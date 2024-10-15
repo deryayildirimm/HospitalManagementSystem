@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "Pusula.Training.HealthCare.Blazor": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "hotReloadEnabled": false,
+      "applicationUrl": "https://localhost:44398",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

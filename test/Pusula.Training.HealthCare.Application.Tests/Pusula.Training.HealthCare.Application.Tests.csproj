@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Pusula.Training.HealthCare</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Pusula.Training.HealthCare.Application\Pusula.Training.HealthCare.Application.csproj" />
+    <ProjectReference Include="..\Pusula.Training.HealthCare.Domain.Tests\Pusula.Training.HealthCare.Domain.Tests.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+  </ItemGroup>
+
+</Project>

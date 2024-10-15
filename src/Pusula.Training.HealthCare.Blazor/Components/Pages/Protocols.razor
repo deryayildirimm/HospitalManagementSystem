@@ -1,0 +1,473 @@
+@page "/protocols"
+
+@attribute [Authorize(HealthCarePermissions.Protocols.Default)]
+@using Pusula.Training.HealthCare.Protocols
+@using Pusula.Training.HealthCare.Localization
+@using Pusula.Training.HealthCare.Shared
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@using Microsoft.AspNetCore.Components.Web
+@using Blazorise
+@using Blazorise.Components
+@using Blazorise.DataGrid
+@using Volo.Abp.BlazoriseUI
+@using Volo.Abp.BlazoriseUI.Components
+@using Volo.Abp.ObjectMapping
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+
+@using Pusula.Training.HealthCare.Permissions
+@using Volo.Abp.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components
+@using Volo.Abp.Http.Client
+@inherits HealthCareComponentBase
+@inject IProtocolsAppService ProtocolsAppService
+
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["Protocols"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
+
+</PageHeader>
+
+@* ************************* SEARCH ************************* *@
+<Card>
+    <CardBody>
+        @*//<suite-custom-code-block-1>*@
+        @*//</suite-custom-code-block-1>*@
+        <Form id="ProtocolSearchForm" class="mb-3">
+            <Addons>
+                <Addon AddonType="AddonType.Body">
+                    <TextEdit @bind-Text="@Filter.FilterText"
+                              Autofocus="true"
+                              Placeholder="@L["Search"]">
+                    </TextEdit>
+                </Addon>
+                <Addon AddonType="AddonType.End">
+                    <SubmitButton Form="ProtocolSearchForm" Clicked="GetProtocolsAsync">
+                        <Icon Name="IconName.Search" Class="me-1"></Icon>@L["Search"]
+                    </SubmitButton>
+                </Addon>
+            </Addons>
+        </Form>
+
+        <Row Class="mt-3 mb-3">
+            <div class="col-md-12">
+                <a href="javascript:;" class="text-decoration-none" @onclick="() => ShowAdvancedFilters = !ShowAdvancedFilters">@L["SeeAdvancedFilters"]</a>
+            </div>
+        </Row>
+
+        <div style="display: @(!ShowAdvancedFilters ? "none" : "block")">
+            <Row>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Type"]</FieldLabel>
+                        <TextEdit Text="@Filter.Type" TextChanged="@OnTypeChangedAsync" />
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["MinStartTime"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+                                    InputMode="DateInputMode.Date"
+                                    Date="@Filter.StartTimeMin"
+                                    DateChanged="@OnStartTimeMinChangedAsync"
+                                    Placeholder="@string.Empty" />
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["MaxStartTime"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+                                    InputMode="DateInputMode.Date"
+                                    Date="@Filter.StartTimeMax"
+                                    DateChanged="@OnStartTimeMaxChangedAsync"
+                                    Placeholder="@string.Empty" />
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["EndTime"]</FieldLabel>
+                        <TextEdit Text="@Filter.EndTime" TextChanged="@OnEndTimeChangedAsync" />
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Patient"]</FieldLabel>
+                        <Select TValue="Guid?"
+                                SelectedValue="@Filter.PatientId"
+                                SelectedValueChanged="@OnPatientIdChangedAsync">
+
+                            <SelectItem></SelectItem>
+
+                            @foreach (var item in PatientsCollection)
+                            {
+                                <SelectItem TValue="Guid" Value="@item.Id">
+                                    @item.DisplayName
+                                </SelectItem>
+                            }
+
+                        </Select>
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Department"]</FieldLabel>
+                        <Select TValue="Guid?"
+                                SelectedValue="@Filter.DepartmentId"
+                                SelectedValueChanged="@OnDepartmentIdChangedAsync">
+
+                            <SelectItem></SelectItem>
+
+                            @foreach (var item in DepartmentsCollection)
+                            {
+                                <SelectItem TValue="Guid" Value="@item.Id">
+                                    @item.DisplayName
+                                </SelectItem>
+                            }
+
+                        </Select>
+                    </Field>
+                </Column>
+            </Row>
+            @*//<suite-custom-code-block-2>*@
+            @*//</suite-custom-code-block-2>*@
+        </div>
+
+        @*//<suite-custom-code-block-3>*@
+        @*//</suite-custom-code-block-3>*@
+    </CardBody>
+</Card>
+
+@* ************************* DATA GRID ************************* *@
+<Card>
+    <CardBody>
+        @if (SelectedProtocols.Any())
+        {
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                @if (AllProtocolsSelected)
+                {
+                    <p class="lead mb-0">
+                        @L["AllItemsAreSelected", TotalCount]
+                    </p>
+                }
+                else
+                {
+                    <p class="lead mb-0">
+                        @if (SelectedProtocols.Count > 1)
+                        {
+                            @L["NumberOfItemsOnThisPageAreSelected", SelectedProtocols.Count]
+                        }
+                        else
+                        {
+                            @L["OneItemOnThisPageIsSelected"]
+                        }
+                    </p>
+                }
+
+                <div>
+                    @if ((SelectedProtocols.Count == PageSize || SelectedProtocols.Count == ProtocolList.Count) && TotalCount > SelectedProtocols.Count)
+                    {
+                        if (!AllProtocolsSelected)
+                        {
+                            <Button Clicked="SelectAllItems" Class="mx-1 btn-outline-secondary">@L["SelectAllItems", TotalCount]</Button>
+                        }
+                        else
+                        {
+                            <Button Clicked="ClearSelection" Class="mx-1 btn-outline-secondary">@L["ClearSelection"]</Button>
+                        }
+                    }
+
+                    <Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedProtocolsAsync">
+                        <Icon Name="@IconName.Delete" /> @L["Delete"]
+                    </Button>
+                </div>
+            </div>
+
+            <hr class="my-1 mx-0" />
+        }
+        <DataGrid TItem="ProtocolWithNavigationPropertiesDto"
+                  Data="ProtocolList"
+                  SelectionMode="DataGridSelectionMode.Multiple"
+                  SelectedRows="SelectedProtocols"
+                  RowSelectable="@((args) => CanDeleteProtocol)"
+                  SelectedRowsChanged="SelectedProtocolRowsChanged"
+                  ReadData="OnDataGridReadAsync"
+                  TotalItems="TotalCount"
+                  ShowPager="true"
+                  Responsive="true"
+                  PageSize="PageSize"
+                  Class="datagrid-detail">
+            <LoadingTemplate>
+                <Row Class="w-100 align-items-center" Style="height: 150px;">
+                    <Column>
+                        <RadarSpinner />
+                    </Column>
+                </Row>
+            </LoadingTemplate>
+            <EmptyTemplate>
+                <Row Class="w-100 align-items-center" Style="height: 150px;">
+                    <Column>
+                        <Heading Size="HeadingSize.Is4" TextAlignment="TextAlignment.Center">@L["NoDataAvailable"]</Heading>
+                    </Column>
+                </Row>
+            </EmptyTemplate>
+            <DataGridColumns>
+
+                @if (CanDeleteProtocol && ProtocolList.Any())
+                {
+                    <DataGridMultiSelectColumn TItem="ProtocolWithNavigationPropertiesDto" DisplayOrder="-1" Width="30px"></DataGridMultiSelectColumn>
+                }
+
+                <DataGridEntityActionsColumn TItem="ProtocolWithNavigationPropertiesDto" @ref="@EntityActionsColumn">
+                    <DisplayTemplate>
+                        <EntityActions TItem="ProtocolWithNavigationPropertiesDto" EntityActionsColumn="@EntityActionsColumn">
+                            <EntityAction TItem="ProtocolWithNavigationPropertiesDto"
+                                          Visible="@CanEditProtocol"
+                                          Clicked="async () => await OpenEditProtocolModalAsync(context)"
+                                          Text="@L["Edit"]"></EntityAction>
+                            <EntityAction TItem="ProtocolWithNavigationPropertiesDto"
+                                          Visible="@CanDeleteProtocol"
+                                          Clicked="() => DeleteProtocolAsync(context)"
+                                          ConfirmationMessage="@(()=> L["DeleteConfirmationMessage"])"
+                                          Text="@L["Delete"]"></EntityAction>
+                            @*//<suite-custom-code-block-4>*@
+                            @*//</suite-custom-code-block-4>*@
+                        </EntityActions>
+                    </DisplayTemplate>
+                </DataGridEntityActionsColumn>
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Protocol.Type"
+                                Caption="@L["Type"]">
+                </DataGridColumn>
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Protocol.StartTime"
+                                Caption="@L["StartTime"]">
+                    <DisplayTemplate>
+                        @context.Protocol.StartTime.ToShortDateString()
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Protocol.EndTime"
+                                Caption="@L["EndTime"]">
+                </DataGridColumn>
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Patient.FirstName"
+                                Caption="@L["Patient"]">
+                </DataGridColumn>
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Department.Name"
+                                Caption="@L["Department"]">
+                </DataGridColumn>
+
+            </DataGridColumns>
+
+
+        </DataGrid>
+    </CardBody>
+</Card>
+
+@* ************************* CREATE MODAL ************************* *@
+<Modal @ref="CreateProtocolModal" Closing="@CreateProtocolModal.CancelClosingModalWhenFocusLost">
+    <ModalContent Centered="true">
+        @*//<suite-custom-code-block-5>*@
+        @*//</suite-custom-code-block-5>*@
+        <Form id="CreateProtocolForm">
+            <ModalHeader>
+                <ModalTitle>@L["NewProtocol"]</ModalTitle>
+                <CloseButton Clicked="CloseCreateProtocolModalAsync" />
+            </ModalHeader>
+            <ModalBody>
+                <Validations @ref="@NewProtocolValidations"
+                             Mode="ValidationMode.Auto"
+                             Model="@NewProtocol"
+                             ValidateOnLoad="false">
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["Type"] *</FieldLabel>
+                            <TextEdit @bind-Text="@NewProtocol.Type" MaxLength="ProtocolConsts.TypeMaxLength">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["StartTime"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.StartTime">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["EndTime"]</FieldLabel>
+                            <TextEdit @bind-Text="@NewProtocol.EndTime">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Field>
+                        <FieldLabel>@L["Patient"] *</FieldLabel>
+                        <Autocomplete Data="@PatientsCollection"
+                                      TItem="LookupDto<Guid>"
+                                      TValue="Guid"
+                                      TextField="@((item) => item?.DisplayName)"
+                                      ValueField="@((item) => item?.Id ?? default)"
+                                      SearchChanged="@GetPatientCollectionLookupAsync"
+                                      @bind-SelectedValue="@NewProtocol.PatientId"
+                                      Placeholder="&#8212;" />
+                    </Field>
+
+
+                    <Field>
+                        <FieldLabel>@L["Department"]</FieldLabel>
+                        <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DepartmentId">
+                            @foreach (var department in DepartmentsCollection)
+                            {
+                                <SelectItem TValue="Guid" Value="@(department.Id)">
+                                    @(department.DisplayName)
+                                </SelectItem>
+                            }
+                        </Select>
+                    </Field>
+
+
+
+
+                </Validations>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary"
+                        Clicked="CloseCreateProtocolModalAsync">
+                    @L["Cancel"]
+                </Button>
+                <SubmitButton Form="CreateProtocolForm" Clicked="CreateProtocolAsync" />
+                @*//<suite-custom-code-block-6>*@
+                @*//</suite-custom-code-block-6>*@
+            </ModalFooter>
+        </Form>
+        @*//<suite-custom-code-block-7>*@
+        @*//</suite-custom-code-block-7>*@
+    </ModalContent>
+</Modal>
+
+@* ************************* EDIT MODAL ************************* *@
+<Modal @ref="EditProtocolModal" Closing="@EditProtocolModal.CancelClosingModalWhenFocusLost">
+    <ModalContent Centered="true">
+        @*//<suite-custom-code-block-8>*@
+        @*//</suite-custom-code-block-8>*@
+        <Form id="EditProtocolForm">
+            <ModalHeader>
+                <ModalTitle>@L["Update"]</ModalTitle>
+                <CloseButton Clicked="CloseEditProtocolModalAsync" />
+            </ModalHeader>
+            <ModalBody>
+                <Validations @ref="@EditingProtocolValidations"
+                             Mode="ValidationMode.Auto"
+                             Model="@EditingProtocol"
+                             ValidateOnLoad="false">
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["Type"] *</FieldLabel>
+                            <TextEdit @bind-Text="@EditingProtocol.Type" MaxLength="ProtocolConsts.TypeMaxLength">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["StartTime"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingProtocol.StartTime">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["EndTime"]</FieldLabel>
+                            <TextEdit @bind-Text="@EditingProtocol.EndTime">
+                                <Feedback>
+                                    <ValidationError />
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+
+                    <Field>
+                        <FieldLabel>@L["Patient"] *</FieldLabel>
+                        <Autocomplete Data="@PatientsCollection"
+                                      TItem="LookupDto<Guid>"
+                                      TValue="Guid"
+                                      TextField="@((item) => item?.DisplayName)"
+                                      ValueField="@((item) => item?.Id ?? default)"
+                                      SearchChanged="@GetPatientCollectionLookupAsync"
+                                      @bind-SelectedValue="@EditingProtocol.PatientId"
+                                      Placeholder="&#8212;" />
+                    </Field>
+
+
+                    <Field>
+                        <FieldLabel>@L["Department"]</FieldLabel>
+                        <Select TValue="Guid" @bind-SelectedValue="@EditingProtocol.DepartmentId">
+                            @foreach (var department in DepartmentsCollection)
+                            {
+                                <SelectItem TValue="Guid" Value="@(department.Id)">
+                                    @(department.DisplayName)
+                                </SelectItem>
+                            }
+                        </Select>
+                    </Field>
+
+
+
+
+                </Validations>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary"
+                        Clicked="CloseEditProtocolModalAsync">
+                    @L["Cancel"]
+                </Button>
+                <SubmitButton Form="EditProtocolForm" Clicked="UpdateProtocolAsync" />
+                @*//<suite-custom-code-block-9>*@
+                @*//</suite-custom-code-block-9>*@
+            </ModalFooter>
+        </Form>
+        @*//<suite-custom-code-block-10>*@
+        @*//</suite-custom-code-block-10>*@
+    </ModalContent>
+</Modal>
+

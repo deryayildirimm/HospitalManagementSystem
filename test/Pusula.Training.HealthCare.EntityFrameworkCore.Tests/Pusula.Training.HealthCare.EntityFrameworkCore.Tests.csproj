@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Pusula.Training.HealthCare</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Pusula.Training.HealthCare.EntityFrameworkCore\Pusula.Training.HealthCare.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\Pusula.Training.HealthCare.Application.Tests\Pusula.Training.HealthCare.Application.Tests.csproj" />
+    <PackageReference Include="Volo.Abp.EntityFrameworkCore.Sqlite" Version="8.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+  </ItemGroup>
+
+</Project>

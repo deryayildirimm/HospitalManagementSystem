@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "Psp.Apps.Aspire": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:17011",
+      //"commandLineArgs": "auth-server gateway-api gateway-public admin-shared shared-administration-service shared-identity-service shared-saas-service shared-io-service shared-message-service admin-samples samples-product-service admin-biklinik biklinik-admission-service biklinik-appointment-service biklinik-finance-service biklinik-health-tourism-service biklinik-hr-service biklinik-master-service biklinik-rcm-service biklinik-resource-service biklinik-treatment-service admin-office admin-office-hub office-hub-service office-license-service office-monitoring-service office-versioning-service admin-pusula-billboard admin-pusula-tender pusula-billboard-service pusula-tender-service",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "DOTNET_ENVIRONMENT": "Development",
+        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21237",
+        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22248"
+      }
+    }
+  }
+}
