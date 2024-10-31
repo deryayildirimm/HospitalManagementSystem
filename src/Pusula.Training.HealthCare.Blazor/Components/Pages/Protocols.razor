@@ -65,7 +65,7 @@
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["Type"]</FieldLabel>
-                        <TextEdit Text="@Filter.Type" TextChanged="@OnTypeChangedAsync" />
+                        <TextEdit Text="@Filter.Type" TextChanged="@OnTypeChangedAsync"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
@@ -75,7 +75,7 @@
                                     InputMode="DateInputMode.Date"
                                     Date="@Filter.StartTimeMin"
                                     DateChanged="@OnStartTimeMinChangedAsync"
-                                    Placeholder="@string.Empty" />
+                                    Placeholder="@string.Empty"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
@@ -85,13 +85,13 @@
                                     InputMode="DateInputMode.Date"
                                     Date="@Filter.StartTimeMax"
                                     DateChanged="@OnStartTimeMaxChangedAsync"
-                                    Placeholder="@string.Empty" />
+                                    Placeholder="@string.Empty"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["EndTime"]</FieldLabel>
-                        <TextEdit Text="@Filter.EndTime" TextChanged="@OnEndTimeChangedAsync" />
+                        <TextEdit Text="@Filter.EndTime" TextChanged="@OnEndTimeChangedAsync"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
@@ -182,12 +182,12 @@
                     }
 
                     <Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedProtocolsAsync">
-                        <Icon Name="@IconName.Delete" /> @L["Delete"]
+                        <Icon Name="@IconName.Delete"/> @L["Delete"]
                     </Button>
                 </div>
             </div>
 
-            <hr class="my-1 mx-0" />
+            <hr class="my-1 mx-0"/>
         }
         <DataGrid TItem="ProtocolWithNavigationPropertiesDto"
                   Data="ProtocolList"
@@ -204,7 +204,7 @@
             <LoadingTemplate>
                 <Row Class="w-100 align-items-center" Style="height: 150px;">
                     <Column>
-                        <RadarSpinner />
+                        <RadarSpinner/>
                     </Column>
                 </Row>
             </LoadingTemplate>
@@ -228,12 +228,14 @@
                             <EntityAction TItem="ProtocolWithNavigationPropertiesDto"
                                           Visible="@CanEditProtocol"
                                           Clicked="async () => await OpenEditProtocolModalAsync(context)"
-                                          Text="@L["Edit"]"></EntityAction>
+                                          Text="@L["Edit"]">
+                            </EntityAction>
                             <EntityAction TItem="ProtocolWithNavigationPropertiesDto"
                                           Visible="@CanDeleteProtocol"
                                           Clicked="() => DeleteProtocolAsync(context)"
-                                          ConfirmationMessage="@(()=> L["DeleteConfirmationMessage"])"
-                                          Text="@L["Delete"]"></EntityAction>
+                                          ConfirmationMessage="@(() => L["DeleteConfirmationMessage"])"
+                                          Text="@L["Delete"]">
+                            </EntityAction>
                             @*//<suite-custom-code-block-4>*@
                             @*//</suite-custom-code-block-4>*@
                         </EntityActions>
@@ -283,7 +285,7 @@
         <Form id="CreateProtocolForm">
             <ModalHeader>
                 <ModalTitle>@L["NewProtocol"]</ModalTitle>
-                <CloseButton Clicked="CloseCreateProtocolModalAsync" />
+                <CloseButton Clicked="CloseCreateProtocolModalAsync"/>
             </ModalHeader>
             <ModalBody>
                 <Validations @ref="@NewProtocolValidations"
@@ -297,7 +299,7 @@
                             <FieldLabel>@L["Type"] *</FieldLabel>
                             <TextEdit @bind-Text="@NewProtocol.Type" MaxLength="ProtocolConsts.TypeMaxLength">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -309,7 +311,7 @@
                             <FieldLabel>@L["StartTime"]</FieldLabel>
                             <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.StartTime">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </DateEdit>
                         </Field>
@@ -321,7 +323,7 @@
                             <FieldLabel>@L["EndTime"]</FieldLabel>
                             <TextEdit @bind-Text="@NewProtocol.EndTime">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -337,9 +339,8 @@
                                       ValueField="@((item) => item?.Id ?? default)"
                                       SearchChanged="@GetPatientCollectionLookupAsync"
                                       @bind-SelectedValue="@NewProtocol.PatientId"
-                                      Placeholder="&#8212;" />
+                                      Placeholder="&#8212;"/>
                     </Field>
-
 
                     <Field>
                         <FieldLabel>@L["Department"]</FieldLabel>
@@ -354,8 +355,6 @@
                     </Field>
 
 
-
-
                 </Validations>
             </ModalBody>
             <ModalFooter>
@@ -363,7 +362,7 @@
                         Clicked="CloseCreateProtocolModalAsync">
                     @L["Cancel"]
                 </Button>
-                <SubmitButton Form="CreateProtocolForm" Clicked="CreateProtocolAsync" />
+                <SubmitButton Form="CreateProtocolForm" Clicked="CreateProtocolAsync"/>
                 @*//<suite-custom-code-block-6>*@
                 @*//</suite-custom-code-block-6>*@
             </ModalFooter>
@@ -381,7 +380,7 @@
         <Form id="EditProtocolForm">
             <ModalHeader>
                 <ModalTitle>@L["Update"]</ModalTitle>
-                <CloseButton Clicked="CloseEditProtocolModalAsync" />
+                <CloseButton Clicked="CloseEditProtocolModalAsync"/>
             </ModalHeader>
             <ModalBody>
                 <Validations @ref="@EditingProtocolValidations"
@@ -395,7 +394,7 @@
                             <FieldLabel>@L["Type"] *</FieldLabel>
                             <TextEdit @bind-Text="@EditingProtocol.Type" MaxLength="ProtocolConsts.TypeMaxLength">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -407,7 +406,7 @@
                             <FieldLabel>@L["StartTime"]</FieldLabel>
                             <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingProtocol.StartTime">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </DateEdit>
                         </Field>
@@ -419,7 +418,7 @@
                             <FieldLabel>@L["EndTime"]</FieldLabel>
                             <TextEdit @bind-Text="@EditingProtocol.EndTime">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -435,7 +434,7 @@
                                       ValueField="@((item) => item?.Id ?? default)"
                                       SearchChanged="@GetPatientCollectionLookupAsync"
                                       @bind-SelectedValue="@EditingProtocol.PatientId"
-                                      Placeholder="&#8212;" />
+                                      Placeholder="&#8212;"/>
                     </Field>
 
 
@@ -452,8 +451,6 @@
                     </Field>
 
 
-
-
                 </Validations>
             </ModalBody>
             <ModalFooter>
@@ -461,7 +458,7 @@
                         Clicked="CloseEditProtocolModalAsync">
                     @L["Cancel"]
                 </Button>
-                <SubmitButton Form="EditProtocolForm" Clicked="UpdateProtocolAsync" />
+                <SubmitButton Form="EditProtocolForm" Clicked="UpdateProtocolAsync"/>
                 @*//<suite-custom-code-block-9>*@
                 @*//</suite-custom-code-block-9>*@
             </ModalFooter>
@@ -470,4 +467,3 @@
         @*//</suite-custom-code-block-10>*@
     </ModalContent>
 </Modal>
-

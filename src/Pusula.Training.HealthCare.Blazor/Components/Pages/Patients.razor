@@ -65,13 +65,13 @@
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["FirstName"]</FieldLabel>
-                        <TextEdit Text="@Filter.FirstName" TextChanged="@OnFirstNameChangedAsync" />
+                        <TextEdit Text="@Filter.FirstName" TextChanged="@OnFirstNameChangedAsync"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["LastName"]</FieldLabel>
-                        <TextEdit Text="@Filter.LastName" TextChanged="@OnLastNameChangedAsync" />
+                        <TextEdit Text="@Filter.LastName" TextChanged="@OnLastNameChangedAsync"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
@@ -81,7 +81,7 @@
                                     InputMode="DateInputMode.Date"
                                     Date="@Filter.BirthDateMin"
                                     DateChanged="@OnBirthDateMinChangedAsync"
-                                    Placeholder="@string.Empty" />
+                                    Placeholder="@string.Empty"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
@@ -91,31 +91,31 @@
                                     InputMode="DateInputMode.Date"
                                     Date="@Filter.BirthDateMax"
                                     DateChanged="@OnBirthDateMaxChangedAsync"
-                                    Placeholder="@string.Empty" />
+                                    Placeholder="@string.Empty"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["IdentityNumber"]</FieldLabel>
-                        <TextEdit Text="@Filter.IdentityNumber" TextChanged="@OnIdentityNumberChangedAsync" />
+                        <TextEdit Text="@Filter.IdentityNumber" TextChanged="@OnIdentityNumberChangedAsync"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["EmailAddress"]</FieldLabel>
-                        <TextEdit Text="@Filter.EmailAddress" TextChanged="@OnEmailAddressChangedAsync" />
+                        <TextEdit Text="@Filter.EmailAddress" TextChanged="@OnEmailAddressChangedAsync"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["MobilePhoneNumber"]</FieldLabel>
-                        <TextEdit Text="@Filter.MobilePhoneNumber" TextChanged="@OnMobilePhoneNumberChangedAsync" />
+                        <TextEdit Text="@Filter.MobilePhoneNumber" TextChanged="@OnMobilePhoneNumberChangedAsync"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["HomePhoneNumber"]</FieldLabel>
-                        <TextEdit Text="@Filter.HomePhoneNumber" TextChanged="@OnHomePhoneNumberChangedAsync" />
+                        <TextEdit Text="@Filter.HomePhoneNumber" TextChanged="@OnHomePhoneNumberChangedAsync"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
@@ -123,7 +123,7 @@
                         <FieldLabel>@L["MinGender"]</FieldLabel>
                         <NumericEdit TValue="int?"
                                      Value="@Filter.GenderMin"
-                                     ValueChanged="@OnGenderMinChangedAsync" />
+                                     ValueChanged="@OnGenderMinChangedAsync"/>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
@@ -131,7 +131,7 @@
                         <FieldLabel>@L["MaxGender"]</FieldLabel>
                         <NumericEdit TValue="int?"
                                      Value="@Filter.GenderMax"
-                                     ValueChanged="@OnGenderMaxChangedAsync" />
+                                     ValueChanged="@OnGenderMaxChangedAsync"/>
                     </Field>
                 </Column>
             </Row>
@@ -184,12 +184,12 @@
                     }
 
                     <Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedPatientsAsync">
-                        <Icon Name="@IconName.Delete" /> @L["Delete"]
+                        <Icon Name="@IconName.Delete"/> @L["Delete"]
                     </Button>
                 </div>
             </div>
 
-            <hr class="my-1 mx-0" />
+            <hr class="my-1 mx-0"/>
         }
         <DataGrid TItem="PatientDto"
                   Data="PatientList"
@@ -206,7 +206,7 @@
             <LoadingTemplate>
                 <Row Class="w-100 align-items-center" Style="height: 150px;">
                     <Column>
-                        <RadarSpinner />
+                        <RadarSpinner/>
                     </Column>
                 </Row>
             </LoadingTemplate>
@@ -230,12 +230,14 @@
                             <EntityAction TItem="PatientDto"
                                           Visible="@CanEditPatient"
                                           Clicked="async () => await OpenEditPatientModalAsync(context)"
-                                          Text="@L["Edit"]"></EntityAction>
+                                          Text="@L["Edit"]">
+                            </EntityAction>
                             <EntityAction TItem="PatientDto"
                                           Visible="@CanDeletePatient"
                                           Clicked="() => DeletePatientAsync(context)"
-                                          ConfirmationMessage="@(()=> L["DeleteConfirmationMessage"])"
-                                          Text="@L["Delete"]"></EntityAction>
+                                          ConfirmationMessage="@(() => L["DeleteConfirmationMessage"])"
+                                          Text="@L["Delete"]">
+                            </EntityAction>
                             @*//<suite-custom-code-block-4>*@
                             @*//</suite-custom-code-block-4>*@
                         </EntityActions>
@@ -300,7 +302,7 @@
         <Form id="CreatePatientForm">
             <ModalHeader>
                 <ModalTitle>@L["NewPatient"]</ModalTitle>
-                <CloseButton Clicked="CloseCreatePatientModalAsync" />
+                <CloseButton Clicked="CloseCreatePatientModalAsync"/>
             </ModalHeader>
             <ModalBody>
                 <Validations @ref="@NewPatientValidations"
@@ -312,9 +314,9 @@
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["FirstName"] *</FieldLabel>
-                            <TextEdit @bind-Text="@NewPatient.FirstName" MaxLength="PatientConsts.FirstNameMaxLength">
+                            <TextEdit @bind-Text="@NewPatient.FirstName" MaxLength="PatientConsts.NameMaxLength">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -326,7 +328,7 @@
                             <FieldLabel>@L["LastName"] *</FieldLabel>
                             <TextEdit @bind-Text="@NewPatient.LastName" MaxLength="PatientConsts.LastNameMaxLength">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -338,7 +340,7 @@
                             <FieldLabel>@L["BirthDate"]</FieldLabel>
                             <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewPatient.BirthDate">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </DateEdit>
                         </Field>
@@ -348,9 +350,9 @@
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["IdentityNumber"] *</FieldLabel>
-                            <TextEdit @bind-Text="@NewPatient.IdentityNumber" MaxLength="PatientConsts.IdentityNumberMaxLength">
+                            <TextEdit @bind-Text="@NewPatient.IdentityNumber" MaxLength="PatientConsts.IdentityNumberLength">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -362,7 +364,7 @@
                             <FieldLabel>@L["EmailAddress"] *</FieldLabel>
                             <TextEdit @bind-Text="@NewPatient.EmailAddress" MaxLength="PatientConsts.EmailAddressMaxLength" Role="TextRole.Email">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -374,7 +376,7 @@
                             <FieldLabel>@L["MobilePhoneNumber"] *</FieldLabel>
                             <TextEdit @bind-Text="@NewPatient.MobilePhoneNumber" MaxLength="PatientConsts.MobilePhoneNumberMaxLength">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -386,7 +388,7 @@
                             <FieldLabel>@L["HomePhoneNumber"]</FieldLabel>
                             <TextEdit @bind-Text="@NewPatient.HomePhoneNumber">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -396,17 +398,8 @@
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["Gender"] *</FieldLabel>
-                            <NumericPicker TValue="int" @bind-Value="@NewPatient.Gender" Min="PatientConsts.GenderMinLength" Max="PatientConsts.GenderMaxLength" Decimals="0">
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </NumericPicker>
                         </Field>
                     </Validation>
-
-
-
-
                 </Validations>
             </ModalBody>
             <ModalFooter>
@@ -414,7 +407,7 @@
                         Clicked="CloseCreatePatientModalAsync">
                     @L["Cancel"]
                 </Button>
-                <SubmitButton Form="CreatePatientForm" Clicked="CreatePatientAsync" />
+                <SubmitButton Form="CreatePatientForm" Clicked="CreatePatientAsync"/>
                 @*//<suite-custom-code-block-6>*@
                 @*//</suite-custom-code-block-6>*@
             </ModalFooter>
@@ -432,7 +425,7 @@
         <Form id="EditPatientForm">
             <ModalHeader>
                 <ModalTitle>@L["Update"]</ModalTitle>
-                <CloseButton Clicked="CloseEditPatientModalAsync" />
+                <CloseButton Clicked="CloseEditPatientModalAsync"/>
             </ModalHeader>
             <ModalBody>
                 <Validations @ref="@EditingPatientValidations"
@@ -444,9 +437,9 @@
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["FirstName"] *</FieldLabel>
-                            <TextEdit @bind-Text="@EditingPatient.FirstName" MaxLength="PatientConsts.FirstNameMaxLength">
+                            <TextEdit @bind-Text="@EditingPatient.FirstName" MaxLength="PatientConsts.NameMaxLength">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -458,7 +451,7 @@
                             <FieldLabel>@L["LastName"] *</FieldLabel>
                             <TextEdit @bind-Text="@EditingPatient.LastName" MaxLength="PatientConsts.LastNameMaxLength">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -470,7 +463,7 @@
                             <FieldLabel>@L["BirthDate"]</FieldLabel>
                             <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingPatient.BirthDate">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </DateEdit>
                         </Field>
@@ -480,9 +473,9 @@
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["IdentityNumber"] *</FieldLabel>
-                            <TextEdit @bind-Text="@EditingPatient.IdentityNumber" MaxLength="PatientConsts.IdentityNumberMaxLength">
+                            <TextEdit @bind-Text="@EditingPatient.IdentityNumber" MaxLength="PatientConsts.IdentityNumberLength">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -494,7 +487,7 @@
                             <FieldLabel>@L["EmailAddress"] *</FieldLabel>
                             <TextEdit @bind-Text="@EditingPatient.EmailAddress" MaxLength="PatientConsts.EmailAddressMaxLength" Role="TextRole.Email">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -506,7 +499,7 @@
                             <FieldLabel>@L["MobilePhoneNumber"] *</FieldLabel>
                             <TextEdit @bind-Text="@EditingPatient.MobilePhoneNumber" MaxLength="PatientConsts.MobilePhoneNumberMaxLength">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -518,7 +511,7 @@
                             <FieldLabel>@L["HomePhoneNumber"]</FieldLabel>
                             <TextEdit @bind-Text="@EditingPatient.HomePhoneNumber">
                                 <Feedback>
-                                    <ValidationError />
+                                    <ValidationError/>
                                 </Feedback>
                             </TextEdit>
                         </Field>
@@ -528,15 +521,8 @@
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["Gender"] *</FieldLabel>
-                            <NumericPicker TValue="int" @bind-Value="@EditingPatient.Gender" Min="PatientConsts.GenderMinLength" Max="PatientConsts.GenderMaxLength" Decimals="0">
-                                <Feedback>
-                                    <ValidationError />
-                                </Feedback>
-                            </NumericPicker>
                         </Field>
                     </Validation>
-
-
 
 
                 </Validations>
@@ -546,13 +532,10 @@
                         Clicked="CloseEditPatientModalAsync">
                     @L["Cancel"]
                 </Button>
-                <SubmitButton Form="EditPatientForm" Clicked="UpdatePatientAsync" />
+                <SubmitButton Form="EditPatientForm" Clicked="UpdatePatientAsync"/>
                 @*//<suite-custom-code-block-9>*@
                 @*//</suite-custom-code-block-9>*@
             </ModalFooter>
         </Form>
-        @*//<suite-custom-code-block-10>*@
-        @*//</suite-custom-code-block-10>*@
     </ModalContent>
 </Modal>
-

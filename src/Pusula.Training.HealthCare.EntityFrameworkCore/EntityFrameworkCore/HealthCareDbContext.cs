@@ -54,7 +54,9 @@ public class HealthCareDbContext :
     public DbSet<IdentitySecurityLog> SecurityLogs { get; set; }
     public DbSet<IdentityLinkUser> LinkUsers { get; set; }
     public DbSet<IdentityUserDelegation> UserDelegations { get; set; }
+
     public DbSet<IdentitySession> Sessions { get; set; }
+
     // Tenant Management
     public DbSet<Tenant> Tenants { get; set; }
     public DbSet<TenantConnectionString> TenantConnectionStrings { get; set; }
@@ -64,7 +66,6 @@ public class HealthCareDbContext :
     public HealthCareDbContext(DbContextOptions<HealthCareDbContext> options)
         : base(options)
     {
-
     }
 
     protected override void OnModelCreating(ModelBuilder builder)
@@ -89,32 +90,42 @@ public class HealthCareDbContext :
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "Patients", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                b.Property(x => x.FirstName).HasColumnName(nameof(Patient.FirstName)).IsRequired().HasMaxLength(PatientConsts.FirstNameMaxLength);
-                b.Property(x => x.LastName).HasColumnName(nameof(Patient.LastName)).IsRequired().HasMaxLength(PatientConsts.LastNameMaxLength);
+                b.Property(x => x.FirstName).HasColumnName(nameof(Patient.FirstName)).IsRequired()
+                    .HasMaxLength(PatientConsts.NameMaxLength);
+                b.Property(x => x.LastName).HasColumnName(nameof(Patient.LastName)).IsRequired()
+                    .HasMaxLength(PatientConsts.LastNameMaxLength);
                 b.Property(x => x.BirthDate).HasColumnName(nameof(Patient.BirthDate));
-                b.Property(x => x.IdentityNumber).HasColumnName(nameof(Patient.IdentityNumber)).IsRequired().HasMaxLength(PatientConsts.IdentityNumberMaxLength);
-                b.Property(x => x.EmailAddress).HasColumnName(nameof(Patient.EmailAddress)).IsRequired().HasMaxLength(PatientConsts.EmailAddressMaxLength);
-                b.Property(x => x.MobilePhoneNumber).HasColumnName(nameof(Patient.MobilePhoneNumber)).IsRequired().HasMaxLength(PatientConsts.MobilePhoneNumberMaxLength);
+                b.Property(x => x.IdentityNumber).HasColumnName(nameof(Patient.IdentityNumber)).IsRequired()
+                    .HasMaxLength(PatientConsts.IdentityNumberLength);
+                b.Property(x => x.EmailAddress).HasColumnName(nameof(Patient.EmailAddress)).IsRequired()
+                    .HasMaxLength(PatientConsts.EmailAddressMaxLength);
+                b.Property(x => x.MobilePhoneNumber).HasColumnName(nameof(Patient.MobilePhoneNumber)).IsRequired()
+                    .HasMaxLength(PatientConsts.MobilePhoneNumberMaxLength);
                 b.Property(x => x.HomePhoneNumber).HasColumnName(nameof(Patient.HomePhoneNumber));
-                b.Property(x => x.Gender).HasColumnName(nameof(Patient.Gender)).IsRequired().HasMaxLength(PatientConsts.GenderMaxLength);
+                b.Property(x => x.Gender).HasColumnName(nameof(Patient.Gender)).IsRequired()
+                    .HasMaxLength(PatientConsts.GenderMinValue);
             });
 
             builder.Entity<Department>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "Departments", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                b.Property(x => x.Name).HasColumnName(nameof(Department.Name)).IsRequired().HasMaxLength(DepartmentConsts.NameMaxLength);
+                b.Property(x => x.Name).HasColumnName(nameof(Department.Name)).IsRequired()
+                    .HasMaxLength(DepartmentConsts.NameMaxLength);
             });
 
             builder.Entity<Protocol>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "Protocols", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                b.Property(x => x.Type).HasColumnName(nameof(Protocol.Type)).IsRequired().HasMaxLength(ProtocolConsts.TypeMaxLength);
+                b.Property(x => x.Type).HasColumnName(nameof(Protocol.Type)).IsRequired()
+                    .HasMaxLength(ProtocolConsts.TypeMaxLength);
                 b.Property(x => x.StartTime).HasColumnName(nameof(Protocol.StartTime));
                 b.Property(x => x.EndTime).HasColumnName(nameof(Protocol.EndTime));
-                b.HasOne<Patient>().WithMany().IsRequired().HasForeignKey(x => x.PatientId).OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne<Patient>().WithMany().IsRequired().HasForeignKey(x => x.PatientId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
         }
 
