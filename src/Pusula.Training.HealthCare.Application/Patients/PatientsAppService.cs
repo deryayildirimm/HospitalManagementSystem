@@ -23,8 +23,12 @@ namespace Pusula.Training.HealthCare.Patients
     {
         public virtual async Task<PagedResultDto<PatientDto>> GetListAsync(GetPatientsInput input)
         {
-            var totalCount = await patientRepository.GetCountAsync(input.FilterText, input.FirstName, input.LastName, input.BirthDateMin, input.BirthDateMax, input.IdentityNumber, input.EmailAddress, input.MobilePhoneNumber, input.HomePhoneNumber, input.GenderMin, input.GenderMax);
-            var items = await patientRepository.GetListAsync(input.FilterText, input.FirstName, input.LastName, input.BirthDateMin, input.BirthDateMax, input.IdentityNumber, input.EmailAddress, input.MobilePhoneNumber, input.HomePhoneNumber, input.GenderMin, input.GenderMax, input.Sorting, input.MaxResultCount, input.SkipCount);
+            var totalCount = await patientRepository.GetCountAsync(input.FilterText, input.FirstName, input.LastName,  input.IdentityNumber, 
+                input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber, 
+                input.HomePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
+            var items = await patientRepository.GetListAsync(input.FilterText, input.FirstName, input.LastName,  input.IdentityNumber, 
+                input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber, 
+                input.HomePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
 
             return new PagedResultDto<PatientDto>
             {
@@ -53,7 +57,9 @@ namespace Pusula.Training.HealthCare.Patients
         {
 
             var patient = await patientManager.CreateAsync(
-            input.FirstName, input.LastName, input.BirthDate, input.IdentityNumber, input.EmailAddress, input.MobilePhoneNumber, input.Gender, input.HomePhoneNumber
+            input.FirstName, input.LastName, input.IdentityNumber, input.Nationality, input.PassportNumber, input.BirthDate, 
+            input.MobilePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.Gender, input.MothersName, 
+            input.FathersName, input.EmailAddress, input.HomePhoneNumber, input.Address, input.DiscountGroup
             );
 
             return ObjectMapper.Map<Patient, PatientDto>(patient);
@@ -65,7 +71,9 @@ namespace Pusula.Training.HealthCare.Patients
 
             var patient = await patientManager.UpdateAsync(
             id,
-            input.FirstName, input.LastName, input.BirthDate, input.IdentityNumber, input.EmailAddress, input.MobilePhoneNumber, input.Gender, input.HomePhoneNumber, input.ConcurrencyStamp
+            input.FirstName, input.LastName, input.IdentityNumber, input.Nationality, input.PassportNumber, input.BirthDate, 
+            input.MobilePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.Gender, input.MothersName, 
+            input.FathersName, input.EmailAddress, input.HomePhoneNumber, input.Address, input.DiscountGroup
             );
 
             return ObjectMapper.Map<Patient, PatientDto>(patient);
@@ -80,7 +88,9 @@ namespace Pusula.Training.HealthCare.Patients
                 throw new AbpAuthorizationException("Invalid download token: " + input.DownloadToken);
             }
 
-            var items = await patientRepository.GetListAsync(input.FilterText, input.FirstName, input.LastName, input.BirthDateMin, input.BirthDateMax, input.IdentityNumber, input.EmailAddress, input.MobilePhoneNumber, input.HomePhoneNumber, input.GenderMin, input.GenderMax);
+            var items = await patientRepository.GetListAsync(input.FilterText, input.FirstName, input.LastName,  input.IdentityNumber, 
+                input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber, 
+                input.HomePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
 
             var memoryStream = new MemoryStream();
             await memoryStream.SaveAsAsync(ObjectMapper.Map<List<Patient>, List<PatientExcelDto>>(items));
@@ -98,7 +108,9 @@ namespace Pusula.Training.HealthCare.Patients
         [Authorize(HealthCarePermissions.Patients.Delete)]
         public virtual async Task DeleteAllAsync(GetPatientsInput input)
         {
-            await patientRepository.DeleteAllAsync(input.FilterText, input.FirstName, input.LastName, input.BirthDateMin, input.BirthDateMax, input.IdentityNumber, input.EmailAddress, input.MobilePhoneNumber, input.HomePhoneNumber, input.GenderMin, input.GenderMax);
+            await patientRepository.DeleteAllAsync(input.FilterText, input.FirstName, input.LastName,  input.IdentityNumber, 
+                input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber, 
+                input.HomePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
         }
 
         public virtual async Task<Shared.DownloadTokenResultDto> GetDownloadTokenAsync()

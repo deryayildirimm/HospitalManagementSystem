@@ -118,22 +118,16 @@
                         <TextEdit Text="@Filter.HomePhoneNumber" TextChanged="@OnHomePhoneNumberChangedAsync"/>
                     </Field>
                 </Column>
-                <Column ColumnSize="ColumnSize.Is3">
+                
+                @*//<Column ColumnSize="ColumnSize.Is3">
                     <Field>
-                        <FieldLabel>@L["MinGender"]</FieldLabel>
+                        <FieldLabel>@L["Gender"]</FieldLabel>
                         <NumericEdit TValue="int?"
-                                     Value="@Filter.GenderMin"
-                                     ValueChanged="@OnGenderMinChangedAsync"/>
+                                     Value="@Filter.Gender"
+                                     ValueChanged="@OnGenderChangedAsync"/>
                     </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["MaxGender"]</FieldLabel>
-                        <NumericEdit TValue="int?"
-                                     Value="@Filter.GenderMax"
-                                     ValueChanged="@OnGenderMaxChangedAsync"/>
-                    </Field>
-                </Column>
+                </Column> *@
+                
             </Row>
             @*//<suite-custom-code-block-2>*@
             @*//</suite-custom-code-block-2>*@
