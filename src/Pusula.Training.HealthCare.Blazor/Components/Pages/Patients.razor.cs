@@ -62,7 +62,6 @@ public partial class Patients
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
-
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -282,9 +281,26 @@ public partial class Patients
         Filter.MobilePhoneNumber = mobilePhoneNumber;
         await SearchAsync();
     }
-    protected virtual async Task OnGenderChangedAsync(int? gender)
+    
+    protected virtual async Task OnPatientTypeChangedAsync(EnumPatientTypes? selectedType)
     {
-        //Filter.Gender = gender;
+        Filter.PatientType = selectedType;
+        await SearchAsync();
+    }
+    
+    protected virtual async Task OnInsuranceTypeChangedAsync(EnumInsuranceType? insuranceType)
+    {
+        Filter.InsuranceType = insuranceType;
+        await SearchAsync();
+    }
+    protected virtual async Task OnDiscountGroupChangedAsync(EnumDiscountGroup? discountGroup)
+    {
+        Filter.DiscountGroup = discountGroup;
+        await SearchAsync();
+    }
+    protected virtual async Task OnGenderChangedAsync(EnumGender? gender)
+    {
+        Filter.Gender = gender;
         await SearchAsync();
     }
     private Task SelectAllItems()
