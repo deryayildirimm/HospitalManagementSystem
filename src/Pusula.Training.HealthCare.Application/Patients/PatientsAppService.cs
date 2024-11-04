@@ -25,10 +25,10 @@ namespace Pusula.Training.HealthCare.Patients
         {
             var totalCount = await patientRepository.GetCountAsync(input.FilterText, input.FirstName, input.LastName,  input.IdentityNumber, 
                 input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber, 
-                input.HomePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
+                input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
             var items = await patientRepository.GetListAsync(input.FilterText, input.FirstName, input.LastName,  input.IdentityNumber, 
                 input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber, 
-                input.HomePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
+                input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
 
             return new PagedResultDto<PatientDto>
             {
@@ -57,9 +57,9 @@ namespace Pusula.Training.HealthCare.Patients
         {
 
             var patient = await patientManager.CreateAsync(
-            input.FirstName, input.LastName, input.IdentityNumber, input.Nationality, input.PassportNumber, input.BirthDate, 
+            input.FirstName, input.LastName, input.Nationality, input.BirthDate, 
             input.MobilePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.Gender, input.MothersName, 
-            input.FathersName, input.EmailAddress, input.HomePhoneNumber, input.Address, input.DiscountGroup
+            input.FathersName, input.IdentityNumber, input.PassportNumber, input.EmailAddress, input.Relative, input.RelativePhoneNumber, input.Address, input.DiscountGroup
             );
 
             return ObjectMapper.Map<Patient, PatientDto>(patient);
@@ -71,9 +71,9 @@ namespace Pusula.Training.HealthCare.Patients
 
             var patient = await patientManager.UpdateAsync(
             id,
-            input.FirstName, input.LastName, input.IdentityNumber, input.Nationality, input.PassportNumber, input.BirthDate, 
+            input.FirstName, input.LastName, input.Nationality, input.BirthDate, 
             input.MobilePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.Gender, input.MothersName, 
-            input.FathersName, input.EmailAddress, input.HomePhoneNumber, input.Address, input.DiscountGroup
+            input.FathersName, input.IdentityNumber, input.PassportNumber, input.EmailAddress, input.Relative, input.RelativePhoneNumber, input.Address, input.DiscountGroup
             );
 
             return ObjectMapper.Map<Patient, PatientDto>(patient);
@@ -90,7 +90,7 @@ namespace Pusula.Training.HealthCare.Patients
 
             var items = await patientRepository.GetListAsync(input.FilterText, input.FirstName, input.LastName,  input.IdentityNumber, 
                 input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber, 
-                input.HomePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
+                input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
 
             var memoryStream = new MemoryStream();
             await memoryStream.SaveAsAsync(ObjectMapper.Map<List<Patient>, List<PatientExcelDto>>(items));
@@ -110,7 +110,7 @@ namespace Pusula.Training.HealthCare.Patients
         {
             await patientRepository.DeleteAllAsync(input.FilterText, input.FirstName, input.LastName,  input.IdentityNumber, 
                 input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber, 
-                input.HomePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
+                input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
         }
 
         public virtual async Task<Shared.DownloadTokenResultDto> GetDownloadTokenAsync()

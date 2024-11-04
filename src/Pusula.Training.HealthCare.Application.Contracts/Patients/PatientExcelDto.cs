@@ -14,7 +14,8 @@ public class PatientExcelDto
     public DateTime BirthDate { get; set; }
     public string? EmailAddress { get; set; }
     public string MobilePhoneNumber { get; set; } = null!;
-    public string? HomePhoneNumber { get; set; }
+    public EnumRelative? Relative { get; set; }
+    public string? RelativePhoneNumber { get; set; }
     public EnumPatientTypes PatientType { get; set; }
     public string? Address { get; set; }
     public EnumInsuranceType InsuranceType { get; set; }

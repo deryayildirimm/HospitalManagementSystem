@@ -98,17 +98,18 @@ public class HealthCareDbContext :
                     .HasMaxLength(PatientConsts.NameMaxLength);
                 b.Property(x => x.FathersName).HasColumnName(nameof(Patient.FathersName))
                     .HasMaxLength(PatientConsts.NameMaxLength);
-                b.Property(x => x.IdentityNumber).HasColumnName(nameof(Patient.IdentityNumber)).IsRequired()
+                b.Property(x => x.IdentityNumber).HasColumnName(nameof(Patient.IdentityNumber))
                     .HasMaxLength(PatientConsts.IdentityNumberLength);
                 b.Property(x => x.Nationality).HasColumnName(nameof(Patient.Nationality)).IsRequired();
-                b.Property(x => x.PassportNumber).HasColumnName(nameof(Patient.PassportNumber)).IsRequired()
+                b.Property(x => x.PassportNumber).HasColumnName(nameof(Patient.PassportNumber))
                     .HasMaxLength(PatientConsts.PassportNumberMaxLength);
                 b.Property(x => x.BirthDate).HasColumnName(nameof(Patient.BirthDate)).IsRequired();
                 b.Property(x => x.EmailAddress).HasColumnName(nameof(Patient.EmailAddress))
                     .HasMaxLength(PatientConsts.EmailAddressMaxLength);
                 b.Property(x => x.MobilePhoneNumber).HasColumnName(nameof(Patient.MobilePhoneNumber)).IsRequired()
                     .HasMaxLength(PatientConsts.MobilePhoneNumberMaxLength);
-                b.Property(x => x.HomePhoneNumber).HasColumnName(nameof(Patient.HomePhoneNumber))
+                b.Property(x => x.Relative).HasColumnName(nameof(Patient.Relative));
+                b.Property(x => x.RelativePhoneNumber).HasColumnName(nameof(Patient.RelativePhoneNumber))
                     .HasMaxLength(PatientConsts.MobilePhoneNumberMaxLength);
                 b.Property(x => x.PatientType).HasColumnName(nameof(Patient.PatientType)).IsRequired();
                 b.Property(x => x.Address).HasColumnName(nameof(Patient.Address))

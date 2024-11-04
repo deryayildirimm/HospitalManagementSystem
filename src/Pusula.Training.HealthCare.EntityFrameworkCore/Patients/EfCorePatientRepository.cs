@@ -25,7 +25,6 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         DateTime? birthDateMax = null,
         string? emailAddress = null,
         string? mobilePhoneNumber = null,
-        string? homePhoneNumber = null,
         EnumPatientTypes? patientType = null,
         EnumInsuranceType? insuranceType = null,
         string? insuranceNo = null,
@@ -36,7 +35,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         var query = await GetQueryableAsync();
 
         query = ApplyFilter(query, filterText, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, birthDateMax, 
-            emailAddress, mobilePhoneNumber, homePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender);
+            emailAddress, mobilePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender);
 
         var ids = query.Select(x => x.Id);
         await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
@@ -53,7 +52,6 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         DateTime? birthDateMax = null,
         string? emailAddress = null,
         string? mobilePhoneNumber = null,
-        string? homePhoneNumber = null,
         EnumPatientTypes? patientType = null,
         EnumInsuranceType? insuranceType = null,
         string? insuranceNo = null,
@@ -65,7 +63,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetQueryableAsync()), filterText, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, 
-            birthDateMax, emailAddress, mobilePhoneNumber, homePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender);
+            birthDateMax, emailAddress, mobilePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender);
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? PatientConsts.GetDefaultSorting(false) : sorting);
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
@@ -81,7 +79,6 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         DateTime? birthDateMax = null,
         string? emailAddress = null,
         string? mobilePhoneNumber = null,
-        string? homePhoneNumber = null,
         EnumPatientTypes? patientType = null,
         EnumInsuranceType? insuranceType = null,
         string? insuranceNo = null,
@@ -90,7 +87,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetDbSetAsync()), filterText, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, birthDateMax, 
-            emailAddress, mobilePhoneNumber, homePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender);
+            emailAddress, mobilePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender);
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
 
@@ -106,7 +103,6 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         DateTime? birthDateMax = null,
         string? emailAddress = null,
         string? mobilePhoneNumber = null,
-        string? homePhoneNumber = null,
         EnumPatientTypes? patientType = null,
         EnumInsuranceType? insuranceType = null,
         string? insuranceNo = null,
@@ -117,7 +113,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
             .WhereIf(!string.IsNullOrWhiteSpace(filterText),
                 e => e.FirstName!.Contains(filterText!) || e.LastName!.Contains(filterText!) ||
                      e.IdentityNumber!.Contains(filterText!) || e.EmailAddress!.Contains(filterText!) ||
-                     e.MobilePhoneNumber!.Contains(filterText!) || e.HomePhoneNumber!.Contains(filterText!))
+                     e.MobilePhoneNumber!.Contains(filterText!))
             .WhereIf(!string.IsNullOrWhiteSpace(firstName), e => e.FirstName.ToLower().Contains(firstName!.ToLower()))
             .WhereIf(!string.IsNullOrWhiteSpace(lastName), e => e.LastName.ToLower().Contains(lastName!.ToLower()))
             .WhereIf(!string.IsNullOrWhiteSpace(identityNumber), e => e.IdentityNumber!.Contains(identityNumber!))
@@ -127,7 +123,6 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
             .WhereIf(birthDateMax.HasValue, e => e.BirthDate <= birthDateMax!.Value)
             .WhereIf(!string.IsNullOrWhiteSpace(emailAddress), e => e.EmailAddress!.Contains(emailAddress!))
             .WhereIf(!string.IsNullOrWhiteSpace(mobilePhoneNumber), e => e.MobilePhoneNumber.Contains(mobilePhoneNumber!))
-            .WhereIf(!string.IsNullOrWhiteSpace(homePhoneNumber), e => e.HomePhoneNumber != null && e.HomePhoneNumber.Contains(homePhoneNumber!))
             .WhereIf(patientType.HasValue, e => e.PatientType == patientType)
             .WhereIf(insuranceType.HasValue, e => e.InsuranceType == insuranceType)
             .WhereIf(!string.IsNullOrWhiteSpace(insuranceNo), e => e.InsuranceNo!.Contains(insuranceNo!))

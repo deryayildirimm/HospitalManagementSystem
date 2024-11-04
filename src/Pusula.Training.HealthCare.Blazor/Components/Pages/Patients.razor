@@ -76,6 +76,18 @@
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
+                        <FieldLabel>@L["IdentityNumber"]</FieldLabel>
+                        <TextEdit Text="@Filter.IdentityNumber" TextChanged="@OnIdentityNumberChangedAsync"/>
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["PassportNumber"]</FieldLabel>
+                        <TextEdit Text="@Filter.PassportNumber" TextChanged="@OnPassportNumberChangedAsync"/>
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
                         <FieldLabel>@L["MinBirthDate"]</FieldLabel>
                         <DatePicker TValue="DateTime?"
                                     InputMode="DateInputMode.Date"
@@ -96,12 +108,6 @@
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
-                        <FieldLabel>@L["IdentityNumber"]</FieldLabel>
-                        <TextEdit Text="@Filter.IdentityNumber" TextChanged="@OnIdentityNumberChangedAsync"/>
-                    </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
                         <FieldLabel>@L["EmailAddress"]</FieldLabel>
                         <TextEdit Text="@Filter.EmailAddress" TextChanged="@OnEmailAddressChangedAsync"/>
                     </Field>
@@ -112,12 +118,12 @@
                         <TextEdit Text="@Filter.MobilePhoneNumber" TextChanged="@OnMobilePhoneNumberChangedAsync"/>
                     </Field>
                 </Column>
-                <Column ColumnSize="ColumnSize.Is3">
+                @*// <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["HomePhoneNumber"]</FieldLabel>
                         <TextEdit Text="@Filter.HomePhoneNumber" TextChanged="@OnHomePhoneNumberChangedAsync"/>
                     </Field>
-                </Column>
+                </Column> *@
                 
                 @*//<Column ColumnSize="ColumnSize.Is3">
                     <Field>
@@ -272,8 +278,8 @@
                 </DataGridColumn>
 
                 <DataGridColumn TItem="PatientDto"
-                                Field="HomePhoneNumber"
-                                Caption="@L["HomePhoneNumber"]">
+                                Field="RelativePhoneNumber"
+                                Caption="@L["RelativePhoneNumber"]">
                 </DataGridColumn>
 
                 <DataGridColumn TItem="PatientDto"
@@ -377,7 +383,7 @@
                     </Validation>
 
 
-                    <Validation MessageLocalizer="@LH.Localize">
+                    @*//<Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["HomePhoneNumber"]</FieldLabel>
                             <TextEdit @bind-Text="@NewPatient.HomePhoneNumber">
@@ -386,7 +392,7 @@
                                 </Feedback>
                             </TextEdit>
                         </Field>
-                    </Validation>
+                    </Validation> *@
 
 
                     <Validation MessageLocalizer="@LH.Localize">
@@ -500,7 +506,7 @@
                     </Validation>
 
 
-                    <Validation MessageLocalizer="@LH.Localize">
+                    @*//<Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["HomePhoneNumber"]</FieldLabel>
                             <TextEdit @bind-Text="@EditingPatient.HomePhoneNumber">
@@ -509,7 +515,7 @@
                                 </Feedback>
                             </TextEdit>
                         </Field>
-                    </Validation>
+                    </Validation>*@
 
 
                     

@@ -148,13 +148,7 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("Gender");
 
-                    b.Property<string>("HomePhoneNumber")
-                        .HasMaxLength(15)
-                        .HasColumnType("character varying(15)")
-                        .HasColumnName("HomePhoneNumber");
-
                     b.Property<string>("IdentityNumber")
-                        .IsRequired()
                         .HasMaxLength(11)
                         .HasColumnType("character varying(11)")
                         .HasColumnName("IdentityNumber");
@@ -205,7 +199,6 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnName("Nationality");
 
                     b.Property<string>("PassportNumber")
-                        .IsRequired()
                         .HasMaxLength(9)
                         .HasColumnType("character varying(9)")
                         .HasColumnName("PassportNumber");
@@ -216,6 +209,15 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.Property<int>("PatientType")
                         .HasColumnType("integer")
                         .HasColumnName("PatientType");
+
+                    b.Property<int?>("Relative")
+                        .HasColumnType("integer")
+                        .HasColumnName("Relative");
+
+                    b.Property<string>("RelativePhoneNumber")
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)")
+                        .HasColumnName("RelativePhoneNumber");
 
                     b.HasKey("Id");
 

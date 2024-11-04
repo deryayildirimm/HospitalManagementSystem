@@ -17,7 +17,6 @@ public class PatientExcelDownloadDto
     public DateTime? BirthDateMax { get; set; }
     public string? EmailAddress { get; set; }
     public string? MobilePhoneNumber { get; set; }
-    public string? HomePhoneNumber { get; set; }
     public EnumPatientTypes? PatientType { get; set; }
     public EnumInsuranceType? InsuranceType { get; set; }
     public string? InsuranceNo { get; set; }

@@ -11,13 +11,14 @@ public class PatientDto : FullAuditedEntityDto<Guid>, IHasConcurrencyStamp
     public string LastName { get; set; } = null!;
     public string? MothersName { get; set; }
     public string? FathersName { get; set; }
-    public string IdentityNumber { get; set; } = null!;
+    public string? IdentityNumber { get; set; }
     public EnumNationality Nationality { get; set; }
-    public string PassportNumber { get; set; } = null!;
+    public string? PassportNumber { get; set; }
     public DateTime BirthDate { get; set; }
     public string? EmailAddress { get; set; }
     public string MobilePhoneNumber { get; set; } = null!;
-    public string? HomePhoneNumber { get; set; }
+    public EnumRelative? Relatives { get; set; }
+    public string? RelativePhoneNumber { get; set; }
     public EnumPatientTypes PatientType { get; set; }
     public string? Address { get; set; }
     public EnumInsuranceType InsuranceType { get; set; }

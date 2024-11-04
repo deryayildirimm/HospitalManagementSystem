@@ -17,19 +17,21 @@ namespace Pusula.Training.HealthCare.Patients
 
         [CanBeNull] public virtual string? FathersName { get; set; }
 
-        [NotNull] public virtual string IdentityNumber { get; set; }
+        [CanBeNull] public virtual string? IdentityNumber { get; set; }
 
         [NotNull] public virtual EnumNationality Nationality { get; set; }
 
-        [NotNull] public virtual string PassportNumber { get; set; }
+        [CanBeNull] public virtual string? PassportNumber { get; set; }
 
         [NotNull] public virtual DateTime BirthDate { get; set; }
 
         [CanBeNull] public virtual string? EmailAddress { get; set; }
 
         [NotNull] public virtual string MobilePhoneNumber { get; set; }
+        
+        [CanBeNull] public virtual EnumRelative? Relative { get; set; }
 
-        [CanBeNull] public virtual string? HomePhoneNumber { get; set; }
+        [CanBeNull] public virtual string? RelativePhoneNumber { get; set; }
 
         [NotNull] public virtual EnumPatientTypes PatientType { get; set; }
 
@@ -43,6 +45,7 @@ namespace Pusula.Training.HealthCare.Patients
 
         [NotNull] public virtual EnumGender Gender { get; set; }
 
+        // isAlive
 
         protected Patient()
         {
@@ -59,47 +62,18 @@ namespace Pusula.Training.HealthCare.Patients
             InsuranceNo = string.Empty;
             Gender = EnumGender.FEMALE;
         }
-        
-        public Patient(Guid id, string firstName, string lastName, DateTime birthDate, string identityNumber,
-            string? emailAddress, string mobilePhoneNumber, EnumGender gender, string? homePhoneNumber = null)
-        {
-            Id = id;
-            Check.NotNull(firstName, nameof(firstName));
-            Check.Length(firstName, nameof(firstName), PatientConsts.NameMaxLength, PatientConsts.NameMinLength);
 
-            Check.NotNull(lastName, nameof(lastName));
-            Check.Length(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, 0);
-
-            Check.NotNull(identityNumber, nameof(identityNumber));
-            Check.Length(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberLength, 0);
-
-            Check.NotNull(emailAddress, nameof(emailAddress));
-            Check.Length(emailAddress, nameof(emailAddress), PatientConsts.EmailAddressMaxLength, 0);
-
-            Check.NotNull(mobilePhoneNumber, nameof(mobilePhoneNumber));
-            Check.Length(mobilePhoneNumber, nameof(mobilePhoneNumber), PatientConsts.MobilePhoneNumberMaxLength, 0);
-            
-            FirstName = firstName;
-            LastName = lastName;
-            BirthDate = birthDate;
-            IdentityNumber = identityNumber;
-            EmailAddress = emailAddress;
-            MobilePhoneNumber = mobilePhoneNumber;
-            Gender = gender;
-            HomePhoneNumber = homePhoneNumber;
-        }
-
-        public Patient(Guid id, string firstName, string lastName, string identityNumber, EnumNationality nationality, string passportNumber, DateTime birthDate, 
+        public Patient(Guid id, string firstName, string lastName, EnumNationality nationality, DateTime birthDate, 
             string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
-            string? mothersName = null, string? fathersName = null, string? emailAddress = null, string? homePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
+            string? mothersName = null, string? fathersName = null, string? identityNumber = null, string? passportNumber = null, string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
         {
             Check.NotNullOrWhiteSpace(firstName, nameof(firstName), PatientConsts.NameMaxLength, PatientConsts.NameMinLength);
             Check.NotNullOrWhiteSpace(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, PatientConsts.LastNameMinLength);
 
-            Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberLength,
-                PatientConsts.IdentityNumberLength);
+            // Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberLength,
+            //    PatientConsts.IdentityNumberLength);
             Check.Range((int)nationality, nameof(nationality), PatientConsts.NationalityMinLength, PatientConsts.NationalityMaxLength);
-            Check.NotNullOrWhiteSpace(passportNumber, nameof(passportNumber), PatientConsts.PassportNumberMaxLength, PatientConsts.PassportNumberMinLength);
+            // Check.NotNullOrWhiteSpace(passportNumber, nameof(passportNumber), PatientConsts.PassportNumberMaxLength, PatientConsts.PassportNumberMinLength);
             Check.NotNullOrWhiteSpace(mobilePhoneNumber, nameof(mobilePhoneNumber), PatientConsts.MobilePhoneNumberMaxLength, PatientConsts.MobilePhoneNumberMinLength);
             Check.Range((int)patientType, nameof(patientType), PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue);
             Check.Range((int)insuranceType, nameof(insuranceType), PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue);
@@ -116,7 +90,8 @@ namespace Pusula.Training.HealthCare.Patients
             BirthDate = birthDate;
             EmailAddress = emailAddress;
             MobilePhoneNumber = mobilePhoneNumber;
-            HomePhoneNumber = homePhoneNumber;
+            Relative = relative;
+            RelativePhoneNumber = relativePhoneNumber;
             PatientType = patientType;
             Address = address;
             InsuranceType = insuranceType;

@@ -20,17 +20,15 @@ public class PatientUpdateDto : IHasConcurrencyStamp
     [StringLength(PatientConsts.NameMaxLength)]
     public string? FathersName { get; set; }
     
-    [Required]
     [RegularExpression(@"^[1-9]{1}[0-9]{9}[02468]{1}$")]
     [StringLength(PatientConsts.IdentityNumberLength)]
-    public string IdentityNumber { get; set; } = null!;
+    public string? IdentityNumber { get; set; } = null!;
     
-    [Required]
     public EnumNationality Nationality { get; set; }
     
     [Required]
     [StringLength(PatientConsts.PassportNumberMaxLength)]
-    public string PassportNumber { get; set; } = null!;
+    public string? PassportNumber { get; set; } = null!;
     
     [Required]
     public DateTime BirthDate { get; set; }
@@ -43,9 +41,12 @@ public class PatientUpdateDto : IHasConcurrencyStamp
     [RegularExpression(@"^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$")]
     [StringLength(PatientConsts.MobilePhoneNumberMaxLength)]
     public string MobilePhoneNumber { get; set; } = null!;
+    
+    [Range(PatientConsts.RelativeMinValue, PatientConsts.RelativeMaxValue)]
+    public EnumRelative? Relative { get; set; }
 
     [RegularExpression(@"^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$")]
-    public string? HomePhoneNumber { get; set; }
+    public string? RelativePhoneNumber { get; set; }
     
     [Required]
     [Range(PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue)]

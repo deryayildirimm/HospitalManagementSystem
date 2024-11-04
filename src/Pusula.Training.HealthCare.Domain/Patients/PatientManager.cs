@@ -9,16 +9,16 @@ namespace Pusula.Training.HealthCare.Patients;
 
 public class PatientManager(IPatientRepository patientRepository) : DomainService
 {
-    public virtual async Task<Patient> CreateAsync(string firstName, string lastName, string identityNumber, EnumNationality nationality, string passportNumber, DateTime birthDate, string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
-        string? mothersName = null, string? fathersName = null, string? emailAddress = null, string? homePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
+    public virtual async Task<Patient> CreateAsync(string firstName, string lastName, EnumNationality nationality, DateTime birthDate, string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
+        string? mothersName = null, string? fathersName = null, string? identityNumber = null, string? passportNumber = null, string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
     {
         Check.NotNullOrWhiteSpace(firstName, nameof(firstName), PatientConsts.NameMaxLength, PatientConsts.NameMinLength);
         Check.NotNullOrWhiteSpace(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, PatientConsts.LastNameMinLength);
 
-        Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberLength,
-            PatientConsts.IdentityNumberLength);
+        // Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberLength,
+        //     PatientConsts.IdentityNumberLength);
         Check.Range((int)nationality, nameof(nationality), PatientConsts.NationalityMinLength, PatientConsts.NationalityMaxLength);
-        Check.NotNullOrWhiteSpace(passportNumber, nameof(passportNumber), PatientConsts.PassportNumberMaxLength, PatientConsts.PassportNumberMinLength);
+        // Check.NotNullOrWhiteSpace(passportNumber, nameof(passportNumber), PatientConsts.PassportNumberMaxLength, PatientConsts.PassportNumberMinLength);
         Check.NotNullOrWhiteSpace(mobilePhoneNumber, nameof(mobilePhoneNumber), PatientConsts.MobilePhoneNumberMaxLength, PatientConsts.MobilePhoneNumberMinLength);
         Check.Range((int)patientType, nameof(patientType), PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue);
         Check.Range((int)insuranceType, nameof(insuranceType), PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue);
@@ -27,7 +27,7 @@ public class PatientManager(IPatientRepository patientRepository) : DomainServic
 
         var patient = new Patient(
             GuidGenerator.Create(),
-            firstName, lastName, identityNumber, nationality, passportNumber, birthDate, mobilePhoneNumber, patientType, insuranceType, insuranceNo, gender, mothersName, fathersName, emailAddress, homePhoneNumber, address, discountGroup
+            firstName, lastName, nationality, birthDate, mobilePhoneNumber, patientType, insuranceType, insuranceNo, gender, mothersName, fathersName, identityNumber, passportNumber, emailAddress, relative, relativePhoneNumber, address, discountGroup
         );
 
         return await patientRepository.InsertAsync(patient);
@@ -35,19 +35,20 @@ public class PatientManager(IPatientRepository patientRepository) : DomainServic
 
     public virtual async Task<Patient> UpdateAsync(
         Guid id,
-        string firstName, string lastName, string identityNumber, EnumNationality nationality, string passportNumber, DateTime birthDate, 
+        string firstName, string lastName, EnumNationality nationality, DateTime birthDate, 
         string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
-        string? mothersName = null, string? fathersName = null, string? emailAddress = null, string? homePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null,
-        [CanBeNull] string? concurrencyStamp = null
+        string? mothersName = null, string? fathersName = null, string? identityNumber = null, string? passportNumber = null, 
+        string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, 
+        EnumDiscountGroup? discountGroup = null, [CanBeNull] string? concurrencyStamp = null
     )
     {
         Check.NotNullOrWhiteSpace(firstName, nameof(firstName), PatientConsts.NameMaxLength, PatientConsts.NameMinLength);
         Check.NotNullOrWhiteSpace(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, PatientConsts.LastNameMinLength);
 
-        Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberLength,
-            PatientConsts.IdentityNumberLength);
+        // Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberLength,
+        //     PatientConsts.IdentityNumberLength);
         Check.Range((int)nationality, nameof(nationality), PatientConsts.NationalityMinLength, PatientConsts.NationalityMaxLength);
-        Check.NotNullOrWhiteSpace(passportNumber, nameof(passportNumber), PatientConsts.PassportNumberMaxLength, PatientConsts.PassportNumberMinLength);
+        // Check.NotNullOrWhiteSpace(passportNumber, nameof(passportNumber), PatientConsts.PassportNumberMaxLength, PatientConsts.PassportNumberMinLength);
         Check.NotNullOrWhiteSpace(mobilePhoneNumber, nameof(mobilePhoneNumber), PatientConsts.MobilePhoneNumberMaxLength, PatientConsts.MobilePhoneNumberMinLength);
         Check.Range((int)patientType, nameof(patientType), PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue);
         Check.Range((int)insuranceType, nameof(insuranceType), PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue);
@@ -65,7 +66,8 @@ public class PatientManager(IPatientRepository patientRepository) : DomainServic
         patient.BirthDate = birthDate;
         patient.EmailAddress = emailAddress;
         patient.MobilePhoneNumber = mobilePhoneNumber;
-        patient.HomePhoneNumber = homePhoneNumber;
+        patient.Relative = relative;
+        patient.RelativePhoneNumber = relativePhoneNumber;
         patient.PatientType = patientType;
         patient.Address = address;
         patient.InsuranceType = insuranceType;
