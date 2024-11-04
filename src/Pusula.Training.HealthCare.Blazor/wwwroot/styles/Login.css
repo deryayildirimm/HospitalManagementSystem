@@ -1,0 +1,11 @@
+.lpx-content-container {
+    background-image: url('../images/login/login-backgorund.webp');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    z-index: 999;
+}
+
+.lpx-content hr {
+    display: none;
+}

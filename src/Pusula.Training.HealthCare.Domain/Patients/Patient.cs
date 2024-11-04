@@ -7,69 +7,97 @@ namespace Pusula.Training.HealthCare.Patients
 {
     public class Patient : FullAuditedAggregateRoot<Guid>
     {
-        [NotNull]
-        public virtual string FirstName { get; set; }
+        public virtual string? PatientNumber { get; set; } // is this id of patient or should we generate new number for it?
 
-        [NotNull]
-        public virtual string LastName { get; set; }
+        [NotNull] public virtual string FirstName { get; set; }
 
-        public virtual DateTime BirthDate { get; set; }
+        [NotNull] public virtual string LastName { get; set; }
 
-        [NotNull]
-        public virtual string IdentityNumber { get; set; }
+        [CanBeNull] public virtual string? MothersName { get; set; }
 
-        [NotNull]
-        public virtual string EmailAddress { get; set; }
+        [CanBeNull] public virtual string? FathersName { get; set; }
 
-        [NotNull]
-        public virtual string MobilePhoneNumber { get; set; }
+        [CanBeNull] public virtual string? IdentityNumber { get; set; }
 
-        [CanBeNull]
-        public virtual string? HomePhoneNumber { get; set; }
+        [NotNull] public virtual EnumNationality Nationality { get; set; }
 
-        public virtual int Gender { get; set; }
+        [CanBeNull] public virtual string? PassportNumber { get; set; }
+
+        [NotNull] public virtual DateTime BirthDate { get; set; }
+
+        [CanBeNull] public virtual string? EmailAddress { get; set; }
+
+        [NotNull] public virtual string MobilePhoneNumber { get; set; }
+        
+        [CanBeNull] public virtual EnumRelative? Relative { get; set; }
+
+        [CanBeNull] public virtual string? RelativePhoneNumber { get; set; }
+
+        [NotNull] public virtual EnumPatientTypes PatientType { get; set; }
+
+        [CanBeNull] public virtual string? Address { get; set; }
+
+        [NotNull] public virtual EnumInsuranceType InsuranceType { get; set; }
+
+        [NotNull] public virtual string InsuranceNo { get; set; }
+
+        [CanBeNull] public virtual EnumDiscountGroup? DiscountGroup { get; set; }
+
+        [NotNull] public virtual EnumGender Gender { get; set; }
+
+        // isAlive
 
         protected Patient()
         {
+            PatientNumber = string.Empty;
             FirstName = string.Empty;
             LastName = string.Empty;
             IdentityNumber = string.Empty;
-            EmailAddress = string.Empty;
+            Nationality = EnumNationality.TURKISH;
+            PassportNumber = string.Empty;
+            BirthDate = DateTime.Now;
             MobilePhoneNumber = string.Empty;
+            PatientType = EnumPatientTypes.NORMAL;
+            InsuranceType = EnumInsuranceType.SGK;
+            InsuranceNo = string.Empty;
+            Gender = EnumGender.FEMALE;
         }
 
-        public Patient(Guid id, string firstName, string lastName, DateTime birthDate, string identityNumber, string emailAddress, string mobilePhoneNumber, int gender, string? homePhoneNumber = null)
+        public Patient(Guid id, string firstName, string lastName, EnumNationality nationality, DateTime birthDate, 
+            string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
+            string? mothersName = null, string? fathersName = null, string? identityNumber = null, string? passportNumber = null, string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
         {
+            Check.NotNullOrWhiteSpace(firstName, nameof(firstName), PatientConsts.NameMaxLength, PatientConsts.NameMinLength);
+            Check.NotNullOrWhiteSpace(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, PatientConsts.LastNameMinLength);
 
+            // Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberLength,
+            //    PatientConsts.IdentityNumberLength);
+            Check.Range((int)nationality, nameof(nationality), PatientConsts.NationalityMinLength, PatientConsts.NationalityMaxLength);
+            // Check.NotNullOrWhiteSpace(passportNumber, nameof(passportNumber), PatientConsts.PassportNumberMaxLength, PatientConsts.PassportNumberMinLength);
+            Check.NotNullOrWhiteSpace(mobilePhoneNumber, nameof(mobilePhoneNumber), PatientConsts.MobilePhoneNumberMaxLength, PatientConsts.MobilePhoneNumberMinLength);
+            Check.Range((int)patientType, nameof(patientType), PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue);
+            Check.Range((int)insuranceType, nameof(insuranceType), PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue);
+            Check.NotNullOrWhiteSpace(insuranceNo, nameof(insuranceNo), PatientConsts.InsuranceNumberMaxLength, PatientConsts.InsuranceNumberMinLength);
+            
             Id = id;
-            Check.NotNull(firstName, nameof(firstName));
-            Check.Length(firstName, nameof(firstName), PatientConsts.FirstNameMaxLength, 0);
-            Check.NotNull(lastName, nameof(lastName));
-            Check.Length(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, 0);
-            Check.NotNull(identityNumber, nameof(identityNumber));
-            Check.Length(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberMaxLength, 0);
-            Check.NotNull(emailAddress, nameof(emailAddress));
-            Check.Length(emailAddress, nameof(emailAddress), PatientConsts.EmailAddressMaxLength, 0);
-            Check.NotNull(mobilePhoneNumber, nameof(mobilePhoneNumber));
-            Check.Length(mobilePhoneNumber, nameof(mobilePhoneNumber), PatientConsts.MobilePhoneNumberMaxLength, 0);
-            if (gender < PatientConsts.GenderMinLength)
-            {
-                throw new ArgumentOutOfRangeException(nameof(gender), gender, "The value of 'gender' cannot be lower than " + PatientConsts.GenderMinLength);
-            }
-
-            if (gender > PatientConsts.GenderMaxLength)
-            {
-                throw new ArgumentOutOfRangeException(nameof(gender), gender, "The value of 'gender' cannot be greater than " + PatientConsts.GenderMaxLength);
-            }
-
             FirstName = firstName;
             LastName = lastName;
-            BirthDate = birthDate;
+            MothersName = mothersName;
+            FathersName = fathersName;
             IdentityNumber = identityNumber;
+            Nationality = nationality;
+            PassportNumber = passportNumber;
+            BirthDate = birthDate;
             EmailAddress = emailAddress;
             MobilePhoneNumber = mobilePhoneNumber;
+            Relative = relative;
+            RelativePhoneNumber = relativePhoneNumber;
+            PatientType = patientType;
+            Address = address;
+            InsuranceType = insuranceType;
+            InsuranceNo = insuranceNo;
+            DiscountGroup = discountGroup;
             Gender = gender;
-            HomePhoneNumber = homePhoneNumber;
         }
     }
 }

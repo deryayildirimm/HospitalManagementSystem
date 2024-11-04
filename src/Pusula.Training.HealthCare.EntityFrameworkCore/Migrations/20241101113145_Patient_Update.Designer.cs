@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Pusula.Training.HealthCare.Migrations
 {
     [DbContext(typeof(HealthCareDbContext))]
-    partial class HealthCareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241101113145_Patient_Update")]
+    partial class Patient_Update
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -148,7 +151,13 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("Gender");
 
+                    b.Property<string>("HomePhoneNumber")
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)")
+                        .HasColumnName("HomePhoneNumber");
+
                     b.Property<string>("IdentityNumber")
+                        .IsRequired()
                         .HasMaxLength(11)
                         .HasColumnType("character varying(11)")
                         .HasColumnName("IdentityNumber");
@@ -199,6 +208,7 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnName("Nationality");
 
                     b.Property<string>("PassportNumber")
+                        .IsRequired()
                         .HasMaxLength(9)
                         .HasColumnType("character varying(9)")
                         .HasColumnName("PassportNumber");
@@ -209,15 +219,6 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.Property<int>("PatientType")
                         .HasColumnType("integer")
                         .HasColumnName("PatientType");
-
-                    b.Property<int?>("Relative")
-                        .HasColumnType("integer")
-                        .HasColumnName("Relative");
-
-                    b.Property<string>("RelativePhoneNumber")
-                        .HasMaxLength(15)
-                        .HasColumnType("character varying(15)")
-                        .HasColumnName("RelativePhoneNumber");
 
                     b.HasKey("Id");
 

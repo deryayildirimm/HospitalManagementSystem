@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Pusula.Training.HealthCare.Migrations
 {
     [DbContext(typeof(HealthCareDbContext))]
-    partial class HealthCareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241101105827_Patient_Updated")]
+    partial class Patient_Updated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -88,9 +91,7 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Address")
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)")
-                        .HasColumnName("Address");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("BirthDate")
                         .HasColumnType("timestamp without time zone")
@@ -119,11 +120,11 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("DeletionTime");
 
-                    b.Property<int>("DiscountGroup")
-                        .HasColumnType("integer")
-                        .HasColumnName("DiscountGroup");
+                    b.Property<int?>("DiscountGroup")
+                        .HasColumnType("integer");
 
                     b.Property<string>("EmailAddress")
+                        .IsRequired()
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)")
                         .HasColumnName("EmailAddress");
@@ -134,9 +135,7 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnName("ExtraProperties");
 
                     b.Property<string>("FathersName")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("FathersName");
+                        .HasColumnType("text");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
@@ -145,23 +144,26 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnName("FirstName");
 
                     b.Property<int>("Gender")
+                        .HasMaxLength(1)
                         .HasColumnType("integer")
                         .HasColumnName("Gender");
 
+                    b.Property<string>("HomePhoneNumber")
+                        .HasColumnType("text")
+                        .HasColumnName("HomePhoneNumber");
+
                     b.Property<string>("IdentityNumber")
+                        .IsRequired()
                         .HasMaxLength(11)
                         .HasColumnType("character varying(11)")
                         .HasColumnName("IdentityNumber");
 
                     b.Property<string>("InsuranceNo")
                         .IsRequired()
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("InsuranceNo");
+                        .HasColumnType("text");
 
                     b.Property<int>("InsuranceType")
-                        .HasColumnType("integer")
-                        .HasColumnName("InsuranceType");
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -190,34 +192,20 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnName("MobilePhoneNumber");
 
                     b.Property<string>("MothersName")
-                        .HasMaxLength(128)
-                        .HasColumnType("character varying(128)")
-                        .HasColumnName("MothersName");
+                        .HasColumnType("text");
 
                     b.Property<int>("Nationality")
-                        .HasColumnType("integer")
-                        .HasColumnName("Nationality");
+                        .HasColumnType("integer");
 
                     b.Property<string>("PassportNumber")
-                        .HasMaxLength(9)
-                        .HasColumnType("character varying(9)")
-                        .HasColumnName("PassportNumber");
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("PatientNumber")
                         .HasColumnType("text");
 
                     b.Property<int>("PatientType")
-                        .HasColumnType("integer")
-                        .HasColumnName("PatientType");
-
-                    b.Property<int?>("Relative")
-                        .HasColumnType("integer")
-                        .HasColumnName("Relative");
-
-                    b.Property<string>("RelativePhoneNumber")
-                        .HasMaxLength(15)
-                        .HasColumnType("character varying(15)")
-                        .HasColumnName("RelativePhoneNumber");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 

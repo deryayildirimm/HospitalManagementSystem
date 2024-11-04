@@ -158,6 +158,7 @@ public class HealthCareBlazorModule : AbpModule
                 bundle =>
                 {
                     bundle.AddFiles("/global-styles.css");
+                    bundle.AddFiles("/styles/login.css");
                 }
             );
 
