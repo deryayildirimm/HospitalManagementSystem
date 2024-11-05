@@ -18,7 +18,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
 {
     public virtual async Task DeleteAllAsync(
         string? filterText = null,
-                    string? type = null,
+        string? type = null,
         DateTime? startTimeMin = null,
         DateTime? startTimeMax = null,
         string? endTime = null,
@@ -34,7 +34,8 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
     }
 
-    public virtual async Task<ProtocolWithNavigationProperties> GetWithNavigationPropertiesAsync(Guid id, CancellationToken cancellationToken = default)
+    public virtual async Task<ProtocolWithNavigationProperties> GetWithNavigationPropertiesAsync(Guid id,
+        CancellationToken cancellationToken = default)
     {
         var dbContext = await GetDbContextAsync();
 

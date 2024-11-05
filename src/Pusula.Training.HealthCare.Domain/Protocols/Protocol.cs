@@ -22,7 +22,8 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         Type = string.Empty;
     }
 
-    public Protocol(Guid id, Guid patientId, Guid departmentId, string type, DateTime startTime, string? endTime = null) : base(id)
+    public Protocol(Guid id, Guid patientId, Guid departmentId, string type, DateTime startTime,
+        string? endTime = null) : base(id)
     {
         Check.NotNull(type, nameof(type));
         Check.Length(type, nameof(type), ProtocolConsts.TypeMaxLength, ProtocolConsts.TypeMinLength);
@@ -32,5 +33,4 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         PatientId = patientId;
         DepartmentId = departmentId;
     }
-
 }

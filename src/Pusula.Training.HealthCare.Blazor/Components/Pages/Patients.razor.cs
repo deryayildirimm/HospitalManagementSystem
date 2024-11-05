@@ -62,7 +62,6 @@ public partial class Patients
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
-
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -133,7 +132,7 @@ public partial class Patients
             culture = "&culture=" + culture;
         }
         await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/patients/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&FirstName={HttpUtility.UrlEncode(Filter.FirstName)}&LastName={HttpUtility.UrlEncode(Filter.LastName)}&BirthDateMin={Filter.BirthDateMin?.ToString("O")}&BirthDateMax={Filter.BirthDateMax?.ToString("O")}&IdentityNumber={HttpUtility.UrlEncode(Filter.IdentityNumber)}&EmailAddress={HttpUtility.UrlEncode(Filter.EmailAddress)}&MobilePhoneNumber={HttpUtility.UrlEncode(Filter.MobilePhoneNumber)}&HomePhoneNumber={HttpUtility.UrlEncode(Filter.HomePhoneNumber)}&GenderMin={Filter.GenderMin}&GenderMax={Filter.GenderMax}", forceLoad: true);
+        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/patients/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&FirstName={HttpUtility.UrlEncode(Filter.FirstName)}&LastName={HttpUtility.UrlEncode(Filter.LastName)}&BirthDateMin={Filter.BirthDateMin?.ToString("O")}&BirthDateMax={Filter.BirthDateMax?.ToString("O")}&IdentityNumber={HttpUtility.UrlEncode(Filter.IdentityNumber)}&EmailAddress={HttpUtility.UrlEncode(Filter.EmailAddress)}&MobilePhoneNumber={HttpUtility.UrlEncode(Filter.MobilePhoneNumber)}&Gender={Filter.Gender}", forceLoad: true);
     }
 
     private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<PatientDto> e)
@@ -247,6 +246,21 @@ public partial class Patients
         Filter.LastName = lastName;
         await SearchAsync();
     }
+    protected virtual async Task OnIdentityNumberChangedAsync(string? identityNumber)
+    {
+        Filter.IdentityNumber = identityNumber;
+        await SearchAsync();
+    }
+    protected virtual async Task OnNationalityChangedAsync(EnumNationality? nationality)
+    {
+        Filter.Nationality = nationality;
+        await SearchAsync();
+    }
+    protected virtual async Task OnPassportNumberChangedAsync(string? passportNumber)
+    {
+        Filter.PassportNumber = passportNumber;
+        await SearchAsync();
+    }
     protected virtual async Task OnBirthDateMinChangedAsync(DateTime? birthDateMin)
     {
         Filter.BirthDateMin = birthDateMin.HasValue ? birthDateMin.Value.Date : birthDateMin;
@@ -255,11 +269,6 @@ public partial class Patients
     protected virtual async Task OnBirthDateMaxChangedAsync(DateTime? birthDateMax)
     {
         Filter.BirthDateMax = birthDateMax.HasValue ? birthDateMax.Value.Date.AddDays(1).AddSeconds(-1) : birthDateMax;
-        await SearchAsync();
-    }
-    protected virtual async Task OnIdentityNumberChangedAsync(string? identityNumber)
-    {
-        Filter.IdentityNumber = identityNumber;
         await SearchAsync();
     }
     protected virtual async Task OnEmailAddressChangedAsync(string? emailAddress)
@@ -272,19 +281,26 @@ public partial class Patients
         Filter.MobilePhoneNumber = mobilePhoneNumber;
         await SearchAsync();
     }
-    protected virtual async Task OnHomePhoneNumberChangedAsync(string? homePhoneNumber)
+    
+    protected virtual async Task OnPatientTypeChangedAsync(EnumPatientTypes? selectedType)
     {
-        Filter.HomePhoneNumber = homePhoneNumber;
+        Filter.PatientType = selectedType;
         await SearchAsync();
     }
-    protected virtual async Task OnGenderMinChangedAsync(int? genderMin)
+    
+    protected virtual async Task OnInsuranceTypeChangedAsync(EnumInsuranceType? insuranceType)
     {
-        Filter.GenderMin = genderMin;
+        Filter.InsuranceType = insuranceType;
         await SearchAsync();
     }
-    protected virtual async Task OnGenderMaxChangedAsync(int? genderMax)
+    protected virtual async Task OnDiscountGroupChangedAsync(EnumDiscountGroup? discountGroup)
     {
-        Filter.GenderMax = genderMax;
+        Filter.DiscountGroup = discountGroup;
+        await SearchAsync();
+    }
+    protected virtual async Task OnGenderChangedAsync(EnumGender? gender)
+    {
+        Filter.Gender = gender;
         await SearchAsync();
     }
     private Task SelectAllItems()

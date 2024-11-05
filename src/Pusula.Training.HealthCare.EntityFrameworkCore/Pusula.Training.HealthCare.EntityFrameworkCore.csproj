@@ -28,4 +28,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Migrations\20241102191057_InitialCreate.Designer.cs" />
+    <Compile Remove="Migrations\20241102191057_InitialCreate.cs" />
+  </ItemGroup>
+
 </Project>

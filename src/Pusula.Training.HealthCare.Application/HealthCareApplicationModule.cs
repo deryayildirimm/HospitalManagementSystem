@@ -21,6 +21,7 @@ using Volo.Abp.BackgroundWorkers;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Pusula.Training.HealthCare.Workers;
+using Volo.Abp.Emailing;
 
 namespace Pusula.Training.HealthCare;
 
@@ -37,7 +38,7 @@ namespace Pusula.Training.HealthCare;
     typeof(AbpBackgroundJobsRabbitMqModule),
     typeof(AbpEventBusRabbitMqModule),
     typeof(AbpBackgroundWorkersModule)
-    )]
+)]
 public class HealthCareApplicationModule : AbpModule
 {
     public override async Task OnApplicationInitializationAsync(ApplicationInitializationContext context)
@@ -49,17 +50,13 @@ public class HealthCareApplicationModule : AbpModule
     {
         var configuration = context.Services.GetConfiguration();
 
-        Configure<AbpDistributedCacheOptions>(options =>
-        {
-            options.KeyPrefix = "PTH:";
-        });
+        Configure<AbpDistributedCacheOptions>(options => { options.KeyPrefix = "PTH:"; });
 
-        Configure<AbpAutoMapperOptions>(options =>
-        {
-            options.AddMaps<HealthCareApplicationModule>();
-        });
+        Configure<AbpAutoMapperOptions>(options => { options.AddMaps<HealthCareApplicationModule>(); });
 
-        context.Services.Replace(ServiceDescriptor.Transient<IBackgroundJobManager, DefaultBackgroundJobManager>());
+#if DEBUG
+        context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
+#endif
 
         Configure<AbpBackgroundJobWorkerOptions>(options =>
         {
@@ -70,10 +67,11 @@ public class HealthCareApplicationModule : AbpModule
         var redis = ConnectionMultiplexer.Connect(configuration["Redis:Configuration"]!);
 
         context.Services
-        .AddDataProtection()
-        .SetApplicationName("PTH")
+            .AddDataProtection()
+            .SetApplicationName("PTH")
             .PersistKeysToStackExchangeRedis(redis, "PTH-Protection-Keys");
 
-        context.Services.AddSingleton<IDistributedLockProvider>(_ => new RedisDistributedSynchronizationProvider(redis.GetDatabase()));
+        context.Services.AddSingleton<IDistributedLockProvider>(_ =>
+            new RedisDistributedSynchronizationProvider(redis.GetDatabase()));
     }
 }

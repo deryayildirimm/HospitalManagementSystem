@@ -1,0 +1,41 @@
+<div>
+    <Dropdown >
+        <DropdownToggle Color="Color.Light">@Text</DropdownToggle>
+        <DropdownMenu Padding="Padding.Is2" Gap="Gap.Is1" MaxMenuHeight="190px">
+            @foreach (var item in Items)
+            {
+                <Check TValue="bool" bind-Checked="item.IsSelected"  @onchange="(e) => OnItemChange(item)">
+                    @item.DisplayName
+                </Check>
+            }
+        </DropdownMenu>
+    </Dropdown>
+</div>
+
+@implements IDisposable
+@inherits  AppComponentBase
+@code {
+    [Parameter] public List<SelectionItem> Items { get; set; } = new();
+
+    [Parameter] public string? Text { get; set; }
+    
+    protected override void OnParametersSet()
+    {
+        StateHasChanged();
+    }
+
+    private void OnItemChange(SelectionItem item)
+    {
+        item.IsSelected = !item.IsSelected;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        foreach (var item in Items)
+        {
+            item.IsSelected = false;
+        }
+    }
+
+}

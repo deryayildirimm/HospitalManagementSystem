@@ -57,6 +57,7 @@
     "FileUploading": "File uploading...",
     "Menu:Patients": "Patients",
     "Menu:HealthCare": "Health Care",
+    "Menu:MedicalServices": "Medical Services",
     "Patient": "Patient",
     "Permission:Protocols": "Protocols",
     "Type": "Type",
@@ -73,6 +74,17 @@
     "NewDepartment": "New Department",
     "Menu:Departments": "Departments",
     "Department": "Department",
-    "Healthcare": "Healthcare"
+    "Healthcare": "Healthcare",
+    "IdentificationNumber": "ID Number",
+    "Permission:MedicalServices": "Medical Services",
+    "MedicalServices": "Medical Services",
+    "NewMedicalService": "New Medical Service",
+    "ServiceDate": "Service Created At",
+    "Cost": "Cost",
+    "MinServiceDate": "Min Service Date",
+    "MaxServiceDate": "Max Service Date",
+    "MinCost": "Min Cost",
+    "MaxCost": "Max Cost",
+    "SelectDepartment": "Select Departments"
   }
 }

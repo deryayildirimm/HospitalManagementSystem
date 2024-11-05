@@ -68,6 +68,15 @@ public class HealthCareMenuContributor : IMenuContributor
                 requiredPermissionName: HealthCarePermissions.Departments.Default)
         );
 
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
+                HealthCareMenus.MedicalServices,
+                l["Menu:MedicalServices"],
+                url: "/medical-services",
+                icon: "fa-solid fa-notes-medical",
+                requiredPermissionName: HealthCarePermissions.MedicalServices.Default)
+        );
+
         return Task.CompletedTask;
     }
 

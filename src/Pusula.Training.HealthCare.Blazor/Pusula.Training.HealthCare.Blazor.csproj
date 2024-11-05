@@ -45,6 +45,9 @@
     <EmbeddedResource Include="openiddict.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <None Update="Components\CustomComponents\MultiSelectDropdown.razor.css">
+      <DependentUpon>MultiSelectDropdown.razor</DependentUpon>
+    </None>
   </ItemGroup>
 
   <ItemGroup>

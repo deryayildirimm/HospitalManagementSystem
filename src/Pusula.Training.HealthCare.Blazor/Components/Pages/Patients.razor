@@ -76,6 +76,30 @@
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
+                        <FieldLabel>@L["IdentityNumber"]</FieldLabel>
+                        <TextEdit Text="@Filter.IdentityNumber" TextChanged="@OnIdentityNumberChangedAsync"/>
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Nationality"]</FieldLabel>
+                        <Select TValue="EnumNationality?" SelectedValue="Filter.Nationality" SelectedValueChanged="@OnNationalityChangedAsync">
+                            <SelectItem></SelectItem>
+                            @foreach (EnumNationality type in Enum.GetValues(typeof(EnumNationality)))
+                            {
+                            <SelectItem Value="@type">@L[type.ToString()]</SelectItem>
+                            }
+                        </Select>
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["PassportNumber"]</FieldLabel>
+                        <TextEdit Text="@Filter.PassportNumber" TextChanged="@OnPassportNumberChangedAsync"/>
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
                         <FieldLabel>@L["MinBirthDate"]</FieldLabel>
                         <DatePicker TValue="DateTime?"
                                     InputMode="DateInputMode.Date"
@@ -96,12 +120,6 @@
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
-                        <FieldLabel>@L["IdentityNumber"]</FieldLabel>
-                        <TextEdit Text="@Filter.IdentityNumber" TextChanged="@OnIdentityNumberChangedAsync"/>
-                    </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
                         <FieldLabel>@L["EmailAddress"]</FieldLabel>
                         <TextEdit Text="@Filter.EmailAddress" TextChanged="@OnEmailAddressChangedAsync"/>
                     </Field>
@@ -114,26 +132,53 @@
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
-                        <FieldLabel>@L["HomePhoneNumber"]</FieldLabel>
-                        <TextEdit Text="@Filter.HomePhoneNumber" TextChanged="@OnHomePhoneNumberChangedAsync"/>
+                        <FieldLabel>@L["Patient Type"]</FieldLabel>
+                        <Select TValue="EnumPatientTypes?" SelectedValue="Filter.PatientType" SelectedValueChanged="@OnPatientTypeChangedAsync">
+                            <SelectItem></SelectItem>
+                            @foreach (EnumPatientTypes type in Enum.GetValues(typeof(EnumPatientTypes)))
+                            {
+                            <SelectItem Value="@type">@L[type.ToString()]</SelectItem>
+                            }
+                        </Select>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
-                        <FieldLabel>@L["MinGender"]</FieldLabel>
-                        <NumericEdit TValue="int?"
-                                     Value="@Filter.GenderMin"
-                                     ValueChanged="@OnGenderMinChangedAsync"/>
+                        <FieldLabel>@L["Insurance Type"]</FieldLabel>
+                        <Select TValue="EnumInsuranceType?" SelectedValue="Filter.InsuranceType" SelectedValueChanged="@OnInsuranceTypeChangedAsync">
+                            <SelectItem></SelectItem>
+                            @foreach (EnumInsuranceType type in Enum.GetValues(typeof(EnumInsuranceType)))
+                            {
+                            <SelectItem Value="@type">@L[type.ToString()]</SelectItem>
+                            }
+                        </Select>
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
-                        <FieldLabel>@L["MaxGender"]</FieldLabel>
-                        <NumericEdit TValue="int?"
-                                     Value="@Filter.GenderMax"
-                                     ValueChanged="@OnGenderMaxChangedAsync"/>
+                        <FieldLabel>@L["Discount Group"]</FieldLabel>
+                        <Select TValue="EnumDiscountGroup?" SelectedValue="Filter.DiscountGroup" SelectedValueChanged="@OnDiscountGroupChangedAsync">
+                            <SelectItem></SelectItem>
+                            @foreach (EnumDiscountGroup type in Enum.GetValues(typeof(EnumDiscountGroup)))
+                            {
+                            <SelectItem Value="@type">@L[type.ToString()]</SelectItem>
+                            }
+                        </Select>
                     </Field>
                 </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Gender"]</FieldLabel>
+                        <Select TValue="EnumGender?" SelectedValue="Filter.Gender" SelectedValueChanged="@OnGenderChangedAsync">
+                            <SelectItem></SelectItem>
+                            @foreach (EnumGender type in Enum.GetValues(typeof(EnumGender)))
+                            {
+                            <SelectItem Value="@type">@L[type.ToString()]</SelectItem>
+                            }
+                        </Select>
+                    </Field>
+                </Column>
+                
             </Row>
             @*//<suite-custom-code-block-2>*@
             @*//</suite-custom-code-block-2>*@
@@ -238,20 +283,14 @@
                                           ConfirmationMessage="@(() => L["DeleteConfirmationMessage"])"
                                           Text="@L["Delete"]">
                             </EntityAction>
-                            @*//<suite-custom-code-block-4>*@
-                            @*//</suite-custom-code-block-4>*@
                         </EntityActions>
                     </DisplayTemplate>
                 </DataGridEntityActionsColumn>
 
-                <DataGridColumn TItem="PatientDto"
-                                Field="FirstName"
-                                Caption="@L["FirstName"]">
-                </DataGridColumn>
-
-                <DataGridColumn TItem="PatientDto"
-                                Field="LastName"
-                                Caption="@L["LastName"]">
+                <DataGridColumn TItem="PatientDto" Caption="@L["Name"]">
+                    <DisplayTemplate>
+                        @($"{context.FirstName} {context.LastName}")
+                    </DisplayTemplate>
                 </DataGridColumn>
 
                 <DataGridColumn TItem="PatientDto"
@@ -275,11 +314,6 @@
                 <DataGridColumn TItem="PatientDto"
                                 Field="MobilePhoneNumber"
                                 Caption="@L["MobilePhoneNumber"]">
-                </DataGridColumn>
-
-                <DataGridColumn TItem="PatientDto"
-                                Field="HomePhoneNumber"
-                                Caption="@L["HomePhoneNumber"]">
                 </DataGridColumn>
 
                 <DataGridColumn TItem="PatientDto"
@@ -383,7 +417,7 @@
                     </Validation>
 
 
-                    <Validation MessageLocalizer="@LH.Localize">
+                    @*//<Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["HomePhoneNumber"]</FieldLabel>
                             <TextEdit @bind-Text="@NewPatient.HomePhoneNumber">
@@ -392,7 +426,7 @@
                                 </Feedback>
                             </TextEdit>
                         </Field>
-                    </Validation>
+                    </Validation> *@
 
 
                     <Validation MessageLocalizer="@LH.Localize">
@@ -506,7 +540,7 @@
                     </Validation>
 
 
-                    <Validation MessageLocalizer="@LH.Localize">
+                    @*//<Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["HomePhoneNumber"]</FieldLabel>
                             <TextEdit @bind-Text="@EditingPatient.HomePhoneNumber">
@@ -515,7 +549,7 @@
                                 </Feedback>
                             </TextEdit>
                         </Field>
-                    </Validation>
+                    </Validation>*@
 
 
                     
