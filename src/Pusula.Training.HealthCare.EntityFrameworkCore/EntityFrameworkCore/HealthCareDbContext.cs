@@ -32,7 +32,8 @@ public class HealthCareDbContext :
     public DbSet<Department> Departments { get; set; } = null!;
     public DbSet<Protocol> Protocols { get; set; } = null!;
     public DbSet<Patient> Patients { get; set; } = null!;
-    public DbSet<MedicalService> Service { get; set; } = null!;
+    public DbSet<MedicalService> Services { get; set; } = null!;
+    public DbSet<DepartmentMedicalService> DepartmentMedicalServices { get; set; } = null!;
 
     #region Entities from the modules
 
@@ -158,18 +159,13 @@ public class HealthCareDbContext :
                     .HasPrecision(18, 6);
 
                 b.Property(x => x.ServiceCreatedAt).HasColumnName(nameof(MedicalService.ServiceCreatedAt)).IsRequired();
-
-                b.HasMany(x => x.Departments)
-                    .WithMany(d => d.MedicalServices)
-                    .UsingEntity(j => j.ToTable(HealthCareConsts.DbTablePrefix + "DepartmentMedicalService",
-                        HealthCareConsts.DbSchema));
-
+                
                 b.HasIndex(e => new { e.Name }).IsUnique();
             });
 
             builder.Entity<MedicalServicePatient>(b =>
             {
-                b.ToTable(HealthCareConsts.DbTablePrefix + "MedicalServicePatient", HealthCareConsts.DbSchema);
+                b.ToTable(HealthCareConsts.DbTablePrefix + "MedicalServicePatients", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
 
                 b.HasKey(x => new { x.MedicalServiceId, x.PatientId });
@@ -185,6 +181,24 @@ public class HealthCareDbContext :
                     .IsRequired();
 
                 b.HasIndex(x => new { x.MedicalServiceId, x.PatientId });
+            });
+            
+            builder.Entity<DepartmentMedicalService>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "DepartmentMedicalServices", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+
+                b.HasKey(x => new { x.MedicalServiceId, x.DepartmentId });
+
+                b.HasOne<Department>(sc => sc.Department)
+                    .WithMany(x => x.DepartmentMedicalServices)
+                    .HasForeignKey(x => x.DepartmentId);
+
+                b.HasOne<MedicalService>(sc => sc.MedicalService)
+                    .WithMany(x => x.DepartmentMedicalServices)
+                    .HasForeignKey(x => x.MedicalServiceId);
+
+                b.HasIndex(x => new { x.MedicalServiceId, x.DepartmentId }).IsUnique();
             });
         }
     }

@@ -15,7 +15,8 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
 
     public virtual DateTime ServiceCreatedAt { get; set; }
 
-    public virtual ICollection<Department> Departments { get; set; } = new List<Department>();
+    public virtual IList<DepartmentMedicalService> DepartmentMedicalServices { get; set; } =
+        new List<DepartmentMedicalService>();
 
     protected MedicalService()
     {
@@ -37,13 +38,7 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
         ServiceCreatedAt = serviceCreatedAt;
     }
 
-    public void SetDepartments(ICollection<Department> newDepartments)
+    public void SetDepartments(ICollection<Department>? newDepartments)
     {
-        Departments.Clear();
-        foreach (var department in newDepartments)
-        {
-            Departments.Add(department);
-        }
     }
-    
 }

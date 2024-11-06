@@ -11,7 +11,7 @@ public class MedicalServiceUpdateDto : IHasConcurrencyStamp
     public string Name { get; set; }
     
     [Required]
-    public List<string> DepartmentNames { get; set; } = new List<string>();
+    public List<string> DepartmentNames { get; set; } = [];
 
     [Required]
     [Range(MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue)]

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Departments;
 using Volo.Abp;
@@ -37,7 +38,12 @@ public class MedicalServiceManager(
 
         foreach (var department in departments)
         {
-            medicalService.Departments.Add(department);
+            var departmentMedicalService = new DepartmentMedicalService
+            {
+                DepartmentId = department.Id,
+                MedicalServiceId = medicalService.Id,
+            };
+            medicalService.DepartmentMedicalServices.Add(departmentMedicalService);
         }
 
         return await medicalServiceRepository.InsertAsync(medicalService);
@@ -60,21 +66,30 @@ public class MedicalServiceManager(
 
         var service = await medicalServiceRepository.GetAsync(id);
 
+        if (service == null)
+        {
+            throw new UserFriendlyException($"Medical service with was not found.");
+        }
+
         service.Name = name;
         service.Cost = cost;
         service.ServiceCreatedAt = serviceCreatedAt;
         service.SetConcurrencyStampIfNotNull(concurrencyStamp);
 
-        var departments = await departmentRepository.GetListByNamesAsync(departmentNames.ToArray());
+        var departments = await departmentRepository
+            .GetListByNamesAsync(departmentNames.ToArray());
 
-        if (departments == null || departments.Count == 0)
+        if (departments != null && departments.Count != 0)
         {
-            throw new UserFriendlyException("Invalid departments");
+            foreach (var department in departments)
+            {
+                service.DepartmentMedicalServices.Add(new DepartmentMedicalService
+                {
+                    DepartmentId = department.Id,
+                    MedicalServiceId = service.Id,
+                });
+            }
         }
-
-        service.Departments.Clear();
-
-        service.SetDepartments(departments);
 
         return await medicalServiceRepository.UpdateAsync(service);
     }

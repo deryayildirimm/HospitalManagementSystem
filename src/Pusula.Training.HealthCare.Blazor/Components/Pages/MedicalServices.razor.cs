@@ -184,7 +184,6 @@ public partial class MedicalServices
         //TODO State reset issue
         ResetCreateSelectedDepartments();
         await InvokeAsync(StateHasChanged);
-        NewMedicalService.DepartmentNames.Clear();
         await CreateMedicalServiceModal.Hide();
     }
 
@@ -196,7 +195,8 @@ public partial class MedicalServices
 
         EditingMedicalServiceId = service.Id;
         EditingMedicalService = ObjectMapper.Map<MedicalServiceDto, MedicalServiceUpdateDto>(service);
-        ResetUpdateSelectedDepartments();
+
+        await ResetUpdateSelectedDepartments();
         EditingMedicalService.DepartmentNames.Clear();
         await EditingMedicalServiceValidations.ClearAll();
         await EditMedicalServiceModal.Show();
@@ -219,8 +219,8 @@ public partial class MedicalServices
 
             HandleCreateDepartmentSelections();
             await MedicalServicesAppService.CreateAsync(NewMedicalService);
-            await GetMedicalServicesAsync();
             NewMedicalService.DepartmentNames.Clear();
+            await GetMedicalServicesAsync();
             await CloseCreateMedicalServiceModalAsync();
         }
         catch (Exception ex)
@@ -238,8 +238,12 @@ public partial class MedicalServices
                 return;
             }
 
-            HandleUpdateDepartmentSelections();
+            var departmentNames = HandleUpdateDepartmentSelections();
+
+            EditingMedicalService.DepartmentNames.AddRange(departmentNames);
+
             await MedicalServicesAppService.UpdateAsync(EditingMedicalServiceId, EditingMedicalService);
+
             await GetMedicalServicesAsync();
             await CloseEditMedicalServiceModalAsync();
         }
@@ -251,28 +255,10 @@ public partial class MedicalServices
 
     private async Task CloseEditMedicalServiceModalAsync()
     {
+        EditingMedicalService = new MedicalServiceUpdateDto();
         EditingMedicalService.DepartmentNames.Clear();
-        ResetUpdateSelectedDepartments();
-        await InvokeAsync(StateHasChanged);
+        await ResetUpdateSelectedDepartments();
         await EditMedicalServiceModal.Hide();
-    }
-
-    protected virtual async Task OnNameChangedAsync(string? name)
-    {
-        Filter.Name = name;
-        await SearchAsync();
-    }
-
-    protected virtual async Task OnCostMinCostChangedAsync(double? cost)
-    {
-        Filter.CostMin = cost;
-        await SearchAsync();
-    }
-
-    protected virtual async Task OnCostMaxCostChangedAsync(double? cost)
-    {
-        Filter.CostMax = cost;
-        await SearchAsync();
     }
 
     protected virtual async Task OnStartTimeMinChangedAsync(DateTime? serviceTimeMin)
@@ -286,21 +272,6 @@ public partial class MedicalServices
         Filter.ServiceDateMax = serviceTimeMax.HasValue
             ? serviceTimeMax.Value.Date.AddDays(1).AddSeconds(-1)
             : serviceTimeMax;
-        await SearchAsync();
-    }
-
-    protected virtual async Task OnEndTimeChangedAsync(string? endTime)
-    {
-        await SearchAsync();
-    }
-
-    protected virtual async Task OnPatientIdChangedAsync(Guid? patientId)
-    {
-        await SearchAsync();
-    }
-
-    protected virtual async Task OnDepartmentIdChangedAsync(Guid? departmentId)
-    {
         await SearchAsync();
     }
 
@@ -409,35 +380,36 @@ public partial class MedicalServices
         }
     }
 
-    private void HandleUpdateDepartmentSelections()
+    private List<string> HandleUpdateDepartmentSelections()
     {
         try
         {
             if (DepartmentsUpdateSelectionItems.Count == 0)
             {
-                return;
+                return [];
             }
 
-            var selectedNames = DepartmentsUpdateSelectionItems.Where(x => x.IsSelected).Select(x => x.DisplayName)
+            return DepartmentsUpdateSelectionItems.Where(x => x.IsSelected).Select(x => x.DisplayName)
                 .ToList();
-
-            EditingMedicalService.DepartmentNames.Clear();
-            EditingMedicalService.DepartmentNames.AddRange(selectedNames);
         }
         catch (Exception ex)
         {
             HandleErrorAsync(ex);
+            return [];
         }
     }
 
-    private void ResetUpdateSelectedDepartments()
+    private async Task ResetUpdateSelectedDepartments()
     {
-        if (DepartmentsUpdateSelectionItems.Count > 0)
+        DepartmentsUpdateSelectionItems = new List<SelectionItem>();
+
+        DepartmentsUpdateSelectionItems = DepartmentsCollection.Select(department => new SelectionItem
         {
-            foreach (var item in DepartmentsUpdateSelectionItems)
-            {
-                item.IsSelected = false;
-            }
-        }
+            Id = department.Id,
+            DisplayName = department.DisplayName,
+            IsSelected = false
+        }).ToList();
+        
+        await InvokeAsync(StateHasChanged);
     }
 }

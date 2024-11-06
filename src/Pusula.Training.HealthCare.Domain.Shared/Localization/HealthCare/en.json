@@ -22,6 +22,7 @@
     "Permission:Create": "Create",
     "Permission:Edit": "Edit",
     "Permission:Delete": "Delete",
+    "Permission:Appointments": "Appointments",
     "FirstName": "First Name",
     "LastName": "Last Name",
     "BirthDate": "Birth Date",
@@ -85,6 +86,21 @@
     "MaxServiceDate": "Max Service Date",
     "MinCost": "Min Cost",
     "MaxCost": "Max Cost",
-    "SelectDepartment": "Select Departments"
+    "SelectDepartment": "Select Departments",
+    "Records": "Records",
+    "TestResults": "Test Results",
+    "LastVisits": "Last Visits",
+    "Filter": "Filter",
+    "FilterByDate": "Filter By Date",
+    "ServiceSummary":  "Service Summary",
+    "Service" : "Service",
+    "Services" : "Services",
+    "Doctor": "Doctor",
+    "Doctors": "Doctors",
+    "Cancel": "Cancel",
+    "Save": "Save",
+    "SaveProceed": "Save And Proceed",
+    "SelectService":"Select Your Service",
+    "SelectAppointment":"Select Appointment"
   }
 }

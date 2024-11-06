@@ -11,8 +11,9 @@ public class Department : FullAuditedAggregateRoot<Guid>
 {
     [NotNull] 
     public virtual string Name { get; set; }
-    
-    public virtual ICollection<MedicalService> MedicalServices { get; set; } = new List<MedicalService>();
+
+    public virtual IList<DepartmentMedicalService> DepartmentMedicalServices { get; set; } =
+        new List<DepartmentMedicalService>();
 
     protected Department()
     {

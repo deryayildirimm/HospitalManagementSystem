@@ -4,7 +4,7 @@
         <DropdownMenu Padding="Padding.Is2" Gap="Gap.Is1" MaxMenuHeight="190px">
             @foreach (var item in Items)
             {
-                <Check TValue="bool" bind-Checked="item.IsSelected"  @onchange="(e) => OnItemChange(item)">
+                <Check TValue="bool" bind-Checked="item.IsSelected" @onchange="(e) => OnItemChange(item)">
                     @item.DisplayName
                 </Check>
             }
@@ -14,28 +14,28 @@
 
 @implements IDisposable
 @inherits  AppComponentBase
+
 @code {
-    [Parameter] public List<SelectionItem> Items { get; set; } = new();
+
+    [Parameter] public List<SelectionItem> Items { get; set; } = [];
 
     [Parameter] public string? Text { get; set; }
-    
-    protected override void OnParametersSet()
+
+    protected override async void OnParametersSet()
     {
         StateHasChanged();
+        await Task.CompletedTask;
     }
 
-    private void OnItemChange(SelectionItem item)
+    private async Task OnItemChange(SelectionItem item)
     {
         item.IsSelected = !item.IsSelected;
         StateHasChanged();
+        await Task.CompletedTask;
     }
 
     public void Dispose()
     {
-        foreach (var item in Items)
-        {
-            item.IsSelected = false;
-        }
     }
 
 }
