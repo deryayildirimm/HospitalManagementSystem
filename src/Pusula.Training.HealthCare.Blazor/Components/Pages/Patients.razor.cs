@@ -177,8 +177,7 @@ public partial class Patients
     private async Task OpenEditPatientModalAsync(PatientDto input)
     {
         SelectedEditTab = "patient-edit-tab";
-
-
+        
         var patient = await PatientsAppService.GetAsync(input.Id);
 
         EditingPatientId = patient.Id;
@@ -190,10 +189,28 @@ public partial class Patients
 
     private async Task DeletePatientAsync(PatientDto input)
     {
+        
+        var confirmed = await UiMessageService.Confirm($"Are you sure you want to delete {input.FirstName} {input.LastName}?");
+        if(!confirmed) return;
+        
         await PatientsAppService.DeleteAsync(input.Id);
         await GetPatientsAsync();
     }
 
+    // revert delete function
+    private async Task RevertPatientAsync(PatientDto input)
+    {
+        
+        var confirmed = await UiMessageService.Confirm($"Are you sure you want to undelete {input.FirstName} {input.LastName}?");
+        if (!confirmed) return;
+        
+        var revertPatient = ObjectMapper.Map<PatientDto, PatientUpdateDto>(input);
+        revertPatient.IsDeleted = !input.IsDeleted;
+        await PatientsAppService.UpdateAsync(input.Id, revertPatient);
+        await GetPatientsAsync();
+    }
+
+    
     private async Task CreatePatientAsync()
     {
         try
@@ -236,7 +253,13 @@ public partial class Patients
             await HandleErrorAsync(ex);
         }
     }
-
+    
+    protected virtual async Task OnDeletedData(bool? isDeleted)
+    {
+        Filter.IsDeleted = isDeleted;
+        await SearchAsync();
+    }
+    
     protected virtual async Task OnFirstNameChangedAsync(string? firstName)
     {
         Filter.FirstName = firstName;
