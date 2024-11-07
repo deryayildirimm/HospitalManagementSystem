@@ -7,7 +7,7 @@ using Volo.Abp.Domain.Services;
 
 namespace Pusula.Training.HealthCare.Patients;
 
-public class PatientManager(IPatientRepository patientRepository) : DomainService
+public class PatientManager(IPatientRepository patientRepository ,    IDataFilter _dataFilter) : DomainService
 {
     public virtual async Task<Patient> CreateAsync(string firstName, string lastName, EnumNationality nationality, DateTime birthDate, string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
         string? mothersName = null, string? fathersName = null, string? identityNumber = null, string? passportNumber = null, string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
@@ -37,9 +37,10 @@ public class PatientManager(IPatientRepository patientRepository) : DomainServic
         Guid id,
         string firstName, string lastName, EnumNationality nationality, DateTime birthDate, 
         string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
+        bool isDeleted,
         string? mothersName = null, string? fathersName = null, string? identityNumber = null, string? passportNumber = null, 
         string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, 
-        EnumDiscountGroup? discountGroup = null, [CanBeNull] string? concurrencyStamp = null
+        EnumDiscountGroup? discountGroup = null,  [CanBeNull] string? concurrencyStamp = null
     )
     {
         Check.NotNullOrWhiteSpace(firstName, nameof(firstName), PatientConsts.NameMaxLength, PatientConsts.NameMinLength);
@@ -53,29 +54,36 @@ public class PatientManager(IPatientRepository patientRepository) : DomainServic
         Check.Range((int)patientType, nameof(patientType), PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue);
         Check.Range((int)insuranceType, nameof(insuranceType), PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue);
         Check.NotNullOrWhiteSpace(insuranceNo, nameof(insuranceNo), PatientConsts.InsuranceNumberMaxLength, PatientConsts.InsuranceNumberMinLength);
+        Check.NotNull(isDeleted, nameof(isDeleted));
+        // silinmiş veriler uzerınde de işlem yapabilmek için eklendi
+        using (_dataFilter.Disable<ISoftDelete>())
+        {
+            var patient = await patientRepository.GetAsync(id);
 
-        var patient = await patientRepository.GetAsync(id);
-
-        patient.FirstName = firstName;
-        patient.LastName = lastName;
-        patient.MothersName = mothersName;
-        patient.FathersName = fathersName;
-        patient.IdentityNumber = identityNumber;
-        patient.Nationality = nationality;
-        patient.PassportNumber = passportNumber;
-        patient.BirthDate = birthDate;
-        patient.EmailAddress = emailAddress;
-        patient.MobilePhoneNumber = mobilePhoneNumber;
-        patient.Relative = relative;
-        patient.RelativePhoneNumber = relativePhoneNumber;
-        patient.PatientType = patientType;
-        patient.Address = address;
-        patient.InsuranceType = insuranceType;
-        patient.InsuranceNo = insuranceNo;
-        patient.DiscountGroup = discountGroup;
-        patient.Gender = gender;
-
-        patient.SetConcurrencyStampIfNotNull(concurrencyStamp);
-        return await patientRepository.UpdateAsync(patient);
+            patient.FirstName = firstName;
+            patient.LastName = lastName;
+            patient.MothersName = mothersName;
+            patient.FathersName = fathersName;
+            patient.IdentityNumber = identityNumber;
+            patient.Nationality = nationality;
+            patient.PassportNumber = passportNumber;
+            patient.BirthDate = birthDate;
+            patient.EmailAddress = emailAddress;
+            patient.MobilePhoneNumber = mobilePhoneNumber;
+            patient.Relative = relative;
+            patient.RelativePhoneNumber = relativePhoneNumber;
+            patient.PatientType = patientType;
+            patient.Address = address;
+            patient.InsuranceType = insuranceType;
+            patient.InsuranceNo = insuranceNo;
+            patient.DiscountGroup = discountGroup;
+            patient.Gender = gender;
+            patient.IsDeleted = isDeleted; 
+            
+            patient.SetConcurrencyStampIfNotNull(concurrencyStamp);
+            return await patientRepository.UpdateAsync(patient);
+        }
+        
+ 
     }
 }
