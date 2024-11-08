@@ -22,7 +22,7 @@ public partial class Appointments
     private bool CanCreateDepartment { get; set; }
     private bool CanEditDepartment { get; set; }
     private bool CanDeleteDepartment { get; set; }
-    private string selectedStep = "select_service";
+    private string selectedStep { get; set; } = "select_service";
 
     private List<SelectionItem> ServicesList = new List<SelectionItem>
     {
