@@ -21,6 +21,8 @@ public class GetPatientsInput : PagedAndSortedResultRequestDto
     public string? InsuranceNo { get; set; }
     public  EnumDiscountGroup? DiscountGroup { get; set; }
     public EnumGender? Gender { get; set; }
+    
+    public bool? IsDeleted { get; set; }
 
     public GetPatientsInput()
     {

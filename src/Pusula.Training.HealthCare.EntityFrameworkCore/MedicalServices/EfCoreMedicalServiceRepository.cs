@@ -52,21 +52,6 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 
-    public async Task<MedicalServiceWithDetails> GetWithDetailsAsync(Guid id,
-        CancellationToken cancellationToken = default)
-    {
-        
-        return (await (await GetDbSetAsync())
-            .Include(medicalService => medicalService.Departments)
-            .Where(medicalService => medicalService.Id == id)
-            .Select(medicalService => new MedicalServiceWithDetails
-            {
-                MedicalService = medicalService,
-                Departments = medicalService.Departments.Any() ? medicalService.Departments.ToList() : new List<Department>()
-            })
-            .FirstOrDefaultAsync(cancellationToken))!;
-    }
-
     public async Task<long> GetCountAsync(
         string? name = null,
         double? costMin = null,

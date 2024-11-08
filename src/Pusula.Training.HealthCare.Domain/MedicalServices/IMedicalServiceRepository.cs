@@ -28,11 +28,6 @@ public interface IMedicalServiceRepository : IRepository<MedicalService, Guid>
         int skipCount = 0,
         CancellationToken cancellationToken = default
     );
-    
-    Task<MedicalServiceWithDetails> GetWithDetailsAsync(
-        Guid id,
-        CancellationToken cancellationToken = default
-    );
 
     Task<long> GetCountAsync(
         string? name = null,

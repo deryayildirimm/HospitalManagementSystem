@@ -32,14 +32,16 @@ namespace Pusula.Training.HealthCare
         {
             await SeedPatientRecords();
             await SeedRoleRecords();
-            await SeedDepartmentRecords();
             await SeedMedicalServiceRecords();
+            await SeedDepartmentRecords();
             await SeedMedicalServiceToDepartments();
-            await SeedMedicalServicePatientRecords();
         }
 
         private async Task SeedMedicalServiceRecords()
         {
+            if (await medicalServiceRepository.GetCountAsync() > 0)
+                return;
+            
             await medicalServiceRepository.InsertAsync(
                 new MedicalService(Guid.NewGuid(), "X-Ray", 300.00, DateTime.Now), true);
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "MRI Scan", 1200.00,
@@ -72,36 +74,19 @@ namespace Pusula.Training.HealthCare
 
         private async Task SeedDepartmentRecords()
         {
-            var departments = new List<Department>
-            {
-                new Department(Guid.NewGuid(), "Cardiology"),
-                new Department(Guid.NewGuid(), "Radiology"),
-                new Department(Guid.NewGuid(), "Emergency"),
-                new Department(Guid.NewGuid(), "Pediatrics"),
-                new Department(Guid.NewGuid(), "Oncology"),
-                new Department(Guid.NewGuid(), "Neurology"),
-                new Department(Guid.NewGuid(), "Orthopedics"),
-                new Department(Guid.NewGuid(), "Dermatology"),
-                new Department(Guid.NewGuid(), "Gastroenterology"),
-                new Department(Guid.NewGuid(), "Urology"),
-                new Department(Guid.NewGuid(), "Obstetrics and Gynecology"),
-                new Department(Guid.NewGuid(), "Pulmonology"),
-                new Department(Guid.NewGuid(), "Endocrinology"),
-                new Department(Guid.NewGuid(), "Nephrology"),
-                new Department(Guid.NewGuid(), "Psychiatry"),
-                new Department(Guid.NewGuid(), "Hematology"),
-                new Department(Guid.NewGuid(), "Ophthalmology"),
-                new Department(Guid.NewGuid(), "Otolaryngology"),
-                new Department(Guid.NewGuid(), "Anesthesiology"),
-                new Department(Guid.NewGuid(), "Rheumatology"),
-                new Department(Guid.NewGuid(), "Physical Therapy and Rehabilitation"),
-                new Department(Guid.NewGuid(), "Pathology"),
-                new Department(Guid.NewGuid(), "Allergy and Immunology"),
-                new Department(Guid.NewGuid(), "Plastic Surgery"),
-                new Department(Guid.NewGuid(), "General Surgery")
-            };
-
-            await departmentRepository.InsertManyAsync(departments, true);
+            if (await departmentRepository.GetCountAsync() > 0)
+                return;
+            
+            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Cardiology"), true);
+            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Radiology"), true);
+            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Emergency"), true);
+            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Pediatrics"), true);
+            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Orthopedics"), true);
+            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Dermatology"), true);
+            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Urology"), true);
+            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Oncology"), true);
+            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Neurology"), true);
+            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Dermatology"), true);
         }
 
         private async Task SeedMedicalServiceToDepartments()
@@ -112,10 +97,17 @@ namespace Pusula.Training.HealthCare
             foreach (var department in departments)
             {
                 var random = new Random();
+
                 var randomServices = medicalServices.OrderBy(ms => random.Next()).Take(2).ToList();
                 foreach (var service in randomServices)
                 {
-                    department.MedicalServices.Add(service);
+                    var departmentMedicalService = new DepartmentMedicalService
+                    {
+                        MedicalServiceId = service.Id,
+                        DepartmentId = department.Id
+                    };
+
+                    service.DepartmentMedicalServices.Add(departmentMedicalService);
                 }
             }
 
@@ -124,6 +116,10 @@ namespace Pusula.Training.HealthCare
 
         private async Task SeedPatientRecords()
         {
+
+            if (await patientRepository.GetCountAsync() > 0)
+                return;
+            
             var patient1 = new Patient(
                 Guid.NewGuid(),
                 "Ali",
@@ -234,28 +230,6 @@ namespace Pusula.Training.HealthCare
             await userManager.CreateAsync(new IdentityUser(guidGenerator.Create(), "doctor@1", "doc1@gmail.com"),
                 "doctor@A1");
         }
-
-        private async Task SeedMedicalServicePatientRecords()
-        {
-            var patients = await patientRepository.GetListAsync();
-            var medicalServices = await medicalServiceRepository.GetListAsync();
-            var random = new Random();
-
-            foreach (var patient in patients)
-            {
-                var randomServices = medicalServices.OrderBy(ms => random.Next()).Take(medicalServices.Count).ToList();
-
-                foreach (var medicalServicePatient in randomServices.Select(service => new MedicalServicePatient(
-                             service.Id,
-                             patient.Id,
-                             service.Cost,
-                             DateTime.Now
-                         )))
-                {
-                    patient.MedicalServices.Add(medicalServicePatient);
-                    await patientRepository.UpdateAsync(patient, true);
-                }
-            }
-        }
+        
     }
 }

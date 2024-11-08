@@ -1,7 +1,5 @@
 using JetBrains.Annotations;
 using System;
-using System.Collections.Generic;
-using Pusula.Training.HealthCare.MedicalServices;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -46,8 +44,6 @@ namespace Pusula.Training.HealthCare.Patients
         [CanBeNull] public virtual EnumDiscountGroup? DiscountGroup { get; set; }
 
         [NotNull] public virtual EnumGender Gender { get; set; }
-
-        public virtual ICollection<MedicalServicePatient> MedicalServices { get; set; } = new List<MedicalServicePatient>();
 
         // isAlive
 

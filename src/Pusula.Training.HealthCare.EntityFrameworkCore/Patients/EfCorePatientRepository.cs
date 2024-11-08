@@ -64,7 +64,9 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
     {
         var query = ApplyFilter((await GetQueryableAsync()), filterText, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, 
             birthDateMax, emailAddress, mobilePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender);
-        query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? PatientConsts.GetDefaultSorting(false) : sorting);
+      //  query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? PatientConsts.GetDefaultSorting(false) : sorting);
+      query = query.OrderBy(e => e.IsDeleted) // IsDeleted'e göre önce sıralama
+          .ThenBy(string.IsNullOrWhiteSpace(sorting) ? PatientConsts.GetDefaultSorting(false) : sorting); // Ardından mevcut sıralamayı uygula
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 

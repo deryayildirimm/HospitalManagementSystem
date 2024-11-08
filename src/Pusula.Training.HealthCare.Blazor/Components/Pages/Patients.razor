@@ -82,18 +82,6 @@
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
-                        <FieldLabel>@L["Nationality"]</FieldLabel>
-                        <Select TValue="EnumNationality?" SelectedValue="Filter.Nationality" SelectedValueChanged="@OnNationalityChangedAsync">
-                            <SelectItem></SelectItem>
-                            @foreach (EnumNationality type in Enum.GetValues(typeof(EnumNationality)))
-                            {
-                            <SelectItem Value="@type">@L[type.ToString()]</SelectItem>
-                            }
-                        </Select>
-                    </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
                         <FieldLabel>@L["PassportNumber"]</FieldLabel>
                         <TextEdit Text="@Filter.PassportNumber" TextChanged="@OnPassportNumberChangedAsync"/>
                     </Field>
@@ -132,50 +120,8 @@
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
-                        <FieldLabel>@L["Patient Type"]</FieldLabel>
-                        <Select TValue="EnumPatientTypes?" SelectedValue="Filter.PatientType" SelectedValueChanged="@OnPatientTypeChangedAsync">
-                            <SelectItem></SelectItem>
-                            @foreach (EnumPatientTypes type in Enum.GetValues(typeof(EnumPatientTypes)))
-                            {
-                            <SelectItem Value="@type">@L[type.ToString()]</SelectItem>
-                            }
-                        </Select>
-                    </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["Insurance Type"]</FieldLabel>
-                        <Select TValue="EnumInsuranceType?" SelectedValue="Filter.InsuranceType" SelectedValueChanged="@OnInsuranceTypeChangedAsync">
-                            <SelectItem></SelectItem>
-                            @foreach (EnumInsuranceType type in Enum.GetValues(typeof(EnumInsuranceType)))
-                            {
-                            <SelectItem Value="@type">@L[type.ToString()]</SelectItem>
-                            }
-                        </Select>
-                    </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["Discount Group"]</FieldLabel>
-                        <Select TValue="EnumDiscountGroup?" SelectedValue="Filter.DiscountGroup" SelectedValueChanged="@OnDiscountGroupChangedAsync">
-                            <SelectItem></SelectItem>
-                            @foreach (EnumDiscountGroup type in Enum.GetValues(typeof(EnumDiscountGroup)))
-                            {
-                            <SelectItem Value="@type">@L[type.ToString()]</SelectItem>
-                            }
-                        </Select>
-                    </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["Gender"]</FieldLabel>
-                        <Select TValue="EnumGender?" SelectedValue="Filter.Gender" SelectedValueChanged="@OnGenderChangedAsync">
-                            <SelectItem></SelectItem>
-                            @foreach (EnumGender type in Enum.GetValues(typeof(EnumGender)))
-                            {
-                            <SelectItem Value="@type">@L[type.ToString()]</SelectItem>
-                            }
-                        </Select>
+                        <!--    <FieldLabel>@L["Show Archived"]</FieldLabel>  -->
+                        <Check TValue="bool?" Checked="@Filter.IsDeleted" CheckedChanged="@OnDeletedData" > Show Achived </Check>
                     </Field>
                 </Column>
                 
@@ -240,7 +186,7 @@
                   Data="PatientList"
                   SelectionMode="DataGridSelectionMode.Multiple"
                   SelectedRows="SelectedPatients"
-                  RowSelectable="@((args) => CanDeletePatient)"
+                  RowSelectable="@((args) =>  !args.Item.IsDeleted)"
                   SelectedRowsChanged="SelectedPatientRowsChanged"
                   ReadData="OnDataGridReadAsync"
                   TotalItems="TotalCount"
@@ -269,28 +215,14 @@
                     <DataGridMultiSelectColumn TItem="PatientDto" DisplayOrder="-1" Width="30px"></DataGridMultiSelectColumn>
                 }
 
-                <DataGridEntityActionsColumn TItem="PatientDto" @ref="@EntityActionsColumn">
-                    <DisplayTemplate>
-                        <EntityActions TItem="PatientDto" EntityActionsColumn="@EntityActionsColumn">
-                            <EntityAction TItem="PatientDto"
-                                          Visible="@CanEditPatient"
-                                          Clicked="async () => await OpenEditPatientModalAsync(context)"
-                                          Text="@L["Edit"]">
-                            </EntityAction>
-                            <EntityAction TItem="PatientDto"
-                                          Visible="@CanDeletePatient"
-                                          Clicked="() => DeletePatientAsync(context)"
-                                          ConfirmationMessage="@(() => L["DeleteConfirmationMessage"])"
-                                          Text="@L["Delete"]">
-                            </EntityAction>
-                        </EntityActions>
-                    </DisplayTemplate>
-                </DataGridEntityActionsColumn>
+                <DataGridColumn TItem="PatientDto"
+                                Field="FirstName"
+                                Caption="@L["FirstName"]">
+                </DataGridColumn>
 
-                <DataGridColumn TItem="PatientDto" Caption="@L["Name"]">
-                    <DisplayTemplate>
-                        @($"{context.FirstName} {context.LastName}")
-                    </DisplayTemplate>
+                <DataGridColumn TItem="PatientDto"
+                                Field="LastName"
+                                Caption="@L["LastName"]">
                 </DataGridColumn>
 
                 <DataGridColumn TItem="PatientDto"
@@ -317,8 +249,59 @@
                 </DataGridColumn>
 
                 <DataGridColumn TItem="PatientDto"
+                                Field="RelativePhoneNumber"
+                                Caption="@L["RelativePhoneNumber"]">
+                </DataGridColumn>
+
+                <DataGridColumn TItem="PatientDto"
                                 Field="Gender"
                                 Caption="@L["Gender"]">
+                </DataGridColumn>
+                
+                <!--  Silme işlemlerinde kontrol amaclı eklenmıstır -->
+                <!--
+                                <DataGridColumn TItem="PatientDto"
+                                                Field="IsDeleted"
+                                                Caption="@L["IsDeleted"]">
+                                </DataGridColumn>
+                      -->
+                <!-- Edit Button Column -->
+                <DataGridColumn TItem="PatientDto">
+                    <DisplayTemplate >
+                        <Button Color="Color.Primary" Disabled="context.IsDeleted"
+                                Clicked="async () => await OpenEditPatientModalAsync(context)" >
+                            <Icon Name="@IconName.Edit" />
+                        </Button>
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+                <!-- Detail Page Column -->
+                <DataGridColumn TItem="PatientDto">
+                    <DisplayTemplate >
+                        <Button Color="Color.Primary"  >
+                            <Icon Name="@IconName.Crop" />
+                        </Button>
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+                <!-- Delete Button Column -->
+
+                <DataGridColumn TItem="PatientDto">
+                    <DisplayTemplate>
+                        <Button Color="Color.Danger"    Clicked="() => DeletePatientAsync(context)"
+                                Disabled="context.IsDeleted" >
+                            <Icon Name="@IconName.Times" />
+                        </Button>
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+                <!-- Revert Button Column -->
+                <DataGridColumn TItem="PatientDto">
+                    <DisplayTemplate>
+                        <Button Color="Color.Secondary"  Clicked="  () => RevertPatientAsync (context)"  Disabled="!context.IsDeleted">
+                            <Icon Name="@IconName.Undo"/>
+                        </Button>
+                    </DisplayTemplate>
                 </DataGridColumn>
 
             </DataGridColumns>
@@ -538,20 +521,6 @@
                             </TextEdit>
                         </Field>
                     </Validation>
-
-
-                    @*//<Validation MessageLocalizer="@LH.Localize">
-                        <Field>
-                            <FieldLabel>@L["HomePhoneNumber"]</FieldLabel>
-                            <TextEdit @bind-Text="@EditingPatient.HomePhoneNumber">
-                                <Feedback>
-                                    <ValidationError/>
-                                </Feedback>
-                            </TextEdit>
-                        </Field>
-                    </Validation>*@
-
-
                     
                     
                     

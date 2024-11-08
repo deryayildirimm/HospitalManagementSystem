@@ -338,3 +338,16 @@
         </Form>
     </ModalContent>
 </Modal>
+
+@* ************************* TOAST ************************* *@
+<Toaster>
+    <Toast Background="Background.Success" @bind-Visible="@ToastVisible">
+        <ToastHeader Background="Background.Success">
+            <Strong TextColor="TextColor.Light" TextSize="TextSize.Small" Margin="Margin.IsAuto.FromEnd">@EditStatus</Strong>
+            <CloseButton />
+        </ToastHeader>
+        <ToastBody TextColor="TextColor.Light" TextSize="TextSize.Small">
+            @EditMessage
+        </ToastBody>
+    </Toast>
+</Toaster>

@@ -68,6 +68,8 @@ public class PatientUpdateDto : IHasConcurrencyStamp
     
     [Range(PatientConsts.GenderMinValue, PatientConsts.GenderMaxValue)]
     public EnumGender Gender { get; set; }
+    
+    public bool IsDeleted { get; set; }
 
     public string ConcurrencyStamp { get; set; } = null!;
 }

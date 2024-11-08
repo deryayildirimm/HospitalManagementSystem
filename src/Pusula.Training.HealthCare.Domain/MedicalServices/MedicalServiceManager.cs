@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Departments;
 using Volo.Abp;
 using Volo.Abp.Data;
-using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Domain.Services;
 
 namespace Pusula.Training.HealthCare.MedicalServices;
@@ -79,18 +77,21 @@ public class MedicalServiceManager(
         var departments = await departmentRepository
             .GetListByNamesAsync(departmentNames.ToArray());
 
-        if (departments != null && departments.Count != 0)
+        if (departments.Count == 0)
         {
-            foreach (var department in departments)
-            {
-                service.DepartmentMedicalServices.Add(new DepartmentMedicalService
-                {
-                    DepartmentId = department.Id,
-                    MedicalServiceId = service.Id,
-                });
-            }
+            return await medicalServiceRepository.UpdateAsync(service);
         }
 
+        foreach (var department in departments)
+        {
+            service.DepartmentMedicalServices.Add(new DepartmentMedicalService
+            {
+                DepartmentId = department.Id,
+                MedicalServiceId = service.Id,
+            });
+        }
+        
         return await medicalServiceRepository.UpdateAsync(service);
+
     }
 }

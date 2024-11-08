@@ -38,7 +38,7 @@ namespace Pusula.Training.HealthCare;
     typeof(AbpBackgroundJobsRabbitMqModule),
     typeof(AbpEventBusRabbitMqModule),
     typeof(AbpBackgroundWorkersModule)
-)]
+    )]
 public class HealthCareApplicationModule : AbpModule
 {
     public override async Task OnApplicationInitializationAsync(ApplicationInitializationContext context)
