@@ -124,6 +124,7 @@ public partial class Appointments
     private bool isActive = true;
     private string appointmentId = "ER123456";
     private string paymentId = "PAY987654";
+    private bool IsProcessCanceled { get; set; }
 
     private bool IsFullFilledService =>
         !string.IsNullOrEmpty(selectedService.ServiceName) &&
@@ -157,6 +158,7 @@ public partial class Appointments
         AppointmentTimes = new List<AppointmentTime>();
         AppointmentSummary = new AppointmentSummaryItem();
         IsFinalResultSuccess = false;
+        IsProcessCanceled = false;
     }
 
     protected override async Task OnInitializedAsync()
@@ -186,23 +188,35 @@ public partial class Appointments
             .IsGrantedAsync(HealthCarePermissions.Appointments.Delete);
     }
 
-    private Task OnSelectedStepChanged(string name)
+    private async Task CancelProcess()
     {
-        selectedStep = name;
-        return Task.CompletedTask;
+        IsProcessCanceled = true;
+        await ResetAppointment();
+        await stepsRef.SelectStep("select_service");
+        IsProcessCanceled = false;
+        StateHasChanged();
     }
 
-    private Task CancelProcess()
+    private Task ResetAppointment()
     {
+        
         selectedService.ServiceName = null;
         selectedService.DoctorName = null;
         selectedService.DepartmentName = null;
         selectedService.Cost = 0.0;
-
+        
+        AppointmentSummary.AppointmentTime = null;
+        AppointmentSummary.AppointmentDate = null;
+        AppointmentSummary.ServiceType = null;
+        AppointmentSummary.Price = 0.0;
+        AppointmentSummary.DoctorName = null;
+        AppointmentSummary.Department = null;
+        AvailableSlotCount = 0;
+        
+        AppointmentTimes.Clear();
+        DaysList.ForEach(e => e.IsSelected = false);
         DoctorsList.ForEach(e => e.IsSelected = false);
         ServicesList.ForEach(e => e.IsSelected = false);
-        StateHasChanged();
-
         return Task.CompletedTask;
     }
 
@@ -301,6 +315,12 @@ public partial class Appointments
 
     private bool NavigationAllowed(StepNavigationContext context)
     {
+
+        if (IsProcessCanceled)
+        {
+            return true;
+        }
+        
         if (context.CurrentStepName == "select_service" && !IsFullFilledService)
         {
             return false;

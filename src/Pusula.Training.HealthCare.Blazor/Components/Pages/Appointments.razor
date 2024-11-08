@@ -56,20 +56,45 @@
                 }
                 <hr class="my-2"/>
             </div>
-            <div class="d-flex flex-column gap-2">
-                <Button @onclick="() => CancelProcess()" disabled="@(!IsFullFilledService)" class="border-thick-2 rounded-pill py-1" Color="Color.Danger" Outline>
-                    @L["Cancel"]
-                </Button>
-                @if (selectedStep != "select_service")
+                @if (selectedStep != "final_result")
                 {
-                    <Button @onclick="() => stepsRef.PreviousStep()" class="border-thick-2 rounded-pill py-1" Color="Color.Info" Outline>
-                        @L["Back"]
-                    </Button>
+                    <div class="d-flex flex-column gap-2">
+                        <!-- Cancel Button -->
+                        @if (selectedStep != "select_service")
+                        {
+                            <Button
+                                @onclick="CancelProcess"
+                                disabled="@(!IsFullFilledService)"
+                                class="border-thick-2 rounded-pill py-1"
+                                Color="Color.Danger"
+                                Outline>
+                                @L["Cancel"]
+                            </Button>
+                        }
+
+                        <!-- Back Button -->
+                        @if (selectedStep != "select_service")
+                        {
+                            <Button
+                                @onclick="() => stepsRef.PreviousStep()"
+                                class="border-thick-2 rounded-pill py-1"
+                                Color="Color.Info"
+                                Outline>
+                                @L["Back"]
+                            </Button>
+                        }
+
+                        <!-- Proceed Button -->
+                        <Button
+                            @onclick="() => stepsRef.NextStep()"
+                            disabled="@(!IsFullFilledService)"
+                            class="border-thick-2 rounded-pill py-1"
+                            Color="Color.Info"
+                            Outline>
+                            @L["Proceed"]
+                        </Button>
+                    </div>
                 }
-                <Button @onclick="() => stepsRef.NextStep()" disabled="@(!IsFullFilledService)" class="border-thick-2 rounded-pill py-1" Color="Color.Info" Outline>
-                    @L["Proceed"]
-                </Button>
-            </div>
         </div>
     </div>
 </div>
