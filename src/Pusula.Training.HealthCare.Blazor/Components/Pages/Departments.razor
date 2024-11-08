@@ -3,22 +3,11 @@
 @attribute [Authorize(HealthCarePermissions.Departments.Default)]
 @using Pusula.Training.HealthCare.Departments
 @using Pusula.Training.HealthCare.Localization
-@using Pusula.Training.HealthCare.Shared
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.Extensions.Localization
-@using Microsoft.AspNetCore.Components.Web
-@using Blazorise
-@using Blazorise.Components
-@using Blazorise.DataGrid
-@using Volo.Abp.BlazoriseUI
-@using Volo.Abp.BlazoriseUI.Components
-@using Volo.Abp.ObjectMapping
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 
 @using Pusula.Training.HealthCare.Permissions
 @using Volo.Abp.AspNetCore.Components.Web
-@using Microsoft.AspNetCore.Components
 @using Volo.Abp.Http.Client
 @inherits HealthCareComponentBase
 @inject IDepartmentsAppService DepartmentsAppService
@@ -132,9 +121,6 @@
                   SelectedRows="SelectedDepartments"
                   RowSelectable="@((args) => CanDeleteDepartment)"
                   SelectedRowsChanged="SelectedDepartmentRowsChanged"
-                  
-                  
-                  
                   ReadData="OnDataGridReadAsync"
                   TotalItems="TotalCount"
                   ShowPager="true"

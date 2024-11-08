@@ -60,14 +60,11 @@ public partial class Departments
             Sorting = CurrentSorting
         };
         DepartmentList = [];
-
-
     }
 
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
-
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -104,8 +101,7 @@ public partial class Departments
                         .IsGrantedAsync(HealthCarePermissions.Departments.Edit);
         CanDeleteDepartment = await AuthorizationService
                         .IsGrantedAsync(HealthCarePermissions.Departments.Delete);
-
-
+        
     }
 
     private async Task GetDepartmentsAsync()

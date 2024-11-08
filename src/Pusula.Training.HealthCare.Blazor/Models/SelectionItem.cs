@@ -8,6 +8,8 @@ public class SelectionItem
     public string DisplayName { get; set; } = null!;
     public bool IsSelected { get; set; }
     
+    public double Cost { get; set; }
+    
     public override bool Equals(object obj)
     {
         if (obj is SelectionItem item)

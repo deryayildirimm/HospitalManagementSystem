@@ -1,0 +1,373 @@
+@page "/patient/{patientNo:int}/appointment"
+
+@attribute [Authorize(HealthCarePermissions.Appointments.Default)]
+@using Pusula.Training.HealthCare.Appointments
+@using Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.Localization
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web
+@using Volo.Abp.Http.Client
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@inherits HealthCareComponentBase
+
+@inject IAppointmentAppService AppointmentAppService
+
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["Appointments"]">
+</PageHeader>
+
+<link href="../Components/Pages/Appointments.razor.css?version=0.43" rel="stylesheet"/>
+
+<div class="row py-3">
+<div class="col-sm-12 col-md-3">
+    <div class="card border-1 border-black p-4">
+        <h5 class="fw-bolder m-0">@L["ServiceSummary"]</h5>
+        <hr class="my-2"/>
+        <div class="card-body p-0">
+            <div>
+                <h6 class="text-start">@L["Department"]</h6>
+                @if (selectedService != null && selectedService.DepartmentName != null)
+                {
+                    <Badge TextSize="TextSize.ExtraSmall" Class="p-2" Style="background-color: var(--bs-gray-600)">
+                        @selectedService.DepartmentName
+                    </Badge>
+                }
+                <hr class="my-2"/>
+                <h6 class="text-start">@L["Service"]</h6>
+                @if (selectedService != null && selectedService.ServiceName != null)
+                {
+                    <Badge TextSize="TextSize.ExtraSmall" Class="p-2" Style="background-color: var(--bs-gray-600)">
+                        @selectedService.ServiceName
+                    </Badge>
+                }
+                <hr class="my-2"/>
+                <h6 class="text-start">@L["Doctor"]</h6>
+                @if (selectedService != null && selectedService.DoctorName != null)
+                {
+                    <Badge TextSize="TextSize.ExtraSmall" Class="p-2" Style="background-color: var(--bs-gray-600)">
+                        @selectedService.DoctorName
+                    </Badge>
+                }
+                <hr class="my-2"/>
+            </div>
+            <div class="d-flex flex-column gap-2">
+                <Button @onclick="() => CancelProcess()" disabled="@(!IsFullFilledService)" class="border-thick-2 rounded-pill py-1" Color="Color.Danger" Outline>
+                    @L["Cancel"]
+                </Button>
+                @if (selectedStep != "select_service")
+                {
+                    <Button @onclick="() => stepsRef.PreviousStep()" class="border-thick-2 rounded-pill py-1" Color="Color.Info" Outline>
+                        @L["Back"]
+                    </Button>
+                }
+                <Button @onclick="() => stepsRef.NextStep()" disabled="@(!IsFullFilledService)" class="border-thick-2 rounded-pill py-1" Color="Color.Info" Outline>
+                    @L["Proceed"]
+                </Button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-sm-12 col-md-9 p-sm-0">
+<div class="card border-1 border-black">
+<div class="card-body p-1">
+<Steps @ref="stepsRef" NavigationAllowed="NavigationAllowed" Class="d-flex align-content-center justify-content-center" Width="Width.Is100"
+       @bind-SelectedStep="selectedStep">
+<Items>
+    <Step Class="m-0" Name="select_service">
+        <Marker>
+            <Icon Name="IconName.Add" IconSize="IconSize.Small"/>
+        </Marker>
+        <Caption>
+            @L["SelectService"]
+        </Caption>
+    </Step>
+    <Step Class="m-0" Name="select_appointment">
+        <Marker>
+            <Icon Name="IconName.Calendar" IconSize="IconSize.Small"/>
+        </Marker>
+        <Caption>
+            @L["Schedule"]
+        </Caption>
+    </Step>
+    <Step Class="m-0" Name="confirmation">
+        <Marker>
+            <Icon Name="IconName.Check" IconSize="IconSize.Small"/>
+        </Marker>
+        <Caption>
+            @L["Confirmation"]
+        </Caption>
+    </Step>
+    <Step Class="m-0" Name="final_result">
+        <Marker>
+            <Icon Name="IconName.Flag" IconSize="IconSize.Small"/>
+        </Marker>
+        <Caption>
+            @L["FinalResult"]
+        </Caption>
+    </Step>
+</Items>
+<Content>
+<StepPanel Name="select_service" Padding="Padding.Is2">
+    <div class="row gx-4">
+        <div class="col-sm-12 col-md-8">
+            <h5 class="fw-bold">@L["Doctors"]</h5>
+            <div class="card">
+                <div class="card-body p-0">
+                    <Form id="DoctorSearchForm" class="mb-3" Width="Width.Is100">
+                        <Addons>
+                            <Addon AddonType="AddonType.Start">
+                                <AddonLabel
+                                    Border="Border.RoundedStart"
+                                    Padding="Padding.Is2"
+                                    Style="background-color: var(--bs-gray-300)">
+                                    <Icon IconSize="IconSize.Large"
+                                          Name="IconName.Search">
+                                    </Icon>
+                                </AddonLabel>
+                            </Addon>
+                            <Addon AddonType="AddonType.Body">
+                                <TextEdit
+                                    Class="px-1"
+                                    Style="background-color: var(--bs-gray-300)"
+                                    Border="Border.RoundedEnd"
+                                    Autofocus="true"
+                                    Placeholder="@L["Search"]">
+                                </TextEdit>
+                            </Addon>
+                        </Addons>
+                    </Form>
+                    <div class="doctor-list h-80v d-flex flex-column p-1 gap-2 overflow-auto" style="max-height: 80vh">
+                        @foreach (var doctor in DoctorsList)
+                        {
+                            <DoctorCard Doctor="@doctor"
+                                        OnDoctorSelect="@OnDoctorSelect"
+                                        GetDoctorCardClass="@GetDoctorCardClass"/>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-md-4">
+            <h5 class="fw-bold">@L["Services"]</h5>
+            <Form id="ServiceSearchForm" class="mb-2" Width="Width.Is100">
+                <Addons>
+                    <Addon AddonType="AddonType.Start">
+                        <AddonLabel
+                            Border="Border.RoundedStart"
+                            Padding="Padding.Is2"
+                            Style="background-color: var(--bs-gray-300)">
+                            <Icon IconSize="IconSize.Large" Name="IconName.Search"></Icon>
+                        </AddonLabel>
+                    </Addon>
+                    <Addon AddonType="AddonType.Body">
+                        <TextEdit
+                            Class="px-1"
+                            Style="background-color: var(--bs-gray-300)"
+                            Border="Border.RoundedEnd"
+                            Autofocus="true"
+                            Placeholder="@L["Search"]">
+                        </TextEdit>
+                    </Addon>
+                </Addons>
+            </Form>
+            <div class="d-flex flex-column p-1 overflow-y-scroll"
+                 style="max-height: 350px;">
+                @foreach (var item in ServicesList)
+                {
+                    <Check Class="fw-semibold" TValue="bool" @bind-Checked="@item.IsSelected"
+                           @onchange="() => OnServiceChange(item)">
+                        @item.DisplayName
+                    </Check>
+                    <hr class="m-1"/>
+                }
+            </div>
+        </div>
+    </div>
+</StepPanel>
+<StepPanel Name="select_appointment" Padding="Padding.Is2">
+    <div class="row">
+        <div class="col-12 d-flex flex-column">
+            <div class="days-container">
+                <button class="carousel-control left" @onclick="LoadMoreDaysLeft">❮</button>
+                <div class="days d-flex gap-1 overflow-hidden align-items-center justify-content-center" id="daysCarousel">
+                    @foreach (var item in DaysList)
+                    {
+                        <div class="day-card @(item.IsSelected ? "active" : "")" @onclick="() => SelectDay(item)">
+                            <div class="day-name">@item.Date.ToString("ddd")</div>
+                            <div class="day-number">@item.Date.Day</div>
+                            <div class="month">@item.Date.ToString("MMM")</div>
+                            <div class="is-day-available @(item.IsAvailable ? "success-color" : "fail-color")">
+                            </div>
+                        </div>
+                    }
+
+                </div>
+                <button class="carousel-control right" @onclick="LoadMoreDaysRight">❯</button>
+            </div>
+
+            <div class="appointment-section my-3">
+                <div>
+                    <Text TextSize="TextSize.Heading6" TextWeight="TextWeight.Bold">
+                        @selectedService.DoctorName
+                    </Text>
+                    <Text TextSize="TextSize.Heading6" TextWeight="TextWeight.Normal">
+                        (@AvailableSlotCount)
+                    </Text>
+                </div>
+
+                <div class="d-flex gap-2 justify-content-start flex-wrap my-2">
+                    @foreach (var appointment in AppointmentTimes)
+                    {
+                        <div class="time-slot-card shadow-sm text-center align-items-center justify-content-center @(appointment.IsAvailable ? "light-green" : "light-red opacity-75") 
+                                                             @(appointment.IsSelected ? "active" : "")"
+                             @onclick="() => { SelectAppointment(appointment); }">
+                            <div class="px-1 py-2 align-items-center justify-content-center h-100">
+                                <Text class="fs-5" TextWeight="TextWeight.SemiBold">@appointment.StartTime - @appointment.EndTime</Text>
+                                <Text class="fs-6" TextWeight="TextWeight.SemiBold">@(appointment.IsAvailable ? L["Available"] : L["NotAvailable"])</Text>
+                                @if (appointment.IsSelected)
+                                {
+                                    <div class="slot-selected-tag">
+                                        <Icon Name="IconName.Check" IconSize="IconSize.Default" TextColor="TextColor.Light"></Icon>
+                                    </div>
+                                }
+                            </div>
+
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</StepPanel>
+<StepPanel Name="confirmation" Padding="Padding.Is2">
+    <div class="container">
+        <div class="row h-100 align-items-stretch">
+            <div class="col-sm-12 col-md-6">
+                <Card Shadow="Shadow.Default" Height="Height.Is100">
+                    <CardBody Flex="Flex.Column" Display="Display.Flex" Gap="Gap.Is3">
+                        <div>
+                            <Label For="appointmentNote" Class="form-label">@L["AppointmentNote"]</Label>
+                            <TextEdit @bind-Value="appointmentNote" Placeholder="@L["TypeTheNote"]" Class="form-control"/>
+                        </div>
+
+                        <Dropdown TextAlignment="TextAlignment.Start" Style="background: white;">
+                            <DropdownToggle TextAlignment="TextAlignment.Start" Width="Width.Is100" Color="Color.Light" Style="border-color: purple">
+                                @L["AppointmentSource"]
+                            </DropdownToggle>
+                            <DropdownMenu Width="Width.Is100">
+                                <DropdownItem>
+                                    action
+                                </DropdownItem>
+                                <DropdownDivider/>
+                                <DropdownItem>
+                                    action2
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+
+                        <div>
+                            <Label For="appointmentId" Class="form-label">@L["EAppointmentID"]</Label>
+                            <TextEdit Disabled="true" @bind-Value="appointmentId" Placeholder="@L["EAppointmentID"]" Class="form-control"/>
+                        </div>
+
+                        <div>
+                            <Label For="paymentId" Class="form-label">@L["EAppointmentPaymentID"]</Label>
+                            <TextEdit Disabled="true" @bind-Value="paymentId" Placeholder="@L["EAppointmentPaymentID"]" Class="form-control"/>
+                        </div>
+                    </CardBody>
+                </Card>
+            </div>
+            <div class="col-sm-12 col-md-6">
+                <Card Shadow="Shadow.Default" Height="Height.Is100">
+                    <CardBody Display="Display.Flex" Flex="Flex.Column" Gap="Gap.Is2">
+                        <CardTitle TextSize="TextSize.Heading5">@L["ServiceSummary"]</CardTitle>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <Icon Name="IconName.User" IconSize="IconSize.Large" Class="purple"></Icon>
+                            <Text TextSize="TextSize.Small">@AppointmentSummary.PatientName</Text>
+                        </div>
+
+                        <div class="d-flex align-items-center  gap-2">
+                            <Icon Name="IconName.Building" IconSize="IconSize.Large" Class="purple"></Icon>
+                            <Text TextSize="TextSize.Small">@AppointmentSummary.HospitalName</Text>
+                        </div>
+
+                        <div class="d-flex align-items-center  gap-2">
+                            <Icon Name="IconName.Calendar" IconSize="IconSize.Large" Class="purple"></Icon>
+                            <Text TextSize="TextSize.Small">@AppointmentSummary.AppointmentDate</Text>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <Icon Name="IconName.Clock" IconSize="IconSize.Large" Class="purple"></Icon>
+                            <Text TextSize="TextSize.Small">@AppointmentSummary.AppointmentTime</Text>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <Icon Name="IconName.Hospital" IconSize="IconSize.Large" Class="purple"></Icon>
+                            <Text TextSize="TextSize.Small">@AppointmentSummary.DoctorName</Text>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <Icon Name="IconName.Check" IconSize="IconSize.Large" Class="purple"></Icon>
+                            <Text TextSize="TextSize.Small">@AppointmentSummary.ServiceType</Text>
+                        </div>
+
+                        <div class="d-flex gap-2 align-items-center justify-content-start">
+                            <Icon Name="IconName.MoneyBillAlt" IconSize="IconSize.Large" TextColor="TextColor.Secondary" Class="purple"></Icon>
+                            <Text TextSize="TextSize.Small" TextWeight="TextWeight.Bold">@AppointmentSummary.Price</Text>
+                            <Text TextSize="TextSize.Small" TextWeight="TextWeight.Bold">@L["TL"]</Text>
+                        </div>
+
+                        <div class="mt-4">
+                            <p class="text-center">
+                                <strong>@L["ConfirmAppointment"]</strong>
+                            </p>
+                            <Button Clicked="() => CreateAppointment()" Color="Color.Success" Class="w-100">@L["Confirm"]</Button>
+                        </div>
+                    </CardBody>
+                </Card>
+            </div>
+        </div>
+    </div>
+</StepPanel>
+<StepPanel Name="final_result" Padding="Padding.Is3">
+    <div class="row h-100">
+        <Card Shadow="Shadow.Default" Height="Height.Is100">
+            <CardBody>
+                @if (IsFinalResultSuccess)
+                {
+                    <div class="text-center text-success d-flex flex-column gap-2">
+                        <Icon Name="IconName.CheckCircle" IconSize="IconSize.x6" TextColor="TextColor.Success"></Icon>
+                        <Text TextSize="TextSize.Heading4" TextWeight="TextWeight.Bold">@L["OperationSuccessful"]</Text>
+                        <Text TextSize="TextSize.Heading5" TextWeight="TextWeight.Bold">@L["SuccessMessage"]</Text>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-danger d-flex flex-column gap-2">
+                        <Icon Name="IconName.TimesCircle" IconSize="IconSize.x6" TextColor="TextColor.Warning"></Icon>
+                        <Text TextSize="TextSize.Heading4" TextWeight="TextWeight.Bold">@L["OperationFailed"]</Text>
+                        <Text TextSize="TextSize.Heading5" TextWeight="TextWeight.Bold">@L["FailureMessage"]</Text>
+                    </div>
+                }
+            </CardBody>
+        </Card>
+    </div>
+</StepPanel>
+</Content>
+
+</Steps>
+</div>
+</div>
+</div>
+</div>
+
+<script src="/js/WindowHelper.js"></script>
