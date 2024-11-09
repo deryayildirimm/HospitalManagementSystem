@@ -24,21 +24,6 @@ namespace Pusula.Training.HealthCare.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("DepartmentMedicalService", b =>
-                {
-                    b.Property<Guid>("DepartmentsId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("MedicalServicesId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("DepartmentsId", "MedicalServicesId");
-
-                    b.HasIndex("MedicalServicesId");
-
-                    b.ToTable("AppDepartmentMedicalService", (string)null);
-                });
-
             modelBuilder.Entity("Pusula.Training.HealthCare.Departments.Department", b =>
                 {
                     b.Property<Guid>("Id")
@@ -95,6 +80,24 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AppDepartments", (string)null);
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.Departments.DepartmentMedicalService", b =>
+                {
+                    b.Property<Guid>("MedicalServiceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("MedicalServiceId", "DepartmentId");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("MedicalServiceId", "DepartmentId")
+                        .IsUnique();
+
+                    b.ToTable("AppDepartmentMedicalServices", (string)null);
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.MedicalServices.MedicalService", b =>
@@ -165,29 +168,6 @@ namespace Pusula.Training.HealthCare.Migrations
                         .IsUnique();
 
                     b.ToTable("AppMedicalServices", (string)null);
-                });
-
-            modelBuilder.Entity("Pusula.Training.HealthCare.MedicalServices.MedicalServicePatient", b =>
-                {
-                    b.Property<Guid>("MedicalServiceId")
-                        .HasColumnType("uuid");
-
-                    b.Property<Guid>("PatientId")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("ActionTime")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<double>("Amount")
-                        .HasColumnType("double precision");
-
-                    b.HasKey("MedicalServiceId", "PatientId");
-
-                    b.HasIndex("PatientId");
-
-                    b.HasIndex("MedicalServiceId", "PatientId");
-
-                    b.ToTable("AppMedicalServicePatient", (string)null);
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Patients.Patient", b =>
@@ -2207,34 +2187,23 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.ToTable("AbpTenantConnectionStrings", (string)null);
                 });
 
-            modelBuilder.Entity("DepartmentMedicalService", b =>
+            modelBuilder.Entity("Pusula.Training.HealthCare.Departments.DepartmentMedicalService", b =>
                 {
-                    b.HasOne("Pusula.Training.HealthCare.Departments.Department", null)
-                        .WithMany()
-                        .HasForeignKey("DepartmentsId")
+                    b.HasOne("Pusula.Training.HealthCare.Departments.Department", "Department")
+                        .WithMany("DepartmentMedicalServices")
+                        .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Pusula.Training.HealthCare.MedicalServices.MedicalService", null)
-                        .WithMany()
-                        .HasForeignKey("MedicalServicesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Pusula.Training.HealthCare.MedicalServices.MedicalServicePatient", b =>
-                {
-                    b.HasOne("Pusula.Training.HealthCare.MedicalServices.MedicalService", null)
-                        .WithMany()
+                    b.HasOne("Pusula.Training.HealthCare.MedicalServices.MedicalService", "MedicalService")
+                        .WithMany("DepartmentMedicalServices")
                         .HasForeignKey("MedicalServiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Pusula.Training.HealthCare.Patients.Patient", null)
-                        .WithMany("MedicalServices")
-                        .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Department");
+
+                    b.Navigation("MedicalService");
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Protocols.Protocol", b =>
@@ -2394,9 +2363,14 @@ namespace Pusula.Training.HealthCare.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Pusula.Training.HealthCare.Patients.Patient", b =>
+            modelBuilder.Entity("Pusula.Training.HealthCare.Departments.Department", b =>
                 {
-                    b.Navigation("MedicalServices");
+                    b.Navigation("DepartmentMedicalServices");
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.MedicalServices.MedicalService", b =>
+                {
+                    b.Navigation("DepartmentMedicalServices");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>

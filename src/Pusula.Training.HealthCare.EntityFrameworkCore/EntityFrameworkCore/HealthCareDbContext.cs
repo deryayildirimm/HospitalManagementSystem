@@ -162,26 +162,6 @@ public class HealthCareDbContext :
                 
                 b.HasIndex(e => new { e.Name }).IsUnique();
             });
-
-            builder.Entity<MedicalServicePatient>(b =>
-            {
-                b.ToTable(HealthCareConsts.DbTablePrefix + "MedicalServicePatients", HealthCareConsts.DbSchema);
-                b.ConfigureByConvention();
-
-                b.HasKey(x => new { x.MedicalServiceId, x.PatientId });
-
-                b.HasOne<Patient>()
-                    .WithMany(x => x.MedicalServices)
-                    .HasForeignKey(x => x.PatientId)
-                    .IsRequired();
-
-                b.HasOne<MedicalService>()
-                    .WithMany()
-                    .HasForeignKey(x => x.MedicalServiceId)
-                    .IsRequired();
-
-                b.HasIndex(x => new { x.MedicalServiceId, x.PatientId });
-            });
             
             builder.Entity<DepartmentMedicalService>(b =>
             {
