@@ -16,10 +16,11 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
 {
     public virtual async Task DeleteAllAsync(
         string? filterText = null,
+        int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
         string? identityNumber = null,
-        EnumNationality? nationality = null,
+        string? nationality = null,
         string? passportNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
@@ -34,7 +35,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
     {
         var query = await GetQueryableAsync();
 
-        query = ApplyFilter(query, filterText, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, birthDateMax, 
+        query = ApplyFilter(query, filterText, patientNumber, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, birthDateMax, 
             emailAddress, mobilePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender);
 
         var ids = query.Select(x => x.Id);
@@ -43,10 +44,11 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
 
     public virtual async Task<List<Patient>> GetListAsync(
         string? filterText = null,
+        int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
         string? identityNumber = null,
-        EnumNationality? nationality = null,
+        string? nationality = null,
         string? passportNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
@@ -62,7 +64,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), filterText, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, 
+        var query = ApplyFilter((await GetQueryableAsync()), filterText, patientNumber, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, 
             birthDateMax, emailAddress, mobilePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender);
       //  query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? PatientConsts.GetDefaultSorting(false) : sorting);
       query = query.OrderBy(e => e.IsDeleted) // IsDeleted'e göre önce sıralama
@@ -72,10 +74,11 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
 
     public virtual async Task<long> GetCountAsync(
         string? filterText = null,
+        int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
         string? identityNumber = null,
-        EnumNationality? nationality = null,
+        string? nationality = null,
         string? passportNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
@@ -88,7 +91,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         EnumGender? gender = null,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetDbSetAsync()), filterText, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, birthDateMax, 
+        var query = ApplyFilter((await GetDbSetAsync()), filterText, patientNumber, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, birthDateMax, 
             emailAddress, mobilePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender);
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
@@ -96,10 +99,11 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
     protected virtual IQueryable<Patient> ApplyFilter(
         IQueryable<Patient> query,
         string? filterText = null,
+        int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
         string? identityNumber = null,
-        EnumNationality? nationality = null,
+        string? nationality = null,
         string? passportNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
@@ -119,7 +123,6 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
             .WhereIf(!string.IsNullOrWhiteSpace(firstName), e => e.FirstName.ToLower().Contains(firstName!.ToLower()))
             .WhereIf(!string.IsNullOrWhiteSpace(lastName), e => e.LastName.ToLower().Contains(lastName!.ToLower()))
             .WhereIf(!string.IsNullOrWhiteSpace(identityNumber), e => e.IdentityNumber!.Contains(identityNumber!))
-            .WhereIf(nationality.HasValue, e => e.Nationality == nationality)
             .WhereIf(!string.IsNullOrWhiteSpace(passportNumber), e => e.PassportNumber!.ToLower().Contains(passportNumber!.ToLower()))
             .WhereIf(birthDateMin.HasValue, e => e.BirthDate >= birthDateMin!.Value)
             .WhereIf(birthDateMax.HasValue, e => e.BirthDate <= birthDateMax!.Value)

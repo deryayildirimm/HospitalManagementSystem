@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
 using MiniExcelLibs;
+using Pusula.Training.HealthCare.Exceptions;
 using Pusula.Training.HealthCare.Permissions;
 using System;
 using System.Collections.Generic;
@@ -19,8 +20,8 @@ namespace Pusula.Training.HealthCare.Patients
 {
     [RemoteService(IsEnabled = false)]
     [Authorize(HealthCarePermissions.Patients.Default)]
-    public class PatientsAppService(IPatientRepository patientRepository, PatientManager patientManager, 
-        IDistributedCache<PatientDownloadTokenCacheItem, string> downloadTokenCache, 
+    public class PatientsAppService(IPatientRepository patientRepository, PatientManager patientManager,
+        IDistributedCache<PatientDownloadTokenCacheItem, string> downloadTokenCache,
         IDistributedEventBus distributedEventBus,
         IDataFilter _dataFilter) : HealthCareAppService, IPatientsAppService
     {
@@ -29,22 +30,22 @@ namespace Pusula.Training.HealthCare.Patients
             // ISoftDelete filtresini IsDeleted durumuna göre devre dışı bırak veya etkinleştir
             using (_dataFilter.Disable<ISoftDelete>())
             {
-                var totalCount = await patientRepository.GetCountAsync(input.FilterText, input.FirstName,
+                var totalCount = await patientRepository.GetCountAsync(input.FilterText, input.PatientNumber, input.FirstName,
                     input.LastName, input.IdentityNumber,
                     input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress,
                     input.MobilePhoneNumber,
                     input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
-                var items = await patientRepository.GetListAsync(input.FilterText, input.FirstName, input.LastName,
+                var items = await patientRepository.GetListAsync(input.FilterText, input.PatientNumber, input.FirstName, input.LastName,
                     input.IdentityNumber,
                     input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress,
                     input.MobilePhoneNumber,
                     input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
-                
-                if (input.IsDeleted== true)
+
+                if (input.IsDeleted == true)
                 {
                     items = items.Where(x => x.IsDeleted == input.IsDeleted).ToList();
                 }
-                
+
                 return new PagedResultDto<PatientDto>
                 {
                     TotalCount = totalCount,
@@ -77,27 +78,70 @@ namespace Pusula.Training.HealthCare.Patients
         public virtual async Task<PatientDto> CreateAsync(PatientCreateDto input)
         {
 
-            var patient = await patientManager.CreateAsync(
-            input.FirstName, input.LastName, input.Nationality, input.BirthDate, 
-            input.MobilePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.Gender, input.MothersName, 
-            input.FathersName, input.IdentityNumber, input.PassportNumber, input.EmailAddress, input.Relative, input.RelativePhoneNumber, input.Address, input.DiscountGroup
-            );
+            try
+            {
+                var existingPatient = (await patientRepository.GetListAsync()).FirstOrDefault(p => (p.IdentityNumber == input.IdentityNumber && p.IdentityNumber != null) ||
+                                                                                                  (p.PassportNumber == input.PassportNumber && p.PassportNumber != null));
 
-            return ObjectMapper.Map<Patient, PatientDto>(patient);
+                if (existingPatient != null)
+                {
+                    throw new PatientAlreadyExistsException();
+                }
+
+                int patientNumber = (await patientRepository.GetListAsync()).Count == 0
+                    ? 1
+                    : ((await patientRepository.GetListAsync()).LastOrDefault()!.PatientNumber) + 1;
+
+                var patient = await patientManager.CreateAsync(
+                    patientNumber,
+                    input.FirstName, input.LastName, input.Nationality, input.BirthDate,
+                    input.MobilePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.Gender,
+                    input.MothersName, input.FathersName, input.IdentityNumber, input.PassportNumber,
+                    input.EmailAddress, input.Relative, input.RelativePhoneNumber, input.Address, input.DiscountGroup
+                );
+                return ObjectMapper.Map<Patient, PatientDto>(patient);
+            }
+            catch (PatientAlreadyExistsException ex)
+            {
+                throw new UserFriendlyException(ex.Message);
+            }
+            catch (Exception ex)
+            {
+
+                throw new ApplicationException("An unexpected error occurred.", ex);
+            }
         }
 
         [Authorize(HealthCarePermissions.Patients.Edit)]
         public virtual async Task<PatientDto> UpdateAsync(Guid id, PatientUpdateDto input)
         {
+            try
+            {
+                var existingPatient = (await patientRepository.GetListAsync()).FirstOrDefault(p => (p.IdentityNumber == input.IdentityNumber && p.IdentityNumber != null) ||
+                                                                                                  (p.PassportNumber == input.PassportNumber && p.PassportNumber != null));
 
-            var patient = await patientManager.UpdateAsync(
+                if (existingPatient != null)
+                {
+                    throw new PatientAlreadyExistsException();
+                }
+
+                var patient = await patientManager.UpdateAsync(
             id,
-            input.FirstName, input.LastName, input.Nationality, input.BirthDate, 
-            input.MobilePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.Gender, input.IsDeleted, input.MothersName, 
+            input.FirstName, input.LastName, input.Nationality, input.BirthDate,
+            input.MobilePhoneNumber, input.PatientType, input.InsuranceType, input.InsuranceNo, input.Gender, input.IsDeleted, input.MothersName,
             input.FathersName, input.IdentityNumber, input.PassportNumber, input.EmailAddress, input.Relative, input.RelativePhoneNumber, input.Address, input.DiscountGroup
             );
 
-            return ObjectMapper.Map<Patient, PatientDto>(patient);
+                return ObjectMapper.Map<Patient, PatientDto>(patient);
+            }
+            catch (PatientAlreadyExistsException ex)
+            {
+                throw new UserFriendlyException(ex.Message);
+            }
+            catch (PatientUpdateException ex)
+            {
+                throw new UserFriendlyException(ex.Message);
+            }
         }
 
         [AllowAnonymous]
@@ -109,8 +153,8 @@ namespace Pusula.Training.HealthCare.Patients
                 throw new AbpAuthorizationException("Invalid download token: " + input.DownloadToken);
             }
 
-            var items = await patientRepository.GetListAsync(input.FilterText, input.FirstName, input.LastName,  input.IdentityNumber, 
-                input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber, 
+            var items = await patientRepository.GetListAsync(input.FilterText, input.PatientNumber, input.FirstName, input.LastName, input.IdentityNumber,
+                input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber,
                 input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
 
             var memoryStream = new MemoryStream();
@@ -129,8 +173,8 @@ namespace Pusula.Training.HealthCare.Patients
         [Authorize(HealthCarePermissions.Patients.Delete)]
         public virtual async Task DeleteAllAsync(GetPatientsInput input)
         {
-            await patientRepository.DeleteAllAsync(input.FilterText, input.FirstName, input.LastName,  input.IdentityNumber, 
-                input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber, 
+            await patientRepository.DeleteAllAsync(input.FilterText, input.PatientNumber, input.FirstName, input.LastName, input.IdentityNumber,
+                input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress, input.MobilePhoneNumber,
                 input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
         }
 
