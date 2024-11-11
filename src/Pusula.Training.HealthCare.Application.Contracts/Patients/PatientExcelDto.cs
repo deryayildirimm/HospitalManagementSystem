@@ -4,12 +4,13 @@ namespace Pusula.Training.HealthCare.Patients;
 
 public class PatientExcelDto
 {
+    public int PatientNumber { get; set; }
     public string FirstName { get; set; } = null!;
     public string LastName { get; set; } = null!;
     public string? MothersName { get; set; }
     public string? FathersName { get; set; }
     public string IdentityNumber { get; set; } = null!;
-    public EnumNationality Nationality { get; set; }
+    public string Nationality { get; set; } = null!;
     public string PassportNumber { get; set; } = null!;
     public DateTime BirthDate { get; set; }
     public string? EmailAddress { get; set; }

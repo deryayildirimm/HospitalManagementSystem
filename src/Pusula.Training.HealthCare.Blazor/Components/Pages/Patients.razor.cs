@@ -2,10 +2,15 @@ using Blazorise;
 using Blazorise.DataGrid;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Pusula.Training.HealthCare.Countries;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
+using Pusula.Training.HealthCare.Validators;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,31 +23,46 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
 public partial class Patients
 {
+    [CreatePhoneNumberValidator]
+    public string MobilePhoneNumber { get; set; } = string.Empty;
+
+    [CreatePhoneNumberValidator]
+    public string RelativePhoneNumber { get; set; } = string.Empty;
+
     protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     protected bool ShowAdvancedFilters { get; set; }
     private IReadOnlyList<PatientDto> PatientList { get; set; }
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
-    private string CurrentSorting { get; set; } = string.Empty;
     private int TotalCount { get; set; }
+    private string CurrentSorting { get; set; } = string.Empty;
+    public string MainCountryCode { get; set; }
+    public string? RelativeCountryCode { get; set; }
+    private bool AllPatientsSelected { get; set; }
     private bool CanCreatePatient { get; set; }
     private bool CanEditPatient { get; set; }
     private bool CanDeletePatient { get; set; }
     private PatientCreateDto NewPatient { get; set; }
-    private Validations NewPatientValidations { get; set; } = new();
     private PatientUpdateDto EditingPatient { get; set; }
+    private Validations NewPatientValidations { get; set; } = new();
     private Validations EditingPatientValidations { get; set; } = new();
     private Guid EditingPatientId { get; set; }
+    private Modal NationalityModal { get; set; } = new();
     private Modal CreatePatientModal { get; set; } = new();
     private Modal EditPatientModal { get; set; } = new();
     private GetPatientsInput Filter { get; set; }
     private DataGridEntityActionsColumn<PatientDto> EntityActionsColumn { get; set; } = new();
-    protected string SelectedCreateTab = "patient-create-tab";
-    protected string SelectedEditTab = "patient-edit-tab";
-
     private List<PatientDto> SelectedPatients { get; set; } = [];
-    private bool AllPatientsSelected { get; set; }
+    private IEnumerable<CountryPhoneCodeDto> Nationalities = [];
+    private IEnumerable<KeyValuePair<int, string>> Genders = [];
+    private IEnumerable<KeyValuePair<int, string>> Relatives = [];
+    private IEnumerable<KeyValuePair<int, string>> PationTypes = [];
+    private IEnumerable<KeyValuePair<int, string>> InsuranceTypes = [];
+    private IEnumerable<KeyValuePair<int, string>> DiscountGroups = [];
+
+
+
 
     public Patients()
     {
@@ -55,14 +75,11 @@ public partial class Patients
             Sorting = CurrentSorting
         };
         PatientList = [];
-
-
     }
 
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
-
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -85,9 +102,7 @@ public partial class Patients
     protected virtual ValueTask SetToolbarItemsAsync()
     {
         Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
-
-        Toolbar.AddButton(L["NewPatient"], OpenCreatePatientModalAsync, IconName.Add, requiredPolicyName: HealthCarePermissions.Patients.Create);
-
+        Toolbar.AddButton(L["NewPatient"], OpenNationalityModalAsync, IconName.Add, requiredPolicyName: HealthCarePermissions.Patients.Create);
         return ValueTask.CompletedTask;
     }
 
@@ -99,8 +114,6 @@ public partial class Patients
                         .IsGrantedAsync(HealthCarePermissions.Patients.Edit);
         CanDeletePatient = await AuthorizationService
                         .IsGrantedAsync(HealthCarePermissions.Patients.Delete);
-
-
     }
 
     private async Task GetPatientsAsync()
@@ -147,52 +160,73 @@ public partial class Patients
         await InvokeAsync(StateHasChanged);
     }
 
-    private async Task OpenCreatePatientModalAsync()
+    private async Task OpenNationalityModalAsync()
     {
+        await GetNationalitiesListAsync();
         NewPatient = new PatientCreateDto
         {
             BirthDate = DateTime.Now,
-
-
+            Gender = EnumGender.NONE,
+            Nationality = Nationalities.First().Country!,
+            Relative = EnumRelative.NONE,
         };
-
-        SelectedCreateTab = "patient-create-tab";
-
-
-        await NewPatientValidations.ClearAll();
-        await CreatePatientModal.Show();
+        await NationalityModal.Show();
     }
 
-    private async Task CloseCreatePatientModalAsync()
+    private async Task OpenCreatePatientModalAsync()
     {
-        NewPatient = new PatientCreateDto
-        {
-            BirthDate = DateTime.Now,
-
-
-        };
-        await CreatePatientModal.Hide();
+        await GetGendersListAsync();
+        await GetRelativesListAsync();
+        await GetPationTypesListAsync();
+        await GetInsuranceTypesListAsync();
+        await GetDiscountGroupsListAsync();
+        await NewPatientValidations.ClearAll();
+        await ClearPhone();
+        await CreatePatientModal.Show();
     }
 
     private async Task OpenEditPatientModalAsync(PatientDto input)
     {
-        SelectedEditTab = "patient-edit-tab";
-        
+        await GetNationalitiesListAsync();
+        await GetGendersListAsync();
+        await GetRelativesListAsync();
+        await GetPationTypesListAsync();
+        await GetInsuranceTypesListAsync();
+        await GetDiscountGroupsListAsync();
+        await EditingPatientValidations.ClearAll();
         var patient = await PatientsAppService.GetAsync(input.Id);
 
         EditingPatientId = patient.Id;
         EditingPatient = ObjectMapper.Map<PatientDto, PatientUpdateDto>(patient);
 
-        await EditingPatientValidations.ClearAll();
+        EditingPatient.identityField = EditingPatient.Nationality == CountryConsts.CurrentCountry ? true : false; 
+        EditingPatient.passportField = EditingPatient.Nationality == CountryConsts.CurrentCountry ? false : true; 
+
         await EditPatientModal.Show();
+    }
+
+    private async Task CloseNationalityModalAsync() 
+    {
+        await NationalityModal.Hide();
+    }
+
+    private async Task CloseCreatePatientModalAsync()
+    {
+        await ClearPhone();
+        await CreatePatientModal.Hide();
+    }
+
+    private async Task CloseEditPatientModalAsync()
+    {
+        await EditPatientModal.Hide();
     }
 
     private async Task DeletePatientAsync(PatientDto input)
     {
-        
+
         var confirmed = await UiMessageService.Confirm($"Are you sure you want to delete {input.FirstName} {input.LastName}?");
-        if(!confirmed) return;
-        
+        if (!confirmed) return;
+
         await PatientsAppService.DeleteAsync(input.Id);
         await GetPatientsAsync();
     }
@@ -200,17 +234,17 @@ public partial class Patients
     // revert delete function
     private async Task RevertPatientAsync(PatientDto input)
     {
-        
+
         var confirmed = await UiMessageService.Confirm($"Are you sure you want to undelete {input.FirstName} {input.LastName}?");
         if (!confirmed) return;
-        
+
         var revertPatient = ObjectMapper.Map<PatientDto, PatientUpdateDto>(input);
         revertPatient.IsDeleted = !input.IsDeleted;
         await PatientsAppService.UpdateAsync(input.Id, revertPatient);
         await GetPatientsAsync();
     }
 
-    
+
     private async Task CreatePatientAsync()
     {
         try
@@ -219,7 +253,8 @@ public partial class Patients
             {
                 return;
             }
-
+            NewPatient.MobilePhoneNumber = $"+{MainCountryCode}{MobilePhoneNumber}";
+            NewPatient.RelativePhoneNumber = NewPatient.RelativePhoneNumber != null ? $"+{RelativeCountryCode}{RelativePhoneNumber}" : "";
             await PatientsAppService.CreateAsync(NewPatient);
             await GetPatientsAsync();
             await CloseCreatePatientModalAsync();
@@ -228,11 +263,6 @@ public partial class Patients
         {
             await HandleErrorAsync(ex);
         }
-    }
-
-    private async Task CloseEditPatientModalAsync()
-    {
-        await EditPatientModal.Hide();
     }
 
     private async Task UpdatePatientAsync()
@@ -253,63 +283,78 @@ public partial class Patients
             await HandleErrorAsync(ex);
         }
     }
-    
+
     protected virtual async Task OnDeletedData(bool? isDeleted)
     {
         Filter.IsDeleted = isDeleted;
         await SearchAsync();
     }
-    
+
     protected virtual async Task OnFirstNameChangedAsync(string? firstName)
     {
         Filter.FirstName = firstName;
         await SearchAsync();
     }
+
     protected virtual async Task OnLastNameChangedAsync(string? lastName)
     {
         Filter.LastName = lastName;
         await SearchAsync();
     }
+
     protected virtual async Task OnIdentityNumberChangedAsync(string? identityNumber)
     {
         Filter.IdentityNumber = identityNumber;
         await SearchAsync();
     }
-    protected virtual async Task OnNationalityChangedAsync(EnumNationality? nationality)
+
+    protected virtual async Task OnNationalityChangedAsync(string? nationality)
     {
         Filter.Nationality = nationality;
         await SearchAsync();
     }
+
     protected virtual async Task OnPassportNumberChangedAsync(string? passportNumber)
     {
         Filter.PassportNumber = passportNumber;
         await SearchAsync();
     }
+
     protected virtual async Task OnBirthDateMinChangedAsync(DateTime? birthDateMin)
     {
         Filter.BirthDateMin = birthDateMin.HasValue ? birthDateMin.Value.Date : birthDateMin;
         await SearchAsync();
     }
+
     protected virtual async Task OnBirthDateMaxChangedAsync(DateTime? birthDateMax)
     {
         Filter.BirthDateMax = birthDateMax.HasValue ? birthDateMax.Value.Date.AddDays(1).AddSeconds(-1) : birthDateMax;
         await SearchAsync();
     }
+
     protected virtual async Task OnEmailAddressChangedAsync(string? emailAddress)
     {
         Filter.EmailAddress = emailAddress;
         await SearchAsync();
     }
+
     protected virtual async Task OnMobilePhoneNumberChangedAsync(string? mobilePhoneNumber)
     {
         Filter.MobilePhoneNumber = mobilePhoneNumber;
         await SearchAsync();
     }
+
     protected virtual async Task OnGenderChangedAsync(int? gender)
     {
         //Filter.Gender = gender;
         await SearchAsync();
     }
+
+    private void OnRelativePhoneNumberChanged(ChangeEventArgs e)
+    {
+        NewPatient.RelativePhoneNumber = e.Value?.ToString();
+    }
+
     private Task SelectAllItems()
     {
         AllPatientsSelected = true;
@@ -322,6 +367,15 @@ public partial class Patients
         AllPatientsSelected = false;
         SelectedPatients.Clear();
 
+        return Task.CompletedTask;
+    }
+
+    private Task ClearPhone()
+    {
+
+        MobilePhoneNumber = string.Empty;
+        RelativePhoneNumber = string.Empty;
+        RelativeCountryCode = "";
         return Task.CompletedTask;
     }
 
@@ -358,4 +412,72 @@ public partial class Patients
 
         await GetPatientsAsync();
     }
+
+    private async Task CloseAndRouteNationalityModalAsync()
+    {   
+        if (NewPatient.Nationality != null)
+        {
+            MainCountryCode = Nationalities
+                .FirstOrDefault(x => string.Equals(x.Country, NewPatient.Nationality))?.Code ?? string.Empty;
+
+            NewPatient.identityField = NewPatient.Nationality == CountryConsts.CurrentCountry ? true : false;
+            NewPatient.passportField = NewPatient.Nationality == CountryConsts.CurrentCountry ? false : true;
+        }
+
+        await NationalityModal.Hide();
+        await OpenCreatePatientModalAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task GetNationalitiesListAsync()
+    {
+        Nationalities = await CountryAppService.GetCountryPhoneCodesAsync();
+    }
+
+    private Task GetGendersListAsync()
+    {
+        Genders = Enum.GetValues(typeof(EnumGender))
+                      .Cast<EnumGender>()
+                      .Select(e => new KeyValuePair<int, string>((int)e, e.ToString()))
+                      .ToList();
+        return Task.CompletedTask;
+    }
+
+    private Task GetRelativesListAsync()
+    {
+        Relatives = Enum.GetValues(typeof(EnumRelative))
+                     .Cast<EnumRelative>()
+                     .Select(e => new KeyValuePair<int, string>((int)e, e.ToString()))
+                     .ToList();
+
+        return Task.CompletedTask;
+    }
+
+    private Task GetPationTypesListAsync()
+    {
+        PationTypes = Enum.GetValues(typeof(EnumPatientTypes))
+                             .Cast<EnumPatientTypes>()
+                             .Select(e => new KeyValuePair<int, string>((int)e, e.ToString()))
+                             .ToList();
+        return Task.CompletedTask;
+    }
+
+    private Task GetInsuranceTypesListAsync()
+    {
+        InsuranceTypes = Enum.GetValues(typeof(EnumInsuranceType))
+                     .Cast<EnumInsuranceType>()
+                     .Select(e => new KeyValuePair<int, string>((int)e, e.ToString()))
+                     .ToList();
+        return Task.CompletedTask;
+    }
+
+    private Task GetDiscountGroupsListAsync()
+    {
+        DiscountGroups = Enum.GetValues(typeof(EnumDiscountGroup))
+                     .Cast<EnumDiscountGroup>()
+                     .Select(e => new KeyValuePair<int, string>((int)e, e.ToString()))
+                     .ToList();
+        return Task.CompletedTask;
+    }
+
 }

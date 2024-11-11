@@ -50,9 +50,15 @@ public class HealthCareApplicationModule : AbpModule
     {
         var configuration = context.Services.GetConfiguration();
 
-        Configure<AbpDistributedCacheOptions>(options => { options.KeyPrefix = "PTH:"; });
+        Configure<AbpDistributedCacheOptions>(options =>
+        {
+            options.KeyPrefix = "PTH:";
+        });
 
-        Configure<AbpAutoMapperOptions>(options => { options.AddMaps<HealthCareApplicationModule>(); });
+        Configure<AbpAutoMapperOptions>(options =>
+        {
+            options.AddMaps<HealthCareApplicationModule>();
+        });
 
 #if DEBUG
         context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
@@ -67,11 +73,10 @@ public class HealthCareApplicationModule : AbpModule
         var redis = ConnectionMultiplexer.Connect(configuration["Redis:Configuration"]!);
 
         context.Services
-            .AddDataProtection()
-            .SetApplicationName("PTH")
+        .AddDataProtection()
+        .SetApplicationName("PTH")
             .PersistKeysToStackExchangeRedis(redis, "PTH-Protection-Keys");
 
-        context.Services.AddSingleton<IDistributedLockProvider>(_ =>
-            new RedisDistributedSynchronizationProvider(redis.GetDatabase()));
+        context.Services.AddSingleton<IDistributedLockProvider>(_ => new RedisDistributedSynchronizationProvider(redis.GetDatabase()));
     }
 }

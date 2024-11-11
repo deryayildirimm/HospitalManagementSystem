@@ -122,9 +122,10 @@ namespace Pusula.Training.HealthCare
             
             var patient1 = new Patient(
                 Guid.NewGuid(),
+                1,
                 "Ali",
                 "Yılmaz",
-                EnumNationality.TURKISH,
+                "TURKISH",
                 new DateTime(1990, 1, 1),
                 "12345678901",
                 EnumPatientTypes.VIP,
@@ -144,9 +145,10 @@ namespace Pusula.Training.HealthCare
 
             var patient2 = new Patient(
                 Guid.NewGuid(),
+                2,
                 "Mehmet",
                 "Demir",
-                EnumNationality.TURKISH,
+                "ENGLISH",
                 new DateTime(1985, 5, 10),
                 "98765432109",
                 EnumPatientTypes.NORMAL,
@@ -166,9 +168,10 @@ namespace Pusula.Training.HealthCare
 
             var patient3 = new Patient(
                 Guid.NewGuid(),
+                4,
                 "Ayşe",
                 "Kaya",
-                EnumNationality.TURKISH,
+                "German",
                 new DateTime(1992, 3, 15),
                 "12312312345",
                 EnumPatientTypes.VIP,

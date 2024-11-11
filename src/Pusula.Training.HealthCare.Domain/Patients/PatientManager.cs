@@ -9,16 +9,12 @@ namespace Pusula.Training.HealthCare.Patients;
 
 public class PatientManager(IPatientRepository patientRepository ,    IDataFilter _dataFilter) : DomainService
 {
-    public virtual async Task<Patient> CreateAsync(string firstName, string lastName, EnumNationality nationality, DateTime birthDate, string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
+    public virtual async Task<Patient> CreateAsync(int patientNumber, string firstName, string lastName, string nationality, DateTime birthDate, string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
         string? mothersName = null, string? fathersName = null, string? identityNumber = null, string? passportNumber = null, string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
     {
         Check.NotNullOrWhiteSpace(firstName, nameof(firstName), PatientConsts.NameMaxLength, PatientConsts.NameMinLength);
         Check.NotNullOrWhiteSpace(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, PatientConsts.LastNameMinLength);
-
-        // Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberLength,
-        //     PatientConsts.IdentityNumberLength);
-        Check.Range((int)nationality, nameof(nationality), PatientConsts.NationalityMinLength, PatientConsts.NationalityMaxLength);
-        // Check.NotNullOrWhiteSpace(passportNumber, nameof(passportNumber), PatientConsts.PassportNumberMaxLength, PatientConsts.PassportNumberMinLength);
+        Check.NotNullOrWhiteSpace(nationality, nameof(nationality));
         Check.NotNullOrWhiteSpace(mobilePhoneNumber, nameof(mobilePhoneNumber), PatientConsts.MobilePhoneNumberMaxLength, PatientConsts.MobilePhoneNumberMinLength);
         Check.Range((int)patientType, nameof(patientType), PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue);
         Check.Range((int)insuranceType, nameof(insuranceType), PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue);
@@ -26,7 +22,7 @@ public class PatientManager(IPatientRepository patientRepository ,    IDataFilte
 
 
         var patient = new Patient(
-            GuidGenerator.Create(),
+            GuidGenerator.Create(), patientNumber,
             firstName, lastName, nationality, birthDate, mobilePhoneNumber, patientType, insuranceType, insuranceNo, gender, mothersName, fathersName, identityNumber, passportNumber, emailAddress, relative, relativePhoneNumber, address, discountGroup
         );
 
@@ -35,7 +31,7 @@ public class PatientManager(IPatientRepository patientRepository ,    IDataFilte
 
     public virtual async Task<Patient> UpdateAsync(
         Guid id,
-        string firstName, string lastName, EnumNationality nationality, DateTime birthDate, 
+        string firstName, string lastName, string nationality, DateTime birthDate, 
         string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
         bool isDeleted,
         string? mothersName = null, string? fathersName = null, string? identityNumber = null, string? passportNumber = null, 
@@ -45,11 +41,7 @@ public class PatientManager(IPatientRepository patientRepository ,    IDataFilte
     {
         Check.NotNullOrWhiteSpace(firstName, nameof(firstName), PatientConsts.NameMaxLength, PatientConsts.NameMinLength);
         Check.NotNullOrWhiteSpace(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, PatientConsts.LastNameMinLength);
-
-        // Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberLength,
-        //     PatientConsts.IdentityNumberLength);
-        Check.Range((int)nationality, nameof(nationality), PatientConsts.NationalityMinLength, PatientConsts.NationalityMaxLength);
-        // Check.NotNullOrWhiteSpace(passportNumber, nameof(passportNumber), PatientConsts.PassportNumberMaxLength, PatientConsts.PassportNumberMinLength);
+        Check.NotNullOrWhiteSpace(nationality, nameof(nationality));
         Check.NotNullOrWhiteSpace(mobilePhoneNumber, nameof(mobilePhoneNumber), PatientConsts.MobilePhoneNumberMaxLength, PatientConsts.MobilePhoneNumberMinLength);
         Check.Range((int)patientType, nameof(patientType), PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue);
         Check.Range((int)insuranceType, nameof(insuranceType), PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue);

@@ -10,10 +10,11 @@ public interface IPatientRepository : IRepository<Patient, Guid>
 {
     Task DeleteAllAsync(
         string? filterText = null,
+        int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
         string? identityNumber = null,
-        EnumNationality? nationality = null,
+        string? nationality = null,
         string? passportNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
@@ -28,10 +29,11 @@ public interface IPatientRepository : IRepository<Patient, Guid>
 
     Task<List<Patient>> GetListAsync(
         string? filterText = null,
+        int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
         string? identityNumber = null,
-        EnumNationality? nationality = null,
+        string? nationality = null,
         string? passportNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
@@ -49,10 +51,11 @@ public interface IPatientRepository : IRepository<Patient, Guid>
 
     Task<long> GetCountAsync(
         string? filterText = null,
+        int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
         string? identityNumber = null,
-        EnumNationality? nationality = null,
+        string? nationality = null,
         string? passportNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,

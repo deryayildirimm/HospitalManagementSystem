@@ -7,7 +7,6 @@ public class MedicalServiceExcelDownloadDto
     public string DownloadToken { get; set; } = null!;
 
     public Guid? PatientId { get; set; }
-    public EnumMedicalService? MedicalService { get; set; }
     public DateTime? ServiceDateMin { get; set; }
     public DateTime? ServiceDateMax { get; set; }
     
