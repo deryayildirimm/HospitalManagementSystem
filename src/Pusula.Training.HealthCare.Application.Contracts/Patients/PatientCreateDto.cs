@@ -1,3 +1,6 @@
+using JetBrains.Annotations;
+using Pusula.Training.HealthCare.Countries;
+using Pusula.Training.HealthCare.Validators;
 using System;
 using System.ComponentModel.DataAnnotations;
 
@@ -5,6 +8,9 @@ namespace Pusula.Training.HealthCare.Patients;
 
 public class PatientCreateDto
 {
+    public bool identityField { get; set; } = false;
+    public bool passportField { get; set; } = false;
+
     [Required]
     [StringLength(PatientConsts.NameMaxLength)]
     public string FirstName { get; set; } = null!;
@@ -18,53 +24,51 @@ public class PatientCreateDto
 
     [StringLength(PatientConsts.NameMaxLength)]
     public string? FathersName { get; set; }
-    
-    [RegularExpression(@"^[1-9]{1}[0-9]{9}[02468]{1}$")]
-    [StringLength(PatientConsts.IdentityNumberLength)]
-    public string? IdentityNumber { get; set; } = null!;
-    
+
+    [IdentityNumberValidator]
+    public string IdentityNumber { get; set; } = null!;
+
     [Required]
-    public EnumNationality Nationality { get; set; }
-    
-    [StringLength(PatientConsts.PassportNumberMaxLength)]
+    public string Nationality { get; set; } = null!;
+
+    [PassportNumberValidator]
     public string? PassportNumber { get; set; } = null!;
-    
+
     [Required]
     public DateTime BirthDate { get; set; }
-    
+
     [EmailAddress]
     [StringLength(PatientConsts.EmailAddressMaxLength)]
     public string EmailAddress { get; set; } = null!;
 
     [Required]
-    [RegularExpression(@"^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$")]
-    [StringLength(PatientConsts.MobilePhoneNumberMaxLength)]
     public string MobilePhoneNumber { get; set; } = null!;
-    
+
     [Range(PatientConsts.RelativeMinValue, PatientConsts.RelativeMaxValue)]
     public EnumRelative Relative { get; set; }
 
-    [RegularExpression(@"^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$")]
     public string? RelativePhoneNumber { get; set; }
-    
+
     [Required]
     [Range(PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue)]
     public EnumPatientTypes PatientType { get; set; }
-    
+
     [StringLength(PatientConsts.AddressMaxLength)]
-    public string Address { get; set; }
+    public string? Address { get; set; }
 
     [Required]
     [Range(PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue)]
     public EnumInsuranceType InsuranceType { get; set; }
-    
+
     [Required]
-    [StringLength(PatientConsts.InsuranceNumberMaxLength)]
+    [InsuranceNumberValidator]
     public string InsuranceNo { get; set; } = null!;
-    
+
     [Range(PatientConsts.DiscountGroupMinValue, PatientConsts.DiscountGroupMaxValue)]
     public EnumDiscountGroup DiscountGroup { get; set; }
-    
+
+    [Required]
     [Range(PatientConsts.GenderMinValue, PatientConsts.GenderMaxValue)]
-    public EnumGender Gender { get; set; } = 0;
+    public EnumGender Gender { get; set; }
+
 }

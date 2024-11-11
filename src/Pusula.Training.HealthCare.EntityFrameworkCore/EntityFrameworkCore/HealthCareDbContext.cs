@@ -90,6 +90,7 @@ public class HealthCareDbContext :
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "Patients", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
+                b.Property(x => x.PatientNumber).HasColumnName(nameof(Patient.PatientNumber)).IsRequired();
                 b.Property(x => x.FirstName).HasColumnName(nameof(Patient.FirstName)).IsRequired()
                     .HasMaxLength(PatientConsts.NameMaxLength);
                 b.Property(x => x.LastName).HasColumnName(nameof(Patient.LastName)).IsRequired()

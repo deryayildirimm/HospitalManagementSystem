@@ -7,7 +7,7 @@ namespace Pusula.Training.HealthCare.Patients
 {
     public class Patient : FullAuditedAggregateRoot<Guid>
     {
-        public virtual string? PatientNumber { get; set; } // is this id of patient or should we generate new number for it?
+        [NotNull] public virtual int PatientNumber { get; set; }
 
         [NotNull] public virtual string FirstName { get; set; }
 
@@ -19,7 +19,7 @@ namespace Pusula.Training.HealthCare.Patients
 
         [CanBeNull] public virtual string? IdentityNumber { get; set; }
 
-        [NotNull] public virtual EnumNationality Nationality { get; set; }
+        [NotNull] public virtual string Nationality { get; set; }
 
         [CanBeNull] public virtual string? PassportNumber { get; set; }
 
@@ -49,12 +49,10 @@ namespace Pusula.Training.HealthCare.Patients
 
         protected Patient()
         {
-            PatientNumber = string.Empty;
+            PatientNumber = 0;
             FirstName = string.Empty;
             LastName = string.Empty;
-            IdentityNumber = string.Empty;
-            Nationality = EnumNationality.TURKISH;
-            PassportNumber = string.Empty;
+            Nationality = string.Empty;
             BirthDate = DateTime.Now;
             MobilePhoneNumber = string.Empty;
             PatientType = EnumPatientTypes.NORMAL;
@@ -63,23 +61,20 @@ namespace Pusula.Training.HealthCare.Patients
             Gender = EnumGender.FEMALE;
         }
 
-        public Patient(Guid id, string firstName, string lastName, EnumNationality nationality, DateTime birthDate, 
+        public Patient(Guid id, int patientNumber, string firstName, string lastName, string nationality, DateTime birthDate, 
             string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
             string? mothersName = null, string? fathersName = null, string? identityNumber = null, string? passportNumber = null, string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
         {
             Check.NotNullOrWhiteSpace(firstName, nameof(firstName), PatientConsts.NameMaxLength, PatientConsts.NameMinLength);
             Check.NotNullOrWhiteSpace(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, PatientConsts.LastNameMinLength);
-
-            // Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber), PatientConsts.IdentityNumberLength,
-            //    PatientConsts.IdentityNumberLength);
-            Check.Range((int)nationality, nameof(nationality), PatientConsts.NationalityMinLength, PatientConsts.NationalityMaxLength);
-            // Check.NotNullOrWhiteSpace(passportNumber, nameof(passportNumber), PatientConsts.PassportNumberMaxLength, PatientConsts.PassportNumberMinLength);
+            Check.NotNullOrWhiteSpace(nationality, nameof(nationality));
             Check.NotNullOrWhiteSpace(mobilePhoneNumber, nameof(mobilePhoneNumber), PatientConsts.MobilePhoneNumberMaxLength, PatientConsts.MobilePhoneNumberMinLength);
             Check.Range((int)patientType, nameof(patientType), PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue);
             Check.Range((int)insuranceType, nameof(insuranceType), PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue);
             Check.NotNullOrWhiteSpace(insuranceNo, nameof(insuranceNo), PatientConsts.InsuranceNumberMaxLength, PatientConsts.InsuranceNumberMinLength);
-            
+
             Id = id;
+            PatientNumber = patientNumber;
             FirstName = firstName;
             LastName = lastName;
             MothersName = mothersName;

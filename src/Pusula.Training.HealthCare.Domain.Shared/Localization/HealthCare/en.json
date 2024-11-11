@@ -73,6 +73,21 @@
     "NewDepartment": "New Department",
     "Menu:Departments": "Departments",
     "Department": "Department",
-    "Healthcare": "Healthcare"
+    "Healthcare": "Healthcare",
+    "CreatePatient": "Create Patient",
+    "PassportNumber": "Passport Number",
+    "CountryCode": "Country Code",
+    "PhoneNo": "Phone No",
+    "RelativePhoneNo": "Relative Phone No",
+    "PatienttoRelative": "Patient to Relative",
+    "MothersName": "Mothers Name",
+    "FathersName": "Fathers Name",
+    "PatientType": "Patient Type",
+    "InsuranceType": "Insurance Type",
+    "InsuranceNo": "Insurance No",
+    "DiscountGroup": "Discount Group",
+    "ChooseNationality": "Choose Nationality",
+    "MainPhoneNumber": "Phone No",
+    "UpdatePatient": "Update Patient"
   }
 }
