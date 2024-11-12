@@ -5,6 +5,8 @@ using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Shared;
 using System;
 using Pusula.Training.HealthCare.MedicalServices;
+using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.Titles;
 
 namespace Pusula.Training.HealthCare;
 
@@ -36,5 +38,15 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<MedicalService, MedicalServiceDto>();
         CreateMap<MedicalService, MedicalServiceExcelDto>();
         CreateMap<MedicalServiceDto, MedicalServiceUpdateDto>();
+        CreateMap<Department, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
+        
+        CreateMap<Title, TitleDto>();
+        CreateMap<TitleDto, TitleUpdateDto>();
+        CreateMap<Title, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.TitleName));
+
+        CreateMap<Doctor, DoctorDto>();
+        CreateMap<Doctor, DoctorExcelDto>();
+        CreateMap<DoctorDto, DoctorUpdateDto>();
+        CreateMap<DoctorWithNavigationProperties, DoctorWithNavigationPropertiesDto>();
     }
 }
