@@ -496,6 +496,27 @@ namespace Pusula.Training.HealthCare.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AppTitles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TitleName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    ExtraProperties = table.Column<string>(type: "text", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppTitles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OpenIddictApplications",
                 columns: table => new
                 {
@@ -850,6 +871,48 @@ namespace Pusula.Training.HealthCare.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AppDoctors",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    IdentityNumber = table.Column<string>(type: "character varying(11)", maxLength: 11, nullable: false),
+                    BirthDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Gender = table.Column<int>(type: "integer", nullable: false),
+                    Email = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    PhoneNumber = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: true),
+                    YearOfExperience = table.Column<int>(type: "integer", nullable: false),
+                    City = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: false),
+                    District = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    DepartmentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TitleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExtraProperties = table.Column<string>(type: "text", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppDoctors", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppDoctors_AppDepartments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "AppDepartments",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AppDoctors_AppTitles_TitleId",
+                        column: x => x.TitleId,
+                        principalTable: "AppTitles",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OpenIddictAuthorizations",
                 columns: table => new
                 {
@@ -1171,6 +1234,16 @@ namespace Pusula.Training.HealthCare.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppDoctors_DepartmentId",
+                table: "AppDoctors",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppDoctors_TitleId",
+                table: "AppDoctors",
+                column: "TitleId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AppMedicalServices_Name",
                 table: "AppMedicalServices",
                 column: "Name",
@@ -1296,6 +1369,9 @@ namespace Pusula.Training.HealthCare.Migrations
                 name: "AppDepartmentMedicalServices");
 
             migrationBuilder.DropTable(
+                name: "AppDoctors");
+
+            migrationBuilder.DropTable(
                 name: "AppProtocols");
 
             migrationBuilder.DropTable(
@@ -1321,6 +1397,9 @@ namespace Pusula.Training.HealthCare.Migrations
 
             migrationBuilder.DropTable(
                 name: "AppMedicalServices");
+
+            migrationBuilder.DropTable(
+                name: "AppTitles");
 
             migrationBuilder.DropTable(
                 name: "AppDepartments");

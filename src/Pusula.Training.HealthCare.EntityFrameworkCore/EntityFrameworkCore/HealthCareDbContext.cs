@@ -218,8 +218,6 @@ public class HealthCareDbContext :
                 b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
-        }
-
                 b.HasIndex(x => new { x.MedicalServiceId, x.DepartmentId }).IsUnique();
             });
         }
