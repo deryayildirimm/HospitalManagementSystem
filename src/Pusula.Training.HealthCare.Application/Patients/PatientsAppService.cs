@@ -117,13 +117,6 @@ namespace Pusula.Training.HealthCare.Patients
         {
             try
             {
-                var existingPatient = (await patientRepository.GetListAsync()).FirstOrDefault(p => (p.IdentityNumber == input.IdentityNumber && p.IdentityNumber != null) ||
-                                                                                                  (p.PassportNumber == input.PassportNumber && p.PassportNumber != null));
-
-                if (existingPatient != null)
-                {
-                    throw new PatientAlreadyExistsException();
-                }
 
                 var patient = await patientManager.UpdateAsync(
             id,

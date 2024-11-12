@@ -1,4 +1,4 @@
-﻿namespace Pusula.Training.HealthCare.Patients;
+namespace Pusula.Training.HealthCare.Patients;
 
 public enum EnumRelative
 {

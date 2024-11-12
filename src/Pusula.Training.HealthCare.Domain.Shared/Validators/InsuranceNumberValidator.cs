@@ -1,45 +1,44 @@
-﻿using Pusula.Training.HealthCare.Patients;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
+using Pusula.Training.HealthCare.Patients;
 
-namespace Pusula.Training.HealthCare.Validators
+namespace Pusula.Training.HealthCare.Validators;
+
+public class InsuranceNumberValidator : ValidationAttribute
 {
-    public class InsuranceNumberValidator : ValidationAttribute
+    private readonly int _minLength;
+    private readonly int _maxLength;
+
+    public InsuranceNumberValidator(int minLength = PatientConsts.InsuranceNumberMinLength, int maxLength = PatientConsts.InsuranceNumberMaxLength)
     {
-        private readonly int _minLength;
-        private readonly int _maxLength;
+        _minLength = minLength;
+        _maxLength = maxLength;
+    }
 
-        public InsuranceNumberValidator(int minLength = PatientConsts.InsuranceNumberMinLength, int maxLength = PatientConsts.InsuranceNumberMaxLength)
+    protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
+    {
+        if (value == null)
         {
-            _minLength = minLength;
-            _maxLength = maxLength;
+            return new ValidationResult("The Insurance Number field is required.");
         }
 
-        protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
+        var insuranceNo = value.ToString();
+
+        if (insuranceNo!.Length < _minLength)
         {
-            if (value == null)
-            {
-                return new ValidationResult("The Insurance Number field is required.");
-            }
-
-            var insuranceNo = value.ToString();
-
-            if (insuranceNo!.Length < _minLength)
-            {
-                return new ValidationResult("Insurance number is too short.");
-            }
-
-            if (insuranceNo.Length > _maxLength)
-            {
-                return new ValidationResult("Insurance number is too long.");
-            }
-
-            if (!Regex.IsMatch(insuranceNo, "^[A-Za-z0-9]*$"))
-            {
-                return new ValidationResult("Please enter a valid format.");
-            }
-
-            return ValidationResult.Success;
+            return new ValidationResult("Insurance number is too short.");
         }
+
+        if (insuranceNo.Length > _maxLength)
+        {
+            return new ValidationResult("Insurance number is too long.");
+        }
+
+        if (!Regex.IsMatch(insuranceNo, "^[A-Za-z0-9]*$"))
+        {
+            return new ValidationResult("Please enter a valid format.");
+        }
+
+        return ValidationResult.Success;
     }
 }

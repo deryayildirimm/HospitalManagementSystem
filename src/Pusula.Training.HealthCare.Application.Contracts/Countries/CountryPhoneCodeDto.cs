@@ -1,4 +1,4 @@
-﻿namespace Pusula.Training.HealthCare.Countries
+namespace Pusula.Training.HealthCare.Countries
 {
     public class CountryPhoneCodeDto
     {
