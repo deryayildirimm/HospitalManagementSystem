@@ -1,7 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Protocols;
+using Pusula.Training.HealthCare.Titles;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.Data;
@@ -31,6 +33,8 @@ public class HealthCareDbContext :
     public DbSet<Department> Departments { get; set; } = null!;
     public DbSet<Protocol> Protocols { get; set; } = null!;
     public DbSet<Patient> Patients { get; set; } = null!;
+    public DbSet<Title> Titles { get; set; } = null!;
+    public DbSet<Doctor> Doctors { get; set; } = null!;
 
 
     #region Entities from the modules
@@ -138,6 +142,41 @@ public class HealthCareDbContext :
                 b.Property(x => x.StartTime).HasColumnName(nameof(Protocol.StartTime));
                 b.Property(x => x.EndTime).HasColumnName(nameof(Protocol.EndTime));
                 b.HasOne<Patient>().WithMany().IsRequired().HasForeignKey(x => x.PatientId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            builder.Entity<Title>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Titles", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.TitleName).HasColumnName(nameof(Title.TitleName)).IsRequired()
+                    .HasMaxLength(TitleConsts.TitleNameMaxLength);
+            });
+
+            builder.Entity<Doctor>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Doctors", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.FirstName).HasColumnName(nameof(Doctor.FirstName)).IsRequired()
+                    .HasMaxLength(DoctorConsts.FirstNameMaxLength);
+                b.Property(x => x.LastName).HasColumnName(nameof(Doctor.LastName)).IsRequired()
+                    .HasMaxLength(DoctorConsts.LastNameMaxLength);
+                b.Property(x => x.IdentityNumber).HasColumnName(nameof(Doctor.IdentityNumber)).IsRequired()
+                    .HasMaxLength(DoctorConsts.IdentityNumberLength);
+                b.Property(x => x.BirthDate).HasColumnName(nameof(Doctor.BirthDate)).IsRequired();
+                b.Property(x => x.Gender).HasColumnName(nameof(Doctor.Gender)).IsRequired();
+                b.Property(x => x.Email).HasColumnName(nameof(Doctor.Email))
+                    .HasMaxLength(DoctorConsts.EmailMaxLength);
+                b.Property(x => x.PhoneNumber).HasColumnName(nameof(Doctor.PhoneNumber))
+                    .HasMaxLength(DoctorConsts.PhoneNumberMaxLength);
+                b.Property(x => x.YearOfExperience).HasColumnName(nameof(Doctor.YearOfExperience));
+                b.Property(x => x.City).HasColumnName(nameof(Doctor.City)).IsRequired()
+                    .HasMaxLength(DoctorConsts.CityMaxLength);
+                b.Property(x => x.District).HasColumnName(nameof(Doctor.District)).IsRequired()
+                    .HasMaxLength(DoctorConsts.DistrictMaxLength);
+                b.HasOne<Title>().WithMany().IsRequired().HasForeignKey(x => x.TitleId)
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);

@@ -73,6 +73,8 @@
     "NewDepartment": "New Department",
     "Menu:Departments": "Departments",
     "Department": "Department",
-    "Healthcare": "Healthcare"
+    "Healthcare": "Healthcare",
+    "Permission:Titles": "Titles",
+    "Permission:Doctors": "Doctors"
   }
 }
