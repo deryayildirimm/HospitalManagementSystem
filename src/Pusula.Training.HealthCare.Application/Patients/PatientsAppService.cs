@@ -28,26 +28,19 @@ namespace Pusula.Training.HealthCare.Patients
         public virtual async Task<PagedResultDto<PatientDto>> GetListAsync(GetPatientsInput input)
         {
             // ISoftDelete filtresini IsDeleted durumuna göre devre dışı bırak veya etkinleştir
-            
-            //TODO filtereleme degismeli
             using (_dataFilter.Disable<ISoftDelete>())
             {
                 var totalCount = await patientRepository.GetCountAsync(input.FilterText, input.PatientNumber, input.FirstName,
                     input.LastName, input.IdentityNumber,
                     input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress,
                     input.MobilePhoneNumber,
-                    input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
+                    input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender, input.IsDeleted);
                 var items = await patientRepository.GetListAsync(input.FilterText, input.PatientNumber, input.FirstName, input.LastName,
                     input.IdentityNumber,
                     input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress,
                     input.MobilePhoneNumber,
-                    input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender, input.Sorting, input.MaxResultCount, input.SkipCount);
-
-                if (input.IsDeleted == true)
-                {
-                    items = items.Where(x => x.IsDeleted == input.IsDeleted).ToList();
-                }
-
+                    input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender, input.Sorting, input.IsDeleted, input.MaxResultCount, input.SkipCount);
+                
                 return new PagedResultDto<PatientDto>
                 {
                     TotalCount = totalCount,
@@ -60,12 +53,10 @@ namespace Pusula.Training.HealthCare.Patients
         {
             using (_dataFilter.Disable<ISoftDelete>())
             {
-
                 await distributedEventBus.PublishAsync(new PatientViewedEto { Id = id, ViewedAt = Clock.Now },
                     onUnitOfWorkComplete: false);
 
                 var patient = await patientRepository.GetAsync(id);
-
                 return ObjectMapper.Map<Patient, PatientDto>(patient);
             }
         }
@@ -119,7 +110,6 @@ namespace Pusula.Training.HealthCare.Patients
         {
             try
             {
-
                 var patient = await patientManager.UpdateAsync(
             id,
             input.FirstName, input.LastName, input.Nationality, input.BirthDate,
