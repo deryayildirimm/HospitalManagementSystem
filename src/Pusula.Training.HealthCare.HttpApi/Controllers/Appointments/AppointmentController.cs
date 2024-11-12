@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Pusula.Training.HealthCare.Appointments;
-using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Shared;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
@@ -18,46 +17,62 @@ namespace Pusula.Training.HealthCare.Controllers.Appointments;
 [Route("api/app/appointment")]
 public class AppointmentController : HealthCareController, IAppointmentAppService
 {
+    [HttpGet]
     public Task<PagedResultDto<AppointmentDto>> GetListAsync(GetAppointmentsInput input)
     {
         throw new NotImplementedException();
     }
 
-    public Task<DepartmentDto> GetAsync(Guid id)
+    [HttpGet]
+    [Route("{id}")]
+    public Task<AppointmentDto> GetAsync(Guid id)
     {
         throw new NotImplementedException();
     }
 
+    [HttpDelete]
+    [Route("{id}")]
     public Task DeleteAsync(Guid id)
     {
         throw new NotImplementedException();
     }
-
-    public Task<DepartmentDto> CreateAsync(AppointmentCreateDto input)
+    
+    [HttpPost]
+    public Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
     {
         throw new NotImplementedException();
     }
 
-    public Task<DepartmentDto> UpdateAsync(Guid id, AppointmentUpdateDto input)
+    [HttpPut]
+    [Route("{id}")]
+    public Task<AppointmentDto> UpdateAsync(Guid id, AppointmentUpdateDto input)
     {
         throw new NotImplementedException();
     }
 
+    [HttpGet]
+    [Route("as-excel-file")]
     public Task<IRemoteStreamContent> GetListAsExcelFileAsync(AppointmentExcelDownloadDto input)
     {
         throw new NotImplementedException();
     }
 
+    [HttpDelete]
+    [Route("")]
     public Task DeleteByIdsAsync(List<Guid> appointmentIds)
     {
         throw new NotImplementedException();
     }
 
+    [HttpDelete]
+    [Route("all")]
     public Task DeleteAllAsync(GetAppointmentsInput input)
     {
         throw new NotImplementedException();
     }
 
+    [HttpGet]
+    [Route("download-token")]
     public Task<DownloadTokenResultDto> GetDownloadTokenAsync()
     {
         throw new NotImplementedException();

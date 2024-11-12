@@ -12,13 +12,13 @@ public interface IAppointmentAppService : IApplicationService
 {
     Task<PagedResultDto<AppointmentDto>> GetListAsync(GetAppointmentsInput input);
 
-    Task<DepartmentDto> GetAsync(Guid id);
+    Task<AppointmentDto> GetAsync(Guid id);
 
     Task DeleteAsync(Guid id);
 
-    Task<DepartmentDto> CreateAsync(AppointmentCreateDto input);
+    Task<AppointmentDto> CreateAsync(AppointmentCreateDto input);
 
-    Task<DepartmentDto> UpdateAsync(Guid id, AppointmentUpdateDto input);
+    Task<AppointmentDto> UpdateAsync(Guid id, AppointmentUpdateDto input);
 
     Task<IRemoteStreamContent> GetListAsExcelFileAsync(AppointmentExcelDownloadDto input);
     Task DeleteByIdsAsync(List<Guid> appointmentIds);
