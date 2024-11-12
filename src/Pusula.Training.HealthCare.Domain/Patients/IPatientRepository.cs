@@ -45,6 +45,7 @@ public interface IPatientRepository : IRepository<Patient, Guid>
         EnumDiscountGroup? discountGroup = null,
         EnumGender? gender = null,
         string? sorting = null,
+        bool? isDeleted = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
         CancellationToken cancellationToken = default);
@@ -66,5 +67,6 @@ public interface IPatientRepository : IRepository<Patient, Guid>
         string? insuranceNo = null,
         EnumDiscountGroup? discountGroup = null,
         EnumGender? gender = null,
+        bool? isDeleted = null,
         CancellationToken cancellationToken = default);
 }
