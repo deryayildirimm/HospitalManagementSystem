@@ -146,6 +146,8 @@
     "UpdatedSuccess": "Record successfully updated",
     "Updated": "Updated",
     "Created":  "Created",
-    "CreatedSuccess": "Record successfully created."
+    "CreatedSuccess": "Record successfully created.",
+    "Permission:Titles": "Titles",
+    "Permission:Doctors": "Doctors"
   }
 }
