@@ -28,6 +28,8 @@ namespace Pusula.Training.HealthCare.Patients
         public virtual async Task<PagedResultDto<PatientDto>> GetListAsync(GetPatientsInput input)
         {
             // ISoftDelete filtresini IsDeleted durumuna göre devre dışı bırak veya etkinleştir
+            
+            //TODO filtereleme degismeli
             using (_dataFilter.Disable<ISoftDelete>())
             {
                 var totalCount = await patientRepository.GetCountAsync(input.FilterText, input.PatientNumber, input.FirstName,
@@ -39,7 +41,7 @@ namespace Pusula.Training.HealthCare.Patients
                     input.IdentityNumber,
                     input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress,
                     input.MobilePhoneNumber,
-                    input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender);
+                    input.PatientType, input.InsuranceType, input.InsuranceNo, input.DiscountGroup, input.Gender, input.Sorting, input.MaxResultCount, input.SkipCount);
 
                 if (input.IsDeleted == true)
                 {
