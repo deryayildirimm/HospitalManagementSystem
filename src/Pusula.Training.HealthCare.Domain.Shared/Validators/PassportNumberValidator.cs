@@ -1,37 +1,36 @@
-﻿using Pusula.Training.HealthCare.Patients;
 using System.ComponentModel.DataAnnotations;
+using Pusula.Training.HealthCare.Patients;
 
-namespace Pusula.Training.HealthCare.Validators
+namespace Pusula.Training.HealthCare.Validators;
+
+public class PassportNumberValidator : ValidationAttribute
 {
-    public class PassportNumberValidator : ValidationAttribute
+    private readonly int _minLength;
+
+    public PassportNumberValidator(int minLength = PatientConsts.PassportNumberMinLength)
     {
-        private readonly int _minLength;
+        _minLength = minLength;
+    }
 
-        public PassportNumberValidator(int minLength = PatientConsts.PassportNumberMinLength)
+    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    {
+        var passportFieldProperty = validationContext.ObjectType.GetProperty("passportField"); //reflection
+
+        var passportFieldValue = passportFieldProperty!.GetValue(validationContext.ObjectInstance);
+
+        if (passportFieldValue is true)
         {
-            _minLength = minLength;
-        }
-
-        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
-        {
-            var passportFieldProperty = validationContext.ObjectType.GetProperty("passportField"); //reflection
-
-            var passportFieldValue = passportFieldProperty!.GetValue(validationContext.ObjectInstance);
-
-            if (passportFieldValue is true)
+            if (value is string passportNumber)
             {
-                if (value is string passportNumber)
+                if (passportNumber.Length < _minLength)
                 {
-                    if (passportNumber.Length < _minLength)
-                    {
-                        return new ValidationResult("Passport number is too short.");
-                    }
-
-                    return ValidationResult.Success!;
+                    return new ValidationResult("Passport number is too short.");
                 }
-                return new ValidationResult("Passport number is required.");
+
+                return ValidationResult.Success!;
             }
-            return ValidationResult.Success!;
+            return new ValidationResult("Passport number is required.");
         }
+        return ValidationResult.Success!;
     }
 }

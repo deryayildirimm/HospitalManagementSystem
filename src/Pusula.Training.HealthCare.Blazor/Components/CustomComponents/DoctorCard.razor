@@ -1,0 +1,44 @@
+<Card @onclick="() => OnDoctorSelect.InvokeAsync(Doctor)"
+      Class="@GetDoctorCardClass(Doctor)">
+    <CardBody Class="p-0">
+        <div class="d-flex gap-1">
+            <div class="d-flex gap-1 align-bottom f1">
+                <div class="availability"
+                     style="background-color: @(Doctor.IsAvailable ? "var(--bs-success)" : "var(--bs-danger)");">
+                </div>
+                <div class="user-profile-bg rounded-circle text-center align-content-center justify-content-center">
+                    <Icon TextColor="TextColor.Black50"
+                          IconSize="IconSize.Large"
+                          Name="IconName.User">
+                    </Icon>
+                </div>
+                <div class="d-flex flex-column">
+                    <h6 class="m-0 text-center fw-semibold">@Doctor.Name</h6>
+                    <Badge Color="@(Doctor.Gender == "Male" ? Color.Primary : Color.Danger)"
+                           Border="Border.Is1"
+                           TextWeight="TextWeight.Normal"
+                           TextSize="TextSize.ExtraSmall"
+                           Width="Width.Px(25)">
+                        @(Doctor.Gender == "Male" ? "E" : "K")
+                    </Badge>
+                </div>
+            </div>
+            <div class="f1">
+                <h6 class="m-0 text-start fw-normal">@Doctor.Department</h6>
+                <h6 class="m-0 text-start fw-semibold">@Doctor.InsuranceType</h6>
+            </div>
+        </div>
+        @if (Doctor.IsSelected)
+        {
+            <div class="selected-tag">
+                <Icon Name="IconName.Check" IconSize="IconSize.Large" TextColor="TextColor.Light"></Icon>
+            </div>
+        }
+    </CardBody>
+</Card>
+
+@code {
+    [Parameter] public Doctor Doctor { get; set; } = null!;
+    [Parameter] public EventCallback<Doctor> OnDoctorSelect { get; set; }
+    [Parameter] public Func<Doctor, string> GetDoctorCardClass { get; set; }
+}

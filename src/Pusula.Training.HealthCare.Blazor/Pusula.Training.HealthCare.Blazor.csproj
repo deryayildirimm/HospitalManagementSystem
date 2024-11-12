@@ -45,6 +45,9 @@
     <EmbeddedResource Include="openiddict.pfx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+    <None Update="Components\CustomComponents\MultiSelectDropdown.razor.css">
+      <DependentUpon>MultiSelectDropdown.razor</DependentUpon>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -52,6 +55,7 @@
     <Content Remove="Logs\**" />
     <EmbeddedResource Remove="Logs\**" />
     <None Remove="Logs\**" />
+    <None Include="wwwroot\js\WindowHelper.js" />
     <None Include="wwwroot\styles\Login.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
@@ -68,6 +72,7 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Components\Pages\Account\Login.cshtml" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\LottieFiles\Check.json" />
   </ItemGroup>
 
 </Project>
