@@ -1,0 +1,245 @@
+﻿@page "/patients/detail/{Id:guid}"
+@using Pusula.Training.HealthCare.Countries
+@using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Permissions
+@using Volo.Abp.AspNetCore.Components.Messages
+@inject IPatientsAppService PatientsAppService
+@inject IUiMessageService UiMessageService
+@inject ICountryAppService CountryAppService
+@using Pusula.Training.HealthCare.Countries
+@using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Localization
+@using Pusula.Training.HealthCare.Shared
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@using Microsoft.AspNetCore.Components.Web
+@using Blazorise
+@using Blazorise.Components
+@using Blazorise.DataGrid
+@using Volo.Abp.BlazoriseUI
+@using Volo.Abp.BlazoriseUI.Components
+@using Volo.Abp.ObjectMapping
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+
+@using Pusula.Training.HealthCare.Permissions
+@using Volo.Abp.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components
+@using Volo.Abp.Http.Client
+
+
+
+
+
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@attribute [Authorize(HealthCarePermissions.Patients.Default)]
+
+<Layout  >
+    <LayoutHeader Style="height: 13vh; margin-bottom: -20px" >
+        <Row>
+            <Column ColumnSize="ColumnSize.Is6" >
+                <Div Flex="Flex.AlignItems.Start"  >
+                    <Div Padding="Padding.Is1" >
+                        <Figure   Size="FigureSize.Is64x64" >
+                            <FigureImage Source="/images/avatar.jpg" @onclick="OpenPatientModal" AlternateText="empty-256x256" Style="border-radius: 50%; cursor: pointer; transition: transform 0.3s ease, all 0.3s ease;
+                               height: auto; width: auto; overflow: auto "
+                                         onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)';"
+                                         onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)';"/>
+                        </Figure>
+
+                    </Div>
+                    <Div Padding="Padding.Is1" Style="font-size: small"  >
+                        <Div Flex="Flex.AlignItems.Start"  Background="Background.Default" >
+                            <Div Padding="Padding.Is1"  >
+                                <strong>  @($"{patient?.FirstName.ToUpper()} {patient?.LastName.ToUpper()}")</strong>
+                            </Div>
+                            <Div Padding="Padding.Is1" >
+                                <span style="background-color: cornflowerblue; padding: 5px 8px  ">
+                                    @patient?.PatientType 
+                                </span>
+                            </Div>
+                            <Div Padding="Padding.Is1">
+                                CARİ
+                            </Div>
+
+                        </Div>
+
+                        <Div Flex="Flex.AlignItems.Baseline" Padding="Padding.Is1"   >
+                            <Div Padding="Padding.Is1" >
+                                <span    style=" border-radius: 50%;  padding: 8px 10px ;background-color: @(patient?.Gender == EnumGender.FEMALE ? "red" : "cornflowerblue")"  >
+                                    <strong>
+                                        @(patient?.Gender == EnumGender.FEMALE ? "K" : "E") 
+                                    </strong>
+                                </span>
+                            </Div>
+                            <Div Padding="Padding.Is1" >
+                                <text>Hasta No:  1001364 </text>
+                            </Div>
+                            <Div Padding="Padding.Is1">
+                                +1234567895245
+                            </Div>
+                        </Div>
+                    </Div>
+                    <Div Padding="Padding.Is2"  Visibility="Visibility.Invisible">
+                    </Div>
+                </Div>
+            </Column>
+            <Column ColumnSize="ColumnSize.Is7"  Visibility="Visibility.Invisible" >
+                burası boş olucak
+
+            </Column>
+        </Row>
+
+
+
+    </LayoutHeader>
+    <Divider DividerType="DividerType.Dashed" />
+    <LayoutContent>
+        <Row>
+            <Column ColumnSize="ColumnSize.Is6" >
+                <Div Flex="Flex.AlignItems.Start"  >
+                    <Div Padding="Padding.Is2" >
+                        <Button Color="Color.Danger" Size="Size.Small"  > + Yeni Randevu</Button>
+                    </Div>
+                    <Div Padding="Padding.Is2" >
+                        <Button Color="Color.Secondary" Size="Size.Small"> + Verilemeyen Randevu</Button>
+                    </Div>
+                    <Div Padding="Padding.Is2"  Visibility="Visibility.Invisible">
+                    </Div>
+                </Div>
+
+                <Div Flex="Flex.JustifyContent.Between" Style="margin-bottom: -20px;"   >
+                    <Div Padding="Padding.Is2"  >
+                        <Icon Name="IconName.Hourglass"  IconStyle="IconStyle.Regular"/>
+                        <strong style="margin-left: 10px; font-size: medium "> Bekleyen Randevular</strong>
+
+                    </Div>
+                    <Div Padding="Padding.Is2" Style="font-size: small; color: #777; margin-top : 10px; "> <!-- Sağdaki yazı için -->
+                        Kayıt bulunmamaktadır
+
+                    </Div>
+                </Div>
+                <Divider DividerType="DividerType.Dashed" />
+
+            </Column>
+            <Column ColumnSize="ColumnSize.Is6">
+
+                <Div Flex="Flex.AlignItems.Start"  Visibility="Visibility.Invisible" >
+                    <Div Padding="Padding.Is2">
+                        <Button Color="Color.Danger" Size="Size.Small"> + Yeni Randevu</Button>
+                    </Div>
+                    <Div Padding="Padding.Is2" >
+                        <Button Color="Color.Secondary" Size="Size.Small"> + Verilemeyen Randevu</Button>
+                    </Div>
+                    <Div Padding="Padding.Is2"  Visibility="Visibility.Invisible">
+                    </Div>
+                </Div>
+                <Div Flex="Flex.AlignItems.Baseline" Style="margin-bottom: -20px; "  >
+                    <Div Padding="Padding.Is2" >
+                        <Icon Name="IconName.Edit"  IconStyle="IconStyle.Regular"/>
+                        <strong style="margin-left: 10px; font-size: large "> Bekleyen Aramalar</strong>
+                    </Div>
+                </Div>
+                <Divider DividerType="DividerType.Dashed" />
+                <Div Flex="Flex.JustifyContent.Between" Style="margin-bottom: -20px;"  >
+                    <Div Padding="Padding.Is2" >
+                        <Icon Name="IconName.Edit"  IconStyle="IconStyle.Regular"/>
+                        <strong style="margin-left: 10px; font-size: large "> Geri Bildirimler</strong>
+                    </Div>
+                    <Div Padding="Padding.Is2" Style="font-size: small; color: #777; margin-top : 10px; "> <!-- Sağdaki yazı için -->
+                        Kayıt bulunmamaktadır
+                    </Div>
+                </Div>
+                <Divider DividerType="DividerType.Dashed" />
+                <Div Flex="Flex.JustifyContent.Between" Style="margin-bottom: -20px;"  >
+                    <Div Padding="Padding.Is2" >
+                        <Icon Name="IconName.Hourglass"  IconStyle="IconStyle.Regular"/>
+                        <strong style="margin-left: 10px; font-size: large "> Verilemeyen Randevular</strong>
+                    </Div>
+                    <Div Padding="Padding.Is2" Style="font-size: small; color: #777; margin-top : 10px; "> <!-- Sağdaki yazı için -->
+                        Kayıt bulunmamaktadır
+                    </Div>
+                </Div>
+                <Divider DividerType="DividerType.Dashed" />
+            </Column>
+        </Row>
+    </LayoutContent>
+    <LayoutFooter>
+    </LayoutFooter>
+</Layout>
+@* ************************* EDIT MODAL ************************* *@
+<Modal @ref="ViewPatientModal">
+    <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
+        <ModalHeader>
+            <ModalTitle>
+                Hasta Bilgileri
+            </ModalTitle>
+            <CloseButton Clicked="ClosePatientModal"/>
+        </ModalHeader>
+
+        <ModalBody>
+            <Row>
+                <Column ColumnSize="ColumnSize.Is6">
+                    <strong>Ad:</strong> John
+                </Column>
+                <Column ColumnSize="ColumnSize.Is6">
+                    <strong>Soyad:</strong> Doe
+                </Column>
+            </Row>
+            <Row>
+                <Column ColumnSize="ColumnSize.Is6">
+                    <strong>Uyruk:</strong> Türkiye
+                </Column>
+                <Column ColumnSize="ColumnSize.Is6">
+                    <strong>Kimlik No:</strong> 12345678901
+                </Column>
+            </Row>
+            <Row>
+                <Column ColumnSize="ColumnSize.Is6">
+                    <strong>Doğum Tarihi:</strong> 01.01.1980
+                </Column>
+                <Column ColumnSize="ColumnSize.Is6">
+                    <strong>Cinsiyet:</strong> Erkek
+                </Column>
+            </Row>
+            <Row>
+                <Column ColumnSize="ColumnSize.Is6">
+                    <strong>Telefon:</strong> +90 123 456 7890
+                </Column>
+                <Column ColumnSize="ColumnSize.Is6">
+                    <strong>Email:</strong> johndoe@example.com
+                </Column>
+            </Row>
+            <Row>
+                <Column ColumnSize="ColumnSize.Is12">
+                    <strong>Adres:</strong> İstanbul, Türkiye
+                </Column>
+            </Row>
+            <Divider DividerType="DividerType.Dashed"/>
+            <Row>
+                <Column ColumnSize="ColumnSize.Is4">
+                    <strong>Hasta Tipi:</strong> VIP
+                </Column>
+                <Column ColumnSize="ColumnSize.Is4">
+                    <strong>Sigorta Tipi:</strong> SGK
+                </Column>
+                <Column ColumnSize="ColumnSize.Is4">
+                    <strong>Sigorta No:</strong> 987654321
+                </Column>
+            </Row>
+            <Row>
+                <Column ColumnSize="ColumnSize.Is4">
+                    <strong>İndirim Grubu:</strong> Kontratlı
+                </Column>
+                <Column ColumnSize="ColumnSize.Is4">
+                    <strong>Yakın Telefon:</strong> +90 555 123 4567
+                </Column>
+                <Column ColumnSize="ColumnSize.Is4">
+                    <strong>Hasta Yakınlığı:</strong> Akraba
+                </Column>
+            </Row>
+        </ModalBody>
+    </ModalContent>
+</Modal>

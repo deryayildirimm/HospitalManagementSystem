@@ -129,6 +129,15 @@ public partial class Patients
         await ClearSelection();
     }
 
+    // for navigate to the detail-page
+    protected void NavigateToDetail(PatientDto patientDto)
+    {
+        //seçili hastayı servise kaydediyoruz 
+        //   patientService.SetPatient(patientDto);
+        NavigationManager.NavigateTo($"/patients/detail/{patientDto.Id}");
+    }
+
+    
     protected virtual async Task SearchAsync()
     {
         CurrentPage = 1;

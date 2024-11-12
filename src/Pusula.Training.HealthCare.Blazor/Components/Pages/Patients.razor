@@ -277,11 +277,12 @@
                     </DisplayTemplate>
                 </DataGridColumn>
 
+             
                 <!-- Detail Page Column -->
                 <DataGridColumn TItem="PatientDto">
                     <DisplayTemplate >
-                        <Button Color="Color.Primary"  >
-                            <Icon Name="@IconName.Crop" />
+                        <Button Color="Color.Primary" @onclick="() => NavigateToDetail(context)" >
+                            <Icon Name="@IconName.ExternalLinkSquareAlt" />
                         </Button>
                     </DisplayTemplate>
                 </DataGridColumn>
