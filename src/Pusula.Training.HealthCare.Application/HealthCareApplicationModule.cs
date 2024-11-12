@@ -21,6 +21,7 @@ using Volo.Abp.BackgroundWorkers;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Pusula.Training.HealthCare.Workers;
+using Volo.Abp.Emailing;
 
 namespace Pusula.Training.HealthCare;
 
@@ -59,7 +60,9 @@ public class HealthCareApplicationModule : AbpModule
             options.AddMaps<HealthCareApplicationModule>();
         });
 
-        context.Services.Replace(ServiceDescriptor.Transient<IBackgroundJobManager, DefaultBackgroundJobManager>());
+#if DEBUG
+        context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
+#endif
 
         Configure<AbpBackgroundJobWorkerOptions>(options =>
         {

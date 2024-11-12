@@ -1,0 +1,218 @@
+.availability {
+    height: 15px;
+    width: 20px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 3;
+    border-top-left-radius: var(--bs-border-radius-sm);
+}
+
+.carousel-control {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    z-index: 10;
+}
+
+.carousel-control.left {
+    left: -10px !important;
+}
+
+.carousel-control.right {
+    right: -10px !important;;
+}
+
+.user-profile-bg {
+    height: 50px;
+    width: 50px;
+    background-color: var(--bs-gray-300);
+    position: relative;
+}
+
+.doctor-card {
+    border: 1.5px solid transparent;
+    cursor: pointer;
+    position: relative;
+}
+
+.doctor-card:hover {
+    border: 1.5px solid var(--bs-gray-400);
+    transition: 0.3s;
+}
+
+.f1 {
+    flex: 1;
+}
+
+.border-thick-2 {
+    border-width: 2.5px;
+}
+
+.doctor-card-active {
+    border: 1.5px solid var(--bs-success) !important;
+}
+
+.disabled-card {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.selected-tag {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border-bottom-right-radius: var(--bs-border-radius-sm);
+    border-top-left-radius: var(--bs-border-radius-sm);
+    background-color: var(--bs-success);
+    width: 40px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.scroll-view {
+    scroll-behavior: smooth;
+    overflow-y: scroll;
+}
+
+.h-80v {
+    max-height: 50vh !important;
+}
+
+.days-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-top: 10px;
+}
+
+.days {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 10px;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.day-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    width: 60px;
+    height: 80px;
+    background-color: #ffffff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid transparent;
+}
+
+.day-card:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.day-card.active {
+    border: 1.5px solid var(--bs-gray-600) !important;
+    transform: scale(1.08);
+}
+
+.day-name {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.day-number {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+}
+
+.is-day-available {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 5px;
+    width: 100%;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.success-color {
+    background-color: var(--bs-success);
+}
+
+.fail-color {
+    background-color: var(--bs-danger);
+}
+
+.light-green {
+    background-color: rgba(49, 183, 104, 0.65);
+}
+
+.light-red {
+    background-color: rgba(255, 56, 56, 0.5);
+}
+
+.month {
+    font-size: 0.8em;
+    color: #888;
+}
+
+.time-slot-card {
+    cursor: pointer;
+    border: 1px solid #dee2e6;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    width: 140px;
+    height: 90px;
+    margin-bottom: 0 !important;
+    border-radius: 4px;
+    position: relative;
+    color: white;
+}
+
+.time-slot-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.time-slot-card.active {
+    border-color: #0d6efd;
+    background-color: #e9f5ff;
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    color: black;
+}
+
+.time-slot-card .card-title {
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.slot-selected-tag {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    background-color: var(--bs-success);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.purple {
+    color: purple !important;
+}

@@ -1,45 +1,44 @@
-﻿using System;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace Pusula.Training.HealthCare.Validators
+namespace Pusula.Training.HealthCare.Validators;
+
+public class CreatePhoneNumberValidator : ValidationAttribute
 {
-    public class CreatePhoneNumberValidator : ValidationAttribute
+    private const string PhoneNumberPattern = @"^\d{5,10}$";
+
+    protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
     {
-        private const string PhoneNumberPattern = @"^\d{5,10}$";
+        var displayName = validationContext.DisplayName;
+        var stringValue = value?.ToString();
 
-        protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
+        if (string.IsNullOrEmpty(stringValue))
         {
-            var displayName = validationContext.DisplayName;
-            var stringValue = value?.ToString();
-
-            if (string.IsNullOrEmpty(stringValue))
-            {
-                if (displayName == "RelativePhoneNumber")
-                {
-                    return ValidationResult.Success!;
-                }
-                else if (displayName == "MobilePhoneNumber")
-                {
-                    return new ValidationResult("Mobile phone number cannot be empty.");
-                }
-            }
-
-            var regex = new Regex(PhoneNumberPattern);
-
-            if (regex.IsMatch(stringValue!))
+            if (displayName == "RelativePhoneNumber")
             {
                 return ValidationResult.Success!;
             }
+            else if (displayName == "MobilePhoneNumber")
+            {
+                return new ValidationResult("Mobile phone number cannot be empty.");
+            }
+        }
 
-            var formattedDisplayName = InsertSpaces(displayName);
-            return new ValidationResult($"Please enter a valid {formattedDisplayName}.");
-        }
-        private string InsertSpaces(string input)
+        var regex = new Regex(PhoneNumberPattern);
+
+        if (regex.IsMatch(stringValue!))
         {
-            var result = string.Concat(input.Select((x, i) => i > 0 && Char.IsUpper(x) ? " " + x : x.ToString()));
-            return result;
+            return ValidationResult.Success!;
         }
+
+        var formattedDisplayName = InsertSpaces(displayName);
+        return new ValidationResult($"Please enter a valid {formattedDisplayName}.");
+    }
+    private string InsertSpaces(string input)
+    {
+        var result = string.Concat(input.Select((x, i) => i > 0 && Char.IsUpper(x) ? " " + x : x.ToString()));
+        return result;
     }
 }

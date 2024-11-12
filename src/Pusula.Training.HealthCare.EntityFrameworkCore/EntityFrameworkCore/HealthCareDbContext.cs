@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Protocols;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
@@ -31,7 +32,8 @@ public class HealthCareDbContext :
     public DbSet<Department> Departments { get; set; } = null!;
     public DbSet<Protocol> Protocols { get; set; } = null!;
     public DbSet<Patient> Patients { get; set; } = null!;
-
+    public DbSet<MedicalService> Services { get; set; } = null!;
+    public DbSet<DepartmentMedicalService> DepartmentMedicalServices { get; set; } = null!;
 
     #region Entities from the modules
 
@@ -143,13 +145,42 @@ public class HealthCareDbContext :
                 b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
-        }
 
-        //builder.Entity<YourEntity>(b =>
-        //{
-        //    b.ToTable(HealthCareConsts.DbTablePrefix + "YourEntities", HealthCareConsts.DbSchema);
-        //    b.ConfigureByConvention(); //auto configure for the base class props
-        //    //...
-        //});
+            builder.Entity<MedicalService>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "MedicalServices", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+
+                b.Property(x => x.Name).HasColumnName(nameof(MedicalService.Name)).IsRequired()
+                    .HasMaxLength(MedicalServiceConsts.NameMaxLength);
+
+                b.Property(x => x.Cost)
+                    .HasColumnName(nameof(MedicalService.Cost))
+                    .IsRequired()
+                    .HasPrecision(18, 6);
+
+                b.Property(x => x.ServiceCreatedAt).HasColumnName(nameof(MedicalService.ServiceCreatedAt)).IsRequired();
+                
+                b.HasIndex(e => new { e.Name }).IsUnique();
+            });
+            
+            builder.Entity<DepartmentMedicalService>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "DepartmentMedicalServices", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+
+                b.HasKey(x => new { x.MedicalServiceId, x.DepartmentId });
+
+                b.HasOne<Department>(sc => sc.Department)
+                    .WithMany(x => x.DepartmentMedicalServices)
+                    .HasForeignKey(x => x.DepartmentId);
+
+                b.HasOne<MedicalService>(sc => sc.MedicalService)
+                    .WithMany(x => x.DepartmentMedicalServices)
+                    .HasForeignKey(x => x.MedicalServiceId);
+
+                b.HasIndex(x => new { x.MedicalServiceId, x.DepartmentId }).IsUnique();
+            });
+        }
     }
 }
