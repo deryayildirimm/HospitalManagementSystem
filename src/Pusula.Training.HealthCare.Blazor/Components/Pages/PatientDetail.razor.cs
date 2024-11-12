@@ -60,7 +60,10 @@ public partial class PatientDetail(IMapper mapper) : ComponentBase
 
     }
 
-    
+    protected void NavigateToDetail(){    
+        NavigationManager.NavigateTo($"/patient/1234/appointment");
+        
+    }
    
   
     
