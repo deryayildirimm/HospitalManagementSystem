@@ -148,6 +148,7 @@
     "Created":  "Created",
     "CreatedSuccess": "Record successfully created.",
     "Permission:Titles": "Titles",
-    "Permission:Doctors": "Doctors"
+    "Permission:Doctors": "Doctors",
+    "Menu:Doctors": "Doctors"
   }
 }
