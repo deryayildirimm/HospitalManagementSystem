@@ -87,4 +87,14 @@ public interface IDoctorRepository : IRepository<Doctor, Guid>
         Guid? titleId = null,
         Guid? departmentId = null,
         CancellationToken cancellationToken = default);
+
+    Task<long> GetCountByDepartmentIdsAsync(List<Guid> departmentIds,
+        CancellationToken cancellationToken = default);
+
+    Task<List<DoctorWithNavigationProperties>> GetListByDepartmentIdsAsync(
+        List<Guid> departmentIds,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default);
 }

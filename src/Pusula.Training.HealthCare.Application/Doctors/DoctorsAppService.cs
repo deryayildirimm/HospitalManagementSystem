@@ -85,18 +85,16 @@ public class DoctorsAppService(
         };
     }
     
-    public virtual async Task<PagedResultDto<DoctorWithNavigationPropertiesDto>> GetByDepartmentIdsAsync(List<Guid> departmentIds)
+    public virtual async Task<PagedResultDto<DoctorWithNavigationPropertiesDto>> GetByDepartmentIdsAsync(GetDoctorsWithDepartmentIdsInput input)
     {
-        var allItems = await doctorRepository.GetListWithNavigationPropertiesAsync();
-
-        var filteredItems = allItems.Where(item => departmentIds.Contains(item.Doctor.DepartmentId)).ToList();
-
-        var totalCount = filteredItems.Count;
+        var totalCount = await doctorRepository.GetCountByDepartmentIdsAsync(input.DepartmentIds!);
+        var items = await doctorRepository.GetListByDepartmentIdsAsync(input.DepartmentIds!, 
+            input.Sorting, input.MaxResultCount, input.SkipCount);
 
         return new PagedResultDto<DoctorWithNavigationPropertiesDto>
         {
             TotalCount = totalCount,
-            Items = ObjectMapper.Map<List<DoctorWithNavigationProperties>, List<DoctorWithNavigationPropertiesDto>>(filteredItems)
+            Items = ObjectMapper.Map<List<DoctorWithNavigationProperties>, List<DoctorWithNavigationPropertiesDto>>(items)
         };
     }
 
