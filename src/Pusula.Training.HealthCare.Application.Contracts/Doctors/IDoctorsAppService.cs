@@ -20,6 +20,7 @@ public interface IDoctorsAppService : IApplicationService
     Task<PagedResultDto<LookupDto<Guid>>> GetTitleLookupAsync(LookupRequestDto input);
 
     Task<PagedResultDto<LookupDto<Guid>>> GetDepartmentLookupAsync(LookupRequestDto input);
+    Task<PagedResultDto<DoctorWithNavigationPropertiesDto>> GetByDepartmentIdsAsync(List<Guid> departmentIds);
 
     Task DeleteAsync(Guid id);
 

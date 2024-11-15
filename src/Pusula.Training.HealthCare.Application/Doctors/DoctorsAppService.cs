@@ -84,6 +84,22 @@ public class DoctorsAppService(
             Items = ObjectMapper.Map<List<Department>, List<LookupDto<Guid>>>(lookupData)
         };
     }
+    
+    public virtual async Task<PagedResultDto<DoctorWithNavigationPropertiesDto>> GetByDepartmentIdsAsync(List<Guid> departmentIds)
+    {
+        var allItems = await doctorRepository.GetListWithNavigationPropertiesAsync();
+
+        var filteredItems = allItems.Where(item => departmentIds.Contains(item.Doctor.DepartmentId)).ToList();
+
+        var totalCount = filteredItems.Count;
+
+        return new PagedResultDto<DoctorWithNavigationPropertiesDto>
+        {
+            TotalCount = totalCount,
+            Items = ObjectMapper.Map<List<DoctorWithNavigationProperties>, List<DoctorWithNavigationPropertiesDto>>(filteredItems)
+        };
+    }
+
 
     [Authorize(HealthCarePermissions.Doctors.Delete)]
     public virtual async Task DeleteAsync(Guid id)

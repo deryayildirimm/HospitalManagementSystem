@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.Shared;
 using Volo.Abp;
@@ -57,10 +58,15 @@ public class DoctorController(IDoctorsAppService doctorsAppService) : HealthCare
     [Route("as-excel-file")]
     public Task<IRemoteStreamContent> GetListAsExcelFileAsync(DoctorExcelDownloadDto input) => 
         doctorsAppService.GetListAsExcelFileAsync(input);
+    
+    [HttpGet]
+    [Route("department-ids")]
+    public Task<PagedResultDto<DoctorWithNavigationPropertiesDto>> GetByDepartmentIdsAsync(List<Guid> departmentIds) => 
+        doctorsAppService.GetByDepartmentIdsAsync(departmentIds);
 
     [HttpDelete]
     [Route("")]
-    public Task DeleteByIdsAsync(List<Guid> protocolIds) => doctorsAppService.DeleteByIdsAsync(protocolIds);
+    public Task DeleteByIdsAsync(List<Guid> doctorIds) => doctorsAppService.DeleteByIdsAsync(doctorIds);
 
     [HttpDelete]
     [Route("all")]
