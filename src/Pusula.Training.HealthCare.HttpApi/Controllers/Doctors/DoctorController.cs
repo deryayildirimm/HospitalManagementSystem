@@ -60,9 +60,9 @@ public class DoctorController(IDoctorsAppService doctorsAppService) : HealthCare
         doctorsAppService.GetListAsExcelFileAsync(input);
     
     [HttpGet]
-    [Route("department-ids")]
-    public Task<PagedResultDto<DoctorWithNavigationPropertiesDto>> GetByDepartmentIdsAsync(List<Guid> departmentIds) => 
-        doctorsAppService.GetByDepartmentIdsAsync(departmentIds);
+    [Route("by-department-ids")]
+    public Task<PagedResultDto<DoctorWithNavigationPropertiesDto>> GetByDepartmentIdsAsync(GetDoctorsWithDepartmentIdsInput input) => 
+        doctorsAppService.GetByDepartmentIdsAsync(input);
 
     [HttpDelete]
     [Route("")]

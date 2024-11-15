@@ -132,6 +132,30 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
     
+    public async Task<long> GetCountByDepartmentIdsAsync(List<Guid> departmentIds, CancellationToken cancellationToken = default)
+    {
+        var query = await GetQueryForNavigationPropertiesAsync();
+        query = ApplyFilter(query, departmentIds: departmentIds);
+
+        return await query.LongCountAsync(GetCancellationToken(cancellationToken));
+    }
+    
+    public virtual async Task<List<DoctorWithNavigationProperties>> GetListByDepartmentIdsAsync(
+        List<Guid> departmentIds,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default)
+    {
+        var query = await GetQueryForNavigationPropertiesAsync();
+        query = ApplyFilter(query, departmentIds: departmentIds);
+        query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? DoctorConsts.GetDefaultSorting(true) : sorting);
+
+        return await query
+            .PageBy(skipCount, maxResultCount)
+            .ToListAsync(cancellationToken);
+    }
+    
     #region ApplyFilter and Queryable
         protected virtual IQueryable<Doctor> ApplyFilter(
             IQueryable<Doctor> query,
@@ -148,7 +172,8 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
             string? city = null, 
             string? district = null, 
             Guid? titleId = null, 
-            Guid? departmentId = null) =>
+            Guid? departmentId = null,
+            List<Guid>? departmentIds = null) =>
             query
                 .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.FirstName!.ToLower().Contains(filterText!.ToLower()) || e.LastName!.ToLower().Contains(filterText!.ToLower()) || e.PhoneNumber!.Contains(filterText!))
                 .WhereIf(!string.IsNullOrWhiteSpace(firstName), e => e.FirstName!.ToLower().Contains(firstName!.ToLower()))
@@ -163,7 +188,8 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
                 .WhereIf(!string.IsNullOrWhiteSpace(city), e => e.City!.ToLower().Contains(city!.ToLower()))
                 .WhereIf(!string.IsNullOrWhiteSpace(district), e => e.District!.ToLower().Contains(district!.ToLower()))
                 .WhereIf(titleId.HasValue, e => e.TitleId == titleId)
-                .WhereIf(departmentId.HasValue, e => e.DepartmentId == departmentId);
+                .WhereIf(departmentId.HasValue, e => e.DepartmentId == departmentId)
+                .WhereIf(departmentIds != null && departmentIds.Any(), e => departmentIds!.Contains(e.DepartmentId));
 
         protected virtual async Task<IQueryable<DoctorWithNavigationProperties>> GetQueryForNavigationPropertiesAsync() =>
             from doctor in (await GetDbSetAsync())
@@ -194,7 +220,8 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
             string? city = null, 
             string? district = null, 
             Guid? titleId = null, 
-            Guid? departmentId = null) =>
+            Guid? departmentId = null,
+            List<Guid>? departmentIds = null) =>
                 query
                     .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Doctor.FirstName!.ToLower().Contains(filterText!.ToLower()) || e.Doctor.LastName!.ToLower().Contains(filterText!.ToLower()) || e.Doctor.PhoneNumber!.Contains(filterText!))
                     .WhereIf(!string.IsNullOrWhiteSpace(firstName), e => e.Doctor.FirstName!.ToLower().Contains(firstName!.ToLower()))
@@ -209,6 +236,7 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
                     .WhereIf(!string.IsNullOrWhiteSpace(city), e => e.Doctor.City!.ToLower().Contains(city!.ToLower()))
                     .WhereIf(!string.IsNullOrWhiteSpace(district), e => e.Doctor.District!.ToLower().Contains(district!.ToLower()))
                     .WhereIf(titleId.HasValue, e => e.Title.Id == titleId)
-                    .WhereIf(departmentId.HasValue, e => e.Department.Id == departmentId);
+                    .WhereIf(departmentId.HasValue, e => e.Department.Id == departmentId)
+                    .WhereIf(departmentIds != null && departmentIds.Any(), e => departmentIds!.Contains(e.Doctor.DepartmentId));
         #endregion
 }
