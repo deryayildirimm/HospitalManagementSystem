@@ -30,6 +30,8 @@
     "Cancel": "İptal",
     "Submit": "Onayla",
     "ChooseNationality": "Uyruk Seç",
-    "UpdatePatient": "Hasta Güncelle"
+    "UpdatePatient": "Hasta Güncelle",
+    "Doctor" : "Doktor",
+    "Leave" : "İzin"
   }
 }
