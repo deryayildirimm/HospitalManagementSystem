@@ -23,7 +23,7 @@ public class PatientDto : FullAuditedEntityDto<Guid>, IHasConcurrencyStamp
     public EnumPatientTypes PatientType { get; set; }
     public string? Address { get; set; }
     public EnumInsuranceType InsuranceType { get; set; }
-    public string InsuranceNo { get; set; }
+    public string? InsuranceNo { get; set; }
     public EnumDiscountGroup? DiscountGroup { get; set; }
     public EnumGender Gender { get; set; }
 

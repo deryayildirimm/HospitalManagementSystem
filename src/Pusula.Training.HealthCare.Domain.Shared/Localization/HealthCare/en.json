@@ -145,10 +145,18 @@
     "MedicalServiceDuplicateEntry": "You already added this service to department(s) before.",
     "UpdatedSuccess": "Record successfully updated",
     "Updated": "Updated",
-    "Created":  "Created",
+    "Created": "Created",
     "CreatedSuccess": "Record successfully created.",
     "Permission:Titles": "Titles",
     "Permission:Doctors": "Doctors",
-    "Menu:Doctors": "Doctors"
+    "Menu:Doctors": "Doctors",
+    "Duration": "Duration",
+    "MedPlus": "MedPlus+",
+    "MedPlusSolutions": "MedPlus+ HealthCare Solutions",
+    "Gender:M": "M",
+    "Gender:F": "F",
+    "Error:UnExpectedErrorOcurred": "An unexpected error occurred.",
+    "DoctorNotAvailable": "is unavailable on the selected day.",
+    "AvailableAppointments": "Available Appointments"
   }
 }

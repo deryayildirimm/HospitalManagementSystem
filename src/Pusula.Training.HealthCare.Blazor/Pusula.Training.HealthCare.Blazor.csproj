@@ -26,6 +26,7 @@
     <PackageReference Include="Syncfusion.Blazor.Core" Version="27.1.58" />
     <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="27.1.58" />
     <PackageReference Include="Syncfusion.Blazor.Inputs" Version="27.1.58" />
+    <PackageReference Include="Syncfusion.Blazor.Lists" Version="27.1.58" />
     <PackageReference Include="Syncfusion.Blazor.Navigations" Version="27.1.58" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="27.1.58" />
     <PackageReference Include="Volo.Abp.AspNetCore.Components.Server.LeptonXLiteTheme" Version="3.2.0" />

@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Pusula.Training.HealthCare.Appointments;
-using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.DoctorWorkingHours;
+using Pusula.Training.HealthCare.Exceptions;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Shared;
@@ -11,15 +13,46 @@ using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Caching;
 using Volo.Abp.Content;
+using Volo.Abp.Domain.Repositories;
 
 namespace Pusula.Training.HealthCare.Appointment;
 
 [RemoteService(IsEnabled = false)]
 [Authorize(HealthCarePermissions.Appointments.Default)]
 public class AppointmentAppService(
+    IRepository<DoctorWorkingHour> doctorWorkingHourRepository,
+    IAppointmentRepository appointmentRepository,
+    IMedicalServiceRepository medicalServiceRepository,
+    IAppointmentManager appointmentManager,
     IDistributedCache<MedicalServiceDownloadTokenCacheItem, string> downloadCache
 ) : HealthCareAppService, IAppointmentAppService
 {
+    public async Task<PagedResultDto<AppointmentSlotDto>> GetAvailableSlotsAsync(GetAppointmentsInput input)
+    {
+        try
+        {
+            var availableSlots = await appointmentManager
+                .GetAppointmentSlotsAsync(input.DoctorId, input.MedicalServiceId, input.Date);
+            
+            return new PagedResultDto<AppointmentSlotDto>(
+                availableSlots.Count,
+                availableSlots.ToList()
+            );
+        }
+        catch (MedicalServiceNotFoundException ex)
+        {
+            throw new UserFriendlyException(ex.Message);
+        }
+        catch (DoctorNotWorkingException ex)
+        {
+            throw new UserFriendlyException(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            throw new ApplicationException(@L["UnExpectedErrorOcurred"], ex);
+        }
+    }
+
     [Authorize(HealthCarePermissions.Departments.Edit)]
     public Task<PagedResultDto<AppointmentDto>> GetListAsync(GetAppointmentsInput input)
     {

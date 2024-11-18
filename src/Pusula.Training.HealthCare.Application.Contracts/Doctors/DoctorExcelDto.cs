@@ -15,6 +15,6 @@ public class DoctorExcelDto
     public int YearOfExperience { get; set; } = 0;
     public string City { get; set; } = null!;
     public string District { get; set; } = null!;
-    public string Department { get; set; }
-    public string Title { get; set; }
+    public string? Department { get; set; } = null!;
+    public string? Title { get; set; } = null!;
 }

@@ -55,17 +55,11 @@ public partial class PatientDetail(IMapper mapper) : ComponentBase
     protected override async Task OnInitializedAsync()
     {
         patient = await PatientsAppService.GetAsync(Id);
-
-
-
-    }
-
-    protected void NavigateToDetail(){    
-        NavigationManager.NavigateTo($"/patient/1234/appointment");
         
     }
-   
-  
-    
+
+    protected void NavigateToDetail(int PatientNumber){    
+        NavigationManager.NavigateTo($"/patient/{PatientNumber}/appointment");
+    }
 }
             

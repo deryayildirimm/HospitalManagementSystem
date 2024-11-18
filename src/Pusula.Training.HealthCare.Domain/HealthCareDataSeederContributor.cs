@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
+using Pusula.Training.HealthCare.Titles;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
+using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
 using Volo.Abp.Identity;
 using Volo.Abp.PermissionManagement;
@@ -20,7 +25,11 @@ namespace Pusula.Training.HealthCare
         IdentityUserManager userManager,
         IPatientRepository patientRepository,
         IDepartmentRepository departmentRepository,
+        IAppointmentRepository appointmentRepository,
+        ITitleRepository titleRepository,
         IMedicalServiceRepository medicalServiceRepository,
+        IRepository<Doctor> doctorRepository,
+        IRepository<DoctorWorkingHour> doctorWorkingHourRepository,
         IGuidGenerator guidGenerator) : IDataSeedContributor, ITransientDependency
     {
         public async Task SeedAsync(DataSeedContext context)
@@ -35,48 +44,52 @@ namespace Pusula.Training.HealthCare
             await SeedMedicalServiceRecords();
             await SeedDepartmentRecords();
             await SeedMedicalServiceToDepartments();
+            await SeedTitles();
+            await SeedDoctorRecords();
+            await SeedAppointments();
+            await SeedDoctorWorkingHours();
         }
 
         private async Task SeedMedicalServiceRecords()
         {
             if (await medicalServiceRepository.GetCountAsync() > 0)
                 return;
-            
+
             await medicalServiceRepository.InsertAsync(
-                new MedicalService(Guid.NewGuid(), "X-Ray", 300.00, DateTime.Now), true);
-            await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "MRI Scan", 1200.00,
+                new MedicalService(Guid.NewGuid(), "X-Ray", 300.00, 20, DateTime.Now), true);
+            await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "MRI Scan", 1200.00, 20,
                 DateTime.Now), true);
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Cardiology Consultation",
-                250.00, DateTime.Now), true);
+                250.00, 20, DateTime.Now), true);
 
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Pediatric Check-up",
-                120.00, DateTime.Now), true);
+                120.00,20, DateTime.Now), true);
             await medicalServiceRepository.InsertAsync(
-                new MedicalService(Guid.NewGuid(), "Chiropractic Session", 90.00, DateTime.Now));
+                new MedicalService(Guid.NewGuid(), "Chiropractic Session", 90.00, 20, DateTime.Now));
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Nutrition Consultation",
-                75.00, DateTime.Now), true);
+                75.00,20, DateTime.Now), true);
 
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Psychiatric Evaluation",
-                300.0, DateTime.Now), true);
+                300.0,25, DateTime.Now), true);
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Radiology Review", 910.00,
-                DateTime.Now), true);
+                20, DateTime.Now), true);
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Physical Therapy Assessment",
-                725.00, DateTime.Now), true);
+                725.00,10, DateTime.Now), true);
 
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Obstetrics Ultrasound",
-                400.00, DateTime.Now), true);
+                400.00,20, DateTime.Now), true);
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Emergency Room Visit",
-                500.00, DateTime.Now), true);
+                500.00,20, DateTime.Now), true);
 
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Examination",
-                100.00, DateTime.Now), true);
+                100.00, 10, DateTime.Now), true);
         }
 
         private async Task SeedDepartmentRecords()
         {
             if (await departmentRepository.GetCountAsync() > 0)
                 return;
-            
+
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Cardiology"), true);
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Radiology"), true);
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Emergency"), true);
@@ -91,6 +104,10 @@ namespace Pusula.Training.HealthCare
 
         private async Task SeedMedicalServiceToDepartments()
         {
+            if (await medicalServiceRepository.GetCountAsync() == 0
+                || await medicalServiceRepository.GetCountAsync() == 0)
+                return;
+
             var medicalServices = await medicalServiceRepository.GetListAsync();
             var departments = await departmentRepository.GetListAsync();
 
@@ -116,10 +133,9 @@ namespace Pusula.Training.HealthCare
 
         private async Task SeedPatientRecords()
         {
-
             if (await patientRepository.GetCountAsync() > 0)
                 return;
-            
+
             var patient1 = new Patient(
                 Guid.NewGuid(),
                 1,
@@ -192,6 +208,184 @@ namespace Pusula.Training.HealthCare
             await patientRepository.InsertManyAsync([patient1, patient2, patient3], true);
         }
 
+        private async Task SeedTitles()
+        {
+            var titles = new List<Title>
+            {
+                new Title(guidGenerator.Create(), "Dr."),
+                new Title(guidGenerator.Create(), "Prof."),
+                new Title(guidGenerator.Create(), "Yrd. Doç."),
+                new Title(guidGenerator.Create(), "Op."),
+            };
+
+            await titleRepository.InsertManyAsync(titles, autoSave: true);
+        }
+
+        private async Task SeedDoctorRecords()
+        {
+            if (await titleRepository.GetCountAsync() == 0 || await departmentRepository.GetCountAsync() == 0)
+                return;
+
+            var random = new Random();
+            var titles = await titleRepository.GetListAsync();
+            var departments = await departmentRepository.GetListAsync();
+
+            var d1 = new Doctor(
+                guidGenerator.Create(),
+                titles.First(t => t.TitleName == "Dr.").Id,
+                departments[0].Id,
+                "Arif",
+                "Yılmaz",
+                "12345678901",
+                new DateTime(1980, 5, 12),
+                EnumGender.MALE,
+                15,
+                "İstanbul",
+                "Kadıköy",
+                "ahmet.yilmaz@example.com",
+                "555-1234567"
+            );
+
+            var d2 = new Doctor(
+                guidGenerator.Create(),
+                titles.First(t => t.TitleName == "Dr.").Id,
+                departments[0].Id,
+                "Fatma",
+                "Kara",
+                "98765432109",
+                new DateTime(1990, 3, 25),
+                EnumGender.FEMALE,
+                5,
+                "Ankara",
+                "Çankaya",
+                "fatma.kara@example.com",
+                "555-9876543"
+            );
+
+            var d3 = new Doctor(
+                guidGenerator.Create(),
+                titles.First(t => t.TitleName == "Dr.").Id,
+                departments[0].Id,
+                "Mehmet",
+                "Çelik",
+                "12309876543",
+                new DateTime(1975, 11, 30),
+                EnumGender.MALE,
+                20,
+                "İzmir",
+                "Konak",
+                "mehmet.celik@example.com",
+                "555-3219876"
+            );
+
+            var d4 = new Doctor(
+                guidGenerator.Create(),
+                titles.First(t => t.TitleName == "Prof.").Id,
+                departments[1].Id,
+                "Merve",
+                "Şahin",
+                "23456789012",
+                new DateTime(1985, 8, 23),
+                EnumGender.FEMALE,
+                12,
+                "Ankara",
+                "Çankaya",
+                "merve.sahin@example.com",
+                "555-2345678"
+            );
+
+            var d5 = new Doctor(
+                guidGenerator.Create(),
+                titles.First(t => t.TitleName == "Prof.").Id,
+                departments[1].Id,
+                "Zeynep",
+                "Demir",
+                "45678901234",
+                new DateTime(1990, 7, 5),
+                EnumGender.FEMALE,
+                8,
+                "Bursa",
+                "Osmangazi",
+                "zeynep.demir@example.com",
+                "555-4567890"
+            );
+
+            var d6 = new Doctor(
+                guidGenerator.Create(),
+                titles.First(t => t.TitleName == "Yrd. Doç.").Id,
+                departments[3].Id,
+                "Ahmet",
+                "Aksoy",
+                "56789012345",
+                new DateTime(1982, 11, 30),
+                EnumGender.MALE,
+                13,
+                "Adana",
+                "Seyhan",
+                "ahmet.aksoy@example.com",
+                "555-5678901"
+            );
+
+            var d7 = new Doctor(
+                guidGenerator.Create(),
+                titles.First(t => t.TitleName == "Dr.").Id,
+                departments[2].Id,
+                "Elif",
+                "Çelik",
+                "67890123456",
+                new DateTime(1988, 4, 18),
+                EnumGender.FEMALE,
+                10,
+                "Antalya",
+                "Muratpaşa",
+                "elif.celik@example.com",
+                "555-6789012"
+            );
+
+            var d8 = new Doctor(
+                guidGenerator.Create(),
+                titles.First(t => t.TitleName == "Prof.").Id,
+                departments[4].Id,
+                "Mehmet",
+                "Güneş",
+                "78901234567",
+                new DateTime(1970, 9, 9),
+                EnumGender.MALE,
+                25,
+                "Gaziantep",
+                "Şahinbey",
+                "mehmet.gunes@example.com",
+                "555-7890123"
+            );
+            
+            var d9 = new Doctor(
+                guidGenerator.Create(),
+                titles.First(t => t.TitleName == "Yrd. Doç.").Id,
+                departments[5].Id,
+                "Ayşe",
+                "Yıldız",
+                "89012345678",
+                new DateTime(1987, 6, 22),
+                EnumGender.FEMALE,
+                9,
+                "Samsun",
+                "Atakum",
+                "ayse.yildiz@example.com",
+                "555-8901234"
+            );
+            
+            
+            await doctorRepository.InsertAsync(d1, true);
+            await doctorRepository.InsertAsync(d2, true);
+            await doctorRepository.InsertAsync(d3, true);
+            await doctorRepository.InsertAsync(d4, true);
+            await doctorRepository.InsertAsync(d5, true);
+            await doctorRepository.InsertAsync(d6, true);
+            await doctorRepository.InsertAsync(d7, true);
+            await doctorRepository.InsertAsync(d8, true);
+            await doctorRepository.InsertAsync(d9, true);
+        }
+
         private async Task SeedRoleRecords()
         {
             var doctor = new IdentityRole(guidGenerator.Create(), "doctor", null)
@@ -232,6 +426,74 @@ namespace Pusula.Training.HealthCare
 
             await userManager.CreateAsync(new IdentityUser(guidGenerator.Create(), "doctor@1", "doc1@gmail.com"),
                 "doctor@A1");
+        }
+
+        private async Task SeedAppointments()
+        {
+            if (await medicalServiceRepository.GetCountAsync() == 0
+                || await patientRepository.GetCountAsync() == 0
+                || await doctorRepository.GetCountAsync() == 0)
+                return;
+
+            var medicalServices = await medicalServiceRepository.GetListAsync();
+            var doctors = await doctorRepository.GetListAsync();
+            var patients = await patientRepository.GetListAsync();
+
+            var random = new Random();
+
+            for (var i = 0; i < 10; i++)
+            {
+                var doctor = doctors[random.Next(doctors.Count)];
+                var patient = patients[random.Next(patients.Count)];
+                var medicalService = medicalServices[random.Next(medicalServices.Count)];
+
+                var appointmentDate = DateTime.Now.AddDays(random.Next(1, 31));
+                var appointmentTime = appointmentDate.Date
+                    .AddHours(random.Next(9, 18))
+                    .AddMinutes(random.Next(0, 60));
+
+                try
+                {
+                    var appointment = new Appointment(
+                        doctor.Id,
+                        patient.Id,
+                        medicalService.Id,
+                        appointmentDate,
+                        appointmentTime,
+                        (EnumAppointmentStatus)random.Next(0, Enum.GetValues(typeof(EnumAppointmentStatus)).Length),
+                        random.NextDouble() > 0.5 ? "Some notes for this appointment" : null,
+                        random.NextDouble() > 0.5,
+                        medicalService.Cost
+                    );
+
+                    await appointmentRepository.InsertAsync(appointment);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(
+                        $"Skipping appointment for doctor {doctor.Id} and patient {patient.Id} at {appointmentTime}. Error: {ex.Message}");
+                }
+            }
+        }
+
+        private async Task SeedDoctorWorkingHours()
+        {
+            if (await doctorRepository.GetCountAsync() == 0)
+                return;
+
+            var doctors = await doctorRepository.GetListAsync();
+
+            foreach (var doctor in doctors)
+            {
+                for (var day = (int)DayOfWeek.Monday; day <= (int)DayOfWeek.Friday; day++)
+                {
+                    var startHour = new TimeSpan(8, 0, 0);
+                    var endHour = new TimeSpan(17, 0, 0); 
+
+                    var doctorWorkingHour = new DoctorWorkingHour(doctor.Id, (DayOfWeek)day, startHour, endHour);
+                    await doctorWorkingHourRepository.InsertAsync(doctorWorkingHour);
+                }
+            }
         }
         
     }

@@ -13,17 +13,19 @@ public class MedicalServiceManager(
     IDepartmentRepository departmentRepository) : DomainService
 {
     public virtual async Task<MedicalService> CreateAsync(
-        string name, DateTime serviceCreatedAt, double cost, List<string> departmentNames)
+        string name, DateTime serviceCreatedAt, double cost, int duration, List<string> departmentNames)
     {
         Check.NotNullOrWhiteSpace(name, nameof(name));
         Check.NotNull(serviceCreatedAt, nameof(serviceCreatedAt));
         Check.Range(cost, nameof(cost), MedicalServiceConsts.CostMinValue);
+        Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue, MedicalServiceConsts.DurationMaxValue);
         Check.NotNull(departmentNames, nameof(departmentNames));
 
         var medicalService = new MedicalService(
             GuidGenerator.Create(),
             name,
             cost,
+            duration,
             serviceCreatedAt
         );
 
@@ -51,17 +53,20 @@ public class MedicalServiceManager(
         Guid id,
         string name,
         double cost,
+        int duration,
         DateTime serviceCreatedAt,
         List<string> departmentNames,
         string? concurrencyStamp = null
     )
     {
+        
         Check.NotNull(id, nameof(id));
         Check.NotNull(serviceCreatedAt, nameof(serviceCreatedAt));
         Check.NotNullOrWhiteSpace(name, nameof(name));
         Check.Range(cost, nameof(cost), MedicalServiceConsts.CostMinValue);
         Check.NotNull(departmentNames, nameof(departmentNames));
-
+        Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue, MedicalServiceConsts.DurationMaxValue);
+        
         var service = await medicalServiceRepository.GetAsync(id);
 
         if (service == null)
@@ -71,6 +76,7 @@ public class MedicalServiceManager(
 
         service.Name = name;
         service.Cost = cost;
+        service.Duration = duration;
         service.ServiceCreatedAt = serviceCreatedAt;
         service.SetConcurrencyStampIfNotNull(concurrencyStamp);
 

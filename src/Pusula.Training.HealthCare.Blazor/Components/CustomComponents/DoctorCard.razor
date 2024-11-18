@@ -1,3 +1,4 @@
+@using Pusula.Training.HealthCare.Patients
 <Card @onclick="() => OnDoctorSelect.InvokeAsync(Doctor)"
       Class="@GetDoctorCardClass(Doctor)">
     <CardBody Class="p-0">
@@ -14,18 +15,17 @@
                 </div>
                 <div class="d-flex flex-column">
                     <h6 class="m-0 text-center fw-semibold">@Doctor.Name</h6>
-                    <Badge Color="@(Doctor.Gender == "Male" ? Color.Primary : Color.Danger)"
+                    <Badge
                            Border="Border.Is1"
                            TextWeight="TextWeight.Normal"
                            TextSize="TextSize.ExtraSmall"
                            Width="Width.Px(25)">
-                        @(Doctor.Gender == "Male" ? "E" : "K")
+                        @(Doctor.Gender)
                     </Badge>
                 </div>
             </div>
             <div class="f1">
                 <h6 class="m-0 text-start fw-normal">@Doctor.Department</h6>
-                <h6 class="m-0 text-start fw-semibold">@Doctor.InsuranceType</h6>
             </div>
         </div>
         @if (Doctor.IsSelected)

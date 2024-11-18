@@ -15,8 +15,14 @@ namespace Pusula.Training.HealthCare.Controllers.Appointments;
 [Area("app")]
 [ControllerName("Appointment")]
 [Route("api/app/appointment")]
-public class AppointmentController : HealthCareController, IAppointmentAppService
+public class AppointmentController(IAppointmentAppService appointmentAppService)
+    : HealthCareController, IAppointmentAppService
 {
+    [HttpGet]
+    [Route("available-slots")]
+    public async Task<PagedResultDto<AppointmentSlotDto>> GetAvailableSlotsAsync(GetAppointmentsInput input) =>
+        await appointmentAppService.GetAvailableSlotsAsync(input);
+
     [HttpGet]
     public Task<PagedResultDto<AppointmentDto>> GetListAsync(GetAppointmentsInput input)
     {
@@ -36,7 +42,7 @@ public class AppointmentController : HealthCareController, IAppointmentAppServic
     {
         throw new NotImplementedException();
     }
-    
+
     [HttpPost]
     public Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
     {
