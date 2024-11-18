@@ -22,6 +22,7 @@ using DistributedCacheEntryOptions = Microsoft.Extensions.Caching.Distributed.Di
 namespace Pusula.Training.HealthCare.DoctorLeaves;
 
 [RemoteService(IsEnabled = false)]
+[Authorize(HealthCarePermissions.DoctorLeaves.Default)]
 public class DoctorLeaveAppService(IDoctorLeaveRepository repo, DoctorLeaveManager manager,
     IDistributedCache<DoctorLeaveDownloadTokenCacheItem, string> downloadTokenCache,
     IDistributedEventBus distributedEventBus,
@@ -40,15 +41,6 @@ public class DoctorLeaveAppService(IDoctorLeaveRepository repo, DoctorLeaveManag
             
         }
 
-       // calısırsa pageresult seklıne cevırırım belkı 
-        public virtual async Task<List<DoctorLeaveDto>> GetListByDoctorNumberAsync(
-            Guid? doctorId, string? identityNumber)
-        {
-            var doctorLeaves = await repo.GetListByDoctorNumberAsync(doctorId, identityNumber);
-            
-            return ObjectMapper.Map<List<DoctorLeave>, List<DoctorLeaveDto>>(doctorLeaves);
-        }
-
         public virtual async Task<DoctorLeaveDto> GetAsync(Guid id)
         {
           
@@ -61,48 +53,32 @@ public class DoctorLeaveAppService(IDoctorLeaveRepository repo, DoctorLeaveManag
         }
 
    
+        [Authorize(HealthCarePermissions.DoctorLeaves.Delete)]
         public virtual async Task DeleteAsync(Guid id)
         {
             await repo.DeleteAsync(id);
         }
 
-   
+        [Authorize(HealthCarePermissions.DoctorLeaves.Create)]
         public virtual async Task<DoctorLeaveDto> CreateAsync(DoctorLeaveCreateDto input)
         {
-
-            try
-            {
+            
                 var leave = await manager.CreateAsync(input.DoctorId, input.StartDate, input.EndDate, input.Reason);
                 return ObjectMapper.Map<DoctorLeave, DoctorLeaveDto>(leave);
-            }
-           
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine("errorrrr " + ex.Message);
-                throw new ApplicationException("An unexpected error occurred.", ex);
-            }
+         
         }
 
-     
+        [Authorize(HealthCarePermissions.DoctorLeaves.Edit)]
         public virtual async Task<DoctorLeaveDto> UpdateAsync(Guid id, DoctorLeaveUpdateDto input)
         {
-            try
-            {
-                var leave = await manager.UpdateAsync(
-            id,
-            input.DoctorId, input.StartDate, input.EndDate, input.Reason, input.ConcurrencyStamp
-            );
-
+            
+                var leave = await manager.UpdateAsync(id, input.DoctorId, input.StartDate, input.EndDate, input.Reason, input.ConcurrencyStamp);
+                   
                 return ObjectMapper.Map<DoctorLeave, DoctorLeaveDto>(leave);
-            }
-           
-            catch (Exception ex)
-            {
-                throw new UserFriendlyException(ex.Message);
-            }
+          
         }
 
-  
+        [AllowAnonymous]
         public virtual async Task<IRemoteStreamContent> GetListAsExcelFileAsync(DoctorLeaveExcelDownloadDto input)
         {
             var downloadToken = await downloadTokenCache.GetAsync(input.DownloadToken);
@@ -120,13 +96,13 @@ public class DoctorLeaveAppService(IDoctorLeaveRepository repo, DoctorLeaveManag
             return new RemoteStreamContent(memoryStream, "Leaves.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         }
 
-    
+        [Authorize(HealthCarePermissions.DoctorLeaves.Delete)]
         public virtual async Task DeleteByIdsAsync(List<Guid> leaveIds)
         {
             await repo.DeleteManyAsync(leaveIds);
         }
 
-       
+        [Authorize(HealthCarePermissions.DoctorLeaves.Delete)]
         public virtual async Task DeleteAllAsync(GetDoctorLeaveInput input)
         {
             await repo.DeleteAllAsync(input.FilterText, input.DoctorId, input.StartDateMin, input.StartDateMax, input.EndDateMin, input.EndDateMax,
