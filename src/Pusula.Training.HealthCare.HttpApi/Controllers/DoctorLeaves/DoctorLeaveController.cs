@@ -1,0 +1,88 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Asp.Versioning;
+using Microsoft.AspNetCore.Mvc;
+using Pusula.Training.HealthCare.DoctorLeaves;
+using Pusula.Training.HealthCare.Shared;
+using Volo.Abp;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Content;
+
+namespace Pusula.Training.HealthCare.Controllers.DoctorLeaves;
+
+[RemoteService]
+[Area("app")]
+[ControllerName("DoctorLeave")]
+[Route("api/app/doctorleave")]
+public class DoctorLeaveController(IDoctorLeaveAppService leaveService) : HealthCareController, IDoctorLeaveAppService
+{
+    [HttpGet]
+    public virtual Task<PagedResultDto<DoctorLeaveDto>> GetListAsync(GetDoctorLeaveInput input)
+    {
+        return leaveService.GetListAsync(input);
+    }
+
+    [HttpGet]
+    [Route("{id}")]
+    public virtual Task<DoctorLeaveDto> GetAsync(Guid id)
+    {
+        return leaveService.GetAsync(id);
+    }
+    
+    [HttpGet]
+    [Route("by-doctor-number/{identityNumber?}")]
+    public virtual Task<List<DoctorLeaveDto>> GetListByDoctorNumberAsync([FromQuery]Guid? doctorId, string? identityNumber)
+    {
+        return leaveService.GetListByDoctorNumberAsync(doctorId, identityNumber);
+    }
+
+
+    [HttpPost]
+    public virtual Task<DoctorLeaveDto> CreateAsync(DoctorLeaveCreateDto input)
+    {
+        return leaveService.CreateAsync(input);
+    }
+
+    [HttpPut]
+    [Route("{id}")]
+    public virtual Task<DoctorLeaveDto> UpdateAsync(Guid id, DoctorLeaveUpdateDto input)
+    {
+        return leaveService.UpdateAsync(id, input);
+    }
+
+    [HttpDelete]
+    [Route("{id}")]
+    public virtual Task DeleteAsync(Guid id)
+    {
+        return leaveService.DeleteAsync(id);
+    }
+
+    [HttpGet]
+    [Route("as-excel-file")]
+    public virtual Task<IRemoteStreamContent> GetListAsExcelFileAsync(DoctorLeaveExcelDownloadDto input)
+    {
+        return leaveService.GetListAsExcelFileAsync(input);
+    }
+
+    [HttpGet]
+    [Route("download-token")]
+    public virtual Task<DownloadTokenResultDto> GetDownloadTokenAsync()
+    {
+        return leaveService.GetDownloadTokenAsync();
+    }
+
+    [HttpDelete]
+    [Route("")]
+    public virtual Task DeleteByIdsAsync(List<Guid> leaveIds)
+    {
+        return leaveService.DeleteByIdsAsync(leaveIds);
+    }
+
+    [HttpDelete]
+    [Route("all")]
+    public virtual Task DeleteAllAsync(GetDoctorLeaveInput input)
+    {
+        return leaveService.DeleteAllAsync(input);
+    }
+}
