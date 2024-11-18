@@ -11,8 +11,6 @@ namespace Pusula.Training.HealthCare.DoctorLeaves;
 public interface IDoctorLeaveAppService: IApplicationService
 {
     Task<PagedResultDto<DoctorLeaveDto>> GetListAsync(GetDoctorLeaveInput input);
-    
-    Task<List<DoctorLeaveDto>> GetListByDoctorNumberAsync(Guid? doctorId, string? identityNumber );
 
     Task<DoctorLeaveDto> GetAsync(Guid id);
 

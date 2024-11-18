@@ -26,12 +26,11 @@ public class DoctorLeave : FullAuditedAggregateRoot<Guid>
 
     public DoctorLeave(Guid id, Guid doctorId, DateTime startDate, DateTime endDate, string? reason = null)
     {
-        //validasyonlar yapıldı
+       
         Check.NotNullOrWhiteSpace(doctorId.ToString(), nameof(doctorId));
         Check.NotNull(startDate, nameof(startDate));
         Check.NotNull(endDate, nameof(endDate));
-
-
+        
         Id = id;
         DoctorId = doctorId;
         StartDate = startDate;

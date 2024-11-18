@@ -30,13 +30,6 @@ public class DoctorLeaveController(IDoctorLeaveAppService leaveService) : Health
         return leaveService.GetAsync(id);
     }
     
-    [HttpGet]
-    [Route("by-doctor-number/{identityNumber?}")]
-    public virtual Task<List<DoctorLeaveDto>> GetListByDoctorNumberAsync([FromQuery]Guid? doctorId, string? identityNumber)
-    {
-        return leaveService.GetListByDoctorNumberAsync(doctorId, identityNumber);
-    }
-
 
     [HttpPost]
     public virtual Task<DoctorLeaveDto> CreateAsync(DoctorLeaveCreateDto input)

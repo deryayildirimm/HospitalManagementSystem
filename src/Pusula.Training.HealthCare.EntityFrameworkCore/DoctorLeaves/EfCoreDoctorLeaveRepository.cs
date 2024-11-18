@@ -72,37 +72,8 @@ public class EfCoreDoctorLeaveRepository(IDbContextProvider<HealthCareDbContext>
         string? identityNumber,
         CancellationToken cancellationToken = default)
     {
+      
         var dbContext = await GetDbContextAsync();
-
-        // DoctorId varsa kullan
-        if (doctorId.HasValue)
-        {
-            return await dbContext.DoctorLeaves
-                .Where(dl => dl.DoctorId == doctorId.Value)
-                .ToListAsync(cancellationToken);
-        }
-        
-        // InsuranceNumber ile doktor bulunup DoctorId üzerinden sorgula
-        if (!string.IsNullOrWhiteSpace(identityNumber))
-        {
-            var doctor = await dbContext.Doctors
-                .FirstOrDefaultAsync(d => d.IdentityNumber == identityNumber, cancellationToken);
-
-            if (doctor == null)
-            {
-                throw new BusinessException("DoctorNotFound")
-                    .WithData("InsuranceNumber", identityNumber);
-            }
-
-            return await dbContext.DoctorLeaves
-                .Where(dl => dl.DoctorId == doctor.Id)
-                .ToListAsync(cancellationToken);
-        }
-
-        throw new BusinessException("InvalidRequest")
-            .WithData("Message", "Either DoctorId or IdentityNumber must be provided.");
-        
-        /*
         // DoctorId varsa sorgulama yap; yoksa IdentityNumber ile doktor bul
         // doctorId varsa kullan, yoksa identityNumber ile doktorId bul
         var doctorIdToQuery = doctorId 
@@ -117,7 +88,7 @@ public class EfCoreDoctorLeaveRepository(IDbContextProvider<HealthCareDbContext>
         return await dbContext.DoctorLeaves
             .Where(dl => dl.DoctorId == doctorIdToQuery)
             .ToListAsync(cancellationToken);
-        */
+       
     }
     protected virtual IQueryable<DoctorLeave> ApplyFilter(
         IQueryable<DoctorLeave> query,
