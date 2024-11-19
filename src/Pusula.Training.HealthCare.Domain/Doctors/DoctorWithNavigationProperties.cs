@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Pusula.Training.HealthCare.Departments;
+﻿using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Titles;
 
 namespace Pusula.Training.HealthCare.Doctors;

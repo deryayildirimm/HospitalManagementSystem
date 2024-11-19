@@ -69,4 +69,20 @@ public static class HealthCarePermissions
         public const string Create = Default + ".Create";
         public const string Delete = Default + ".Delete";
     }
+    
+    public static class Cities
+    {
+        public const string Default = GroupName + ".Cities";
+        public const string Edit = Default + ".Edit";
+        public const string Create = Default + ".Create";
+        public const string Delete = Default + ".Delete";
+    }
+    
+    public static class Districts
+    {
+        public const string Default = GroupName + ".Districts";
+        public const string Edit = Default + ".Edit";
+        public const string Create = Default + ".Create";
+        public const string Delete = Default + ".Delete";
+    }
 }

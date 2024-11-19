@@ -2,9 +2,9 @@
 
 namespace Pusula.Training.HealthCare.Doctors;
 
-public class DoctorTitleAndDepartmentsEto
+public class DoctorTitleAndDepartmentEto
 {
     
     public string Title { get; set; } = null!;
-    public List<string> Department { get; set; } = null!;
+    public string Department { get; set; } = null!;
 }

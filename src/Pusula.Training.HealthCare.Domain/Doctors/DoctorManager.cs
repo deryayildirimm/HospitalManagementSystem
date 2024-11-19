@@ -21,6 +21,8 @@ public class DoctorManager(IDoctorRepository doctorRepository) : DomainService
         Check.Range(yearOfExperience, nameof(yearOfExperience), 0, 100);
         Check.NotNullOrWhiteSpace(city, nameof(city), DoctorConsts.CityMaxLength, DoctorConsts.CityMinLength);
         Check.NotNullOrWhiteSpace(district, nameof(district), DoctorConsts.DistrictMaxLength, DoctorConsts.DistrictMinLength);
+        Check.NotNullOrWhiteSpace(departmentId.ToString(), nameof(departmentId));
+        Check.NotNullOrWhiteSpace(titleId.ToString(), nameof(titleId));
         
         var doctor = new Doctor(
             GuidGenerator.Create(), titleId, departmentId, firstName, lastName, identityNumber, birthDate, gender, yearOfExperience, city, district, email, phoneNumber
@@ -42,6 +44,8 @@ public class DoctorManager(IDoctorRepository doctorRepository) : DomainService
         Check.Range(yearOfExperience, nameof(yearOfExperience), 0, 100);
         Check.NotNullOrWhiteSpace(city, nameof(city), DoctorConsts.CityMaxLength, DoctorConsts.CityMinLength);
         Check.NotNullOrWhiteSpace(district, nameof(district), DoctorConsts.DistrictMaxLength, DoctorConsts.DistrictMinLength);
+        Check.NotNullOrWhiteSpace(departmentId.ToString(), nameof(departmentId));
+        Check.NotNullOrWhiteSpace(titleId.ToString(), nameof(titleId));
         
         var doctor = await doctorRepository.GetAsync(id);
 

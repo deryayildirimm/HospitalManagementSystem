@@ -22,7 +22,7 @@ namespace Pusula.Training.HealthCare.Doctors;
 
 
 [RemoteService(IsEnabled = false)]
-[Authorize(HealthCarePermissions.Patients.Default)]
+[Authorize(HealthCarePermissions.Doctors.Default)]
 public class DoctorsAppService(
         IDoctorRepository doctorRepository,
         DoctorManager doctorManager,

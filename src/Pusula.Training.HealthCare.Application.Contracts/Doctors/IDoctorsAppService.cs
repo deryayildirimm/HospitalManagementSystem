@@ -29,7 +29,7 @@ public interface IDoctorsAppService : IApplicationService
     Task<DoctorDto> UpdateAsync(DoctorUpdateDto input);
 
     Task<IRemoteStreamContent> GetListAsExcelFileAsync(DoctorExcelDownloadDto input);
-    Task DeleteByIdsAsync(List<Guid> protocolIds);
+    Task DeleteByIdsAsync(List<Guid> doctorIds);
 
     Task DeleteAllAsync(GetDoctorsInput input);
     Task<Pusula.Training.HealthCare.Shared.DownloadTokenResultDto> GetDownloadTokenAsync();

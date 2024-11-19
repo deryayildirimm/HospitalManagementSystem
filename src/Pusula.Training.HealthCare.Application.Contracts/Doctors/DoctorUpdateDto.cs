@@ -33,6 +33,8 @@ public class DoctorUpdateDto
     [Required]
     [StringLength(DoctorConsts.DistrictMaxLength, MinimumLength = DoctorConsts.DistrictMinLength)]
     public string District { get; set; } = null!;
+    [Required]
     public Guid DepartmentId { get; set; }
+    [Required]
     public Guid TitleId { get; set; }
 }
