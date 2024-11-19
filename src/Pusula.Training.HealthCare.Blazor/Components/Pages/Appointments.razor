@@ -6,6 +6,7 @@
 @using Pusula.Training.HealthCare.Permissions
 @using Pusula.Training.HealthCare.Localization
 @using Pusula.Training.HealthCare.MedicalServices
+@using Pusula.Training.HealthCare.Patients
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web
 @using Volo.Abp.Http.Client
@@ -15,7 +16,7 @@
 @inject IAppointmentAppService AppointmentAppService
 @inject IMedicalServicesAppService MedicalServiceAppService
 @inject IDoctorsAppService DoctorsAppService
-
+@inject IPatientsAppService PatientsAppService
 @inject IUiMessageService UiMessageService
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
@@ -24,7 +25,7 @@
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["Appointments"]">
-    <link href="../Components/Pages/Appointments.razor.css?v=1.1" rel="stylesheet"/>
+    <link href="../Components/Pages/Appointments.razor.css?v=1.2" rel="stylesheet"/>
 </PageHeader>
 
 <div class="row py-3">
@@ -32,7 +33,7 @@
     <div class="card border-1 border-black p-4">
         <h5 class="fw-bolder m-0">@L["ServiceSummary"]</h5>
         <hr class="my-2"/>
-        <div class="card-body p-2">
+        <div class="card-body p-0">
             <div>
                 <h6 class="text-start">@L["Department"]</h6>
                 @if (AppointmentStepperModel.DepartmentName != null)
@@ -258,11 +259,19 @@ else if (ActiveStep == 1)
                         {
                             @foreach (var appointment in AppointmentSlots)
                             {
-                                var cardClasses = $"time-slot-card shadow-sm text-center align-items-center justify-content-center " +
-                                                  $"{(appointment.AvailabilityValue ? "light-green" : "light-red opacity-75")} " +
-                                                  $"{(appointment.IsSelected ? "active" : "")}";
 
-                                <div class="@cardClasses" @onclick="() => { SelectAppointment(appointment); }">
+                                var dynamicClasses = "shadow-sm text-center align-items-center justify-content-center ";
+                                
+                                if (appointment.AvailabilityValue)
+                                {
+                                    dynamicClasses += $"time-slot-card light-green {(appointment.IsSelected ? "active" : "")}";
+                                }
+                                else
+                                {
+                                    dynamicClasses += $"is-booked";
+                                }
+
+                                <div class="@dynamicClasses" @onclick="() => { SelectAppointmentSlot(appointment); }">
                                     <div class="d-flex flex-column align-items-center justify-content-center px-1 py-1 h-100">
                                         <Text class="fs-5" TextWeight="TextWeight.SemiBold" TextColor="TextColor.Dark">
                                             @appointment.StartTime - @appointment.EndTime
@@ -321,7 +330,7 @@ else if (ActiveStep == 2)
                                 </DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
-
+                        
                         <div>
                             <Label For="appointmentId" Class="form-label">@L["EAppointmentID"]</Label>
                             <TextEdit Disabled="true" @bind-Value="appointmentId" Placeholder="@L["EAppointmentID"]" Class="form-control"/>
@@ -331,6 +340,11 @@ else if (ActiveStep == 2)
                             <Label For="paymentId" Class="form-label">@L["EAppointmentPaymentID"]</Label>
                             <TextEdit Disabled="true" @bind-Value="paymentId" Placeholder="@L["EAppointmentPaymentID"]" Class="form-control"/>
                         </div>
+                        <div>
+                            <Label Class="form-label">@L["SendReminder"]</Label>
+                            <Switch Cursor="Cursor.Pointer" Width="Width.Px(60)" Height="Height.Px(30)" TValue="bool" Checked="@AppointmentStepperModel.ReminderSent" CheckedChanged="@OnReminderSettingChanged"></Switch>
+                        </div>
+
                     </CardBody>
                 </Card>
             </div>
@@ -351,17 +365,22 @@ else if (ActiveStep == 2)
 
                         <div class="d-flex align-items-center  gap-2">
                             <Icon Name="IconName.Calendar" IconSize="IconSize.Large" Class="purple"></Icon>
-                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.AppointmentDate</Text>
+                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.AppointmentDisplayDate</Text>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             <Icon Name="IconName.Clock" IconSize="IconSize.Large" Class="purple"></Icon>
-                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.AppointmentTime</Text>
+                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.AppointmentDisplayTime</Text>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             <Icon Name="IconName.Hospital" IconSize="IconSize.Large" Class="purple"></Icon>
                             <Text TextSize="TextSize.Small">@AppointmentStepperModel.DoctorName</Text>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-2">
+                            <Icon Name="IconName.List" IconSize="IconSize.Large" Class="purple"></Icon>
+                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.DepartmentName</Text>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">

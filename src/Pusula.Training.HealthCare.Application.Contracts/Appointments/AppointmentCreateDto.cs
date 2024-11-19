@@ -18,11 +18,11 @@ public class AppointmentCreateDto
     public DateTime AppointmentDate { get; set; }
     
     [Required]
-    public DateTime AppointmentTime { get; set; }
+    public DateTime StartTime { get; set; }
     
     [Required]
-    public EnumAppointmentStatus Status { get; set; }
-
+    public DateTime EndTime { get; set; }
+    
     public string? Notes { get; set; } = string.Empty;
     
     [Required]
@@ -30,8 +30,4 @@ public class AppointmentCreateDto
     
     [Required]
     public double Amount { get; set; }
-
-    public AppointmentCreateDto()
-    {
-    }
 }

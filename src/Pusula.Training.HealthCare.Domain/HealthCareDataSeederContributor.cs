@@ -46,8 +46,8 @@ namespace Pusula.Training.HealthCare
             await SeedMedicalServiceToDepartments();
             await SeedTitles();
             await SeedDoctorRecords();
-            await SeedAppointments();
             await SeedDoctorWorkingHours();
+            await SeedAppointments();
         }
 
         private async Task SeedMedicalServiceRecords()
@@ -63,23 +63,23 @@ namespace Pusula.Training.HealthCare
                 250.00, 20, DateTime.Now), true);
 
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Pediatric Check-up",
-                120.00,20, DateTime.Now), true);
+                120.00, 20, DateTime.Now), true);
             await medicalServiceRepository.InsertAsync(
                 new MedicalService(Guid.NewGuid(), "Chiropractic Session", 90.00, 20, DateTime.Now));
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Nutrition Consultation",
-                75.00,20, DateTime.Now), true);
+                75.00, 20, DateTime.Now), true);
 
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Psychiatric Evaluation",
-                300.0,25, DateTime.Now), true);
+                300.0, 25, DateTime.Now), true);
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Radiology Review", 910.00,
                 20, DateTime.Now), true);
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Physical Therapy Assessment",
-                725.00,10, DateTime.Now), true);
+                725.00, 10, DateTime.Now), true);
 
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Obstetrics Ultrasound",
-                400.00,20, DateTime.Now), true);
+                400.00, 20, DateTime.Now), true);
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Emergency Room Visit",
-                500.00,20, DateTime.Now), true);
+                500.00, 20, DateTime.Now), true);
 
             await medicalServiceRepository.InsertAsync(new MedicalService(Guid.NewGuid(), "Examination",
                 100.00, 10, DateTime.Now), true);
@@ -357,7 +357,7 @@ namespace Pusula.Training.HealthCare
                 "mehmet.gunes@example.com",
                 "555-7890123"
             );
-            
+
             var d9 = new Doctor(
                 guidGenerator.Create(),
                 titles.First(t => t.TitleName == "Yrd. Doç.").Id,
@@ -373,8 +373,8 @@ namespace Pusula.Training.HealthCare
                 "ayse.yildiz@example.com",
                 "555-8901234"
             );
-            
-            
+
+
             await doctorRepository.InsertAsync(d1, true);
             await doctorRepository.InsertAsync(d2, true);
             await doctorRepository.InsertAsync(d3, true);
@@ -440,42 +440,88 @@ namespace Pusula.Training.HealthCare
             var patients = await patientRepository.GetListAsync();
 
             var random = new Random();
+            var startHour = TimeSpan.FromHours(9);
+            var endHour = TimeSpan.FromHours(17);
+            
+            var allAppointments = new List<Appointment>();
 
-            for (var i = 0; i < 10; i++)
+            foreach (var patient in patients)
             {
-                var doctor = doctors[random.Next(doctors.Count)];
-                var patient = patients[random.Next(patients.Count)];
+                var doctor = doctors[random.Next(doctors.Count)]; 
                 var medicalService = medicalServices[random.Next(medicalServices.Count)];
+                var serviceDuration = TimeSpan.FromMinutes(medicalService.Duration);
 
-                var appointmentDate = DateTime.Now.AddDays(random.Next(1, 31));
-                var appointmentTime = appointmentDate.Date
-                    .AddHours(random.Next(9, 18))
-                    .AddMinutes(random.Next(0, 60));
+                var appointmentDate = DateTime.Now.Date.AddDays(1);
 
-                try
+                var availableTimes = new List<TimeSpan>();
+
+                for (var time = startHour; time + serviceDuration <= endHour; time += serviceDuration)
                 {
-                    var appointment = new Appointment(
-                        doctor.Id,
-                        patient.Id,
-                        medicalService.Id,
-                        appointmentDate,
-                        appointmentTime,
-                        (EnumAppointmentStatus)random.Next(0, Enum.GetValues(typeof(EnumAppointmentStatus)).Length),
-                        random.NextDouble() > 0.5 ? "Some notes for this appointment" : null,
-                        random.NextDouble() > 0.5,
-                        medicalService.Cost
-                    );
-
-                    await appointmentRepository.InsertAsync(appointment);
+                    availableTimes.Add(time);
                 }
-                catch (Exception ex)
+
+                var patientAppointments =
+                    new HashSet<(DateTime, TimeSpan)>();
+
+                for (int i = 0; i < 10; i++)
                 {
-                    Console.WriteLine(
-                        $"Skipping appointment for doctor {doctor.Id} and patient {patient.Id} at {appointmentTime}. Error: {ex.Message}");
+                    bool isSlotTaken;
+                    TimeSpan appointmentTime;
+
+                    do
+                    {
+                        appointmentTime = availableTimes[random.Next(availableTimes.Count)];
+                        isSlotTaken = patientAppointments.Contains((appointmentDate, appointmentTime));
+                    } while (isSlotTaken);
+
+                    patientAppointments.Add((appointmentDate, appointmentTime));
+
+                    try
+                    {
+                        var appointment = new Appointment(
+                            guidGenerator.Create(),
+                            doctor.Id,
+                            patient.Id,
+                            medicalService.Id,
+                            appointmentDate,
+                            appointmentDate + appointmentTime,
+                            appointmentDate + appointmentTime + serviceDuration,
+                            (EnumAppointmentStatus)random.Next(0, Enum.GetValues(typeof(EnumAppointmentStatus)).Length),
+                            random.NextDouble() > 0.5 ? "Some notes for this appointment" : null,
+                            random.NextDouble() > 0.5,
+                            medicalService.Cost
+                        );
+
+                        allAppointments.Add(appointment);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(
+                            $"Skipping appointment for patient {patient.Id} on {appointmentDate.Add(appointmentTime)}. Error: {ex.Message}");
+                    }
+
+                    // Her hasta için 10 farklı randevu saati olmalı
+                    if (patientAppointments.Count >= 10)
+                    {
+                        break;
+                    }
+
+                    // Eğer tüm slotlar dolmuşsa bir sonraki gün başlayacak
+                    if (appointmentTime + serviceDuration >= endHour)
+                    {
+                        appointmentDate = appointmentDate.AddDays(1); // Bir sonraki güne geçiş
+                        availableTimes.Clear(); // O günün saat dilimlerini sıfırla
+                        for (var time = startHour; time + serviceDuration <= endHour; time += serviceDuration)
+                        {
+                            availableTimes.Add(time); // Yeni güne ait saat dilimlerini oluştur
+                        }
+                    }
                 }
             }
-        }
 
+            await appointmentRepository.InsertManyAsync(allAppointments);
+        }
+        
         private async Task SeedDoctorWorkingHours()
         {
             if (await doctorRepository.GetCountAsync() == 0)
@@ -488,13 +534,12 @@ namespace Pusula.Training.HealthCare
                 for (var day = (int)DayOfWeek.Monday; day <= (int)DayOfWeek.Friday; day++)
                 {
                     var startHour = new TimeSpan(8, 0, 0);
-                    var endHour = new TimeSpan(17, 0, 0); 
+                    var endHour = new TimeSpan(17, 0, 0);
 
                     var doctorWorkingHour = new DoctorWorkingHour(doctor.Id, (DayOfWeek)day, startHour, endHour);
                     await doctorWorkingHourRepository.InsertAsync(doctorWorkingHour);
                 }
             }
         }
-        
     }
 }

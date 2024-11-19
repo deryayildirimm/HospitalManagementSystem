@@ -68,6 +68,7 @@ public partial class Appointments
 
     #endregion
 
+    private PatientDto Patient { get; set; }
     private List<SelectionItem> ServicesList { get; set; }
 
     private SfListBox<SelectionItem[], SelectionItem> SelectServiceDropdown;
@@ -113,8 +114,8 @@ public partial class Appointments
 
     private bool IsSecondStepValid =>
         IsFirstStepValid &&
-        !string.IsNullOrEmpty(AppointmentStepperModel.AppointmentTime) &&
-        !string.IsNullOrEmpty(AppointmentStepperModel.AppointmentDate);
+        !string.IsNullOrEmpty(AppointmentStepperModel.AppointmentDisplayTime) &&
+        !string.IsNullOrEmpty(AppointmentStepperModel.AppointmentDisplayDate);
 
     private bool IsThirdStepValid =>
         IsSecondStepValid &&
@@ -123,6 +124,8 @@ public partial class Appointments
 
     public Appointments()
     {
+
+        Patient = new PatientDto();
 
         MedicalServiceFilter = new GetMedicalServiceInput
         {
@@ -147,7 +150,7 @@ public partial class Appointments
         GetAppointmentSlotFilter = new GetAppointmentsInput();
 
         AppointmentStepperModel = new StepperModel();
-
+        
         DoctorsList = [];
         ServicesList = [];
         DaysList = [];
@@ -160,6 +163,7 @@ public partial class Appointments
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
+        await GetPatient();
         await GetServices();
         AddInitialDays();
     }
@@ -287,13 +291,11 @@ public partial class Appointments
     {
         if (args.Value.Length == 0)
         {
-            NewAppointment = new AppointmentCreateDto();
-            AppointmentStepperModel = new StepperModel();
+            OnStepperReset();
         }
         else
         {
             var item = args.Value[0];
-            NewAppointment.MedicalServiceId = item.Id;
             AppointmentStepperModel.MedicalServiceId = item.Id;
             AppointmentStepperModel.MedicalServiceName = item.DisplayName;
             AppointmentStepperModel.Amount = item.Cost;
@@ -330,6 +332,33 @@ public partial class Appointments
     #endregion
 
     #region API Fetch
+
+    private async Task GetPatient()
+    {
+        try
+        {
+            var patientFilter = new GetPatientsInput
+            {
+                PatientNumber = PatientNo
+            };
+            
+            var patients =  (await PatientsAppService.GetListAsync(patientFilter)).Items;
+
+            if (patients.Count > 0)
+            {
+                Patient = patients[0];
+                
+                AppointmentStepperModel.PatientId = Patient.Id;
+                AppointmentStepperModel.PatientName = Patient.FirstName + " " + Patient.LastName;
+            }
+            
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
 
     private async Task GetServices()
     {
@@ -369,7 +398,7 @@ public partial class Appointments
     private async Task GetDoctorsList()
     {
         var deptIds = MedicalServiceWithDepartmentsList
-            .Where(x => x.MedicalService.Id == NewAppointment.MedicalServiceId)
+            .Where(x => x.MedicalService.Id == AppointmentStepperModel.MedicalServiceId)
             .SelectMany(x => x.Departments)
             .Select(dept => dept.Id)
             .ToList();
@@ -515,12 +544,13 @@ public partial class Appointments
     {
         DaysList.ForEach(e => e.IsSelected = false);
         item.IsSelected = true;
-        AppointmentStepperModel.AppointmentDate = item.Date.ToShortDateString();
+        AppointmentStepperModel.AppointmentDisplayDate = item.Date.ToShortDateString();
+        AppointmentStepperModel.AppointmentDate = item.Date;
         GetAppointmentSlotFilter.Date = item.Date;
         await GetAvailableSlots();
     }
 
-    private void SelectAppointment(AppointmentSlot appointmentSlot)
+    private void SelectAppointmentSlot(AppointmentSlot appointmentSlot)
     {
         if (!appointmentSlot.AvailabilityValue)
         {
@@ -530,38 +560,90 @@ public partial class Appointments
         if (appointmentSlot.IsSelected)
         {
             AppointmentSlots.ForEach(e => e.IsSelected = false);
-            AppointmentStepperModel.AppointmentTime = null;
+            AppointmentStepperModel.AppointmentDisplayTime = null!;
+            AppointmentStepperModel.StartTime = null!;
+            AppointmentStepperModel.EndTime = null!;
         }
         else
         {
             AppointmentSlots.ForEach(e => e.IsSelected = false);
             appointmentSlot.IsSelected = true;
-            AppointmentStepperModel.AppointmentTime = 
+            AppointmentStepperModel.AppointmentDisplayTime = 
                 $"{appointmentSlot.StartTime.ToString(CultureInfo.CurrentCulture)} - {appointmentSlot.EndTime.ToString(CultureInfo.CurrentCulture)}";
+            AppointmentStepperModel.StartTime = appointmentSlot.StartTime;
+            AppointmentStepperModel.EndTime = appointmentSlot.EndTime;
         }
 
-        AppointmentStepperModel.PatientId = Guid.NewGuid();
+    }
 
+    private Task OnReminderSettingChanged(bool val)
+    {
+        AppointmentStepperModel.ReminderSent = val;
+        return Task.CompletedTask;
     }
 
     //TODO Create will be done
     private async Task CreateAppointment()
     {
-        var message = L["ConfirmMessage"];
-        var confirm = L["Confirm"];
 
-        if (!await UiMessageService.Confirm(message, confirm, options =>
-            {
-                options.ConfirmButtonText = L["Yes"];
-                options.CancelButtonText = L["No"];
-            }))
+        if (!IsThirdStepValid)
         {
             return;
         }
-        
-        OnNextStep();
 
-        IsFinalResultSuccess = true;
+        try
+        {
+            var baseDate = AppointmentStepperModel.AppointmentDate;
+            var parsedStartDateTime = ConvertToDateTime(AppointmentStepperModel.AppointmentDate, AppointmentStepperModel.StartTime);
+            var parsedEndDateTime = ConvertToDateTime(AppointmentStepperModel.AppointmentDate, AppointmentStepperModel.EndTime);
+        
+            //New appointment object mapping
+            NewAppointment.DoctorId = AppointmentStepperModel.DoctorId;
+            NewAppointment.PatientId = AppointmentStepperModel.PatientId;
+            NewAppointment.MedicalServiceId = AppointmentStepperModel.MedicalServiceId;
+            NewAppointment.AppointmentDate = AppointmentStepperModel.AppointmentDate;
+            NewAppointment.StartTime = parsedStartDateTime;
+            NewAppointment.EndTime = parsedEndDateTime;
+            NewAppointment.Amount = AppointmentStepperModel.Amount;
+            NewAppointment.Notes = AppointmentStepperModel.Note;
+            NewAppointment.ReminderSent = AppointmentStepperModel.ReminderSent;
+        
+            var message = L["ConfirmMessage"];
+            var confirm = L["Confirm"];
+        
+            if (!await UiMessageService.Confirm(message, confirm, options =>
+                {
+                    options.ConfirmButtonText = L["Yes"];
+                    options.CancelButtonText = L["No"];
+                }))
+            {
+                return;
+            }
+        
+            var it = await AppointmentAppService.CreateAsync(NewAppointment);
+
+            IsFinalResultSuccess = it != null;
+            
+            OnNextStep();
+
+            IsFinalResultSuccess = true;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    private DateTime ConvertToDateTime(DateTime appointmentDate, string timeString)
+    {
+        if (TimeSpan.TryParse(timeString, out var time))
+        {
+            return appointmentDate.Date.Add(time);
+        }
+        
+        throw new FormatException("Invalid time format. Expected format is 'hh:mm'.");
+
     }
 
     #region StepHandlers
@@ -570,7 +652,11 @@ public partial class Appointments
     {
         ActiveStep = 0;
         await Stepper.ResetAsync();
-        AppointmentStepperModel = new StepperModel();
+        AppointmentStepperModel = new StepperModel
+        {
+            PatientId = Patient.Id,
+            PatientName = Patient.FirstName + " " + Patient.LastName
+        };
         StateHasChanged();
     }
 
@@ -685,21 +771,38 @@ public partial class Appointments
     {
         [Required] public string HospitalName { get; set; } = "XYZ Hospital";
 
-        [Required] public string PatientName { get; set; } = "John Doe";
+        [Required] 
+        public string PatientName { get; set; } = null!;
 
-        [Required] public Guid PatientId { get; set; }
+        [Required] 
+        public Guid PatientId { get; set; }
 
-        [Required] public string AppointmentDate { get; set; }
+        [Required] 
+        public string AppointmentDisplayDate { get; set; } = null!;
+        
+        [Required] 
+        public DateTime AppointmentDate { get; set; }
 
-        [Required] public string AppointmentTime { get; set; }
+        [Required] 
+        public string AppointmentDisplayTime { get; set; }
+        
+        [Required]
+        public string StartTime { get; set; } = null!;
+    
+        [Required]
+        public string EndTime { get; set; } = null!;
 
-        [Required] public string DoctorName { get; set; }
+        [Required] 
+        public string DoctorName { get; set; } = null!;
 
-        [Required] public Guid DoctorId { get; set; }
+        [Required] 
+        public Guid DoctorId { get; set; }
 
-        [Required] public string DepartmentName { get; set; }
+        [Required] 
+        public string DepartmentName { get; set; } = null!;
 
-        [Required] public string MedicalServiceName { get; set; }
+        [Required] 
+        public string MedicalServiceName { get; set; } = null!;
         
         public string? Note { get; set; }
 

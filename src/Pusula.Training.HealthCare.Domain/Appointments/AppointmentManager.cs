@@ -38,8 +38,10 @@ public class AppointmentManager(
         }
 
         var doctorAppointments = await appointmentRepository
-            .GetListAsync(x => x.DoctorId == doctorId && x.AppointmentDate.Date == date);
+            .GetListAsync(x => x.DoctorId == doctorId && x.AppointmentDate.Date == date.Date);
 
+        var doctorAppointmentTimes = new HashSet<TimeSpan>(doctorAppointments.Select(x => x.StartTime.TimeOfDay));
+        
         var startTime = workingHour.StartHour;
         var endTime = workingHour.EndHour;
         var serviceDuration = TimeSpan.FromMinutes(medicalService.Duration);
@@ -50,9 +52,7 @@ public class AppointmentManager(
              appointmentTime + serviceDuration <= endTime;
              appointmentTime += serviceDuration)
         {
-            var isAvailable = !doctorAppointments.Any(x =>
-                x.AppointmentDate.Date == date &&
-                x.AppointmentTime.TimeOfDay == appointmentTime);
+            var isAvailable = !doctorAppointmentTimes.Contains(appointmentTime);
 
             availableSlots.Add(new AppointmentSlotDto
             {
@@ -66,5 +66,50 @@ public class AppointmentManager(
         }
 
         return availableSlots;
+    }
+
+    public async Task<Appointment> CreateAsync(Guid doctorId, Guid patientId, Guid medicalServiceId, DateTime appointmentDate, DateTime startTime,
+        DateTime endTime, bool reminderSent, double amount, string? notes = null)
+    {
+        
+        Check.NotNull(doctorId, nameof(doctorId));
+        Check.NotNull(patientId, nameof(patientId));
+        Check.NotNull(medicalServiceId, nameof(doctorId));
+        Check.NotNull(appointmentDate, nameof(appointmentDate));
+        Check.NotNull(startTime, nameof(startTime));
+        Check.NotNull(endTime, nameof(endTime));
+        Check.NotNull(reminderSent, nameof(reminderSent));
+        Check.NotNull(amount, nameof(amount));
+        Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
+        
+        var isAppointmentTaken = await appointmentRepository
+                                .FirstOrDefaultAsync(x => x.DoctorId == doctorId 
+                                                          && x.AppointmentDate.Date == appointmentDate.Date
+                                                          && x.StartTime == startTime);
+
+        if (isAppointmentTaken != null)
+        {
+            throw new AppointmentAlreadyTakenException();
+        }
+        
+        var appointment = new Appointment(
+            id:GuidGenerator.Create(),
+            doctorId:doctorId,
+            patientId:patientId,
+            medicalServiceId:medicalServiceId,
+            appointmentDate: appointmentDate,
+            startTime: startTime,
+            endTime: endTime,
+            EnumAppointmentStatus.Scheduled,
+            notes: notes,
+            reminderSent: reminderSent,
+            amount: amount
+        );
+        
+        await appointmentRepository.InsertAsync(appointment);
+        
+        
+        return null;
+        
     }
 }

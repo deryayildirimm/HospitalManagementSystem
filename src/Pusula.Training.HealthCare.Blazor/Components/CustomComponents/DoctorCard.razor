@@ -1,6 +1,6 @@
 @using Pusula.Training.HealthCare.Patients
 <Card @onclick="() => OnDoctorSelect.InvokeAsync(Doctor)"
-      Class="@GetDoctorCardClass(Doctor)">
+      Class="@(GetDoctorCardClass?.Invoke(Doctor) ?? "")">
     <CardBody Class="p-0">
         <div class="d-flex gap-1">
             <div class="d-flex gap-1 align-bottom f1">
@@ -40,5 +40,5 @@
 @code {
     [Parameter] public Doctor Doctor { get; set; } = null!;
     [Parameter] public EventCallback<Doctor> OnDoctorSelect { get; set; }
-    [Parameter] public Func<Doctor, string> GetDoctorCardClass { get; set; }
+    [Parameter] public Func<Doctor, string>? GetDoctorCardClass { get; set; }
 }

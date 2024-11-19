@@ -157,6 +157,7 @@
     "Gender:F": "F",
     "Error:UnExpectedErrorOcurred": "An unexpected error occurred.",
     "DoctorNotAvailable": "is unavailable on the selected day.",
-    "AvailableAppointments": "Available Appointments"
+    "AvailableAppointments": "Available Appointments",
+    "SendReminder":  "Send Reminder",
   }
 }

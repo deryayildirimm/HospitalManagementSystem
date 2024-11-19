@@ -234,16 +234,20 @@ public class HealthCareDbContext :
                 b.HasKey(a => a.Id);
 
                 //Patient cannot make more than one appointment at a time 
-                b.HasIndex(a => new { a.DoctorId, a.PatientId, a.AppointmentDate, a.AppointmentTime })
+                b.HasIndex(a => new { a.PatientId, a.AppointmentDate, a.StartTime, a.EndTime })
                     .IsUnique();
 
                 b.Property(a => a.AppointmentDate)
                     .IsRequired()
                     .HasColumnName(nameof(Appointment.AppointmentDate));
 
-                b.Property(a => a.AppointmentTime)
+                b.Property(a => a.StartTime)
                     .IsRequired()
-                    .HasColumnName(nameof(Appointment.AppointmentTime));
+                    .HasColumnName(nameof(Appointment.StartTime));
+                
+                b.Property(a => a.EndTime)
+                    .IsRequired()
+                    .HasColumnName(nameof(Appointment.EndTime));
 
                 b.Property(a => a.Status)
                     .IsRequired()

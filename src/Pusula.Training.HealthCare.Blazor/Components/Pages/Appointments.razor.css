@@ -195,6 +195,22 @@
     color: white;
 }
 
+.is-booked {
+    color: #b3b3b3;
+    background-color: #f7f7f7;
+    box-shadow: none;
+    cursor: not-allowed;
+    border-radius: 8px;
+    width: 140px;
+}
+
+.is-booked:hover {
+    transform: none;
+    box-shadow: none;
+    background-color: #f7f7f7;
+}
+
+
 .time-slot-card .card-title {
     font-size: 1.2em;
     font-weight: 600;
@@ -213,6 +229,8 @@
     align-items: center;
     justify-content: center;
 }
+
+
 
 .purple {
     color: purple !important;
@@ -236,18 +254,23 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
 .sf-icon-calendar:before {
     content: "\e322";
 }
+
 .sf-icon-select:before {
     content: "\e708";
 }
+
 .sf-icon-check:before {
     content: "\e727";
 }
+
 .sf-icon-payment:before {
     content: "\e706";
 }
+
 .sf-icon-success:before {
     content: "\e715";
 }

@@ -15,7 +15,7 @@ using Volo.Abp.Caching;
 using Volo.Abp.Content;
 using Volo.Abp.Domain.Repositories;
 
-namespace Pusula.Training.HealthCare.Appointment;
+namespace Pusula.Training.HealthCare.Appointments;
 
 [RemoteService(IsEnabled = false)]
 [Authorize(HealthCarePermissions.Appointments.Default)]
@@ -69,9 +69,20 @@ public class AppointmentAppService(
         throw new NotImplementedException();
     }
 
-    public Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
+    public async Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
     {
-        throw new NotImplementedException();
+        var appointment = await appointmentManager.CreateAsync(
+            input.DoctorId,
+            input.PatientId,
+            input.MedicalServiceId,
+            input.AppointmentDate,
+            input.StartTime,
+            input.EndTime,
+            input.ReminderSent,
+            input.Amount,
+            input.Notes
+            );
+        return ObjectMapper.Map<Appointment, AppointmentDto>(appointment);
     }
 
     public Task<AppointmentDto> UpdateAsync(Guid id, AppointmentUpdateDto input)

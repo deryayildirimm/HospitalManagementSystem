@@ -37,10 +37,6 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("AppointmentDate");
 
-                    b.Property<DateTime>("AppointmentTime")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("AppointmentTime");
-
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("CreationTime");
@@ -59,6 +55,10 @@ namespace Pusula.Training.HealthCare.Migrations
 
                     b.Property<Guid>("DoctorId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("EndTime");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -89,17 +89,21 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("ReminderSent");
 
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("StartTime");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer")
                         .HasColumnName("Status");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DoctorId");
+
                     b.HasIndex("MedicalServiceId");
 
-                    b.HasIndex("PatientId");
-
-                    b.HasIndex("DoctorId", "PatientId", "AppointmentDate", "AppointmentTime")
+                    b.HasIndex("PatientId", "AppointmentDate", "StartTime", "EndTime")
                         .IsUnique();
 
                     b.ToTable("AppAppointments", (string)null);
