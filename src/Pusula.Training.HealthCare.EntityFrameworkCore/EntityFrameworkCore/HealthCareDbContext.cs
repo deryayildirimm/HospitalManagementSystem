@@ -214,11 +214,11 @@ public class HealthCareDbContext :
                     .HasMaxLength(DoctorConsts.EmailMaxLength);
                 b.Property(x => x.PhoneNumber).HasColumnName(nameof(Doctor.PhoneNumber))
                     .HasMaxLength(DoctorConsts.PhoneNumberMaxLength);
-                b.Property(x => x.YearOfExperience).HasColumnName(nameof(Doctor.YearOfExperience));
-                b.Property(x => x.City).HasColumnName(nameof(Doctor.City)).IsRequired()
-                    .HasMaxLength(DoctorConsts.CityMaxLength);
-                b.Property(x => x.District).HasColumnName(nameof(Doctor.District)).IsRequired()
-                    .HasMaxLength(DoctorConsts.DistrictMaxLength);
+                b.Property(x => x.StartDate).HasColumnName(nameof(Doctor.StartDate)).IsRequired();
+                b.HasOne<City>().WithMany().IsRequired().HasForeignKey(x => x.CityId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne<District>().WithMany().IsRequired().HasForeignKey(x => x.DistrictId)
+                    .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne<Title>().WithMany().IsRequired().HasForeignKey(x => x.TitleId)
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)

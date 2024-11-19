@@ -56,7 +56,6 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<DoctorLeave, DoctorLeaveExcelDto>();
         CreateMap<DoctorLeaveDto, DoctorLeaveUpdateDto>();
         
-        
         CreateMap<City, CityDto>();
         CreateMap<City, CityExcelDto>();
         CreateMap<CityDto, CityUpdateDto>();

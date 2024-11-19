@@ -33,6 +33,16 @@ public class DoctorController(IDoctorsAppService doctorsAppService) : HealthCare
         doctorsAppService.GetAsync(id);
 
     [HttpGet]
+    [Route("city-lookup")]
+    public Task<PagedResultDto<LookupDto<Guid>>> GetCityLookupAsync(LookupRequestDto input) => 
+        doctorsAppService.GetCityLookupAsync(input);
+
+    [HttpGet]
+    [Route("district-lookup")]
+    public Task<PagedResultDto<LookupDto<Guid>>> GetDistrictLookupAsync(LookupRequestDto input) => 
+        doctorsAppService.GetDistrictLookupAsync(input);
+
+    [HttpGet]
     [Route("title-lookup")]
     public Task<PagedResultDto<LookupDto<Guid>>> GetTitleLookupAsync(LookupRequestDto input) => 
         doctorsAppService.GetTitleLookupAsync(input);

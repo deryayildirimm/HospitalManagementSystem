@@ -28,14 +28,14 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
         string? email = null, 
         string? phoneNumber = null, 
         int? yearOfExperienceMin = 0,
-        string? city = null, 
-        string? district = null, 
+        Guid? cityId = null,
+        Guid? districtId = null,
         Guid? titleId = null, 
         Guid? departmentId = null,
         CancellationToken cancellationToken = default)
     {
         var query = await GetQueryForNavigationPropertiesAsync();
-        query = ApplyFilter(query, filterText, firstName, lastName, identityNumber, birthDateMin, birthDateMax, gender, email, phoneNumber, yearOfExperienceMin, city, district, titleId, departmentId);
+        query = ApplyFilter(query, filterText, firstName, lastName, identityNumber, birthDateMin, birthDateMax, gender, email, phoneNumber, yearOfExperienceMin, cityId, districtId, titleId, departmentId);
         var ids = query.Select(x => x.Doctor.Id);
         await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
     }
@@ -67,8 +67,8 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
         string? email = null, 
         string? phoneNumber = null, 
         int? yearOfExperienceMin = 0,
-        string? city = null, 
-        string? district = null, 
+        Guid? cityId = null,
+        Guid? districtId = null,
         Guid? titleId = null, 
         Guid? departmentId = null,
         string? sorting = null,
@@ -77,7 +77,7 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
         CancellationToken cancellationToken = default)
     {
         var query = await GetQueryForNavigationPropertiesAsync();
-        query = ApplyFilter(query, filterText, firstName, lastName, identityNumber, birthDateMin, birthDateMax, gender, email, phoneNumber, yearOfExperienceMin, city, district, titleId, departmentId);
+        query = ApplyFilter(query, filterText, firstName, lastName, identityNumber, birthDateMin, birthDateMax, gender, email, phoneNumber, yearOfExperienceMin, cityId, districtId, titleId, departmentId);
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? DoctorConsts.GetDefaultSorting(true) : sorting);
 
         var tmp = query.PageBy(skipCount, maxResultCount).ToQueryString();
@@ -95,8 +95,8 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
         string? email = null, 
         string? phoneNumber = null, 
         int? yearOfExperienceMin = 0,
-        string? city = null, 
-        string? district = null, 
+        Guid? cityId = null,
+        Guid? districtId = null,
         Guid? titleId = null, 
         Guid? departmentId = null, 
         string? sorting = null,
@@ -104,7 +104,7 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), filterText, firstName, lastName, identityNumber, birthDateMin, birthDateMax, gender, email, phoneNumber, yearOfExperienceMin, city, district, titleId, departmentId);
+        var query = ApplyFilter((await GetQueryableAsync()), filterText, firstName, lastName, identityNumber, birthDateMin, birthDateMax, gender, email, phoneNumber, yearOfExperienceMin, cityId, districtId, titleId, departmentId);
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? DoctorConsts.GetDefaultSorting(false) : sorting);
         
         return await query.Page(skipCount, maxResultCount).ToListAsync(cancellationToken);
@@ -120,14 +120,14 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
         string? email = null, 
         string? phoneNumber = null, 
         int? yearOfExperienceMin = 0,
-        string? city = null, 
-        string? district = null, 
+        Guid? cityId = null,
+        Guid? districtId = null,
         Guid? titleId = null, 
         Guid? departmentId = null,
         CancellationToken cancellationToken = default)
     {
         var query = await GetQueryForNavigationPropertiesAsync();
-        query = ApplyFilter(query, filterText, firstName, lastName, identityNumber, birthDateMin, birthDateMax, gender, email, phoneNumber, yearOfExperienceMin, city, district, titleId, departmentId);
+        query = ApplyFilter(query, filterText, firstName, lastName, identityNumber, birthDateMin, birthDateMax, gender, email, phoneNumber, yearOfExperienceMin, cityId, districtId, titleId, departmentId);
         
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
@@ -173,8 +173,8 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
             string? email = null, 
             string? phoneNumber = null, 
             int? yearOfExperienceMin = 0,
-            string? city = null, 
-            string? district = null, 
+            Guid? cityId = null,
+            Guid? districtId = null,
             Guid? titleId = null, 
             Guid? departmentId = null,
             List<Guid>? departmentIds = null) =>
@@ -188,9 +188,9 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
                 .WhereIf(gender.HasValue, e => e.Gender == gender)
                 .WhereIf(!string.IsNullOrWhiteSpace(email), e => e.Email!.Contains(email!))
                 .WhereIf(!string.IsNullOrWhiteSpace(phoneNumber), e => e.PhoneNumber!.Contains(phoneNumber!))
-                .WhereIf(yearOfExperienceMin.HasValue, e => e.YearOfExperience >= yearOfExperienceMin!.Value)
-                .WhereIf(!string.IsNullOrWhiteSpace(city), e => e.City!.ToLower().Contains(city!.ToLower()))
-                .WhereIf(!string.IsNullOrWhiteSpace(district), e => e.District!.ToLower().Contains(district!.ToLower()))
+                .WhereIf(yearOfExperienceMin.HasValue, e => e.StartDate <= DateTime.Now.AddYears(-yearOfExperienceMin!.Value))
+                .WhereIf(cityId.HasValue, e => e.CityId == cityId)
+                .WhereIf(districtId.HasValue, e => e.DistrictId == districtId)
                 .WhereIf(titleId.HasValue, e => e.TitleId == titleId)
                 .WhereIf(departmentId.HasValue, e => e.DepartmentId == departmentId)
                 .WhereIf(departmentIds != null && departmentIds.Any(), e => departmentIds!.Contains(e.DepartmentId));
@@ -221,8 +221,8 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
             string? email = null, 
             string? phoneNumber = null, 
             int? yearOfExperienceMin = 0,
-            string? city = null, 
-            string? district = null, 
+            Guid? cityId = null,
+            Guid? districtId = null,
             Guid? titleId = null, 
             Guid? departmentId = null,
             List<Guid>? departmentIds = null) =>
@@ -240,9 +240,9 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
                     .WhereIf(gender.HasValue, e => e.Doctor.Gender == gender)
                     .WhereIf(!string.IsNullOrWhiteSpace(email), e => e.Doctor.Email!.Contains(email!))
                     .WhereIf(!string.IsNullOrWhiteSpace(phoneNumber), e => e.Doctor.PhoneNumber!.Contains(phoneNumber!))
-                    .WhereIf(yearOfExperienceMin.HasValue, e => e.Doctor.YearOfExperience >= yearOfExperienceMin!.Value)
-                    .WhereIf(!string.IsNullOrWhiteSpace(city), e => e.Doctor.City!.ToLower().Contains(city!.ToLower()))
-                    .WhereIf(!string.IsNullOrWhiteSpace(district), e => e.Doctor.District!.ToLower().Contains(district!.ToLower()))
+                    .WhereIf(yearOfExperienceMin.HasValue, e => e.Doctor.StartDate <= DateTime.Now.AddYears(-yearOfExperienceMin!.Value))
+                    .WhereIf(cityId.HasValue, e => e.City.Id == cityId)
+                    .WhereIf(districtId.HasValue, e => e.District.Id == districtId)
                     .WhereIf(titleId.HasValue, e => e.Title.Id == titleId)
                     .WhereIf(departmentId.HasValue, e => e.Department.Id == departmentId)
                     .WhereIf(departmentIds != null && departmentIds.Any(), e => departmentIds!.Contains(e.Doctor.DepartmentId));

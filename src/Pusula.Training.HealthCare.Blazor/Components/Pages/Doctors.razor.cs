@@ -52,6 +52,8 @@ public partial class Doctors
     private List<DoctorWithNavigationPropertiesDto> SelectedDoctors { get; set; } = [];
     private IEnumerable<KeyValuePair<int, string>> Genders = [];
     
+    private IReadOnlyList<LookupDto<Guid>> CitiesCollection { get; set; } = [];
+    private IReadOnlyList<LookupDto<Guid>> DistrictsCollection { get; set; } = [];
     private IReadOnlyList<LookupDto<Guid>> TitlesCollection { get; set; } = [];
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; } = [];
 
@@ -110,6 +112,8 @@ public partial class Doctors
     
     private async Task SetLookupsAsync()
     {
+        CitiesCollection = [.. (await DoctorsAppService.GetCityLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
+        DistrictsCollection = [.. (await DoctorsAppService.GetDistrictLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
         TitlesCollection = [.. (await DoctorsAppService.GetTitleLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
         DepartmentsCollection = [.. (await DoctorsAppService.GetDepartmentLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
     }
@@ -291,19 +295,29 @@ public partial class Doctors
         Filter.YearOfExperienceMin = yearOfExperienceMin;
         await SearchAsync();
     }
-
-    protected virtual async Task OnCityChangedAsync(string? city)
+    
+    private async Task OnCityChangedAsync(Guid? cityId)
     {
-        Filter.City = city;
-        await SearchAsync();
+        Filter.CityId = cityId;
+
+        if (cityId.HasValue)
+        {
+            // Fetch districts for the selected city
+            DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
+        }
+        else
+        {
+            // Reset districts if no city is selected
+            DistrictsCollection = [];
+        }
+
+        // Clear selected district if it's no longer valid
+        Filter.DistrictId = null;
+
+        await InvokeAsync(StateHasChanged);
     }
 
-    protected virtual async Task OnDistrictChangedAsync(string? district)
-    {
-        Filter.District = district;
-        await SearchAsync();
-    }
-
+    
     private Task SelectAllItems()
     {
         AllDoctorsSelected = true;
