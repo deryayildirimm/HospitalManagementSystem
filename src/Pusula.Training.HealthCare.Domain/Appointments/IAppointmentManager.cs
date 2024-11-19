@@ -24,4 +24,17 @@ public interface IAppointmentManager
         double amount,
         string? notes = null
     );
+    
+    Task<Appointment> UpdateAsync(
+        Guid id,
+        DateTime appointmentDate,
+        DateTime startTime,
+        DateTime endTime,
+        EnumAppointmentStatus status,
+        bool reminderSent,
+        double amount,
+        string? notes = null,
+        string? concurrencyStamp = null
+    );
+    
 }

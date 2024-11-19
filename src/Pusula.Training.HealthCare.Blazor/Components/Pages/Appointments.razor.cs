@@ -146,7 +146,14 @@ public partial class Appointments
     {
         if (firstRender)
         {
-            ScreenWidth = await JS.InvokeAsync<double>("getWindowSize");
+            try
+            {
+                ScreenWidth = await JS.InvokeAsync<double>("getWindowSize");
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
             SetDayLoadCount();
             AddInitialDays();
         }
