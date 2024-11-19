@@ -6,6 +6,7 @@ using Pusula.Training.HealthCare.Shared;
 using System;
 using Pusula.Training.HealthCare.Cities;
 using Pusula.Training.HealthCare.Districts;
+using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.Titles;
@@ -50,6 +51,11 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Doctor, DoctorExcelDto>();
         CreateMap<DoctorDto, DoctorUpdateDto>();
         CreateMap<DoctorWithNavigationProperties, DoctorWithNavigationPropertiesDto>();
+        
+        CreateMap<DoctorLeave, DoctorLeaveDto>();
+        CreateMap<DoctorLeave, DoctorLeaveExcelDto>();
+        CreateMap<DoctorLeaveDto, DoctorLeaveUpdateDto>();
+        
         
         CreateMap<City, CityDto>();
         CreateMap<City, CityExcelDto>();

@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pusula.Training.HealthCare.Cities;
 using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Doctors;
@@ -40,6 +41,7 @@ public class HealthCareDbContext :
     public DbSet<DepartmentMedicalService> DepartmentMedicalServices { get; set; } = null!;
     public DbSet<Title> Titles { get; set; } = null!;
     public DbSet<Doctor> Doctors { get; set; } = null!;
+    public DbSet<DoctorLeave> DoctorLeaves { get; set; } = null!;
     public DbSet<City> Cities { get; set; } = null!;
     public DbSet<District> Districts { get; set; } = null!;
 
@@ -224,6 +226,19 @@ public class HealthCareDbContext :
             });
                 b.HasIndex(x => new { x.MedicalServiceId, x.DepartmentId }).IsUnique();
             });
+            
+            builder.Entity<DoctorLeave>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "DoctorLeaves", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.StartDate).HasColumnName(nameof(DoctorLeave.StartDate)).IsRequired();
+                b.Property(x => x.EndDate).HasColumnName(nameof(DoctorLeave.EndDate)).IsRequired();
+                b.Property(x => x.Reason).HasColumnName(nameof(DoctorLeave.Reason)).HasMaxLength(200);
+                b.HasOne<Doctor>().WithMany().IsRequired().HasForeignKey(x => x.DoctorId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+            });
+            
 
             builder.Entity<City>(b =>
             {
