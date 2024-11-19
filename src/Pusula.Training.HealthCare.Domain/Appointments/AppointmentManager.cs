@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Pusula.Training.HealthCare.Departments;
+using JetBrains.Annotations;
 using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.Exceptions;
 using Pusula.Training.HealthCare.MedicalServices;
 using Volo.Abp;
+using Volo.Abp.Data;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Domain.Services;
 
@@ -18,11 +18,14 @@ public class AppointmentManager(
     IRepository<DoctorWorkingHour> doctorWorkingHourRepository,
     IMedicalServiceRepository medicalServiceRepository) : DomainService, IAppointmentManager
 {
-
-    public async Task<List<AppointmentSlotDto>> GetAppointmentSlotsAsync(Guid doctorId, Guid medicalServiceId, DateTime date)
+    public virtual async Task<List<AppointmentSlotDto>> GetAppointmentSlotsAsync(
+        Guid doctorId, 
+        Guid medicalServiceId,
+        DateTime date)
     {
         var workingHour = await doctorWorkingHourRepository
-            .FirstOrDefaultAsync(x => x.DoctorId == doctorId && date.DayOfWeek == x.DayOfWeek);
+            .FirstOrDefaultAsync(x => x.DoctorId == doctorId 
+                                      && date.DayOfWeek == x.DayOfWeek);
 
         if (workingHour == null)
         {
@@ -38,10 +41,11 @@ public class AppointmentManager(
         }
 
         var doctorAppointments = await appointmentRepository
-            .GetListAsync(x => x.DoctorId == doctorId && x.AppointmentDate.Date == date.Date);
+            .GetListAsync(x => x.DoctorId == doctorId 
+                               && x.AppointmentDate.Date == date.Date);
 
         var doctorAppointmentTimes = new HashSet<TimeSpan>(doctorAppointments.Select(x => x.StartTime.TimeOfDay));
-        
+
         var startTime = workingHour.StartHour;
         var endTime = workingHour.EndHour;
         var serviceDuration = TimeSpan.FromMinutes(medicalService.Duration);
@@ -52,6 +56,11 @@ public class AppointmentManager(
              appointmentTime + serviceDuration <= endTime;
              appointmentTime += serviceDuration)
         {
+            if (appointmentTime < date.Date.TimeOfDay)
+            {
+                continue;
+            }
+
             var isAvailable = !doctorAppointmentTimes.Contains(appointmentTime);
 
             availableSlots.Add(new AppointmentSlotDto
@@ -68,10 +77,10 @@ public class AppointmentManager(
         return availableSlots;
     }
 
-    public async Task<Appointment> CreateAsync(Guid doctorId, Guid patientId, Guid medicalServiceId, DateTime appointmentDate, DateTime startTime,
+    public virtual async Task<Appointment> CreateAsync(Guid doctorId, Guid patientId, Guid medicalServiceId,
+        DateTime appointmentDate, DateTime startTime,
         DateTime endTime, bool reminderSent, double amount, string? notes = null)
     {
-        
         Check.NotNull(doctorId, nameof(doctorId));
         Check.NotNull(patientId, nameof(patientId));
         Check.NotNull(medicalServiceId, nameof(doctorId));
@@ -81,22 +90,27 @@ public class AppointmentManager(
         Check.NotNull(reminderSent, nameof(reminderSent));
         Check.NotNull(amount, nameof(amount));
         Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
-        
+
+        if (startTime < DateTime.Now || endTime < DateTime.Now || startTime >= endTime)
+        {
+            throw new AppointmentDateNotValidException();
+        }
+
         var isAppointmentTaken = await appointmentRepository
-                                .FirstOrDefaultAsync(x => x.DoctorId == doctorId 
-                                                          && x.AppointmentDate.Date == appointmentDate.Date
-                                                          && x.StartTime == startTime);
+            .FirstOrDefaultAsync(x => x.DoctorId == doctorId
+                                      && x.AppointmentDate.Date == appointmentDate.Date
+                                      && x.StartTime == startTime);
 
         if (isAppointmentTaken != null)
         {
             throw new AppointmentAlreadyTakenException();
         }
-        
+
         var appointment = new Appointment(
-            id:GuidGenerator.Create(),
-            doctorId:doctorId,
-            patientId:patientId,
-            medicalServiceId:medicalServiceId,
+            id: GuidGenerator.Create(),
+            doctorId: doctorId,
+            patientId: patientId,
+            medicalServiceId: medicalServiceId,
             appointmentDate: appointmentDate,
             startTime: startTime,
             endTime: endTime,
@@ -105,11 +119,32 @@ public class AppointmentManager(
             reminderSent: reminderSent,
             amount: amount
         );
-        
-        await appointmentRepository.InsertAsync(appointment);
-        
-        
-        return null;
-        
+
+        return await appointmentRepository.InsertAsync(appointment);
+    }
+
+    public async Task<Appointment> UpdateAsync(Guid id, DateTime appointmentDate, DateTime startTime,
+        DateTime endTime, EnumAppointmentStatus status, bool reminderSent, double amount,
+        [CanBeNull] string? notes = null, [CanBeNull] string? concurrencyStamp = null)
+    {
+        Check.NotNull(appointmentDate, nameof(appointmentDate));
+        Check.NotNull(startTime, nameof(startTime));
+        Check.NotNull(endTime, nameof(endTime));
+        Check.NotNull(reminderSent, nameof(reminderSent));
+        Check.NotNull(amount, nameof(amount));
+        Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
+
+        var appointment = await appointmentRepository.GetAsync(id);
+
+        appointment.SetAppointmentDate(appointmentDate);
+        appointment.SetStartTime(startTime);
+        appointment.SetEndTime(endTime);
+        appointment.SetStatus(status);
+        appointment.SetNotes(notes);
+        appointment.SetReminderSent(reminderSent);
+        appointment.SetAmount(amount);
+        appointment.SetConcurrencyStampIfNotNull(concurrencyStamp);
+
+        return await appointmentRepository.UpdateAsync(appointment);
     }
 }

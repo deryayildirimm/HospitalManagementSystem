@@ -1,16 +1,17 @@
 using System;
-using System.ComponentModel.DataAnnotations;
-using JetBrains.Annotations;
 using Volo.Abp.Application.Dtos;
 
 namespace Pusula.Training.HealthCare.Appointments;
 
-public class AppointmentExcelDownloadDto : PagedAndSortedResultRequestDto
+public class GetAppointmentsWithNavigationPropertiesInput : PagedAndSortedResultRequestDto
 {
-    public string DownloadToken { get; set; } = null!;
     public Guid? DoctorId { get; set; }
     public Guid? PatientId { get; set; }
     public Guid? MedicalServiceId { get; set; }
+    public string? PatientName { get; set; }
+    public string? DoctorName { get; set; }
+    public string? ServiceName { get; set; }
+    public int? PatientNumber { get; set; }
     public DateTime? AppointmentDate { get; set; }
     public DateTime? StartTime { get; set; }
     public DateTime? EndTime { get; set; }

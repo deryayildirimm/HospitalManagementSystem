@@ -4,13 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Blazorise;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Blazor.Models;
-using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
@@ -28,13 +26,13 @@ public partial class Appointments
 
     #region Stepper
 
-    private StepperModel AppointmentStepperModel;
-    private SfStepper Stepper;
-    private StepperStep SelectServiceStepper;
-    private StepperStep ScheduleStepper;
-    private StepperStep ConfirmationStepper;
-    private StepperStep ResultStepper;
-    private int ActiveStep = 0;
+    private StepperModel AppointmentStepperModel { get; set; }
+    private SfStepper Stepper { get; set; } = null!;
+    private StepperStep SelectServiceStepper { get; set; } = null!;
+    private StepperStep ScheduleStepper { get; set; } = null!;
+    private StepperStep ConfirmationStepper { get; set; } = null!;
+    private StepperStep ResultStepper { get; set; } = null!;
+    private int ActiveStep { get; set; } = 0;
 
     #endregion
     
@@ -64,16 +62,16 @@ public partial class Appointments
 
     #region AppointmentFilters
 
-    private GetAppointmentsInput GetAppointmentSlotFilter { get; set; }
+    private GetAppointmentSlotInput GetAppointmentSlotFilter { get; set; }
 
     #endregion
 
     private PatientDto Patient { get; set; }
     private List<SelectionItem> ServicesList { get; set; }
 
-    private SfListBox<SelectionItem[], SelectionItem> SelectServiceDropdown;
+    private SfListBox<SelectionItem[], SelectionItem> SelectServiceDropdown { get; set; } = null!;
 
-    private IReadOnlyList<MedicalServiceWithDepartmentsDto> MedicalServiceWithDepartmentsList { get; set; }
+    private IReadOnlyList<MedicalServiceWithDepartmentsDto> MedicalServiceWithDepartmentsList { get; set; } = null!;
 
     private List<Doctor> DoctorsList { get; set; }
 
@@ -81,31 +79,15 @@ public partial class Appointments
 
     private List<AppointmentSlot> AppointmentSlots { get; set; }
     
-    private Random random = new Random();
     private List<DayItem> DaysList { get; set; }
-    private int loadCount = 14;
-    private int currentDayOffset = 0;
-    private double screenWidth = 0;
+    private int LoadCount { get; set; } = 14;
+    private double ScreenWidth { get; set; } = 0;
     private int AvailableSlotCount { get; set; } = 0;
     private int LoadingShimmerCount { get; set; } = 24;
-
-    private string appointmentNote = "";
-    private string selectedChannel = "";
-    private bool isActive = true;
-    private string appointmentId = "ER123456";
-    private string paymentId = "PAY987654";
-    private bool IsDoctorWorking = true;
-    private string DoctorWorkingInfo = "";
-    private string AppointmentSlotsErrorMessage = "";
+    private string AppointmentId { get; set; } = "ER123456";
+    private string PaymentId { get; set; } = "PAY987654";
     private bool SlotsLoading { get; set; }
-    
     private bool IsProcessCanceled { get; set; }
-
-    private bool isValid = false;
-    private string content = "";
-    private bool isValidMsg = false;
-    private bool showFeedBack = false;
-
 
     private bool IsFirstStepValid =>
         !string.IsNullOrEmpty(AppointmentStepperModel.MedicalServiceName) &&
@@ -126,7 +108,9 @@ public partial class Appointments
     {
 
         Patient = new PatientDto();
-
+        GetAppointmentSlotFilter = new GetAppointmentSlotInput();
+        AppointmentStepperModel = new StepperModel();
+        NewAppointment = new AppointmentCreateDto();
         MedicalServiceFilter = new GetMedicalServiceInput
         {
             Name = "",
@@ -134,11 +118,6 @@ public partial class Appointments
             SkipCount = (ServiceCurrentPage - 1) * ServicePageSize,
             Sorting = ServiceCurrentSorting
         };
-
-        NewAppointment = new AppointmentCreateDto
-        {
-        };
-
         DoctorsWithDepartmentIdsInput = new GetDoctorsWithDepartmentIdsInput
         {
             Name = "",
@@ -146,11 +125,6 @@ public partial class Appointments
             SkipCount = (DoctorCurrentPage - 1) * DoctorPageSize,
             Sorting = DoctorCurrentSorting
         };
-
-        GetAppointmentSlotFilter = new GetAppointmentsInput();
-
-        AppointmentStepperModel = new StepperModel();
-        
         DoctorsList = [];
         ServicesList = [];
         DaysList = [];
@@ -172,7 +146,7 @@ public partial class Appointments
     {
         if (firstRender)
         {
-            screenWidth = await JS.InvokeAsync<double>("getWindowSize");
+            ScreenWidth = await JS.InvokeAsync<double>("getWindowSize");
             SetDayLoadCount();
             AddInitialDays();
         }
@@ -200,7 +174,7 @@ public partial class Appointments
     #region GenerateAppointmentDays
     private void SetDayLoadCount()
     {
-        loadCount = screenWidth switch
+        LoadCount = ScreenWidth switch
         {
             < 768 => 7,
             < 1024 => 14,
@@ -218,7 +192,7 @@ public partial class Appointments
         var lastDay = DaysList[0].Date;
 
         //if new days smaller than today, then reset the days array
-        if (lastDay.AddDays(-loadCount) < DateTime.Now)
+        if (lastDay.AddDays(-LoadCount) < DateTime.Now)
         {
             AddInitialDays();
             return;
@@ -226,14 +200,14 @@ public partial class Appointments
         
         DaysList.Clear();
 
-        for (var i = 0; i < loadCount; i++)
+        for (var i = 0; i < LoadCount; i++)
         {
             lastDay = lastDay.Date.AddDays(-1);
             var day = new DayItem
             {
                 Date = lastDay,
                 IsSelected = false,
-                IsAvailable = random.Next(0, 2) == 0
+                IsAvailable = true
             };
 
             DaysList.Insert(0, day);
@@ -253,13 +227,13 @@ public partial class Appointments
         var lastDay = DaysList.Last();
         DaysList.Clear();
         
-        for (var i = 0; i < loadCount; i++)
+        for (var i = 0; i < LoadCount; i++)
         {
             DaysList.Add(new DayItem
             {
                 Date = lastDay.Date.AddDays(i),
                 IsSelected = false,
-                IsAvailable = random.Next(0, 2) == 0
+                IsAvailable = true
             });
         }
 
@@ -269,13 +243,13 @@ public partial class Appointments
     private void AddInitialDays()
     {
         DaysList.Clear();
-        for (var i = 0; i < loadCount; i++)
+        for (var i = 0; i < LoadCount; i++)
         {
             DaysList.Add(new DayItem
             {
                 Date = DateTime.Now.AddDays(i),
                 IsSelected = false,
-                IsAvailable = random.Next(0, 2) == 0
+                IsAvailable = true
             });
         }
 
@@ -581,8 +555,7 @@ public partial class Appointments
         AppointmentStepperModel.ReminderSent = val;
         return Task.CompletedTask;
     }
-
-    //TODO Create will be done
+    
     private async Task CreateAppointment()
     {
 

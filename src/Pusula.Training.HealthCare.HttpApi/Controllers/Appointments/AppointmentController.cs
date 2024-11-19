@@ -20,67 +20,56 @@ public class AppointmentController(IAppointmentAppService appointmentAppService)
 {
     [HttpGet]
     [Route("available-slots")]
-    public async Task<PagedResultDto<AppointmentSlotDto>> GetAvailableSlotsAsync(GetAppointmentsInput input) =>
+    public async Task<PagedResultDto<AppointmentSlotDto>> GetAvailableSlotsAsync(GetAppointmentSlotInput input) =>
         await appointmentAppService.GetAvailableSlotsAsync(input);
 
     [HttpGet]
-    public Task<PagedResultDto<AppointmentDto>> GetListAsync(GetAppointmentsInput input)
-    {
-        throw new NotImplementedException();
-    }
+    public virtual Task<PagedResultDto<AppointmentDto>> GetListAsync(GetAppointmentsInput input)
+        => appointmentAppService.GetListAsync(input);
+
+    [HttpGet]
+    [Route("with-navigation-properties")]
+    public virtual Task<PagedResultDto<AppointmentWithNavigationPropertiesDto>> GetListWithNavigationPropertiesAsync(
+        GetAppointmentsWithNavigationPropertiesInput input)
+        => appointmentAppService.GetListWithNavigationPropertiesAsync(input);
 
     [HttpGet]
     [Route("{id}")]
-    public Task<AppointmentDto> GetAsync(Guid id)
-    {
-        throw new NotImplementedException();
-    }
-
-    [HttpDelete]
-    [Route("{id}")]
-    public Task DeleteAsync(Guid id)
-    {
-        throw new NotImplementedException();
-    }
+    public virtual Task<AppointmentDto> GetAsync(Guid id)
+        => appointmentAppService.GetAsync(id);
 
     [HttpPost]
-    public Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
-    {
-        throw new NotImplementedException();
-    }
+    public virtual Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
+        => appointmentAppService.CreateAsync(input);
 
     [HttpPut]
     [Route("{id}")]
-    public Task<AppointmentDto> UpdateAsync(Guid id, AppointmentUpdateDto input)
-    {
-        throw new NotImplementedException();
-    }
+    public virtual Task<AppointmentDto> UpdateAsync(Guid id, AppointmentUpdateDto input)
+        => appointmentAppService.UpdateAsync(id, input);
 
     [HttpGet]
     [Route("as-excel-file")]
-    public Task<IRemoteStreamContent> GetListAsExcelFileAsync(AppointmentExcelDownloadDto input)
-    {
-        throw new NotImplementedException();
-    }
+    public virtual Task<IRemoteStreamContent> GetListAsExcelFileAsync(AppointmentExcelDownloadDto input)
+        => appointmentAppService.GetListAsExcelFileAsync(input);
+
+
+    [HttpDelete]
+    [Route("{id}")]
+    public virtual Task DeleteAsync(Guid id)
+        => appointmentAppService.DeleteAsync(id);
 
     [HttpDelete]
     [Route("")]
-    public Task DeleteByIdsAsync(List<Guid> appointmentIds)
-    {
-        throw new NotImplementedException();
-    }
+    public virtual Task DeleteByIdsAsync(List<Guid> appointmentIds)
+        => appointmentAppService.DeleteByIdsAsync(appointmentIds);
 
     [HttpDelete]
     [Route("all")]
-    public Task DeleteAllAsync(GetAppointmentsInput input)
-    {
-        throw new NotImplementedException();
-    }
+    public virtual Task DeleteAllAsync(GetAppointmentsInput input)
+        => appointmentAppService.DeleteAllAsync(input);
 
     [HttpGet]
     [Route("download-token")]
-    public Task<DownloadTokenResultDto> GetDownloadTokenAsync()
-    {
-        throw new NotImplementedException();
-    }
+    public virtual Task<DownloadTokenResultDto> GetDownloadTokenAsync()
+        => appointmentAppService.GetDownloadTokenAsync();
 }
