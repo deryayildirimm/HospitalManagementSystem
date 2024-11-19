@@ -87,8 +87,8 @@ public class DoctorsAppService(
     
     public virtual async Task<PagedResultDto<DoctorWithNavigationPropertiesDto>> GetByDepartmentIdsAsync(GetDoctorsWithDepartmentIdsInput input)
     {
-        var totalCount = await doctorRepository.GetCountByDepartmentIdsAsync(input.DepartmentIds!);
-        var items = await doctorRepository.GetListByDepartmentIdsAsync(input.DepartmentIds!, 
+        var totalCount = await doctorRepository.GetCountByDepartmentIdsAsync(input.FilterText, input.DepartmentIds!);
+        var items = await doctorRepository.GetListByDepartmentIdsAsync(input.FilterText, input.DepartmentIds!, 
             input.Sorting, input.MaxResultCount, input.SkipCount);
 
         return new PagedResultDto<DoctorWithNavigationPropertiesDto>

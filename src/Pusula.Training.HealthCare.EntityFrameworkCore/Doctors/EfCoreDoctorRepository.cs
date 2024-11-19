@@ -132,23 +132,27 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
     
-    public async Task<long> GetCountByDepartmentIdsAsync(List<Guid> departmentIds, CancellationToken cancellationToken = default)
+    public async Task<long> GetCountByDepartmentIdsAsync(
+        string? filterText = null,
+        List<Guid>? departmentIds = null, 
+        CancellationToken cancellationToken = default)
     {
         var query = await GetQueryForNavigationPropertiesAsync();
-        query = ApplyFilter(query, departmentIds: departmentIds);
+        query = ApplyFilter(query, filterText, departmentIds: departmentIds);
 
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
     
     public virtual async Task<List<DoctorWithNavigationProperties>> GetListByDepartmentIdsAsync(
-        List<Guid> departmentIds,
+        string? filterText = null,
+        List<Guid>? departmentIds = null,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
         var query = await GetQueryForNavigationPropertiesAsync();
-        query = ApplyFilter(query, departmentIds: departmentIds);
+        query = ApplyFilter(query, filterText, departmentIds: departmentIds);
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? DoctorConsts.GetDefaultSorting(true) : sorting);
 
         return await query
@@ -223,7 +227,11 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
             Guid? departmentId = null,
             List<Guid>? departmentIds = null) =>
                 query
-                    .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Doctor.FirstName!.ToLower().Contains(filterText!.ToLower()) || e.Doctor.LastName!.ToLower().Contains(filterText!.ToLower()) || e.Doctor.PhoneNumber!.Contains(filterText!))
+                    .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Doctor.FirstName!.ToLower().Contains(filterText!.ToLower()) 
+                                                                          || e.Doctor.LastName!.ToLower().Contains(filterText!.ToLower()) 
+                                                                          || e.Doctor.PhoneNumber!.Contains(filterText!) 
+                                                                          || filterText!.ToLower().Contains(e.Doctor.LastName!.ToLower()) 
+                                                                          || filterText!.ToLower().Contains(e.Doctor.FirstName!.ToLower()))
                     .WhereIf(!string.IsNullOrWhiteSpace(firstName), e => e.Doctor.FirstName!.ToLower().Contains(firstName!.ToLower()))
                     .WhereIf(!string.IsNullOrWhiteSpace(lastName), e => e.Doctor.LastName!.ToLower().Contains(lastName!.ToLower()))
                     .WhereIf(!string.IsNullOrWhiteSpace(identityNumber), e => e.Doctor.IdentityNumber!.Contains(identityNumber!))
