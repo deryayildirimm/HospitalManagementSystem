@@ -23,6 +23,8 @@ public class AppointmentManager(
         Guid medicalServiceId,
         DateTime date)
     {
+        
+        //Check doctor's working hours on the selected date
         var workingHour = await doctorWorkingHourRepository
             .FirstOrDefaultAsync(x => x.DoctorId == doctorId 
                                       && date.DayOfWeek == x.DayOfWeek);
@@ -32,6 +34,7 @@ public class AppointmentManager(
             throw new DoctorNotWorkingException();
         }
 
+        //Check if medical service exist
         var medicalService = await medicalServiceRepository
             .FirstOrDefaultAsync(x => x.Id == medicalServiceId);
 
@@ -40,12 +43,18 @@ public class AppointmentManager(
             throw new MedicalServiceNotFoundException();
         }
 
+        //Check doctor's appointments on the selected date
         var doctorAppointments = await appointmentRepository
             .GetListAsync(x => x.DoctorId == doctorId 
                                && x.AppointmentDate.Date == date.Date);
 
-        var doctorAppointmentTimes = new HashSet<TimeSpan>(doctorAppointments.Select(x => x.StartTime.TimeOfDay));
-
+        //Retrieve doctor's appointment times on the selected date
+        var doctorAppointmentTimes = doctorAppointments.Select(x => new 
+        {
+            StartTime = x.StartTime.TimeOfDay,
+            EndTime = x.EndTime.TimeOfDay
+        }).ToList();
+        
         var startTime = workingHour.StartHour;
         var endTime = workingHour.EndHour;
         var serviceDuration = TimeSpan.FromMinutes(medicalService.Duration);
@@ -56,12 +65,16 @@ public class AppointmentManager(
              appointmentTime + serviceDuration <= endTime;
              appointmentTime += serviceDuration)
         {
-            if (appointmentTime < date.Date.TimeOfDay)
+            
+            // Skip creating slots for past times on the current date
+            if (date.Date == DateTime.Now.Date && appointmentTime < DateTime.Now.TimeOfDay)
             {
                 continue;
             }
 
-            var isAvailable = !doctorAppointmentTimes.Contains(appointmentTime);
+            //Check if doctor has another appointment at the same time
+            var isAvailable = !doctorAppointmentTimes.Any(slot =>
+                appointmentTime >= slot.StartTime && appointmentTime < slot.EndTime);
 
             availableSlots.Add(new AppointmentSlotDto
             {

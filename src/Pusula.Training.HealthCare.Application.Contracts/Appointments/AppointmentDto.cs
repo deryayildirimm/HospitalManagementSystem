@@ -7,18 +7,13 @@ namespace Pusula.Training.HealthCare.Appointments;
 public class AppointmentDto : FullAuditedEntityDto<Guid>
 {
     public Guid DoctorId { get; set; }
-    
     public Guid MedicalServiceId { get; set; }
-    
+    public  Guid PatientId { get; set; }
     public DateTime AppointmentDate { get; set; }
-    
-    public string AppointmentTime { get; set; } = null!;
-    
-    public string Availability {get; set;} = null!;
-    
-    public bool AvailabilityValue {get; set;} = false;
-
-    public AppointmentDto()
-    {
-    }
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; } 
+    public virtual EnumAppointmentStatus Status { get; protected set; }
+    public virtual string? Notes { get; protected set; } = string.Empty;
+    public virtual bool ReminderSent { get; protected set; }
+    public virtual double Amount { get; protected set; }
 }

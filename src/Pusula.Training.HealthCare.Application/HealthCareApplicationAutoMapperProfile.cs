@@ -51,7 +51,8 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<DoctorDto, DoctorUpdateDto>();
         CreateMap<DoctorWithNavigationProperties, DoctorWithNavigationPropertiesDto>();
         
-        CreateMap<Appointments.Appointment, AppointmentDto>();
-        CreateMap<AppointmentSlotDto, AppointmentDto>();
+        CreateMap<Appointment, AppointmentDto>();
+        CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();
+        
     }
 }
