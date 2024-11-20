@@ -74,9 +74,10 @@ public class DoctorsAppService(
         };
     }
 
-    public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetDistrictLookupAsync(LookupRequestDto input)
+    public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetDistrictLookupAsync(Guid? cityId, LookupRequestDto input)
     {
         var query = (await districtRepository.GetQueryableAsync())
+            .WhereIf(cityId.HasValue, x => x.CityId == cityId!.Value) 
             .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
                 x => x.Name != null && x.Name.Contains(input.Filter!));
 

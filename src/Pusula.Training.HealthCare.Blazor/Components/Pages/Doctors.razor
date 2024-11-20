@@ -476,7 +476,7 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is2">
+                        <Column ColumnSize="ColumnSize.Is3">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center; vertical-align: middle;">
@@ -512,7 +512,7 @@
                                         <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
                                         @L["City"]
                                     </FieldLabel>
-                                    <Select TValue="Guid" @bind-SelectedValue="@NewDoctor.CityId">
+                                    <Select TValue="Guid" @bind-SelectedValue="@NewDoctor.CityId" @onchange="(e) => OnCityChanged(Guid.Parse(e.Value.ToString()))">
                                         <SelectItem></SelectItem>
                                         @foreach (var item in CitiesCollection)
                                         {

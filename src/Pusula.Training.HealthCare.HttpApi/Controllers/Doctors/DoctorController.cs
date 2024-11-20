@@ -39,8 +39,8 @@ public class DoctorController(IDoctorsAppService doctorsAppService) : HealthCare
 
     [HttpGet]
     [Route("district-lookup")]
-    public Task<PagedResultDto<LookupDto<Guid>>> GetDistrictLookupAsync(LookupRequestDto input) => 
-        doctorsAppService.GetDistrictLookupAsync(input);
+    public Task<PagedResultDto<LookupDto<Guid>>> GetDistrictLookupAsync(Guid? cityId, LookupRequestDto input) => 
+        doctorsAppService.GetDistrictLookupAsync(cityId, input);
 
     [HttpGet]
     [Route("title-lookup")]

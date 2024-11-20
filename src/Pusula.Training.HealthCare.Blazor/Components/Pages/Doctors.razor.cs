@@ -113,7 +113,6 @@ public partial class Doctors
     private async Task SetLookupsAsync()
     {
         CitiesCollection = [.. (await DoctorsAppService.GetCityLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
-        DistrictsCollection = [.. (await DoctorsAppService.GetDistrictLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
         TitlesCollection = [.. (await DoctorsAppService.GetTitleLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
         DepartmentsCollection = [.. (await DoctorsAppService.GetDepartmentLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
     }
@@ -133,6 +132,7 @@ public partial class Doctors
     
     protected virtual async Task SearchAsync()
     {
+        Console.WriteLine($"Filter: {System.Text.Json.JsonSerializer.Serialize(Filter)}");
         CurrentPage = 1;
         await GetDoctorsAsync();
         await InvokeAsync(StateHasChanged);
@@ -299,23 +299,31 @@ public partial class Doctors
     private async Task OnCityChangedAsync(Guid? cityId)
     {
         Filter.CityId = cityId;
-
         if (cityId.HasValue)
         {
-            // Fetch districts for the selected city
-            DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
+            DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(cityId.Value, new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
         }
         else
         {
-            // Reset districts if no city is selected
             DistrictsCollection = [];
         }
-
-        Filter.DistrictId = null;
-        await InvokeAsync(StateHasChanged);
+        await SearchAsync();
     }
 
-
+    private async Task OnCityChanged(Guid cityId)
+    {
+        NewDoctor.CityId = cityId;
+       
+        if (cityId != null)
+        {
+            // Assuming you have a service that fetches districts based on the city
+            DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(cityId, new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
+        }
+        else
+        {
+            DistrictsCollection = []; // Clear districts if no city selected
+        }
+    }
     
     private Task SelectAllItems()
     {

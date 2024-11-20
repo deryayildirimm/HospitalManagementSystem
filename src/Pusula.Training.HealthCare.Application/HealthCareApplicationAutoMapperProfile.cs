@@ -65,5 +65,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<District, DistrictExcelDto>();
         CreateMap<DistrictDto, DistrictUpdateDto>();
         CreateMap<DistrictWithNavigationProperties, DistrictWithNavigationPropertiesDto>();
+        CreateMap<District, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
     }
 }

@@ -5,7 +5,9 @@ using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Pusula.Training.HealthCare.Cities;
 using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Titles;
@@ -50,6 +52,8 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
             .Select(doctor => new DoctorWithNavigationProperties
             {
                 Doctor = doctor,
+                City = dbContext.Set<City>().FirstOrDefault(c => c.Id == doctor.CityId)!,
+                District = dbContext.Set<District>().FirstOrDefault(c => c.Id == doctor.DistrictId)!,
                 Title = dbContext.Set<Title>().FirstOrDefault(c => c.Id == doctor.TitleId)!,
                 Department = dbContext.Set<Department>().FirstOrDefault(c => c.Id == doctor.DepartmentId)!
             })
@@ -197,6 +201,10 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
 
         protected virtual async Task<IQueryable<DoctorWithNavigationProperties>> GetQueryForNavigationPropertiesAsync() =>
             from doctor in (await GetDbSetAsync())
+            join city in (await GetDbContextAsync()).Set<City>() on doctor.CityId equals city.Id into cities
+            from city in cities.DefaultIfEmpty()
+            join district in (await GetDbContextAsync()).Set<District>() on doctor.DistrictId equals district.Id into districts
+            from district in districts.DefaultIfEmpty()
             join title in (await GetDbContextAsync()).Set<Title>() on doctor.TitleId equals title.Id into titles
             from title in titles.DefaultIfEmpty()
             join department in (await GetDbContextAsync()).Set<Department>() on doctor.DepartmentId equals department.Id into departments
@@ -204,6 +212,8 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
             select new DoctorWithNavigationProperties
             {
                 Doctor = doctor,
+                City = city,
+                District = district,
                 Title = title,
                 Department = department
             };
