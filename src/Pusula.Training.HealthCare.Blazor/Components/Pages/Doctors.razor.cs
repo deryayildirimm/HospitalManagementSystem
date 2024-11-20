@@ -311,11 +311,10 @@ public partial class Doctors
             DistrictsCollection = [];
         }
 
-        // Clear selected district if it's no longer valid
         Filter.DistrictId = null;
-
         await InvokeAsync(StateHasChanged);
     }
+
 
     
     private Task SelectAllItems()

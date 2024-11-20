@@ -89,6 +89,8 @@ public class DoctorsAppService(
         };
     }
 
+
+
     public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetTitleLookupAsync(LookupRequestDto input)
     {
         var query = (await titleRepository.GetQueryableAsync())

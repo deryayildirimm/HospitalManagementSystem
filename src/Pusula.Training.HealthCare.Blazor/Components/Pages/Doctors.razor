@@ -281,9 +281,11 @@
                                 Caption="@L["Email"]">
                 </DataGridColumn>
 
-                <DataGridColumn TItem="DoctorWithNavigationPropertiesDto"
-                                Field="Doctor.YearOfExperience"
-                                Caption="@L["YearOfExperience"]">
+                <DataGridColumn TItem="DoctorWithNavigationPropertiesDto" Caption="@L["YearsOfExperience"]">
+                    <DisplayTemplate>
+                        @(DateTime.Now.Year - context.Doctor.StartDate.Year -
+                        (DateTime.Now.DayOfYear < context.Doctor.StartDate.DayOfYear ? 1 : 0))
+                    </DisplayTemplate>
                 </DataGridColumn>
 
                 <DataGridColumn TItem="DoctorWithNavigationPropertiesDto"
@@ -313,10 +315,7 @@
                         </Button>
                     </DisplayTemplate>
                 </DataGridColumn>
-
             </DataGridColumns>
-
-
         </DataGrid>
     </CardBody>
 </Card>
