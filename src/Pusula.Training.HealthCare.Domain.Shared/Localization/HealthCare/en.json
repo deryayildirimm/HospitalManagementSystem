@@ -158,6 +158,8 @@
     "Error:UnExpectedErrorOcurred": "An unexpected error occurred.",
     "DoctorNotAvailable": "is unavailable on the selected day.",
     "AvailableAppointments": "Available Appointments",
-    "SendReminder":  "Send Reminder",
+    "SendReminder": "Send Reminder",
+    "DoctorNotFound": "Doctors not found.",
+    "AppointmentInformationWillBeSent": "Appointment information will be sent the doctor and patient soon."
   }
 }

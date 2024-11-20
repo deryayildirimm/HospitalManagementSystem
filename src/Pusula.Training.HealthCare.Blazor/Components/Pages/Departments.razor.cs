@@ -104,8 +104,7 @@ public partial class Departments
                         .IsGrantedAsync(HealthCarePermissions.Departments.Edit);
         CanDeleteDepartment = await AuthorizationService
                         .IsGrantedAsync(HealthCarePermissions.Departments.Delete);
-
-
+        
     }
 
     private async Task GetDepartmentsAsync()

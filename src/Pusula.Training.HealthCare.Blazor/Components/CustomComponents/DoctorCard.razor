@@ -1,4 +1,7 @@
+@using Microsoft.Extensions.Localization
+@using Pusula.Training.HealthCare.Localization
 @using Pusula.Training.HealthCare.Patients
+
 <Card @onclick="() => OnDoctorSelect.InvokeAsync(Doctor)"
       Class="@(GetDoctorCardClass?.Invoke(Doctor) ?? "")">
     <CardBody Class="p-0">
@@ -16,11 +19,12 @@
                 <div class="d-flex flex-column">
                     <h6 class="m-0 text-center fw-semibold">@Doctor.Name</h6>
                     <Badge
-                           Border="Border.Is1"
-                           TextWeight="TextWeight.Normal"
-                           TextSize="TextSize.ExtraSmall"
-                           Width="Width.Px(25)">
-                        @(Doctor.Gender)
+                        Color="@(Doctor.Gender== EnumGender.MALE ? Color.Primary : Color.Danger)"
+                        Border="Border.Is1"
+                        TextWeight="TextWeight.Normal"
+                        TextSize="TextSize.ExtraSmall"
+                        Width="Width.Px(25)">
+                        @(Doctor.Gender== EnumGender.MALE ? @L["Gender:M"] : @L["Gender:F"])
                     </Badge>
                 </div>
             </div>
@@ -36,6 +40,8 @@
         }
     </CardBody>
 </Card>
+
+@inject IStringLocalizer<HealthCareResource> L
 
 @code {
     [Parameter] public Doctor Doctor { get; set; } = null!;

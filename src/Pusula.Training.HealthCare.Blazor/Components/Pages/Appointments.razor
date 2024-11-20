@@ -36,28 +36,19 @@
         <div class="card-body p-0">
             <div>
                 <h6 class="text-start">@L["Department"]</h6>
-                @if (AppointmentStepperModel.DepartmentName != null)
-                {
-                    <Badge TextSize="TextSize.ExtraSmall" Class="p-2" Style="background-color: var(--bs-gray-600)">
-                        @AppointmentStepperModel.DepartmentName
-                    </Badge>
-                }
+                <Badge TextSize="TextSize.ExtraSmall" Class="p-2" Style="background-color: var(--bs-gray-600)">
+                    @StepperModel.DepartmentName
+                </Badge>
                 <hr class="my-2"/>
                 <h6 class="text-start">@L["Service"]</h6>
-                @if (AppointmentStepperModel.MedicalServiceName != null)
-                {
-                    <Badge TextSize="TextSize.ExtraSmall" Class="p-2" Style="background-color: var(--bs-gray-600)">
-                        @AppointmentStepperModel.MedicalServiceName
-                    </Badge>
-                }
+                <Badge TextSize="TextSize.ExtraSmall" Class="p-2" Style="background-color: var(--bs-gray-600)">
+                    @StepperModel.MedicalServiceName
+                </Badge>
                 <hr class="my-2"/>
                 <h6 class="text-start">@L["Doctor"]</h6>
-                @if (AppointmentStepperModel.DoctorName != null)
-                {
-                    <Badge TextSize="TextSize.ExtraSmall" Class="p-2" Style="background-color: var(--bs-gray-600)">
-                        @AppointmentStepperModel.DoctorName
-                    </Badge>
-                }
+                <Badge TextSize="TextSize.ExtraSmall" Class="p-2" Style="background-color: var(--bs-gray-600)">
+                    @StepperModel.DoctorName
+                </Badge>
                 <hr class="my-2"/>
             </div>
             @if (ActiveStep != 3)
@@ -104,9 +95,11 @@
     </div>
 </div>
 
-<div class="col-sm-12 col-md-9 p-4 border-black border-1">
+<div class="col-sm-12 col-md-9">
+<Card Class="border-black border-1 p-4">
+<CardBody>
 <Div class="row mb-4">
-    <SfStepper ReadOnly="true" Linear="true" @ref="Stepper" ShowTooltip="true" StepChanged="HandleStepChange">
+    <SfStepper ReadOnly="true" Linear="true" @ref="Stepper" ShowTooltip="true" StepChanging="HandleStepChange">
         <StepperSteps>
             <StepperStep @ref="SelectServiceStepper" Label="@L["SelectService"]" IconCss="e-icons e-list-unordered">
             </StepperStep>
@@ -125,8 +118,8 @@
         <div class="row gx-4">
             <div class="col-sm-12 col-md-8">
                 <h5 class="fw-bold">@L["Doctors"]</h5>
-                <div class="card">
-                    <div class="card-body p-2">
+                <div class="card h-100">
+                    <div class="card-body h-100">
                         <Form id="DoctorSearchForm" class="mb-3" Width="Width.Is100">
                             <Addons>
                                 <Addon AddonType="AddonType.Start">
@@ -152,13 +145,26 @@
                                 </Addon>
                             </Addons>
                         </Form>
+
                         <div class="doctor-list h-80v d-flex flex-column p-1 gap-2 overflow-auto" style="max-height: 80vh">
-                            @foreach (var doctor in DoctorsList)
+
+                            @if (IsDoctorListLoading)
                             {
-                                <DoctorCard Doctor="@doctor"
-                                            OnDoctorSelect="@OnDoctorSelect"
-                                            GetDoctorCardClass="@GetDoctorCardClass"/>
+                                @for (var i = 0; i < @DoctorLoadingShimmerCount; i++)
+                                {
+                                    <DoctorShimmerCard></DoctorShimmerCard>
+                                }
                             }
+                            else if (!IsDoctorListLoading && DoctorsList.Count > 0)
+                            {
+                                @foreach (var doctor in DoctorsList)
+                                {
+                                    <DoctorCard Doctor="@doctor"
+                                                OnDoctorSelect="@OnDoctorSelect"
+                                                GetDoctorCardClass="@GetDoctorCardClass"/>
+                                }
+                            }
+
                         </div>
                     </div>
                 </div>
@@ -203,6 +209,7 @@
         </div>
     </Div>
 }
+//Doctor selection
 
 else if (ActiveStep == 1)
 {
@@ -231,7 +238,7 @@ else if (ActiveStep == 1)
                     <div class="d-flex justify-content-between">
                         <div>
                             <Text TextSize="TextSize.Heading6" TextWeight="TextWeight.Bold">
-                                @AppointmentStepperModel.DoctorName
+                                @StepperModel.DoctorName
                             </Text>
                         </div>
 
@@ -244,7 +251,7 @@ else if (ActiveStep == 1)
                             </Text>
                         </div>
                     </div>
-                    
+
                     <div class="d-flex gap-2 justify-content-start flex-wrap my-3">
 
                         @if (SlotsLoading)
@@ -259,9 +266,8 @@ else if (ActiveStep == 1)
                         {
                             @foreach (var appointment in AppointmentSlots)
                             {
-
                                 var dynamicClasses = "shadow-sm text-center align-items-center justify-content-center ";
-                                
+
                                 if (appointment.AvailabilityValue)
                                 {
                                     dynamicClasses += $"time-slot-card light-green {(appointment.IsSelected ? "active" : "")}";
@@ -291,7 +297,7 @@ else if (ActiveStep == 1)
                         {
                             <div class="d-flex align-items-center justify-content-center rounded-1 px-2 py-1 light-red">
                                 <Text class="fs-6 text-white" TextWeight="TextWeight.SemiBold">
-                                    @AppointmentStepperModel.DoctorName @L["DoctorNotAvailable"]
+                                    @StepperModel.DoctorName @L["DoctorNotAvailable"]
                                 </Text>
                             </div>
                         }
@@ -303,6 +309,7 @@ else if (ActiveStep == 1)
         </div>
     </Div>
 }
+//Scheduling
 
 else if (ActiveStep == 2)
 {
@@ -313,7 +320,7 @@ else if (ActiveStep == 2)
                     <CardBody Flex="Flex.Column" Display="Display.Flex" Gap="Gap.Is3">
                         <div>
                             <Label For="appointmentNote" Class="form-label">@L["AppointmentNote"]</Label>
-                            <TextEdit @bind-Value="AppointmentStepperModel.Note" Placeholder="@L["TypeTheNote"]" Class="form-control"/>
+                            <TextEdit @bind-Value="StepperModel.Note" Placeholder="@L["TypeTheNote"]" Class="form-control"/>
                         </div>
 
                         <Dropdown TextAlignment="TextAlignment.Start" Style="background: white;">
@@ -330,7 +337,7 @@ else if (ActiveStep == 2)
                                 </DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
-                        
+
                         <div>
                             <Label For="appointmentId" Class="form-label">@L["EAppointmentID"]</Label>
                             <TextEdit Disabled="true" @bind-Value="AppointmentId" Placeholder="@L["EAppointmentID"]" Class="form-control"/>
@@ -342,7 +349,7 @@ else if (ActiveStep == 2)
                         </div>
                         <div>
                             <Label Class="form-label">@L["SendReminder"]</Label>
-                            <Switch Cursor="Cursor.Pointer" Width="Width.Px(60)" Height="Height.Px(30)" TValue="bool" Checked="@AppointmentStepperModel.ReminderSent" CheckedChanged="@OnReminderSettingChanged"></Switch>
+                            <Switch Cursor="Cursor.Pointer" Width="Width.Px(60)" Height="Height.Px(30)" TValue="bool" Checked="@StepperModel.ReminderSent" CheckedChanged="@OnReminderSettingChanged"></Switch>
                         </div>
 
                     </CardBody>
@@ -355,42 +362,42 @@ else if (ActiveStep == 2)
 
                         <div class="d-flex align-items-center gap-2">
                             <Icon Name="IconName.User" IconSize="IconSize.Large" Class="purple"></Icon>
-                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.PatientName</Text>
+                            <Text TextSize="TextSize.Small">@StepperModel.PatientName</Text>
                         </div>
 
                         <div class="d-flex align-items-center  gap-2">
                             <Icon Name="IconName.Building" IconSize="IconSize.Large" Class="purple"></Icon>
-                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.HospitalName</Text>
+                            <Text TextSize="TextSize.Small">@StepperModel.HospitalName</Text>
                         </div>
 
                         <div class="d-flex align-items-center  gap-2">
                             <Icon Name="IconName.Calendar" IconSize="IconSize.Large" Class="purple"></Icon>
-                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.AppointmentDisplayDate</Text>
+                            <Text TextSize="TextSize.Small">@StepperModel.AppointmentDisplayDate</Text>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             <Icon Name="IconName.Clock" IconSize="IconSize.Large" Class="purple"></Icon>
-                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.AppointmentDisplayTime</Text>
+                            <Text TextSize="TextSize.Small">@StepperModel.AppointmentDisplayTime</Text>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             <Icon Name="IconName.Hospital" IconSize="IconSize.Large" Class="purple"></Icon>
-                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.DoctorName</Text>
+                            <Text TextSize="TextSize.Small">@StepperModel.DoctorName</Text>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             <Icon Name="IconName.List" IconSize="IconSize.Large" Class="purple"></Icon>
-                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.DepartmentName</Text>
+                            <Text TextSize="TextSize.Small">@StepperModel.DepartmentName</Text>
                         </div>
 
                         <div class="d-flex align-items-center gap-2">
                             <Icon Name="IconName.Check" IconSize="IconSize.Large" Class="purple"></Icon>
-                            <Text TextSize="TextSize.Small">@AppointmentStepperModel.MedicalServiceName</Text>
+                            <Text TextSize="TextSize.Small">@StepperModel.MedicalServiceName</Text>
                         </div>
 
                         <div class="d-flex gap-2 align-items-center justify-content-start">
                             <Icon Name="IconName.MoneyBillAlt" IconSize="IconSize.Large" TextColor="TextColor.Secondary" Class="purple"></Icon>
-                            <Text TextSize="TextSize.Small" TextWeight="TextWeight.Bold">@AppointmentStepperModel.Amount</Text>
+                            <Text TextSize="TextSize.Small" TextWeight="TextWeight.Bold">@StepperModel.Amount</Text>
                             <Text TextSize="TextSize.Small" TextWeight="TextWeight.Bold">@L["TL"]</Text>
                         </div>
 
@@ -406,7 +413,9 @@ else if (ActiveStep == 2)
         </div>
     </Div>
 }
+//Confirmation
 
+//Result
 else if (ActiveStep == 3)
 {
     <Div Padding="Padding.Is2">
@@ -419,6 +428,7 @@ else if (ActiveStep == 3)
                             <Icon Name="IconName.CheckCircle" IconSize="IconSize.x6" TextColor="TextColor.Success"></Icon>
                             <Text TextSize="TextSize.Heading4" TextWeight="TextWeight.Bold">@L["OperationSuccessful"]</Text>
                             <Text TextSize="TextSize.Heading5" TextWeight="TextWeight.Bold">@L["SuccessMessage"]</Text>
+                            <Text TextSize="TextSize.Heading5" TextWeight="TextWeight.Bold">@L["AppointmentInformationWillBeSent"]</Text>
                         </div>
                     }
                     else
@@ -434,6 +444,9 @@ else if (ActiveStep == 3)
         </div>
     </Div>
 }
+
+</CardBody>
+</Card>
 
 </div>
 </div>
