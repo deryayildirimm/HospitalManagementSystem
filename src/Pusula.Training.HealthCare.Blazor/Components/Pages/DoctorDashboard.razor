@@ -1,0 +1,29 @@
+@page "/doctor-dashboard"
+@using Pusula.Training.HealthCare.Localization
+@using Pusula.Training.HealthCare.Permissions
+@attribute [Authorize(HealthCarePermissions.Doctors.Default)]
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+
+@using Volo.Abp.AspNetCore.Components.Web
+@using Volo.Abp.Http.Client
+
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="TEST">
+
+</PageHeader>
+
+@* ************************* Content ************************* *@
+
+<Div class="row py-3">
+    <Div class="col-sm-12 col-md-12">
+        <Card Class="border-black border-1 p-4">
+            
+        </Card>
+    </Div>
+</Div>

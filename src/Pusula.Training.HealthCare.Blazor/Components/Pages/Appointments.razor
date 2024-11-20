@@ -119,7 +119,7 @@
             <div class="col-sm-12 col-md-8">
                 <h5 class="fw-bold">@L["Doctors"]</h5>
                 <div class="card h-100">
-                    <div class="card-body h-100">
+                    <div class="card-body h-100 p-0">
                         <Form id="DoctorSearchForm" class="mb-3" Width="Width.Is100">
                             <Addons>
                                 <Addon AddonType="AddonType.Start">
@@ -319,32 +319,17 @@ else if (ActiveStep == 2)
                 <Card Shadow="Shadow.Default" Height="Height.Is100">
                     <CardBody Flex="Flex.Column" Display="Display.Flex" Gap="Gap.Is3">
                         <div>
-                            <Label For="appointmentNote" Class="form-label">@L["AppointmentNote"]</Label>
+                            <Label Class="form-label">@L["AppointmentNote"]</Label>
                             <TextEdit @bind-Value="StepperModel.Note" Placeholder="@L["TypeTheNote"]" Class="form-control"/>
                         </div>
-
-                        <Dropdown TextAlignment="TextAlignment.Start" Style="background: white;">
-                            <DropdownToggle TextAlignment="TextAlignment.Start" Width="Width.Is100" Color="Color.Light" Style="border-color: purple">
-                                @L["AppointmentSource"]
-                            </DropdownToggle>
-                            <DropdownMenu Width="Width.Is100">
-                                <DropdownItem>
-                                    action
-                                </DropdownItem>
-                                <DropdownDivider/>
-                                <DropdownItem>
-                                    action2
-                                </DropdownItem>
-                            </DropdownMenu>
-                        </Dropdown>
-
+                        
                         <div>
-                            <Label For="appointmentId" Class="form-label">@L["EAppointmentID"]</Label>
+                            <Label Class="form-label">@L["EAppointmentID"]</Label>
                             <TextEdit Disabled="true" @bind-Value="AppointmentId" Placeholder="@L["EAppointmentID"]" Class="form-control"/>
                         </div>
 
                         <div>
-                            <Label For="paymentId" Class="form-label">@L["EAppointmentPaymentID"]</Label>
+                            <Label Class="form-label">@L["EAppointmentPaymentID"]</Label>
                             <TextEdit Disabled="true" @bind-Value="PaymentId" Placeholder="@L["EAppointmentPaymentID"]" Class="form-control"/>
                         </div>
                         <div>
@@ -442,12 +427,15 @@ else if (ActiveStep == 3)
                 </CardBody>
             </Card>
         </div>
+        <Button Color="Color.Success" Outline
+                Clicked="NavigateToPatient">
+            @L["GoBackToPatient"]
+        </Button>
     </Div>
 }
 
 </CardBody>
 </Card>
-
 </div>
 </div>
 

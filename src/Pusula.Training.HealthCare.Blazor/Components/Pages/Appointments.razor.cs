@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Pusula.Training.HealthCare.Appointments;
@@ -11,7 +10,6 @@ using Pusula.Training.HealthCare.Blazor.Models;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
-using Pusula.Training.HealthCare.Permissions;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Navigations;
 using Volo.Abp;
@@ -31,15 +29,15 @@ public partial class Appointments
     private StepperStep ScheduleStepper { get; set; } = null!;
     private StepperStep ConfirmationStepper { get; set; } = null!;
     private StepperStep ResultStepper { get; set; } = null!;
-    private int ActiveStep { get; set; } = 0;
+    private int ActiveStep { get; set; }
 
     #endregion
     
     private bool IsFinalResultSuccess { get; set; }
-    private bool CanCreateAppointment { get; set; }
 
     #region MedicalServiceFilters
-
+    
+    private IReadOnlyList<MedicalServiceWithDepartmentsDto> MedicalServiceWithDepartmentsList { get; set; } = null!;
     private GetMedicalServiceInput MedicalServiceFilter { get; set; }
     private int ServicePageSize { get; } = 50;
     private int ServiceCurrentPage { get; set; } = 1;
@@ -49,7 +47,9 @@ public partial class Appointments
     #endregion
 
     #region DoctorFilters
-
+    private List<Doctor> DoctorsList { get; set; }
+    private bool IsDoctorListLoading { get; set; }
+    private int DoctorLoadingShimmerCount { get; set; } = 5;
     private GetDoctorsWithDepartmentIdsInput DoctorsWithDepartmentIdsInput { get; set; }
     private int DoctorPageSize { get; } = 50;
     private int DoctorCurrentPage { get; set; } = 1;
@@ -65,34 +65,21 @@ public partial class Appointments
 
     private PatientDto Patient { get; set; }
     private List<SelectionItem> ServicesList { get; set; }
-
     private SfListBox<SelectionItem[], SelectionItem> SelectServiceDropdown { get; set; } = null!;
-
-    private IReadOnlyList<MedicalServiceWithDepartmentsDto> MedicalServiceWithDepartmentsList { get; set; } = null!;
-
-    private List<Doctor> DoctorsList { get; set; }
-    private bool IsDoctorListLoading { get; set; }
-    
-    private int DoctorLoadingShimmerCount { get; set; } = 5;
-
     private AppointmentCreateDto NewAppointment { get; set; }
-
     private List<AppointmentSlotItem> AppointmentSlots { get; set; }
-    
     private List<AppointmentDayItem> DaysList { get; set; }
     private int LoadCount { get; set; } = 14;
-    private double ScreenWidth { get; set; } = 0;
-    private int AvailableSlotCount { get; set; } = 0;
+    private double ScreenWidth { get; set; }
+    private int AvailableSlotCount { get; set; }
     private int LoadingShimmerCount { get; set; } = 24;
     private string AppointmentId { get; set; } = "ER123456";
     private string PaymentId { get; set; } = "PAY987654";
     private bool SlotsLoading { get; set; }
     private bool IsProcessCanceled { get; set; }
-
     private bool IsUserNavigatingReverse { get; set; }
-    
     private bool IsCurrentStepValid  { get; set; }
-    
+
     private bool IsFirstStepValid =>
         !string.IsNullOrEmpty(StepperModel.MedicalServiceName) &&
         !string.IsNullOrEmpty(StepperModel.DoctorName) &&
@@ -139,11 +126,11 @@ public partial class Appointments
         IsServiceListLoading = true;
         IsUserNavigatingReverse = false;
         IsCurrentStepValid = false;
+        ActiveStep = 0;
     }
 
     protected override async Task OnInitializedAsync()
     {
-        await SetPermissionsAsync();
         await GetPatient();
         await GetServices();
         AddInitialDays();
@@ -164,12 +151,6 @@ public partial class Appointments
             SetDayLoadCount();
             AddInitialDays();
         }
-    }
-
-    private async Task SetPermissionsAsync()
-    {
-        CanCreateAppointment = await AuthorizationService
-            .IsGrantedAsync(HealthCarePermissions.Appointments.Create);
     }
 
     private async Task CancelProcess()
@@ -331,7 +312,6 @@ public partial class Appointments
             if (patients.Count > 0)
             {
                 Patient = patients[0];
-                
                 StepperModel.PatientId = Patient.Id;
                 StepperModel.PatientName = Patient.FirstName + " " + Patient.LastName;
             }
@@ -452,7 +432,7 @@ public partial class Appointments
 
             AvailableSlotCount = AppointmentSlots.Count(e => e.AvailabilityValue);
         }
-        catch (BusinessException e)
+        catch (BusinessException)
         {
             AppointmentSlots = [];
             AvailableSlotCount = 0;
@@ -474,9 +454,9 @@ public partial class Appointments
         await GetServices();
     }
 
-    private async Task OnDoctorSearchChanged(string newText)
+    private async Task OnDoctorSearchChanged(string? newText)
     {
-        DoctorsWithDepartmentIdsInput.Name = newText;
+        DoctorsWithDepartmentIdsInput.Name = newText ?? string.Empty; 
         await GetDoctorsList();
     }
 
@@ -737,4 +717,10 @@ public partial class Appointments
     }
     
     #endregion
+
+    private void NavigateToPatient()
+    {
+        NavigationManager.NavigateTo($"/patients/detail/4c2883ce-b1f3-46da-88b7-f1f34f9ee657");
+
+    }
 }

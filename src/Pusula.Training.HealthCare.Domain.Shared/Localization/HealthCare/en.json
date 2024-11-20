@@ -160,6 +160,7 @@
     "AvailableAppointments": "Available Appointments",
     "SendReminder": "Send Reminder",
     "DoctorNotFound": "Doctors not found.",
-    "AppointmentInformationWillBeSent": "Appointment information will be sent the doctor and patient soon."
+    "AppointmentInformationWillBeSent": "Appointment information will be sent the doctor and patient soon.",
+    "GoBackToPatient":  "Go Back To Patient Details"
   }
 }
