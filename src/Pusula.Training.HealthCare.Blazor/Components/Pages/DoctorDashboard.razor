@@ -1,29 +1,77 @@
 @page "/doctor-dashboard"
+
+@attribute [Authorize(HealthCarePermissions.Appointments.Default)]
 @using Pusula.Training.HealthCare.Localization
 @using Pusula.Training.HealthCare.Permissions
-@attribute [Authorize(HealthCarePermissions.Doctors.Default)]
-@using Volo.Abp.AspNetCore.Components.Messages
-@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
-
 @using Volo.Abp.AspNetCore.Components.Web
-@using Volo.Abp.Http.Client
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Microsoft.Extensions.Localization
+@using Pusula.Training.HealthCare.Appointments
+@using Pusula.Training.HealthCare.Doctors
 
-@inject IUiMessageService UiMessageService
+@inject AppointmentAppService AppointmentAppService
+@inject DoctorsAppService DoctorAppService
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
-@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
-@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject IStringLocalizer<HealthCareResource> L
 
 @* ************************* PAGE HEADER ************************* *@
-<PageHeader Title="TEST">
+<PageHeader Title=@L["AppointmentOverview"]>
 
 </PageHeader>
 
 @* ************************* Content ************************* *@
 
-<Div class="row py-3">
-    <Div class="col-sm-12 col-md-12">
-        <Card Class="border-black border-1 p-4">
+<div class="row py-3">
+    <div class="col-sm-12 col-md-2">
+
+        <Card Class="card border-1 border-black p-3">
+            <Text Class="fw-bolder m-0" TextColor="TextColor.Dark" TextSize="TextSize.Heading5">@L["LatestAppointments"]</Text>
+
+        </Card>
+
+    </div>
+
+    <div class="col-sm-12 col-md-10">
+        <Card Class="card border-1 border-black p-3">
+            <Text Class="fw-bolder m-0" TextColor="TextColor.Dark" TextSize="TextSize.Heading5">@L["AppointmentSchedule"]</Text>
+            <div class="d-flex justify-content-between my-3">
+                <div>
+                    @if (@DoctorWithNavigation.Title != null && DoctorWithNavigation.Doctor != null)
+                    {
+                        <h6> @($"{DoctorWithNavigation.Title.TitleName} {DoctorWithNavigation.Doctor.FirstName} {DoctorWithNavigation.Doctor.LastName}")</h6>
+                    }
+                    
+                </div>
+
+                <div>
+                    <Text TextSize="TextSize.Heading6" TextWeight="TextWeight.Bold">
+                        @L["ActiveAppointments"]
+                    </Text>
+                    <Text TextSize="TextSize.Heading6" TextWeight="TextWeight.Normal">
+                        (@DataSource.Count)
+                    </Text>
+                </div>
+                
+            </div>
+
+            <SfSchedule TValue="AppointmentWithNavigationPropertiesDto" Height="650px" @bind-SelectedDate="@CurrentDate">
+                <ScheduleEventSettings DataSource="@DataSource">
+                    <ScheduleField Id="Appointment.Id">
+                        <FieldSubject Name="Patient.FirstName"></FieldSubject>
+                        <FieldStartTime Name="Appointment.StartTime"></FieldStartTime>
+                        <FieldEndTime Name="Appointment.EndTime"></FieldEndTime>
+                    </ScheduleField>
+                </ScheduleEventSettings>
+                <ScheduleViews>
+                    <ScheduleView Option="View.Day"></ScheduleView>
+                    <ScheduleView Option="View.Week"></ScheduleView>
+                    <ScheduleView Option="View.WorkWeek"></ScheduleView>
+                    <ScheduleView Option="View.Month"></ScheduleView>
+                    <ScheduleView Option="View.Agenda"></ScheduleView>
+                </ScheduleViews>
+            </SfSchedule>
             
         </Card>
-    </Div>
-</Div>
+    </div>
+</div>

@@ -67,6 +67,8 @@ public partial class MedicalServices
             SkipCount = (CurrentPage - 1) * PageSize,
             Sorting = CurrentSorting
         };
+        CreateDepartmentDropdown = new SfMultiSelect<string[], SelectionItem>();
+        UpdateDepartmentDropdown = new SfMultiSelect<string[], SelectionItem>();
         MedicalServiceList = [];
         DepartmentsCollection = new List<LookupDto<Guid>>();
         SelectedDepartments = [];

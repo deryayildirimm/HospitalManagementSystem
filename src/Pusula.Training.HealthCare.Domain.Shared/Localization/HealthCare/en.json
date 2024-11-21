@@ -162,6 +162,10 @@
     "DoctorNotFound": "Doctors not found.",
     "AppointmentInformationWillBeSent": "Appointment information will be sent the doctor and patient soon.",
     "GoBackToPatient":  "Go Back To Patient Details",
-    "NewAppointment": "New Appointment"
+    "NewAppointment": "New Appointment",
+    "AppointmentOverview": "Appointment Overview",
+    "LatestAppointments": "Latest Appointments",
+    "AppointmentSchedule": "Appointment Schedule",
+    "ActiveAppointments": "Active Appointments"
   }
 }
