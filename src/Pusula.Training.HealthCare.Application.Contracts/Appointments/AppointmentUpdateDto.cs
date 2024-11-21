@@ -5,7 +5,7 @@ using Volo.Abp.Domain.Entities;
 
 namespace Pusula.Training.HealthCare.Appointments;
 
-public class AppointmentUpdateDto : IHasConcurrencyStamp
+public class AppointmentUpdateDto
 {
     [Required]
     public Guid DoctorId { get; set; }
@@ -36,5 +36,4 @@ public class AppointmentUpdateDto : IHasConcurrencyStamp
     [Required]
     public double Amount { get; set; }
 
-    public string ConcurrencyStamp { get; set; } = null!;
 }

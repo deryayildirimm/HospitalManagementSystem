@@ -12,6 +12,13 @@ public interface IAppointmentManager
         Guid medicalServiceId,
         DateTime date
     );
+    
+    Task<List<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(
+        Guid doctorId,
+        Guid medicalServiceId,
+        DateTime startDate,
+        int offset
+    );
 
     Task<Appointment> CreateAsync(
         Guid doctorId, 
@@ -33,8 +40,7 @@ public interface IAppointmentManager
         EnumAppointmentStatus status,
         bool reminderSent,
         double amount,
-        string? notes = null,
-        string? concurrencyStamp = null
+        string? notes = null
     );
     
 }

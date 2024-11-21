@@ -161,6 +161,7 @@
     "SendReminder": "Send Reminder",
     "DoctorNotFound": "Doctors not found.",
     "AppointmentInformationWillBeSent": "Appointment information will be sent the doctor and patient soon.",
-    "GoBackToPatient":  "Go Back To Patient Details"
+    "GoBackToPatient":  "Go Back To Patient Details",
+    "NewAppointment": "New Appointment"
   }
 }

@@ -19,13 +19,12 @@
 @inject IPatientsAppService PatientsAppService
 @inject IUiMessageService UiMessageService
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
-@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["Appointments"]">
-    <link href="../Components/Pages/Appointments.razor.css?v=1.2" rel="stylesheet"/>
+    <link href="../Components/Pages/Appointments.razor.css" rel="stylesheet"/>
 </PageHeader>
 
 <div class="row py-3">
@@ -217,21 +216,36 @@ else if (ActiveStep == 1)
         <div class="row">
             <div class="col-12 d-flex flex-column">
                 <div class="days-container">
-                    <button class="carousel-control left" @onclick="LoadMoreDaysLeft">❮</button>
+                    <button class="carousel-control left" @onclick="OnLoadDaysDaysLeft">❮</button>
                     <div class="days d-flex gap-1 overflow-hidden align-items-center justify-content-center" id="daysCarousel">
-                        @foreach (var item in DaysList)
+                        @if (SlotDaysLoading || DaysLookupList.Count == 0)
                         {
-                            <div class="day-card @(item.IsSelected ? "active" : "")" @onclick="() => OnSelectAppointmentDay(item)">
-                                <div class="day-name">@item.Date.ToString("ddd")</div>
-                                <div class="day-number">@item.Date.Day</div>
-                                <div class="month">@item.Date.ToString("MMM")</div>
-                                <div class="is-day-available @(item.IsAvailable ? "success-color" : "fail-color")">
+                            @for (var i = 0; i < LoadCount; i++)
+                            {
+                                <DayItemShimmerCard></DayItemShimmerCard>
+                            }
+                        }
+                        else
+                        {
+                            @foreach (var item in DaysLookupList)
+                            {
+                                <div class="day-card @(item.IsSelected ? "active" : "")" @onclick="() => OnSelectAppointmentDay(item)">
+                                    <div class="day-name">@item.Date.ToString("ddd")</div>
+                                    <div class="day-number">@item.Date.Day</div>
+                                    <div class="month">@item.Date.ToString("MMM")</div>
+                                    <div class="is-day-available @(item.AvailabilityValue ? "success-color" : "fail-color")">
+                                    </div>
+                                    <div class="available-slots">
+                                        <div class="small-circle @(item.AvailableSlotCount > 0 ? "success-color" : "fail-color")">
+                                        </div>
+                                        <Text Class="month">@item.AvailableSlotCount</Text>
+                                    </div>
                                 </div>
-                            </div>
+                            }
                         }
 
                     </div>
-                    <button class="carousel-control right" @onclick="LoadMoreDaysRight">❯</button>
+                    <button class="carousel-control right" @onclick="OnLoadDaysRight">❯</button>
                 </div>
 
                 <div class="appointment-section my-3">
@@ -427,10 +441,19 @@ else if (ActiveStep == 3)
                 </CardBody>
             </Card>
         </div>
-        <Button Color="Color.Success" Outline
-                Clicked="NavigateToPatient">
-            @L["GoBackToPatient"]
-        </Button>
+        <Div class="d-flex gap-3">
+            <Button Color="Color.Success" Outline
+                    Clicked="NavigateToPatient">
+                <Icon Name="IconName.ArrowLeft"></Icon>
+                @L["GoBackToPatient"]
+            </Button>
+            <Button Color="Color.Info" Outline
+                    Clicked="NavigateToFirstStep">
+                <Icon Name="IconName.Add"></Icon>
+                @L["NewAppointment"]
+            </Button>
+        </Div>
+       
     </Div>
 }
 

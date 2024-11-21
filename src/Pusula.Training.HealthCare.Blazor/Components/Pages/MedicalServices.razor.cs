@@ -51,8 +51,8 @@ public partial class MedicalServices
     private List<SelectionItem> DepartmentsCreateSelectionItems { get; set; } = [];
     private List<SelectionItem> DepartmentsUpdateSelectionItems { get; set; } = [];
     private List<MedicalServiceDto> SelectedMedicalServices { get; set; } = [];
-    private SfMultiSelect<string[], SelectionItem> CreateDepartmentDropdown;
-    private SfMultiSelect<string[], SelectionItem> UpdateDepartmentDropdown;
+    private SfMultiSelect<string[], SelectionItem> CreateDepartmentDropdown { get; set; }
+    private SfMultiSelect<string[], SelectionItem> UpdateDepartmentDropdown { get; set; }
 
     private List<string> SelectedDepartments { get; set; }
     private bool AllMedicalServicesSelected { get; set; }

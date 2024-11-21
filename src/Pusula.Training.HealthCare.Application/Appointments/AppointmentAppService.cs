@@ -25,6 +25,18 @@ public class AppointmentAppService(
     IDistributedCache<AppointmentDownloadTokenCacheItem, string> downloadTokenCache
 ) : HealthCareAppService, IAppointmentAppService
 {
+    public virtual async Task<PagedResultDto<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(GetAppointmentsLookupInput input)
+    {
+        var days = await appointmentManager
+            .GetAvailableDaysLookupAsync(input.DoctorId, input.MedicalServiceId, input.StartDate, input.Offset);
+        
+        return new PagedResultDto<AppointmentDayLookupDto>(
+            days.Count,
+            days.ToList()
+        );
+        
+    }
+
     public virtual async Task<PagedResultDto<AppointmentSlotDto>> GetAvailableSlotsAsync(GetAppointmentSlotInput input)
     {
         try

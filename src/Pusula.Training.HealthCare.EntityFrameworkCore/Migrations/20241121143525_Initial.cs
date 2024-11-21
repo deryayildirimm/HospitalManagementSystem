@@ -1005,6 +1005,8 @@ namespace Pusula.Training.HealthCare.Migrations
                     Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     ReminderSent = table.Column<bool>(type: "boolean", nullable: false),
                     Amount = table.Column<double>(type: "double precision", nullable: false),
+                    ExtraProperties = table.Column<string>(type: "text", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
                     LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),

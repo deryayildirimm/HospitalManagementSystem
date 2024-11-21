@@ -37,6 +37,13 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("AppointmentDate");
 
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
                     b.Property<DateTime>("CreationTime")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("CreationTime");
@@ -59,6 +66,11 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("EndTime");
+
+                    b.Property<string>("ExtraProperties")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ExtraProperties");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
