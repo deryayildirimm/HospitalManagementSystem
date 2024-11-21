@@ -19,7 +19,7 @@ public class DoctorConsts
 
     public const int FirstNameMinLength = 1;
     public const int LastNameMinLength = 1;
-    public const int GenderMinValue = 1;
+    public const int GenderMinValue = 0;
     public const int PhoneNumberMinLength = 10;
     public const int EmailMinLength = 5;
 }

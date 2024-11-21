@@ -80,7 +80,6 @@ public partial class Doctors
     {
         if (firstRender)
         {
-
             await SetBreadcrumbItemsAsync();
             await SetToolbarItemsAsync();
             await InvokeAsync(StateHasChanged);
@@ -179,6 +178,7 @@ public partial class Doctors
         EditingDoctorId = doctor.Doctor.Id;
         EditingDoctor = ObjectMapper.Map<DoctorDto, DoctorUpdateDto>(doctor.Doctor);
 
+        DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(EditingDoctor.CityId, new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
         await EditDoctorModal.Show();
     }
 
@@ -301,7 +301,7 @@ public partial class Doctors
         Filter.CityId = cityId;
         if (cityId.HasValue)
         {
-            DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(cityId.Value, new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
+            DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(cityId, new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
         }
         else
         {
@@ -314,15 +314,8 @@ public partial class Doctors
     {
         NewDoctor.CityId = cityId;
        
-        if (cityId != null)
-        {
-            // Assuming you have a service that fetches districts based on the city
-            DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(cityId, new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
-        }
-        else
-        {
-            DistrictsCollection = []; // Clear districts if no city selected
-        }
+        DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(cityId, new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
+        
     }
     
     private Task SelectAllItems()
