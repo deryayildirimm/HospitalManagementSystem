@@ -46,7 +46,7 @@ public class HealthCareMenuContributor : IMenuContributor
                 HealthCareMenus.Patients,
                 l["Menu:Patients"],
                 url: "/patients",
-                icon: "fa fa-file-alt",
+                icon: "fa fa-users",
                 requiredPermissionName: HealthCarePermissions.Patients.Default)
         );
 
@@ -75,6 +75,15 @@ public class HealthCareMenuContributor : IMenuContributor
                 url: "/medical-services",
                 icon: "fa-solid fa-notes-medical",
                 requiredPermissionName: HealthCarePermissions.MedicalServices.Default)
+        );
+
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
+                HealthCareMenus.Doctors,
+                l["Menu:Doctors"],
+                url: "/doctors",
+                icon: "fa fa-user-md",
+                requiredPermissionName: HealthCarePermissions.Doctors.Default)
         );
 
         return Task.CompletedTask;

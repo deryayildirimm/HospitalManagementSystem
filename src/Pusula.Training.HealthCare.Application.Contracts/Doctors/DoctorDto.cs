@@ -24,14 +24,14 @@ public class DoctorDto : FullAuditedEntityDto<Guid>
     public string? Email { get; set; }
     [StringLength(DoctorConsts.PhoneNumberMaxLength)]
     public string? PhoneNumber { get; set; }
+    [Required] 
+    public DateTime StartDate { get; set; } = DateTime.Now;
     [Required]
-    public int YearOfExperience { get; set; } = 0;
+    public Guid CityId { get; set; }
     [Required]
-    [StringLength(DoctorConsts.CityMaxLength, MinimumLength = DoctorConsts.CityMinLength)]
-    public string City { get; set; } = null!;
+    public Guid DistrictId { get; set; }
     [Required]
-    [StringLength(DoctorConsts.DistrictMaxLength, MinimumLength = DoctorConsts.DistrictMinLength)]
-    public string District { get; set; } = null!;
     public Guid DepartmentId { get; set; }
+    [Required]
     public Guid TitleId { get; set; }
 }

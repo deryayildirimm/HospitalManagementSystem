@@ -149,6 +149,7 @@
     "CreatedSuccess": "Record successfully created.",
     "Permission:Titles": "Titles",
     "Permission:Doctors": "Doctors",
+    "Menu:Doctors": "Doctors",
     "Permission:DoctorLeaves" : "Doctor Leave",
     "Leaves" : "Leaves"
     

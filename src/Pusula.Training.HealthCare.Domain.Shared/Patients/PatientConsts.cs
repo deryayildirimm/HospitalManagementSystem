@@ -31,7 +31,7 @@ namespace Pusula.Training.HealthCare.Patients
         public const int NameMinLength = 1;
         public const int LastNameMinLength = 1;
         public const int PassportNumberMinLength = 6;
-        public const int GenderMinValue = 1;
+        public const int GenderMinValue = 0;
         public const int MobilePhoneNumberMinLength = 8;
         public const int EmailAddressMinLength = 5;
         public const int PatientTypeMinValue = 1;

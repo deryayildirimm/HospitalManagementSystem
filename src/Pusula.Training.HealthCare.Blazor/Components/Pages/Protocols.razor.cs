@@ -70,8 +70,6 @@ public partial class Protocols
         await SetPermissionsAsync();
         await GetDepartmentCollectionLookupAsync();
 
-
-
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
