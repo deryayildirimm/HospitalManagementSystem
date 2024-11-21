@@ -19,6 +19,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
 public partial class Appointments
 {
+    
     #pragma warning disable BL0005
     [Parameter] public int PatientNo { get; set; }
 
@@ -698,7 +699,7 @@ public partial class Appointments
 
     private void NavigateToPatient()
     {
-        NavigationManager.NavigateTo($"/patients/detail/"+PatientNo);
+        NavigationManager.NavigateTo($"/patients/" + PatientNo + "/detail");
     }
 
     private async Task NavigateToFirstStep()
