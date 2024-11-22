@@ -5,6 +5,7 @@ using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.MedicalPersonnel;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Titles;
@@ -42,6 +43,7 @@ public class HealthCareDbContext :
     public DbSet<Title> Titles { get; set; } = null!;
     public DbSet<Doctor> Doctors { get; set; } = null!;
     public DbSet<DoctorLeave> DoctorLeaves { get; set; } = null!;
+    public DbSet<MedicalStaff> MedicalPersonnel { get; set; } = null!;
     public DbSet<City> Cities { get; set; } = null!;
     public DbSet<District> Districts { get; set; } = null!;
 
@@ -239,6 +241,30 @@ public class HealthCareDbContext :
 
             });
             
+            builder.Entity<MedicalStaff>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "MedicalStaff", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.FirstName).HasColumnName(nameof(MedicalStaff.FirstName)).IsRequired()
+                    .HasMaxLength(MedicalStaffConsts.FirstNameMaxLength);
+                b.Property(x => x.LastName).HasColumnName(nameof(MedicalStaff.LastName)).IsRequired()
+                    .HasMaxLength(MedicalStaffConsts.LastNameMaxLength);
+                b.Property(x => x.IdentityNumber).HasColumnName(nameof(MedicalStaff.IdentityNumber)).IsRequired()
+                    .HasMaxLength(MedicalStaffConsts.IdentityNumberLength);
+                b.Property(x => x.BirthDate).HasColumnName(nameof(MedicalStaff.BirthDate)).IsRequired();
+                b.Property(x => x.Gender).HasColumnName(nameof(MedicalStaff.Gender)).IsRequired();
+                b.Property(x => x.Email).HasColumnName(nameof(MedicalStaff.Email))
+                    .HasMaxLength(MedicalStaffConsts.EmailMaxLength);
+                b.Property(x => x.PhoneNumber).HasColumnName(nameof(MedicalStaff.PhoneNumber))
+                    .HasMaxLength(MedicalStaffConsts.PhoneNumberMaxLength);
+                b.Property(x => x.StartDate).HasColumnName(nameof(MedicalStaff.StartDate)).IsRequired();
+                b.HasOne<City>().WithMany().IsRequired().HasForeignKey(x => x.CityId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne<District>().WithMany().IsRequired().HasForeignKey(x => x.DistrictId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
 
             builder.Entity<City>(b =>
             {

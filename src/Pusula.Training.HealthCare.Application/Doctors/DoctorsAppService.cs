@@ -173,6 +173,14 @@ public class DoctorsAppService(
     [Authorize(HealthCarePermissions.Doctors.Edit)]
     public virtual async Task<DoctorDto> UpdateAsync(DoctorUpdateDto input)
     {
+        if (input.CityId == default)
+        {
+            throw new UserFriendlyException(L["The {0} field is required.", L["City"]]);
+        }
+        if (input.DistrictId == default)
+        {
+            throw new UserFriendlyException(L["The {0} field is required.", L["District"]]);
+        }
         if (input.TitleId == default)
         {
             throw new UserFriendlyException(L["The {0} field is required.", L["Title"]]);
@@ -233,6 +241,7 @@ public class DoctorsAppService(
         await doctorRepository.DeleteAllAsync( input.FilterText, input.FirstName, input.LastName, input.IdentityNumber, input.BirthDateMin, input.BirthDateMax,
             input.Gender, input.Email, input.PhoneNumber, input.YearOfExperienceMin, input.CityId, input.DistrictId, input.TitleId, input.DepartmentId);
     }
+    
     public virtual async Task<Shared.DownloadTokenResultDto> GetDownloadTokenAsync()
     {
         var token = Guid.NewGuid().ToString("N");
