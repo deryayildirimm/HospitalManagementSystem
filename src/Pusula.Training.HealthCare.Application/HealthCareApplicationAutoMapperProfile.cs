@@ -9,6 +9,7 @@ using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.MedicalPersonnel;
 using Pusula.Training.HealthCare.Titles;
 
 namespace Pusula.Training.HealthCare;
@@ -55,6 +56,11 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<DoctorLeave, DoctorLeaveDto>();
         CreateMap<DoctorLeave, DoctorLeaveExcelDto>();
         CreateMap<DoctorLeaveDto, DoctorLeaveUpdateDto>();
+        
+        CreateMap<MedicalStaff, MedicalStaffDto>();
+        CreateMap<MedicalStaff, MedicalStaffExcelDto>();
+        CreateMap<MedicalStaffDto, MedicalStaffUpdateDto>();
+        CreateMap<MedicalStaffWithNavigationProperties, MedicalStaffWithNavigationPropertiesDto>();
         
         CreateMap<City, CityDto>();
         CreateMap<City, CityExcelDto>();

@@ -57,7 +57,10 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         doctorLeavePermission.AddChild(HealthCarePermissions.DoctorLeaves.Edit, L("Permission:Edit"));
         doctorLeavePermission.AddChild(HealthCarePermissions.DoctorLeaves.Delete, L("Permission:Delete"));
         
-  
+        var medicalStaffPermission = myGroup.AddPermission(HealthCarePermissions.MedicalStaff.Default, L("Permission:MedicalStaff"));
+        medicalStaffPermission.AddChild(HealthCarePermissions.MedicalStaff.Create, L("Permission:Create"));
+        medicalStaffPermission.AddChild(HealthCarePermissions.MedicalStaff.Edit, L("Permission:Edit"));
+        medicalStaffPermission.AddChild(HealthCarePermissions.MedicalStaff.Delete, L("Permission:Delete"));
 
         var cityPermission = myGroup.AddPermission(HealthCarePermissions.Cities.Default, L("Permission:Cities"));
         cityPermission.AddChild(HealthCarePermissions.Cities.Create, L("Permission:Create"));
