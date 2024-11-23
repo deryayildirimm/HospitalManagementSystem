@@ -81,7 +81,6 @@ public partial class Appointments
     private string PaymentId { get; set; } = "PAY987654";
     private bool SlotsLoading { get; set; }
     private bool SlotDaysLoading { get; set; }
-    private bool IsProcessCanceled { get; set; }
     private bool IsUserNavigatingReverse { get; set; }
     private bool IsCurrentStepValid { get; set; }
 
@@ -131,7 +130,6 @@ public partial class Appointments
         DaysLookupList = [];
         AppointmentSlots = [];
         IsFinalResultSuccess = false;
-        IsProcessCanceled = false;
         IsDoctorListLoading = false;
         IsServiceListLoading = true;
         IsUserNavigatingReverse = false;

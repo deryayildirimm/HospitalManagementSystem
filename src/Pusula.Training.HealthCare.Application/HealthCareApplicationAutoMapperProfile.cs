@@ -54,5 +54,14 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Appointment, AppointmentDto>();
         CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();
         
+        
+        CreateMap<AppointmentWithNavigationProperties, AppointmentExcelDto>()
+            .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(src => src.Doctor.FirstName + " " + src.Doctor.LastName))
+            .ForMember(dest => dest.PatientName, opt => opt.MapFrom(src => src.Patient.FirstName + " " + src.Patient.LastName))
+            .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.MedicalService.Name))
+            .ForMember(dest => dest.PatientNumber, opt => opt.MapFrom(src => src.Patient.PatientNumber))
+            .ForMember(dest => dest.AppointmentDate, opt => opt.MapFrom(src =>
+                $"{src.Appointment.StartTime:yyyy-MM-dd}, {src.Appointment.StartTime:HH:mm} - {src.Appointment.EndTime:HH:mm}"));
+        
     }
 }
