@@ -5,8 +5,12 @@ using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Shared;
 using System;
+using Pusula.Training.HealthCare.Cities;
+using Pusula.Training.HealthCare.Districts;
+using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.MedicalPersonnel;
 using Pusula.Training.HealthCare.Titles;
 
 namespace Pusula.Training.HealthCare;
@@ -39,7 +43,6 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<MedicalService, MedicalServiceDto>();
         CreateMap<MedicalService, MedicalServiceExcelDto>();
         CreateMap<MedicalServiceDto, MedicalServiceUpdateDto>();
-        CreateMap<MedicalServiceWithDepartments, MedicalServiceWithDepartmentsDto>();
         CreateMap<Department, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
         
         CreateMap<Title, TitleDto>();
@@ -50,6 +53,27 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Doctor, DoctorExcelDto>();
         CreateMap<DoctorDto, DoctorUpdateDto>();
         CreateMap<DoctorWithNavigationProperties, DoctorWithNavigationPropertiesDto>();
+        
+        CreateMap<DoctorLeave, DoctorLeaveDto>();
+        CreateMap<DoctorLeave, DoctorLeaveExcelDto>();
+        CreateMap<DoctorLeaveDto, DoctorLeaveUpdateDto>();
+        
+        CreateMap<MedicalStaff, MedicalStaffDto>();
+        CreateMap<MedicalStaff, MedicalStaffExcelDto>();
+        CreateMap<MedicalStaffDto, MedicalStaffUpdateDto>();
+        CreateMap<MedicalStaffWithNavigationProperties, MedicalStaffWithNavigationPropertiesDto>();
+        
+        CreateMap<City, CityDto>();
+        CreateMap<City, CityExcelDto>();
+        CreateMap<CityDto, CityUpdateDto>();
+        CreateMap<City, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
+
+        CreateMap<District, DistrictDto>();
+        CreateMap<District, DistrictExcelDto>();
+        CreateMap<DistrictDto, DistrictUpdateDto>();
+        CreateMap<DistrictWithNavigationProperties, DistrictWithNavigationPropertiesDto>();
+        CreateMap<District, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
         
         CreateMap<Appointment, AppointmentDto>();
         CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();

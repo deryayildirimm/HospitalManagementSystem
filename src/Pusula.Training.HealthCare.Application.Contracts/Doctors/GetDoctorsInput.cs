@@ -16,8 +16,8 @@ public class GetDoctorsInput : PagedAndSortedResultRequestDto
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
     public int? YearOfExperienceMin { get; set; }
-    public string? City { get; set; }
-    public string? District { get; set; }
+    public Guid? CityId { get; set; }
+    public Guid? DistrictId { get; set; }
     public Guid? DepartmentId { get; set; }
     public Guid? TitleId { get; set; }
     

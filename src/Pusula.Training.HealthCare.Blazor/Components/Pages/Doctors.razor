@@ -4,16 +4,6 @@
 @using Pusula.Training.HealthCare.Countries
 @using Pusula.Training.HealthCare.Doctors
 @using Pusula.Training.HealthCare.Localization
-@using Pusula.Training.HealthCare.Shared
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.Extensions.Localization
-@using Microsoft.AspNetCore.Components.Web
-@using Blazorise
-@using Blazorise.Components
-@using Blazorise.DataGrid
-@using Volo.Abp.BlazoriseUI
-@using Volo.Abp.BlazoriseUI.Components
-@using Volo.Abp.ObjectMapping
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 
@@ -132,16 +122,33 @@
                         <NumericEdit TValue="int?" Value="@Filter.YearOfExperienceMin" ValueChanged="@OnYearOfExperienceMinChangedAsync" />
                     </Field>
                 </Column>
-                <Column ColumnSize="ColumnSize.Is3">
+                <Column ColumnSize="ColumnSize.Is4">
                     <Field>
                         <FieldLabel>@L["City"]</FieldLabel>
-                        <TextEdit Text="@Filter.City" TextChanged="@OnCityChangedAsync" />
+                        <Select TValue="Guid?" SelectedValue="@Filter.CityId" SelectedValueChanged="@OnCityChangedAsync">
+                            <SelectItem></SelectItem>
+                            @foreach (var item in CitiesCollection)
+                            {
+                            <SelectItem TValue="Guid" Value="@item.Id">
+                                @item.DisplayName
+                            </SelectItem>
+                            }
+                        </Select>
                     </Field>
                 </Column>
-                <Column ColumnSize="ColumnSize.Is3">
+
+                <Column ColumnSize="ColumnSize.Is4">
                     <Field>
                         <FieldLabel>@L["District"]</FieldLabel>
-                        <TextEdit Text="@Filter.District" TextChanged="@OnDistrictChangedAsync" />
+                        <Select TValue="Guid?" @bind-SelectedValue="@Filter.DistrictId">
+                            <SelectItem></SelectItem>
+                            @foreach (var item in DistrictsCollection)
+                            {
+                            <SelectItem TValue="Guid" Value="@item.Id">
+                                @item.DisplayName
+                            </SelectItem>
+                            }
+                        </Select>
                     </Field>
                 </Column>
 
@@ -180,7 +187,7 @@
 </Card>
 
 @* ************************* DATA GRID ************************* *@
-@*<Card>
+<Card>
     <CardBody>
         @if (SelectedDoctors.Any())
         {
@@ -274,9 +281,11 @@
                                 Caption="@L["Email"]">
                 </DataGridColumn>
 
-                <DataGridColumn TItem="DoctorWithNavigationPropertiesDto"
-                                Field="Doctor.YearOfExperience"
-                                Caption="@L["YearOfExperience"]">
+                <DataGridColumn TItem="DoctorWithNavigationPropertiesDto" Caption="@L["YearsOfExperience"]">
+                    <DisplayTemplate>
+                        @(DateTime.Now.Year - context.Doctor.StartDate.Year -
+                        (DateTime.Now.DayOfYear < context.Doctor.StartDate.DayOfYear ? 1 : 0))
+                    </DisplayTemplate>
                 </DataGridColumn>
 
                 <DataGridColumn TItem="DoctorWithNavigationPropertiesDto"
@@ -306,16 +315,13 @@
                         </Button>
                     </DisplayTemplate>
                 </DataGridColumn>
-
             </DataGridColumns>
-
-
         </DataGrid>
     </CardBody>
 </Card>
-*@
+
 @* ************************* CREATE MODAL ************************* *@
-@*<Modal @ref="CreateDoctorModal" Closing="@CreateDoctorModal.CancelClosingModalWhenFocusLost">
+<Modal @ref="CreateDoctorModal" Closing="@CreateDoctorModal.CancelClosingModalWhenFocusLost">
     <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
         <EditForm method="post" Model="NewDoctor" OnValidSubmit="CreateDoctorAsync" FormName="create" Enhance>
 
@@ -334,6 +340,22 @@
                              ValidateOnLoad="false">
 
                     <Row>
+                        <Column ColumnSize="ColumnSize.Is5">
+                            
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["IdentityNumber"]
+                                    </FieldLabel>
+                                    <TextEdit @bind-Text="@NewDoctor.IdentityNumber" MaxLength="DoctorConsts.IdentityNumberLength">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
                         <Column ColumnSize="ColumnSize.Is2">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
@@ -349,7 +371,7 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is2">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -360,35 +382,32 @@
                                         <SelectItem></SelectItem>
                                         @foreach (var item in TitlesCollection)
                                         {
-                                        <SelectItem TValue="Guid" Value="@item.Id">
-                                            @item.DisplayName
-                                        </SelectItem>
-                                        }
-                                    </Select>
-                                </Field>
-                            </Validation>
-                        </Column><Column ColumnSize="ColumnSize.Is5">
-                            <Validation MessageLocalizer="@LH.Localize">
-                                <Field>
-                                    <FieldLabel style="display: inline-flex; align-items: center;">
-                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
-                                        @L["Department"]
-                                    </FieldLabel>
-                                    <Select TValue="Guid" @bind-SelectedValue="@NewDoctor.DepartmentId">
-                                        <SelectItem></SelectItem>
-                                        @foreach (var item in DepartmentsCollection)
-                                        {
-                                        <SelectItem TValue="Guid" Value="@item.Id">
-                                            @item.DisplayName
-                                        </SelectItem>
+                                            <SelectItem TValue="Guid" Value="@item.Id">
+                                                @item.DisplayName
+                                            </SelectItem>
                                         }
                                     </Select>
                                 </Field>
                             </Validation>
                         </Column>
+                        <Column ColumnSize="ColumnSize.Is2">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["StartDate"]
+                                    </FieldLabel>
+                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewDoctor.StartDate">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </DateEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
                     </Row>
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -403,7 +422,7 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -428,9 +447,9 @@
                                     <Select TValue="EnumGender" @bind-SelectedValue="@NewDoctor.Gender" style="text-overflow: ellipsis;">
                                         @foreach (var item in Genders)
                                         {
-                                                <SelectItem TValue="EnumGender" Value="@(Enum.Parse<EnumGender>(item.Key.ToString()))">
-                                                @item.Value
-                                                </SelectItem>
+                                        <SelectItem TValue="EnumGender" Value="@(Enum.Parse<EnumGender>(item.Key.ToString()))">
+                                            @item.Value
+                                        </SelectItem>
                                         }
                                     </Select>
                                 </Field>
@@ -438,22 +457,26 @@
                         </Column>
                     </Row>
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is3">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
                                         <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
-                                        @L["IdentityNumber"]
+                                        @L["Department"]
                                     </FieldLabel>
-                                    <TextEdit @bind-Text="@NewDoctor.IdentityNumber" MaxLength="DoctorConsts.IdentityNumberLength">
-                                        <Feedback>
-                                            <ValidationError />
-                                        </Feedback>
-                                    </TextEdit>
+                                    <Select TValue="Guid" @bind-SelectedValue="@NewDoctor.DepartmentId">
+                                        <SelectItem></SelectItem>
+                                        @foreach (var item in DepartmentsCollection)
+                                        {
+                                        <SelectItem TValue="Guid" Value="@item.Id">
+                                            @item.DisplayName
+                                        </SelectItem>
+                                        }
+                                    </Select>
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is2">
+                        <Column ColumnSize="ColumnSize.Is3">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center; vertical-align: middle;">
@@ -468,9 +491,7 @@
                                 </Field>
                             </Validation>
                         </Column>
-                    </Row>
-                    <Row>
-                        <Column ColumnSize="ColumnSize.Is4">
+                        <Column ColumnSize="ColumnSize.Is3">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel>@L["Email"]</FieldLabel>
@@ -482,53 +503,50 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is4">
-                            <Validation MessageLocalizer="@LH.Localize">
-                                <Field>
-                                    <FieldLabel>@L["YearOfExperience"]</FieldLabel>
-                                    <NumericEdit TValue="int?" @bind-Value="@NewDoctor.YearOfExperience">
-                                        <Feedback>
-                                            <ValidationError />
-                                        </Feedback>
-                                    </NumericEdit>
-                                </Field>
-                            </Validation>
-                        </Column>
                     </Row>
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is2">
+                        <Column ColumnSize="ColumnSize.Is3">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
-                                    <FieldLabel style="display: inline-flex; align-items: center; vertical-align: middle;">
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
                                         <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
                                         @L["City"]
                                     </FieldLabel>
-                                    <TextEdit @bind-Text="@NewDoctor.City" MaxLength="DoctorConsts.CityMaxLength" style="margin-top: 0px;">
-                                        <Feedback>
-                                            <ValidationError />
-                                        </Feedback>
-                                    </TextEdit>
+                                    <Select TValue="Guid" @bind-SelectedValue="@NewDoctor.CityId" @onchange="(e) => OnCityChanged(Guid.Parse(e.Value.ToString()))">
+                                        <SelectItem></SelectItem>
+                                        @foreach (var item in CitiesCollection)
+                                        {
+                                        <SelectItem TValue="Guid" Value="@item.Id">
+                                            @item.DisplayName
+                                        </SelectItem>
+                                        }
+                                    </Select>
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is2">
+                        <Column ColumnSize="ColumnSize.Is3">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
-                                    <FieldLabel style="display: inline-flex; align-items: center; vertical-align: middle;">
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
                                         <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
                                         @L["District"]
                                     </FieldLabel>
-                                    <TextEdit @bind-Text="@NewDoctor.District" MaxLength="DoctorConsts.DistrictMaxLength" style="margin-top: 0px;">
-                                        <Feedback>
-                                            <ValidationError />
-                                        </Feedback>
-                                    </TextEdit>
+                                    <Select TValue="Guid" @bind-SelectedValue="@NewDoctor.DistrictId">
+                                        <SelectItem></SelectItem>
+                                        @foreach (var item in DistrictsCollection)
+                                        {
+                                        <SelectItem TValue="Guid" Value="@item.Id">
+                                            @item.DisplayName
+                                        </SelectItem>
+                                        }
+                                    </Select>
                                 </Field>
                             </Validation>
                         </Column>
                     </Row>
                 </Validations>
             </ModalBody>
+
             <ModalFooter>
                 <Row class="justify-content-between align-items-center" style="width: 100%;">
                     <Column>
@@ -552,7 +570,7 @@
         </EditForm>
     </ModalContent>
 </Modal>
-*@
+
 @* ************************* EDIT MODAL ************************* *@
 <Modal @ref="EditDoctorModal" Closing="@EditDoctorModal.CancelClosingModalWhenFocusLost">
     <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
@@ -574,11 +592,12 @@
 
                     <Row>
                         <Column ColumnSize="ColumnSize.Is5">
+
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
                                         <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
-                                    @L["IdentityNumber"]
+                                        @L["IdentityNumber"]
                                     </FieldLabel>
                                     <TextEdit @bind-Text="@EditingDoctor.IdentityNumber" MaxLength="DoctorConsts.IdentityNumberLength">
                                         <Feedback>
@@ -596,6 +615,39 @@
                                         @L["BirthDate"]
                                     </FieldLabel>
                                     <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingDoctor.BirthDate">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </DateEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is2">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["Title"]
+                                    </FieldLabel>
+                                    <Select TValue="Guid" @bind-SelectedValue="@EditingDoctor.TitleId">
+                                        @foreach (var item in TitlesCollection)
+                                        {
+                                        <SelectItem TValue="Guid" Value="@item.Id">
+                                            @item.DisplayName
+                                        </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is2">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["StartDate"]
+                                    </FieldLabel>
+                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingDoctor.StartDate">
                                         <Feedback>
                                             <ValidationError />
                                         </Feedback>
@@ -645,9 +697,9 @@
                                     <Select TValue="EnumGender" @bind-SelectedValue="@EditingDoctor.Gender" style="text-overflow: ellipsis;">
                                         @foreach (var item in Genders)
                                         {
-                                                <SelectItem TValue="EnumGender" Value="@(Enum.Parse<EnumGender>(item.Key.ToString()))">
-                                                @item.Value
-                                                </SelectItem>
+                                        <SelectItem TValue="EnumGender" Value="@(Enum.Parse<EnumGender>(item.Key.ToString()))">
+                                            @item.Value
+                                        </SelectItem>
                                         }
                                     </Select>
                                 </Field>
@@ -655,12 +707,30 @@
                         </Column>
                     </Row>
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is4">
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["Department"]
+                                    </FieldLabel>
+                                    <Select TValue="Guid" @bind-SelectedValue="@EditingDoctor.DepartmentId">
+                                        @foreach (var item in DepartmentsCollection)
+                                        {
+                                        <SelectItem TValue="Guid" Value="@item.Id">
+                                            @item.DisplayName
+                                        </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is3">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center; vertical-align: middle;">
                                         <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
-                                        @L["PhoneNo"]
+                                        @L["PhoneNumber"]
                                     </FieldLabel>
                                     <TextEdit @bind-Text="@EditingDoctor.PhoneNumber" MaxLength="DoctorConsts.PhoneNumberMaxLength" style="margin-top: 0px;">
                                         <Feedback>
@@ -670,9 +740,7 @@
                                 </Field>
                             </Validation>
                         </Column>
-                    </Row>
-                    <Row>
-                        <Column ColumnSize="ColumnSize.Is4">
+                        <Column ColumnSize="ColumnSize.Is3">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel>@L["Email"]</FieldLabel>
@@ -686,6 +754,44 @@
                         </Column>
                     </Row>
 
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["City"]
+                                    </FieldLabel>
+                                    <Select TValue="Guid" @bind-SelectedValue="@EditingDoctor.CityId" @onchange="(e) => OnCityChanged(Guid.Parse(e.Value.ToString()))">
+                                        @foreach (var item in CitiesCollection)
+                                        {
+                                        <SelectItem TValue="Guid" Value="@item.Id">
+                                            @item.DisplayName
+                                        </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is3">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["District"]
+                                    </FieldLabel>
+                                    <Select TValue="Guid" @bind-SelectedValue="@EditingDoctor.DistrictId">
+                                        @foreach (var item in DistrictsCollection)
+                                        {
+                                        <SelectItem TValue="Guid" Value="@item.Id">
+                                            @item.DisplayName
+                                        </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                    </Row>
                     <Divider />
                 </Validations>
             </ModalBody>

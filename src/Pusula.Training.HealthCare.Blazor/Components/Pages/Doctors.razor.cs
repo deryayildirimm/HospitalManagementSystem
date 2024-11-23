@@ -52,6 +52,8 @@ public partial class Doctors
     private List<DoctorWithNavigationPropertiesDto> SelectedDoctors { get; set; } = [];
     private IEnumerable<KeyValuePair<int, string>> Genders = [];
     
+    private IReadOnlyList<LookupDto<Guid>> CitiesCollection { get; set; } = [];
+    private IReadOnlyList<LookupDto<Guid>> DistrictsCollection { get; set; } = [];
     private IReadOnlyList<LookupDto<Guid>> TitlesCollection { get; set; } = [];
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; } = [];
 
@@ -78,7 +80,6 @@ public partial class Doctors
     {
         if (firstRender)
         {
-
             await SetBreadcrumbItemsAsync();
             await SetToolbarItemsAsync();
             await InvokeAsync(StateHasChanged);
@@ -110,6 +111,7 @@ public partial class Doctors
     
     private async Task SetLookupsAsync()
     {
+        CitiesCollection = [.. (await DoctorsAppService.GetCityLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
         TitlesCollection = [.. (await DoctorsAppService.GetTitleLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
         DepartmentsCollection = [.. (await DoctorsAppService.GetDepartmentLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
     }
@@ -129,6 +131,7 @@ public partial class Doctors
     
     protected virtual async Task SearchAsync()
     {
+        Console.WriteLine($"Filter: {System.Text.Json.JsonSerializer.Serialize(Filter)}");
         CurrentPage = 1;
         await GetDoctorsAsync();
         await InvokeAsync(StateHasChanged);
@@ -175,6 +178,7 @@ public partial class Doctors
         EditingDoctorId = doctor.Doctor.Id;
         EditingDoctor = ObjectMapper.Map<DoctorDto, DoctorUpdateDto>(doctor.Doctor);
 
+        DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(EditingDoctor.CityId, new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
         await EditDoctorModal.Show();
     }
 
@@ -291,19 +295,29 @@ public partial class Doctors
         Filter.YearOfExperienceMin = yearOfExperienceMin;
         await SearchAsync();
     }
-
-    protected virtual async Task OnCityChangedAsync(string? city)
+    
+    private async Task OnCityChangedAsync(Guid? cityId)
     {
-        Filter.City = city;
+        Filter.CityId = cityId;
+        if (cityId.HasValue)
+        {
+            DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(cityId, new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
+        }
+        else
+        {
+            DistrictsCollection = [];
+        }
         await SearchAsync();
     }
 
-    protected virtual async Task OnDistrictChangedAsync(string? district)
+    private async Task OnCityChanged(Guid cityId)
     {
-        Filter.District = district;
-        await SearchAsync();
+        NewDoctor.CityId = cityId;
+       
+        DistrictsCollection = [..(await DoctorsAppService.GetDistrictLookupAsync(cityId, new() { SkipCount = 0, MaxResultCount = 1000 })).Items];
+        
     }
-
+    
     private Task SelectAllItems()
     {
         AllDoctorsSelected = true;

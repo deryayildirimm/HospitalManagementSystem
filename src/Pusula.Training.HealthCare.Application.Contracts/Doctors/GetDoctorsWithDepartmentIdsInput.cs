@@ -6,6 +6,7 @@ namespace Pusula.Training.HealthCare.Doctors;
 
 public class GetDoctorsWithDepartmentIdsInput : PagedAndSortedResultRequestDto
 {
+    public string? FilterText { get; set; }
     public List<Guid>? DepartmentIds { get; set; }
 
     public string? Name { get; set; } = string.Empty;

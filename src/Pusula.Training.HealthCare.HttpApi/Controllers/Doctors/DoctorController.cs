@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
-using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.Shared;
 using Volo.Abp;
@@ -32,6 +31,16 @@ public class DoctorController(IDoctorsAppService doctorsAppService) : HealthCare
     [Route("{id}")]
     public Task<DoctorDto> GetAsync(Guid id) => 
         doctorsAppService.GetAsync(id);
+
+    [HttpGet]
+    [Route("city-lookup")]
+    public Task<PagedResultDto<LookupDto<Guid>>> GetCityLookupAsync(LookupRequestDto input) => 
+        doctorsAppService.GetCityLookupAsync(input);
+
+    [HttpGet]
+    [Route("district-lookup")]
+    public Task<PagedResultDto<LookupDto<Guid>>> GetDistrictLookupAsync(Guid? cityId, LookupRequestDto input) => 
+        doctorsAppService.GetDistrictLookupAsync(cityId, input);
 
     [HttpGet]
     [Route("title-lookup")]
