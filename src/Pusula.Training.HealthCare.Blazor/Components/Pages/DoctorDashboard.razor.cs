@@ -13,13 +13,14 @@ public partial class DoctorDashboard : ComponentBase
 {
     private DateTime CurrentDate { get; set; }
 
-    private List<AppointmentWithNavigationPropertiesDto> DataSource { get; set; }
+    private List<AppointmentData> DataSource { get; set; }
 
     private GetAppointmentsWithNavigationPropertiesInput AppointmentsFilter { get; set; }
     
     private Guid DoctorId { get; set; }
     
     private DoctorWithNavigationPropertiesDto DoctorWithNavigation { get; set; }
+    private string DoctorNameInfo { get; set; }
 
     #region FilterData
 
@@ -36,10 +37,13 @@ public partial class DoctorDashboard : ComponentBase
         AppointmentsFilter = new GetAppointmentsWithNavigationPropertiesInput
         {
             DoctorId = DoctorId,
+            AppointmentMinDate = CurrentDate,
+            AppointmentMaxDate = CurrentDate.AddDays(7),
             MaxResultCount = AppointmentPageSize,
             SkipCount = (AppointmentCurrentPage - 1) * AppointmentPageSize,
         };
         DataSource = [];
+        DoctorNameInfo = "";
     }
 
     protected override async Task OnInitializedAsync()
@@ -53,7 +57,8 @@ public partial class DoctorDashboard : ComponentBase
         try
         {
             DoctorWithNavigation = await DoctorAppService.GetWithNavigationPropertiesAsync(DoctorId);
-            
+            DoctorNameInfo =
+                $"{DoctorWithNavigation.Title.TitleName} {DoctorWithNavigation.Doctor.FirstName} {DoctorWithNavigation.Doctor.LastName}";
         }
         catch (Exception e)
         {
@@ -66,13 +71,40 @@ public partial class DoctorDashboard : ComponentBase
         try
         {
             
+            var items = ((await AppointmentAppService.GetListWithNavigationPropertiesAsync(AppointmentsFilter)).Items).ToList();
+            if (items.Count > 0)
+            {
+                DataSource = items.Select(x => new AppointmentData
+                {
+                    Id = x.Appointment.Id,
+                    PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
+                    DoctorName = x.Doctor.FirstName + " " + x.Doctor.LastName,
+                    StartTime = x.Appointment.StartTime,
+                    EndTime = x.Appointment.EndTime,
+                    ServiceName = x.MedicalService.Name
+                }).ToList();
 
-            var items = (await AppointmentAppService.GetListWithNavigationPropertiesAsync(AppointmentsFilter)).Items;
-            DataSource = items.ToList();
+            }
         }
         catch (Exception e)
         {
+            DataSource = [];
             throw new UserFriendlyException(e.Message);
         }
+    }
+    
+    
+    public class AppointmentData
+    {
+        public Guid Id { get; set; }
+        public string DoctorName { get; set; } = string.Empty;
+        public string PatientName { get; set; } = string.Empty;
+        public string ServiceName { get; set; } = string.Empty;
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public DateTime DateOnly { get; set; }
+        public DateTime HourOnly { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public bool IsAllDay { get; set; }
     }
 }

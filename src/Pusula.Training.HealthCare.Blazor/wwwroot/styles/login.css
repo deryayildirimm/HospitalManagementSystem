@@ -6,6 +6,53 @@
     z-index: 999;
 }
 
+.lpx-content {
+    
+}
+
 .lpx-content hr {
     display: none;
 }
+
+.radial-bg-dotted {
+    background-image: radial-gradient(#d4d4d4 1px, transparent 0);
+    background-size: 7px 7px;
+}
+
+.turquoise {
+   color: #1EA0D1 !important;
+}
+
+
+.turquoise-bg{
+    background-color: #3DABFB !important;
+}
+
+.custom-color {
+    color: #FF512F;
+}
+
+.dark-shade-bg {
+    color: #686b6e;
+}
+
+
+.btn-grad {
+    background-image: linear-gradient(to right, #FF512F 0%, #F09819  51%, #FF512F  100%);
+    padding: 10px 20px;
+    text-align: center;
+    text-transform: uppercase;
+    transition: 0.5s;
+    background-size: 200% auto;
+    color: white;
+    box-shadow: 0 0 20px #eee;
+    border-radius: 10px;
+    display: block;
+}
+
+.btn-grad:hover {
+    background-position: right center;
+    color: #fff;
+    text-decoration: none;
+}
+         

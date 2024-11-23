@@ -11,7 +11,12 @@ public class AppointmentExcelDownloadDto : PagedAndSortedResultRequestDto
     public Guid? DoctorId { get; set; }
     public Guid? PatientId { get; set; }
     public Guid? MedicalServiceId { get; set; }
-    public DateTime? AppointmentDate { get; set; }
+    public string? PatientName { get; set; }
+    public string? DoctorName { get; set; }
+    public string? ServiceName { get; set; }
+    public int? PatientNumber { get; set; }
+    public DateTime? AppointmentMinDate { get; set; }
+    public DateTime? AppointmentMaxDate { get; set; }
     public DateTime? StartTime { get; set; }
     public DateTime? EndTime { get; set; }
     public EnumAppointmentStatus? Status { get; set; }

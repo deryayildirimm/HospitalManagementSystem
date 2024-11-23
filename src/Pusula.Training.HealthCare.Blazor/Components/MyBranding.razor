@@ -1,0 +1,15 @@
+@using Volo.Abp.DependencyInjection
+@using Volo.Abp.AspNetCore.Components.Web.LeptonXLiteTheme.Themes.LeptonXLite
+
+@inherits Branding
+@inject HealthCareBrandingProvider HealthCareBrandingProvider
+@attribute [ExposeServices(typeof(Branding))]
+@attribute [Dependency(ReplaceServices = true)]
+<a href="/">
+    <!--suppress CheckImageSize -->
+
+    @if (!HealthCareBrandingProvider.LogoUrl.IsNullOrWhiteSpace())
+    {
+        <img src="@HealthCareBrandingProvider.LogoUrl" alt="@HealthCareBrandingProvider.AppName" width="35" height="35">
+    }
+</a>

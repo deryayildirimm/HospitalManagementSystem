@@ -17,10 +17,12 @@ namespace Pusula.Training.HealthCare.Appointments;
 public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext> dbContextProvider)
     : EfCoreRepository<HealthCareDbContext, Appointment, Guid>(dbContextProvider), IAppointmentRepository
 {
-    public virtual async Task DeleteAllAsync(Guid? doctorId = null,
+    public virtual async Task DeleteAllAsync(
+        Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
-        DateTime? appointmentDate = null,
+        DateTime? appointmentMinDate = null,
+        DateTime? appointmentMaxDate = null,
         DateTime? startTime = null,
         DateTime? endTime = null,
         EnumAppointmentStatus? status = null,
@@ -29,17 +31,29 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         double? maxAmount = null,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), doctorId, patientId, medicalServiceId, appointmentDate,
+        var query = ApplyFilter((await GetQueryableAsync()), 
+            doctorId, 
+            patientId, 
+            medicalServiceId, 
+            appointmentMinDate,
+            appointmentMaxDate,
             startTime,
-            endTime, status, reminderSent, minAmount, maxAmount);
+            endTime, 
+            status, 
+            reminderSent, 
+            minAmount, 
+            maxAmount);
 
         var ids = query.Select(x => x.Id);
         await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
     }
 
-    public virtual async Task<List<Appointment>> GetListAsync(Guid? doctorId = null, Guid? patientId = null,
+    public virtual async Task<List<Appointment>> GetListAsync(
+        Guid? doctorId = null, 
+        Guid? patientId = null,
         Guid? medicalServiceId = null,
-        DateTime? appointmentDate = null,
+        DateTime? appointmentMinDate = null,
+        DateTime? appointmentMaxDate = null,
         DateTime? startTime = null,
         DateTime? endTime = null,
         EnumAppointmentStatus? status = null,
@@ -52,16 +66,17 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter(
-            (await GetQueryableAsync()), 
-            doctorId, 
-            patientId, 
-            medicalServiceId, 
-            appointmentDate,
+            (await GetQueryableAsync()),
+            doctorId,
+            patientId,
+            medicalServiceId,
+            appointmentMinDate,
+            appointmentMaxDate,
             startTime,
-            endTime, 
-            status, 
-            reminderSent, 
-            minAmount, 
+            endTime,
+            status,
+            reminderSent,
+            minAmount,
             maxAmount);
 
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting)
@@ -69,23 +84,24 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             : sorting);
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
-    
-    
+
+
     public virtual async Task<long> GetCountAsync(
-        Guid? doctorId = null, 
-        Guid? patientId = null, 
-        Guid? medicalServiceId = null, 
-        DateTime? appointmentDate = null, 
-        DateTime? startTime = null, 
-        DateTime? endTime = null, 
+        Guid? doctorId = null,
+        Guid? patientId = null,
+        Guid? medicalServiceId = null,
+        DateTime? appointmentMinDate = null,
+        DateTime? appointmentMaxDate = null,
+        DateTime? startTime = null,
+        DateTime? endTime = null,
         EnumAppointmentStatus? status = null,
-        bool? reminderSent = null, 
-        double? minAmount = null, 
+        bool? reminderSent = null,
+        double? minAmount = null,
         double? maxAmount = null,
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetQueryableAsync()),
-            doctorId, patientId, medicalServiceId, appointmentDate, startTime,
+            doctorId, patientId, medicalServiceId, appointmentMinDate, appointmentMaxDate, startTime,
             endTime, status, reminderSent, minAmount, maxAmount);
 
         return await query.LongCountAsync(cancellationToken);
@@ -99,7 +115,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         string? doctorName = null,
         string? serviceName = null,
         int? patientNumber = null,
-        DateTime? appointmentDate = null,
+        DateTime? appointmentMinDate = null,
+        DateTime? appointmentMaxDate = null,
         DateTime? startTime = null,
         DateTime? endTime = null,
         EnumAppointmentStatus? status = null,
@@ -113,7 +130,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
     {
         var query = ApplyFilter((await GetQueryForNavigationPropertiesAsync()),
             doctorId, patientId, medicalServiceId, patientName, doctorName, serviceName,
-            patientNumber, appointmentDate, startTime, endTime, status, reminderSent,
+            patientNumber, appointmentMinDate, appointmentMaxDate, startTime, endTime, status,
+            reminderSent,
             minAmount, maxAmount);
 
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? AppointmentConsts.GetDefaultSorting(true) : sorting);
@@ -131,7 +149,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         string? doctorName = null,
         string? serviceName = null,
         int? patientNumber = null,
-        DateTime? appointmentDate = null,
+        DateTime? appointmentMinDate = null,
+        DateTime? appointmentMaxDate = null,
         DateTime? startTime = null,
         DateTime? endTime = null,
         EnumAppointmentStatus? status = null,
@@ -143,7 +162,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         var query = ApplyFilter(
             (await GetQueryForNavigationPropertiesAsync()),
             doctorId, patientId, medicalServiceId, patientName, doctorName, serviceName,
-            patientNumber, appointmentDate, startTime, endTime, status, reminderSent,
+            patientNumber, appointmentMinDate, appointmentMaxDate, startTime, endTime, status,
+            reminderSent,
             minAmount, maxAmount);
 
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
@@ -181,7 +201,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
-        DateTime? appointmentDate = null,
+        DateTime? appointmentMinDate = null,
+        DateTime? appointmentMaxDate = null,
         DateTime? startTime = null,
         DateTime? endTime = null,
         EnumAppointmentStatus? status = null,
@@ -192,7 +213,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             .WhereIf(doctorId.HasValue, x => x.DoctorId == doctorId)
             .WhereIf(patientId.HasValue, x => x.PatientId == patientId)
             .WhereIf(medicalServiceId.HasValue, x => x.MedicalServiceId == medicalServiceId)
-            .WhereIf(appointmentDate.HasValue, e => e.AppointmentDate.Date == appointmentDate!.Value.Date)
+            .WhereIf(appointmentMinDate.HasValue, e => e.AppointmentDate.Date >= appointmentMinDate!.Value.Date)
+            .WhereIf(appointmentMaxDate.HasValue, e => e.AppointmentDate.Date <= appointmentMaxDate!.Value.Date)
             .WhereIf(startTime.HasValue, e => e.StartTime.Date == startTime)
             .WhereIf(endTime.HasValue, e => e.EndTime == endTime)
             .WhereIf(status.HasValue, e => e.Status == status)
@@ -211,7 +233,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         string? doctorName = null,
         string? serviceName = null,
         int? patientNumber = null,
-        DateTime? appointmentDate = null,
+        DateTime? appointmentMinDate = null,
+        DateTime? appointmentMaxDate = null,
         DateTime? startTime = null,
         DateTime? endTime = null,
         EnumAppointmentStatus? status = null,
@@ -231,7 +254,10 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             .WhereIf(!string.IsNullOrWhiteSpace(serviceName),
                 x => x.MedicalService.Name!.ToLower().Contains(serviceName!.ToLower()))
             .WhereIf(patientNumber.HasValue, x => x.Patient.PatientNumber == patientNumber)
-            .WhereIf(appointmentDate.HasValue, e => e.Appointment.AppointmentDate.Date == appointmentDate!.Value.Date)
+            .WhereIf(appointmentMinDate.HasValue,
+                e => e.Appointment.AppointmentDate.Date >= appointmentMinDate!.Value.Date)
+            .WhereIf(appointmentMaxDate.HasValue,
+                e => e.Appointment.AppointmentDate.Date <= appointmentMaxDate!.Value.Date)
             .WhereIf(startTime.HasValue, e => e.Appointment.StartTime.Date == startTime)
             .WhereIf(endTime.HasValue, e => e.Appointment.EndTime == endTime)
             .WhereIf(status.HasValue, e => e.Appointment.Status == status)

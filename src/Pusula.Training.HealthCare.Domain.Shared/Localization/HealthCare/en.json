@@ -23,6 +23,8 @@
     "Permission:Edit": "Edit",
     "Permission:Delete": "Delete",
     "Permission:Appointments": "Appointments",
+    "RememberMe": "Remember Me",
+    "ForgotPassword": "Forgot Password",
     "FirstName": "First Name",
     "LastName": "Last Name",
     "BirthDate": "Birth Date",
@@ -152,6 +154,7 @@
     "Menu:Doctors": "Doctors",
     "Duration": "Duration",
     "MedPlus": "MedPlus+",
+    "MedPlusHealth": "MedPlus+ Healthcare",
     "MedPlusSolutions": "MedPlus+ HealthCare Solutions",
     "Gender:M": "M",
     "Gender:F": "F",
@@ -166,6 +169,7 @@
     "AppointmentOverview": "Appointment Overview",
     "LatestAppointments": "Latest Appointments",
     "AppointmentSchedule": "Appointment Schedule",
-    "ActiveAppointments": "Active Appointments"
+    "ActiveAppointments": "Active Appointments",
+    "PRM": "PRM"
   }
 }

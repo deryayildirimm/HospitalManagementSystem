@@ -6,14 +6,9 @@ using Volo.Abp.Ui.Branding;
 namespace Pusula.Training.HealthCare.Blazor;
 
 [Dependency(ReplaceServices = true)]
-public class HealthCareBrandingProvider : DefaultBrandingProvider
+public class HealthCareBrandingProvider(IStringLocalizer<HealthCareResource> localizer) : DefaultBrandingProvider
 {
-    private IStringLocalizer<HealthCareResource> _localizer;
+    public override string AppName => localizer["AppName"];
 
-    public HealthCareBrandingProvider(IStringLocalizer<HealthCareResource> localizer)
-    {
-        _localizer = localizer;
-    }
-
-    public override string AppName => _localizer["AppName"];
+    public override string LogoUrl => "images/logo/company/logo.png";
 }

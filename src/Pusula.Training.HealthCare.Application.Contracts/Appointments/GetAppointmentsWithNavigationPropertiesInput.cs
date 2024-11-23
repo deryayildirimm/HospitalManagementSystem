@@ -12,7 +12,8 @@ public class GetAppointmentsWithNavigationPropertiesInput : PagedAndSortedResult
     public string? DoctorName { get; set; }
     public string? ServiceName { get; set; }
     public int? PatientNumber { get; set; }
-    public DateTime? AppointmentDate { get; set; }
+    public DateTime? AppointmentMinDate { get; set; }
+    public DateTime? AppointmentMaxDate { get; set; }
     public DateTime? StartTime { get; set; }
     public DateTime? EndTime { get; set; }
     public EnumAppointmentStatus? Status { get; set; }

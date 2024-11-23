@@ -25,16 +25,16 @@ public class AppointmentAppService(
     IDistributedCache<AppointmentDownloadTokenCacheItem, string> downloadTokenCache
 ) : HealthCareAppService, IAppointmentAppService
 {
-    public virtual async Task<PagedResultDto<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(GetAppointmentsLookupInput input)
+    public virtual async Task<PagedResultDto<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(
+        GetAppointmentsLookupInput input)
     {
         var days = await appointmentManager
             .GetAvailableDaysLookupAsync(input.DoctorId, input.MedicalServiceId, input.StartDate, input.Offset);
-        
+
         return new PagedResultDto<AppointmentDayLookupDto>(
             days.Count,
             days.ToList()
         );
-        
     }
 
     public virtual async Task<PagedResultDto<AppointmentSlotDto>> GetAvailableSlotsAsync(GetAppointmentSlotInput input)
@@ -67,13 +67,13 @@ public class AppointmentAppService(
     {
         var totalCount = await appointmentRepository.GetCountAsync(
             input.DoctorId, input.PatientId, input.MedicalServiceId,
-            input.AppointmentDate, input.StartTime, input.EndTime,
+            input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
             input.Status, input.ReminderSent, input.MinAmount,
             input.MaxAmount);
 
         var items = await appointmentRepository.GetListAsync(
             input.DoctorId, input.PatientId, input.MedicalServiceId,
-            input.AppointmentDate, input.StartTime, input.EndTime,
+            input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
             input.Status, input.ReminderSent, input.MinAmount,
             input.MaxAmount, input.Sorting, input.MaxResultCount, input.SkipCount);
 
@@ -89,7 +89,7 @@ public class AppointmentAppService(
     {
         var totalCount = await appointmentRepository.GetCountAsync(
             input.DoctorId, input.PatientId, input.MedicalServiceId,
-            input.AppointmentDate, input.StartTime, input.EndTime,
+            input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
             input.Status, input.ReminderSent, input.MinAmount,
             input.MaxAmount);
 
@@ -101,7 +101,8 @@ public class AppointmentAppService(
             doctorName: input.DoctorName,
             serviceName: input.ServiceName,
             patientNumber: input.PatientNumber,
-            appointmentDate: input.AppointmentDate,
+            appointmentMinDate: input.AppointmentMinDate,
+            appointmentMaxDate: input.AppointmentMaxDate,
             startTime: input.StartTime,
             endTime: input.EndTime,
             status: input.Status,
@@ -204,7 +205,12 @@ public class AppointmentAppService(
             doctorId: input.DoctorId,
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
-            appointmentDate: input.AppointmentDate,
+            patientName: input.PatientName,
+            doctorName: input.DoctorName,
+            serviceName: input.ServiceName,
+            patientNumber: input.PatientNumber,
+            input.AppointmentMinDate, 
+            input.AppointmentMaxDate,
             startTime: input.StartTime,
             endTime: input.EndTime,
             status: input.Status,
@@ -216,7 +222,8 @@ public class AppointmentAppService(
             skipCount: input.SkipCount);
 
         var memoryStream = new MemoryStream();
-        await memoryStream.SaveAsAsync(ObjectMapper.Map<List<AppointmentWithNavigationProperties>, List<AppointmentExcelDto>>(items));
+        await memoryStream.SaveAsAsync(
+            ObjectMapper.Map<List<AppointmentWithNavigationProperties>, List<AppointmentExcelDto>>(items));
         memoryStream.Seek(0, SeekOrigin.Begin);
 
         return new RemoteStreamContent(memoryStream, "Appointments.xlsx",
@@ -234,7 +241,7 @@ public class AppointmentAppService(
     {
         await appointmentRepository.DeleteAllAsync(
             input.DoctorId, input.PatientId, input.MedicalServiceId,
-            input.AppointmentDate, input.StartTime, input.EndTime,
+            input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
             input.Status, input.ReminderSent, input.MinAmount,
             input.MaxAmount);
     }
