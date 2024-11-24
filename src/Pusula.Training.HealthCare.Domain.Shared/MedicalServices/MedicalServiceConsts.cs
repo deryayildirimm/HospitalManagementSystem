@@ -22,5 +22,8 @@ namespace Pusula.Training.HealthCare.MedicalServices
 
         public const double CostMinValue = 0;
         public const double CostMaxValue = double.MaxValue;
+        
+        public const int DurationMinValue = 10;
+        public const int DurationMaxValue = 200;
     }
 }

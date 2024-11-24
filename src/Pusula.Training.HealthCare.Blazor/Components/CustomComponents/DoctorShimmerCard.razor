@@ -1,0 +1,55 @@
+@using Syncfusion.Blazor.Notifications
+
+<ul id="skeletonCard">
+    <li>
+        <div class="CardProfile">
+            <SfSkeleton Shape="SkeletonType.Circle" Effect="ShimmerEffect.Wave" Width="50px" Height="50px"></SfSkeleton>
+        </div>
+        <div class="CardContent">
+            <SfSkeleton Width="70%" Height="20px" Effect="ShimmerEffect.Wave"></SfSkeleton>
+            <SfSkeleton Width="50%" Height="15px" Effect="ShimmerEffect.Wave"></SfSkeleton>
+        </div>
+        <div class="CardRight">
+            <SfSkeleton Width="40px" Height="20px" Effect="ShimmerEffect.Wave"></SfSkeleton>
+        </div>
+    </li>
+</ul>
+
+<style>
+    #skeletonCard {
+        padding: 0;
+        line-height: inherit;
+        gap: 20px;
+        width: 100%;
+        margin: 0;
+    }
+
+    #skeletonCard li {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+        padding: 10px;
+        border-radius: 8px;
+        background-color: #f3f3f3;
+    }
+
+    .CardProfile {
+        margin-right: 15px;
+    }
+
+    .CardContent {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .CardRight {
+        margin-left: 20px;
+        display: flex;
+        align-items: center;
+    }
+    
+</style>

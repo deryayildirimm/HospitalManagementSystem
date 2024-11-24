@@ -3,351 +3,236 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using Blazorise;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
+using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Blazor.Models;
-using Pusula.Training.HealthCare.Permissions;
+using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.MedicalServices;
+using Pusula.Training.HealthCare.Patients;
+using Syncfusion.Blazor.DropDowns;
+using Syncfusion.Blazor.Navigations;
+using Volo.Abp;
+using Doctor = Pusula.Training.HealthCare.Blazor.Models.Doctor;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
 public partial class Appointments
 {
+    
+    #pragma warning disable BL0005
     [Parameter] public int PatientNo { get; set; }
 
-    private Steps stepsRef;
-    private DateTime? selectedDay;
+    #region Stepper
+
+    private AppointmentStepperModel StepperModel { get; set; }
+    private SfStepper Stepper { get; set; } = null!;
+    private StepperStep SelectServiceStepper { get; set; } = null!;
+    private StepperStep ScheduleStepper { get; set; } = null!;
+    private StepperStep ConfirmationStepper { get; set; } = null!;
+    private StepperStep ResultStepper { get; set; } = null!;
+    private int ActiveStep { get; set; }
+
+    #endregion
+
     private bool IsFinalResultSuccess { get; set; }
-    private bool CanCreateDepartment { get; set; }
-    private bool CanEditDepartment { get; set; }
-    private bool CanDeleteDepartment { get; set; }
-    private string selectedStep { get; set; } = "select_service";
 
-    private List<SelectionItem> ServicesList = new List<SelectionItem>
-    {
-        new SelectionItem { DisplayName = "General Consultation", IsSelected = false, Cost = 1112 },
-        new SelectionItem { DisplayName = "Blood Test", IsSelected = false, Cost = 1212 },
-        new SelectionItem { DisplayName = "X-Ray Imaging", IsSelected = false, Cost = 112 },
-        new SelectionItem { DisplayName = "MRI Scan", IsSelected = false, Cost = 1812 },
-        new SelectionItem { DisplayName = "Ultrasound", IsSelected = false, Cost = 1512 },
-        new SelectionItem { DisplayName = "Physical Therapy", IsSelected = false, Cost = 122 },
-        new SelectionItem { DisplayName = "Vaccination", IsSelected = false, Cost = 1112 },
-        new SelectionItem { DisplayName = "Cardiology Check-Up", IsSelected = false, Cost = 144 },
-        new SelectionItem { DisplayName = "Dental Cleaning", IsSelected = false, Cost = 1177 },
-        new SelectionItem { DisplayName = "MRI Scan", IsSelected = false, Cost = 1177 },
-        new SelectionItem { DisplayName = "Ultrasound", IsSelected = false, Cost = 1177 },
-        new SelectionItem { DisplayName = "Physical Therapy", IsSelected = false, Cost = 1177 },
-        new SelectionItem { DisplayName = "Vaccination", IsSelected = false, Cost = 1177 },
-        new SelectionItem { DisplayName = "Cardiology Check-Up", IsSelected = false, Cost = 1177 },
-        new SelectionItem { DisplayName = "Dental Cleaning", IsSelected = false, Cost = 1177 },
-    };
+    #region MedicalServiceFilters
 
-    private List<Doctor> DoctorsList = new()
-    {
-        new Doctor
-        {
-            Id = new Guid("d28888e9-2ba9-4d9b-8e75-8f9c98b1a01b"), Name = "Dr. Ahmet Yıldız", Department = "Neurology",
-            Gender = "Male",
-            IsAvailable = true, InsuranceType = "Private", IsSelected = false
-        },
-        new Doctor
-        {
-            Id = new Guid("d28888e9-2ba9-4d9b-8e75-8f9c98b1a02b"), Name = "Dr. Zeynep Demirtaş",
-            Department = "Pediatrics", Gender = "Female",
-            IsAvailable = false, InsuranceType = "SGK", IsSelected = false
-        },
-        new Doctor
-        {
-            Id = new Guid("d28888e9-2ba9-4d9b-8e75-8f9c98b1a03b"), Name = "Dr. Hasan Korkmaz",
-            Department = "Orthopedics", Gender = "Male",
-            IsAvailable = true, InsuranceType = "Private", IsSelected = false
-        },
-        new Doctor
-        {
-            Id = new Guid("d28888e9-2ba9-4d9b-8e75-8f9c98b1a04b"), Name = "Dr. Melis Kaya", Department = "Dermatology",
-            Gender = "Female",
-            IsAvailable = true, InsuranceType = "Private", IsSelected = false
-        },
-        new Doctor
-        {
-            Id = new Guid("d28888e9-2ba9-4d9b-8e75-8f9c98b1a05b"), Name = "Dr. Cengiz Erdoğan",
-            Department = "Psychiatry", Gender = "Male",
-            IsAvailable = false, InsuranceType = "SGK", IsSelected = false
-        },
-        new Doctor
-        {
-            Id = new Guid("d28888e9-2ba9-4d9b-8e75-8f9c98b1a06b"), Name = "Dr. Burcu Tekin",
-            Department = "Endocrinology", Gender = "Female",
-            IsAvailable = true, InsuranceType = "Private", IsSelected = false
-        },
-        new Doctor
-        {
-            Id = new Guid("d28888e9-2ba9-4d9b-8e75-8f9c98b1a07b"), Name = "Dr. Baran Kılıç", Department = "Urology",
-            Gender = "Male",
-            IsAvailable = true, InsuranceType = "SGK", IsSelected = false
-        },
-        new Doctor
-        {
-            Id = new Guid("d28888e9-2ba9-4d9b-8e75-8f9c98b1a08b"), Name = "Dr. Sibel Aydın", Department = "Cardiology",
-            Gender = "Female",
-            IsAvailable = true, InsuranceType = "Private", IsSelected = false
-        },
-        new Doctor
-        {
-            Id = new Guid("d28888e9-2ba9-4d9b-8e75-8f9c98b1a09b"), Name = "Dr. Kemal Yalçın",
-            Department = "General Surgery", Gender = "Male",
-            IsAvailable = false, InsuranceType = "Senior", IsSelected = false
-        },
-        new Doctor
-        {
-            Id = new Guid("d28888e9-2ba9-4d9b-8e75-8f9c98b1a0ab"), Name = "Dr. Emine Aksoy",
-            Department = "Internal Medicine", Gender = "Female",
-            IsAvailable = true, InsuranceType = "SGK", IsSelected = false
-        }
-    };
+    private IReadOnlyList<MedicalServiceWithDepartmentsDto> MedicalServiceWithDepartmentsList { get; set; } = null!;
+    private GetMedicalServiceInput MedicalServiceFilter { get; set; }
+    private int ServicePageSize { get; } = 50;
+    private int ServiceCurrentPage { get; set; } = 1;
+    private string ServiceCurrentSorting { get; set; } = string.Empty;
+    private bool IsServiceListLoading { get; set; }
 
-    private AppointmentSummaryItem AppointmentSummary { get; set; }
+    #endregion
 
-    private List<AppointmentTime> AppointmentTimes { get; set; }
+    #region DoctorFilters
 
-    private SelectedService selectedService { get; set; }
-    private Random random = new Random();
-    private List<DayItem> DaysList { get; set; }
-    private int loadCount = 14;
-    private int currentDayOffset = 0;
-    private double screenWidth = 0;
-    private int AvailableSlotCount { get; set; } = 0;
+    private List<Doctor> DoctorsList { get; set; }
+    private bool IsDoctorListLoading { get; set; }
+    private int DoctorLoadingShimmerCount { get; set; } = 5;
+    private GetDoctorsWithDepartmentIdsInput DoctorsWithDepartmentIdsInput { get; set; }
+    private int DoctorPageSize { get; } = 50;
+    private int DoctorCurrentPage { get; set; } = 1;
+    private string DoctorCurrentSorting { get; set; } = string.Empty;
 
-    private string appointmentNote = "";
-    private string selectedChannel = "";
-    private bool isActive = true;
-    private string appointmentId = "ER123456";
-    private string paymentId = "PAY987654";
-    private bool IsProcessCanceled { get; set; }
+    #endregion
 
-    private bool IsFullFilledService =>
-        !string.IsNullOrEmpty(selectedService.ServiceName) &&
-        !string.IsNullOrEmpty(selectedService.DoctorName) &&
-        !string.IsNullOrEmpty(selectedService.DepartmentName);
+    #region AppointmentFilters
 
-    private bool IsAppointmentTimeValid =>
-        IsFullFilledService &&
-        !string.IsNullOrEmpty(AppointmentSummary.AppointmentDate) &&
-        !string.IsNullOrEmpty(AppointmentSummary.AppointmentTime);
+    private GetAppointmentSlotInput GetAppointmentSlotFilter { get; set; }
 
-    private bool IsAppointmentValid =>
-        IsAppointmentTimeValid &&
-        !string.IsNullOrEmpty(AppointmentSummary.PatientName) &&
-        !string.IsNullOrEmpty(AppointmentSummary.HospitalName) &&
-        !string.IsNullOrEmpty(AppointmentSummary.AppointmentDate) &&
-        !string.IsNullOrEmpty(AppointmentSummary.AppointmentTime) &&
-        !string.IsNullOrEmpty(AppointmentSummary.DoctorName) &&
-        !string.IsNullOrEmpty(AppointmentSummary.Department) &&
-        !string.IsNullOrEmpty(AppointmentSummary.ServiceType);
+    #endregion
+
+    private PatientDto Patient { get; set; }
+    private List<SelectionItem> ServicesList { get; set; }
+    private SfListBox<SelectionItem[], SelectionItem> SelectServiceDropdown { get; set; } = null!;
+    private AppointmentCreateDto NewAppointment { get; set; }
+    private List<AppointmentSlotItem> AppointmentSlots { get; set; }
+    private List<AppointmentDayLookupItem> DaysLookupList { get; set; }
+    private GetAppointmentsLookupInput DaysLookupFilter { get; set; }
+    private int LoadCount { get; set; } = 14;
+    private double ScreenWidth { get; set; }
+    private int AvailableSlotCount { get; set; }
+    private int LoadingShimmerCount { get; set; } = 24;
+    private string AppointmentId { get; set; } = "ER123456";
+    private string PaymentId { get; set; } = "PAY987654";
+    private bool SlotsLoading { get; set; }
+    private bool SlotDaysLoading { get; set; }
+    private bool IsUserNavigatingReverse { get; set; }
+    private bool IsCurrentStepValid { get; set; }
+
+    private bool IsFirstStepValid =>
+        !string.IsNullOrEmpty(StepperModel.MedicalServiceName) &&
+        !string.IsNullOrEmpty(StepperModel.DoctorName) &&
+        !string.IsNullOrEmpty(StepperModel.DepartmentName);
+
+    private bool IsSecondStepValid =>
+        IsFirstStepValid &&
+        !string.IsNullOrEmpty(StepperModel.AppointmentDisplayTime) &&
+        !string.IsNullOrEmpty(StepperModel.AppointmentDisplayDate);
+
+    private bool IsThirdStepValid =>
+        IsSecondStepValid &&
+        !string.IsNullOrEmpty(StepperModel.PatientName) &&
+        !string.IsNullOrEmpty(StepperModel.HospitalName);
 
     public Appointments()
     {
-        selectedService = new SelectedService
+        Patient = new PatientDto();
+        GetAppointmentSlotFilter = new GetAppointmentSlotInput();
+        StepperModel = new AppointmentStepperModel();
+        NewAppointment = new AppointmentCreateDto();
+        MedicalServiceFilter = new GetMedicalServiceInput
         {
-            DepartmentName = null,
-            DoctorName = null,
-            ServiceName = null,
+            Name = "",
+            MaxResultCount = ServicePageSize,
+            SkipCount = (ServiceCurrentPage - 1) * ServicePageSize,
+            Sorting = ServiceCurrentSorting
         };
-        DaysList = new List<DayItem>();
-        AppointmentTimes = new List<AppointmentTime>();
-        AppointmentSummary = new AppointmentSummaryItem();
+        DoctorsWithDepartmentIdsInput = new GetDoctorsWithDepartmentIdsInput
+        {
+            Name = "",
+            MaxResultCount = DoctorPageSize,
+            SkipCount = (DoctorCurrentPage - 1) * DoctorPageSize,
+            Sorting = DoctorCurrentSorting
+        };
+        DaysLookupFilter = new GetAppointmentsLookupInput
+        {
+            Offset = LoadCount,
+            StartDate = DateTime.Now
+        };
+
+        DoctorsList = [];
+        ServicesList = [];
+        DaysLookupList = [];
+        AppointmentSlots = [];
         IsFinalResultSuccess = false;
-        IsProcessCanceled = false;
+        IsDoctorListLoading = false;
+        IsServiceListLoading = true;
+        IsUserNavigatingReverse = false;
+        SlotDaysLoading = false;
+        IsCurrentStepValid = false;
+        ActiveStep = 0;
+        ScreenWidth = 1100;
     }
 
     protected override async Task OnInitializedAsync()
     {
-        await SetPermissionsAsync();
-        AddInitialDays();
-        GenerateAppointmentTimes();
+        await GetPatient();
+        await GetServices();
+        SetDayLoadCount();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            screenWidth = await JS.InvokeAsync<double>("getWindowSize");
-            SetLoadCount();
-            AddInitialDays();
-        }
-    }
-
-    private async Task SetPermissionsAsync()
-    {
-        CanCreateDepartment = await AuthorizationService
-            .IsGrantedAsync(HealthCarePermissions.Appointments.Create);
-        CanEditDepartment = await AuthorizationService
-            .IsGrantedAsync(HealthCarePermissions.Appointments.Edit);
-        CanDeleteDepartment = await AuthorizationService
-            .IsGrantedAsync(HealthCarePermissions.Appointments.Delete);
+        return Task.CompletedTask;
     }
 
     private async Task CancelProcess()
     {
-        IsProcessCanceled = true;
-        await ResetAppointment();
-        await stepsRef.SelectStep("select_service");
-        IsProcessCanceled = false;
+        await OnStepperReset();
+        ResetAppointmentInfo();
         StateHasChanged();
     }
 
-    private Task ResetAppointment()
+    #region GenerateAppointmentDays
+
+    private void SetDayLoadCount()
     {
-        
-        selectedService.ServiceName = null;
-        selectedService.DoctorName = null;
-        selectedService.DepartmentName = null;
-        selectedService.Cost = 0.0;
-        
-        AppointmentSummary.AppointmentTime = null;
-        AppointmentSummary.AppointmentDate = null;
-        AppointmentSummary.ServiceType = null;
-        AppointmentSummary.Price = 0.0;
-        AppointmentSummary.DoctorName = null;
-        AppointmentSummary.Department = null;
-        AvailableSlotCount = 0;
-        
-        AppointmentTimes.Clear();
-        DaysList.ForEach(e => e.IsSelected = false);
-        DoctorsList.ForEach(e => e.IsSelected = false);
-        ServicesList.ForEach(e => e.IsSelected = false);
-        return Task.CompletedTask;
+        LoadCount = ScreenWidth switch
+        {
+            < 768 => 7,
+            < 1024 => 14,
+            _ => 14
+        };
     }
 
-    private void LoadMoreDaysLeft()
+    private async Task GetAppointmentDays()
     {
-        if (DaysList.Count == 0)
+        try
         {
-            AddInitialDays();
-            return;
-        }
+            SlotDaysLoading = true;
+            DaysLookupList.Clear();
+            var days = (await AppointmentAppService.GetAvailableDaysLookupAsync(DaysLookupFilter)).Items;
 
-        var lastDay = DaysList[0].Date;
-
-        DaysList.Clear();
-
-        for (var i = 0; i < loadCount; i++)
-        {
-            lastDay = lastDay.Date.AddDays(-1);
-            var day = new DayItem
+            DaysLookupList = days.Select(x => new AppointmentDayLookupItem
             {
-                Date = lastDay,
+                Date = x.Date,
+                AvailabilityValue = x.AvailabilityValue,
                 IsSelected = false,
-                IsAvailable = random.Next(0, 2) == 0
-            };
-
-            DaysList.Insert(0, day);
+                AvailableSlotCount = x.AvailableSlotCount,
+            }).ToList();
         }
-
-        StateHasChanged();
+        catch (Exception e)
+        {
+            DaysLookupList = [];
+            throw new UserFriendlyException(e.Message);
+        }
+        finally
+        {
+            SlotDaysLoading = false;
+        }
     }
 
-    private void LoadMoreDaysRight()
+    private async Task OnLoadDaysDaysLeft()
     {
-        if (DaysList.Count == 0)
-        {
-            AddInitialDays();
-            return;
-        }
-
-        var lastDay = DaysList.Last();
-
-        DaysList.Clear();
-
-        for (var i = 0; i < loadCount; i++)
-        {
-            DaysList.Add(new DayItem
-            {
-                Date = lastDay.Date.AddDays(i),
-                IsSelected = false,
-                IsAvailable = random.Next(0, 2) == 0
-            });
-        }
-
-        StateHasChanged();
+        var newStartDate = DaysLookupFilter.StartDate.AddDays(-LoadCount);
+        DaysLookupFilter.StartDate = newStartDate < DateTime.Now.Date ? DateTime.Now.Date : newStartDate;
+        await GetAppointmentDays();
     }
 
-    private void AddInitialDays()
+    private async Task OnLoadDaysRight()
     {
-        DaysList.Clear();
-        for (var i = 0; i < loadCount; i++)
-        {
-            DaysList.Add(new DayItem
-            {
-                Date = DateTime.Now.AddDays(i),
-                IsSelected = false,
-                IsAvailable = random.Next(0, 2) == 0
-            });
-        }
-
-        DaysList[0].IsSelected = true;
-        AppointmentSummary.AppointmentDate = DaysList[0].Date.ToShortDateString();
-        StateHasChanged();
+        DaysLookupFilter.StartDate = DaysLookupFilter.StartDate.AddDays(LoadCount);
+        await GetAppointmentDays();
     }
 
-    private void GenerateAppointmentTimes()
+    #endregion
+
+    #region Selections
+
+    private async Task OnServiceChange(ListBoxChangeEventArgs<SelectionItem[], SelectionItem> args)
     {
-        AppointmentTimes.Clear();
-        var startTime = new DateTime(1, 1, 1, 9, 0, 0);
-        var endTime = new DateTime(1, 1, 1, 17, 0, 0);
-        var interval = TimeSpan.FromMinutes(20);
+        //Reset stepper model
+        await OnStepperReset();
+        //Reset appointment times
+        ResetAppointmentInfo();
 
-        while (startTime < endTime)
+        if (args.Value.Length > 0)
         {
-            AppointmentTimes.Add(new AppointmentTime
-            {
-                StartTime = startTime.ToString("HH:mm"),
-                EndTime = startTime.Add(interval).ToString("HH:mm"),
-                IsSelected = false,
-                IsAvailable = random.Next(2) == 0,
-            });
-            startTime = startTime.Add(interval);
+            var selectedService = args.Value[0];
+
+            StepperModel.MedicalServiceId = selectedService.Id;
+            StepperModel.MedicalServiceName = selectedService.DisplayName;
+            StepperModel.Amount = selectedService.Cost;
+            DaysLookupFilter.MedicalServiceId = selectedService.Id;
+            GetAppointmentSlotFilter.MedicalServiceId = selectedService.Id;
         }
 
-        AvailableSlotCount = AppointmentTimes.Count(e => e.IsAvailable);
-    }
-
-    private bool NavigationAllowed(StepNavigationContext context)
-    {
-
-        if (IsProcessCanceled)
-        {
-            return true;
-        }
-        
-        if (context.CurrentStepName == "select_service" && !IsFullFilledService)
-        {
-            return false;
-        }
-
-        if (context.CurrentStepName == "select_appointment" && !IsAppointmentTimeValid)
-        {
-            return false;
-        }
-
-        return true;
-    }
-
-    private void OnServiceChange(SelectionItem item)
-    {
-        if (item.IsSelected)
-        {
-            ServicesList.ForEach(e => e.IsSelected = false);
-        }
-        else
-        {
-            ServicesList.ForEach(e => e.IsSelected = false);
-            item.IsSelected = true;
-        }
-
-        selectedService.ServiceName = AppointmentSummary.ServiceType = (item.IsSelected ? item.DisplayName : null)!;
-        selectedService.Cost = AppointmentSummary.Price = (item.IsSelected ? item.Cost : 0)!;
+        await GetDoctorsList();
     }
 
     private void OnDoctorSelect(Doctor item)
@@ -362,12 +247,209 @@ public partial class Appointments
             item.IsSelected = true;
         }
 
-        selectedService.DoctorName = (item.IsSelected ? item.Name : null)!;
-        selectedService.DepartmentName = (item.IsSelected ? item.Department : null)!;
-        AppointmentSummary.DoctorName = (item.IsSelected ? item.Name : null)!;
-        AppointmentSummary.Department = (item.IsSelected ? item.Department : null)!;
+        if (item.IsSelected)
+        {
+            StepperModel.DoctorName = item.Name;
+            StepperModel.DoctorId = item.Id;
+            StepperModel.DepartmentName = item.Department;
+            GetAppointmentSlotFilter.DoctorId = item.Id;
+            DaysLookupFilter.DoctorId = item.Id;
+        }
+
         StateHasChanged();
     }
+
+    #endregion
+
+    #region API Fetch
+
+    private async Task GetPatient()
+    {
+        try
+        {
+            var patientFilter = new GetPatientsInput
+            {
+                PatientNumber = PatientNo
+            };
+
+            var patients = (await PatientsAppService.GetListAsync(patientFilter)).Items;
+
+            if (patients.Count > 0)
+            {
+                Patient = patients[0];
+                StepperModel.PatientId = Patient.Id;
+                StepperModel.PatientName = Patient.FirstName + " " + Patient.LastName;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    private async Task GetServices()
+    {
+        try
+        {
+            IsServiceListLoading = true;
+            
+            await ClearServiceSelection();
+            ServicesList = [];
+            
+            MedicalServiceWithDepartmentsList =
+                (await MedicalServiceAppService
+                    .GetMedicalServiceWithDepartmentsAsync(MedicalServiceFilter))
+                .Items
+                .ToList();
+            
+            ServicesList = MedicalServiceWithDepartmentsList.Select(x => x.MedicalService)
+                .Select(y => new SelectionItem
+                {
+                    DisplayName = y.Name,
+                    Id = y.Id,
+                    Cost = y.Cost,
+                    IsSelected = false
+                }).ToList();
+
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            throw new UserFriendlyException(e.Message);
+        }
+        finally
+        {
+            IsServiceListLoading = false;
+        }
+    }
+
+    private async Task GetDoctorsList()
+    {
+        try
+        {
+            IsDoctorListLoading = true;
+            var deptIds = MedicalServiceWithDepartmentsList
+                .Where(x => x.MedicalService.Id == StepperModel.MedicalServiceId)
+                .SelectMany(x => x.Departments)
+                .Select(dept => dept.Id)
+                .ToList();
+
+            DoctorsWithDepartmentIdsInput.DepartmentIds = deptIds;
+            var doctors = (await DoctorsAppService.GetByDepartmentIdsAsync(DoctorsWithDepartmentIdsInput)).Items;
+
+            if (!doctors.Any())
+            {
+                DoctorsList = [];
+                DoctorsWithDepartmentIdsInput = new GetDoctorsWithDepartmentIdsInput();
+                IsDoctorListLoading = false;
+                return;
+            }
+
+            DoctorsList = doctors
+                .Select(x => new Doctor
+                {
+                    Id = x.Doctor.Id,
+                    Name = $"{x.Title.TitleName} {x.Doctor.FirstName} {x.Doctor.LastName}",
+                    Department = x.Department.Name,
+                    Gender = x.Doctor.Gender,
+                    IsAvailable = true,
+                    IsSelected = false
+                })
+                .ToList();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
+        finally
+        {
+            IsDoctorListLoading = false;
+        }
+    }
+
+    private async Task GetAvailableSlots()
+    {
+        try
+        {
+            SlotsLoading = true;
+
+            var slots =
+                (await AppointmentAppService.GetAvailableSlotsAsync(GetAppointmentSlotFilter)).Items;
+
+            if (!slots.Any())
+            {
+                AppointmentSlots = [];
+                return;
+            }
+
+            AppointmentSlots = slots.Select(x => new AppointmentSlotItem
+            {
+                DoctorId = x.DoctorId,
+                MedicalServiceId = x.MedicalServiceId,
+                Date = x.Date,
+                StartTime = x.StartTime,
+                EndTime = x.EndTime,
+                AvailabilityValue = x.AvailabilityValue,
+                IsSelected = false
+            }).ToList();
+
+            AvailableSlotCount = AppointmentSlots.Count(e => e.AvailabilityValue);
+        }
+        catch (BusinessException)
+        {
+            AppointmentSlots = [];
+            AvailableSlotCount = 0;
+        }
+        finally
+        {
+            SlotsLoading = false;
+        }
+    }
+
+    #endregion
+
+    #region SearchData
+
+    private async Task OnTextChanged(string newText)
+    {
+        MedicalServiceFilter.Name = newText;
+        await GetServices();
+    }
+
+    private async Task OnDoctorSearchChanged(string? newText)
+    {
+        DoctorsWithDepartmentIdsInput.Name = newText ?? string.Empty;
+        await GetDoctorsList();
+    }
+
+    #endregion
+
+    #region ClearingHandlers
+
+    private async void ClearServiceSearch()
+    {
+        MedicalServiceFilter.Name = "";
+        await GetServices();
+    }
+
+    private async Task ClearServiceSelection()
+    {
+        await SelectServiceDropdown.SelectItemsAsync(SelectServiceDropdown.Value, false);
+    }
+
+    private void ResetAppointmentInfo()
+    {
+        AvailableSlotCount = 0;
+        AppointmentSlots.Clear();
+        DaysLookupList.ForEach(e => e.IsSelected = false);
+        DoctorsList.ForEach(e => e.IsSelected = false);
+        ServicesList.ForEach(e => e.IsSelected = false);
+    }
+
+    #endregion
+
+    #region StyleHandler
 
     private string GetDoctorCardClass(Doctor doctor)
     {
@@ -395,111 +477,227 @@ public partial class Appointments
         return string.Join(" ", classes);
     }
 
-    private void SetLoadCount()
+    #endregion
+
+    private async Task OnSelectAppointmentDay(AppointmentDayLookupItem item)
     {
-        if (screenWidth < 768)
-        {
-            loadCount = 7;
-        }
-        else if (screenWidth < 1024)
-        {
-            loadCount = 14;
-        }
-        else
-        {
-            loadCount = 14;
-        }
+        DaysLookupList.ForEach(e => e.IsSelected = false);
+        item.IsSelected = true;
+        StepperModel.AppointmentDisplayDate = item.Date.ToShortDateString();
+        StepperModel.AppointmentDate = item.Date;
+        GetAppointmentSlotFilter.Date = item.Date;
+        await GetAvailableSlots();
     }
 
-    private void SelectDay(DayItem item)
+    private void SelectAppointmentSlot(AppointmentSlotItem appointmentSlot)
     {
-        if (item.IsSelected)
-        {
-            DaysList.ForEach(e => e.IsSelected = false);
-            AppointmentSummary.AppointmentDate = null;
-        }
-        else
-        {
-            DaysList.ForEach(e => e.IsSelected = false);
-            item.IsSelected = true;
-            AppointmentSummary.AppointmentDate = item.Date.ToShortDateString();
-        }
-
-        GenerateAppointmentTimes();
-    }
-
-    private void SelectAppointment(AppointmentTime appointment)
-    {
-        if (!appointment.IsAvailable)
+        if (!appointmentSlot.AvailabilityValue)
         {
             return;
         }
 
-        if (!appointment.IsSelected)
+        if (appointmentSlot.IsSelected)
         {
-            AppointmentTimes.ForEach(e => e.IsSelected = false);
-            appointment.IsSelected = true;
-            AppointmentSummary.AppointmentTime =
-                $"{appointment.StartTime.ToString(CultureInfo.CurrentCulture)} - {appointment.EndTime.ToString(CultureInfo.CurrentCulture)}";
-            return;
+            AppointmentSlots.ForEach(e => e.IsSelected = false);
+            StepperModel.AppointmentDisplayTime = null!;
+            StepperModel.StartTime = null!;
+            StepperModel.EndTime = null!;
         }
+        else
+        {
+            AppointmentSlots.ForEach(e => e.IsSelected = false);
+            appointmentSlot.IsSelected = true;
+            StepperModel.AppointmentDisplayTime =
+                $"{appointmentSlot.StartTime.ToString(CultureInfo.CurrentCulture)} - {appointmentSlot.EndTime.ToString(CultureInfo.CurrentCulture)}";
+            StepperModel.StartTime = appointmentSlot.StartTime;
+            StepperModel.EndTime = appointmentSlot.EndTime;
+        }
+    }
 
-        AppointmentTimes.ForEach(e => e.IsSelected = false);
-        AppointmentSummary.AppointmentTime = null;
+    private Task OnReminderSettingChanged(bool val)
+    {
+        StepperModel.ReminderSent = val;
+        return Task.CompletedTask;
     }
 
     private async Task CreateAppointment()
     {
-        var message = L["ConfirmMessage"];
-        var confirm = L["Confirm"];
-        
-        if (!await UiMessageService.Confirm(message, confirm, options =>
-            {
-                options.ConfirmButtonText = L["Yes"];
-                options.CancelButtonText = L["No"];
-            }))
+        if (!IsThirdStepValid)
         {
             return;
         }
 
-        await stepsRef.NextStep();
-        IsFinalResultSuccess = true;
+        try
+        {
+            var baseDate = StepperModel.AppointmentDate;
+            var parsedStartDateTime = ConvertToDateTime(baseDate, StepperModel.StartTime);
+            var parsedEndDateTime = ConvertToDateTime(baseDate, StepperModel.EndTime);
+
+            //New appointment object mapping
+            NewAppointment.DoctorId = StepperModel.DoctorId;
+            NewAppointment.PatientId = StepperModel.PatientId;
+            NewAppointment.MedicalServiceId = StepperModel.MedicalServiceId;
+            NewAppointment.AppointmentDate = StepperModel.AppointmentDate;
+            NewAppointment.StartTime = parsedStartDateTime;
+            NewAppointment.EndTime = parsedEndDateTime;
+            NewAppointment.Amount = StepperModel.Amount;
+            NewAppointment.Notes = StepperModel.Note;
+            NewAppointment.ReminderSent = StepperModel.ReminderSent;
+
+            var message = L["ConfirmMessage"];
+            var confirm = L["Confirm"];
+
+            if (!await UiMessageService.Confirm(message, confirm, options =>
+                {
+                    options.ConfirmButtonText = L["Yes"];
+                    options.CancelButtonText = L["No"];
+                }))
+            {
+                return;
+            }
+
+            await AppointmentAppService.CreateAsync(NewAppointment);
+
+            IsFinalResultSuccess = true;
+        }
+        catch (Exception)
+        {
+            IsFinalResultSuccess = false;
+        }
+        finally
+        {
+            await OnNextStep();
+        }
     }
 
-    public class SelectedService
+    private DateTime ConvertToDateTime(DateTime appointmentDate, string timeString)
     {
-        public string ServiceName { get; set; }
-        public string DoctorName { get; set; }
-        public string DepartmentName { get; set; }
-        public double Cost { get; set; }
+        if (TimeSpan.TryParse(timeString, out var time))
+        {
+            return appointmentDate.Date.Add(time);
+        }
+
+        throw new FormatException("Invalid time format. Expected format is 'hh:mm'.");
     }
 
-    public class DayItem
+    #region StepHandlers
+
+    private async Task OnStepperReset()
     {
-        public DateTime Date { get; set; }
-        public bool IsSelected { get; set; }
-        public bool IsAvailable { get; set; }
+        ActiveStep = 0;
+        await Stepper.ResetAsync();
+        SelectServiceStepper.IsValid = null;
+        ConfirmationStepper.IsValid = null;
+        ScheduleStepper.IsValid = null;
+        ResultStepper.IsValid = null;
+        StepperModel = new AppointmentStepperModel
+        {
+            PatientId = Patient.Id,
+            PatientName = Patient.FirstName + " " + Patient.LastName
+        };
+        StateHasChanged();
     }
 
-    public class AppointmentTime
+    private async Task HandleStepChange(StepperChangeEventArgs args)
     {
-        public string StartTime { get; set; }
-        public string EndTime { get; set; }
-        public bool IsSelected { get; set; }
-        public bool IsAvailable { get; set; }
+        if (args.ActiveStep == args.PreviousStep)
+        {
+            return;
+        }
+
+        IsUserNavigatingReverse = args.ActiveStep < args.PreviousStep;
+
+        if (!IsUserNavigatingReverse)
+        {
+            SetValidState(args);
+        }
+        else
+        {
+            for (var i = args.ActiveStep; i <= args.PreviousStep; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        SelectServiceStepper.IsValid = null;
+                        break;
+                    case 1:
+                        ScheduleStepper.IsValid = null;
+                        break;
+                    case 2:
+                        ConfirmationStepper.IsValid = null;
+                        break;
+                    case 3:
+                        ResultStepper.IsValid = null;
+                        break;
+                }
+            }
+
+            IsCurrentStepValid = true;
+        }
+
+        if (IsCurrentStepValid)
+        {
+            ActiveStep = args.ActiveStep;
+            if (ActiveStep == 1)
+            {
+                await GetAppointmentDays();
+            }
+        }
     }
 
-    public class AppointmentSummaryItem
+    private void SetValidState(StepperChangeEventArgs args)
     {
-        public string PatientName { get; set; } = "John Doe";
-        public string HospitalName { get; set; } = "XYZ Hospital";
-        public string AppointmentDate { get; set; }
-        public string AppointmentTime { get; set; }
-        public string DoctorName { get; set; }
+        var activeStep = Stepper.ActiveStep;
+        switch (activeStep)
+        {
+            case 0:
+            {
+                IsCurrentStepValid = IsFirstStepValid;
+                SelectServiceStepper.IsValid = IsCurrentStepValid;
+                break;
+            }
+            case 1:
+            {
+                IsCurrentStepValid = IsSecondStepValid;
+                ScheduleStepper.IsValid = IsCurrentStepValid;
+                break;
+            }
+            case 2:
+            {
+                IsCurrentStepValid = IsThirdStepValid;
+                ConfirmationStepper.IsValid = IsCurrentStepValid;
+                break;
+            }
+        }
 
-        public string Department { get; set; }
-        public string ServiceType { get; set; }
-        public double Price { get; set; } = 0.0;
-        public string PrimaryColor { get; set; } = "purple";
+        args.Cancel = !IsCurrentStepValid;
     }
+
+    private async Task OnNextStep()
+    {
+        await Stepper.NextStepAsync();
+    }
+
+    private async Task OnPreviousStep()
+    {
+        await Stepper.PreviousStepAsync();
+    }
+
+    #endregion
+
+    #region Navigation
+
+    private void NavigateToPatient()
+    {
+        NavigationManager.NavigateTo($"/patients/" + PatientNo + "/detail");
+    }
+
+    private async Task NavigateToFirstStep()
+    {
+        await OnStepperReset();
+        ResetAppointmentInfo();
+        StateHasChanged();
+    }
+
+    #endregion
 }

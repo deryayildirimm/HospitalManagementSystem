@@ -25,6 +25,7 @@
 @using Pusula.Training.HealthCare.Permissions
 @using Volo.Abp.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components
+@using Polly
 @using Volo.Abp.Http.Client
 
 
@@ -101,7 +102,7 @@
             <Column ColumnSize="ColumnSize.Is6" >
                 <Div Flex="Flex.AlignItems.Start"  >
                     <Div Padding="Padding.Is2" >
-                        <Button Color="Color.Danger" Size="Size.Small" @onclick="() => NavigateToDetail()" > + Yeni Randevu</Button>
+                        <Button Color="Color.Danger" Size="Size.Small" @onclick="() => NavigateToDetail(patient.PatientNumber)" > + Yeni Randevu</Button>
                     </Div>
                     <Div Padding="Padding.Is2" >
                         <Button Color="Color.Secondary" Size="Size.Small"> + Verilemeyen Randevu</Button>

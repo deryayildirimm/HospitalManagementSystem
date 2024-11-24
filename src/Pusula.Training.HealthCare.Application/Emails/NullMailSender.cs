@@ -8,15 +8,13 @@ using Volo.Abp.MultiTenancy;
 
 namespace Pusula.Training.HealthCare.Emails;
 
-public class NullMailSender : EmailSenderBase
+public class NullMailSender(
+    ICurrentTenant currentTenant,
+    IEmailSenderConfiguration configuration,
+    IBackgroundJobManager backgroundJobManager)
+    : EmailSenderBase(currentTenant, configuration, backgroundJobManager)
 {
-    public ILogger<NullEmailSender> Logger { get; }
-
-    public NullMailSender(ICurrentTenant currentTenant, IEmailSenderConfiguration configuration,
-        IBackgroundJobManager backgroundJobManager) : base(currentTenant, configuration, backgroundJobManager)
-    {
-        Logger = NullLogger<NullEmailSender>.Instance;
-    }
+    public new ILogger<NullEmailSender> Logger { get; } = NullLogger<NullEmailSender>.Instance;
 
     protected override Task SendEmailAsync(MailMessage mail)
     {

@@ -7,7 +7,6 @@ namespace Pusula.Training.HealthCare.Doctors;
 
 public class DoctorWithNavigationProperties
 {
-    
     public Doctor Doctor { get; set; } = null!;
     public City City { get; set; } = null!;
     public District District { get; set; } = null!;

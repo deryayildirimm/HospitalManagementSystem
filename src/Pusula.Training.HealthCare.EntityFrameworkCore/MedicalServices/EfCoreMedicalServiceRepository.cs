@@ -52,6 +52,32 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 
+    public async Task<List<MedicalServiceWithDepartments>> GetMedicalServiceWithDepartmentsAsync(string? name = null,
+        double? costMin = null, double? costMax = null,
+        DateTime? serviceDateMin = null, DateTime? serviceDateMax = null, string? sorting = null,
+        int maxResultCount = int.MaxValue, int skipCount = 0, CancellationToken cancellationToken = default)
+    {
+        var query = ApplyFilter((await GetQueryableAsync()), name, costMin, costMax, serviceDateMin, serviceDateMax);
+
+        query = query.OrderBy(string.IsNullOrWhiteSpace(sorting)
+            ? MedicalServiceConsts.GetDefaultSorting(false)
+            : sorting);
+
+        var result = await query
+            .Skip(skipCount)
+            .Take(maxResultCount)
+            .Select(ms => new MedicalServiceWithDepartments
+            {
+                MedicalService = ms,
+                Departments = ms.DepartmentMedicalServices
+                    .Select(dms => dms.Department)
+                    .ToList()
+            })
+            .ToListAsync(cancellationToken);
+
+        return result;
+    }
+
     public async Task<long> GetCountAsync(
         string? name = null,
         double? costMin = null,

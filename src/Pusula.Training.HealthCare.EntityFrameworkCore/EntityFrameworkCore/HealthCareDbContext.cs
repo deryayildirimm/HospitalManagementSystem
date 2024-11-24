@@ -1,10 +1,12 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Cities;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.MedicalPersonnel;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Protocols;
@@ -47,6 +49,8 @@ public class HealthCareDbContext :
     public DbSet<City> Cities { get; set; } = null!;
     public DbSet<District> Districts { get; set; } = null!;
 
+    public DbSet<Appointment> Appointments { get; set; } = null!;
+    public DbSet<DoctorWorkingHour> DoctorWorkingHours { get; set; } = null!;
 
     #region Entities from the modules
 
@@ -173,10 +177,10 @@ public class HealthCareDbContext :
                     .HasPrecision(18, 6);
 
                 b.Property(x => x.ServiceCreatedAt).HasColumnName(nameof(MedicalService.ServiceCreatedAt)).IsRequired();
-                
+
                 b.HasIndex(e => new { e.Name }).IsUnique();
             });
-            
+
             builder.Entity<DepartmentMedicalService>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "DepartmentMedicalServices", HealthCareConsts.DbSchema);
@@ -192,12 +196,7 @@ public class HealthCareDbContext :
                     .WithMany(x => x.DepartmentMedicalServices)
                     .HasForeignKey(x => x.MedicalServiceId);
 
-            builder.Entity<Title>(b =>
-            {
-                b.ToTable(HealthCareConsts.DbTablePrefix + "Titles", HealthCareConsts.DbSchema);
-                b.ConfigureByConvention();
-                b.Property(x => x.TitleName).HasColumnName(nameof(Title.TitleName)).IsRequired()
-                    .HasMaxLength(TitleConsts.TitleNameMaxLength);
+                b.HasIndex(x => new { x.MedicalServiceId, x.DepartmentId }).IsUnique();
             });
 
             builder.Entity<Doctor>(b =>
@@ -226,7 +225,76 @@ public class HealthCareDbContext :
                 b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
-                b.HasIndex(x => new { x.MedicalServiceId, x.DepartmentId }).IsUnique();
+
+            builder.Entity<Title>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Titles", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.TitleName).HasColumnName(nameof(Title.TitleName)).IsRequired()
+                    .HasMaxLength(TitleConsts.TitleNameMaxLength);
+            });
+
+            builder.Entity<Appointment>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Appointments", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.HasKey(a => a.Id);
+
+                //Patient cannot make more than one appointment at a time 
+                b.HasIndex(a => new { a.PatientId, a.AppointmentDate, a.StartTime, a.EndTime })
+                    .IsUnique();
+
+                b.Property(a => a.AppointmentDate)
+                    .IsRequired()
+                    .HasColumnName(nameof(Appointment.AppointmentDate));
+
+                b.Property(a => a.StartTime)
+                    .IsRequired()
+                    .HasColumnName(nameof(Appointment.StartTime));
+                
+                b.Property(a => a.EndTime)
+                    .IsRequired()
+                    .HasColumnName(nameof(Appointment.EndTime));
+
+                b.Property(a => a.Status)
+                    .IsRequired()
+                    .HasColumnName(nameof(Appointment.Status))
+                    .HasConversion<int>();
+
+                b.Property(a => a.Notes)
+                    .HasMaxLength(AppointmentConsts.MaxNotesLength)
+                    .HasColumnName(nameof(Appointment.Notes));
+
+                b.Property(a => a.ReminderSent)
+                    .IsRequired()
+                    .HasColumnName(nameof(Appointment.ReminderSent));
+
+                b.Property(a => a.Amount)
+                    .IsRequired()
+                    .HasColumnName(nameof(Appointment.Amount));
+
+                b.HasOne<Doctor>().WithMany().IsRequired().HasForeignKey(x => x.DoctorId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                b.HasOne<Patient>().WithMany().IsRequired().HasForeignKey(x => x.PatientId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                b.HasOne<MedicalService>().WithMany().IsRequired().HasForeignKey(x => x.MedicalServiceId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+
+            builder.Entity<DoctorWorkingHour>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "DoctorWorkingHours", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+
+                b.Property(x => x.DoctorId).IsRequired().HasColumnName(nameof(DoctorWorkingHour.DoctorId));
+                b.Property(x => x.DayOfWeek).IsRequired().HasColumnName(nameof(DoctorWorkingHour.DayOfWeek));
+                b.Property(x => x.StartHour).IsRequired().HasColumnName(nameof(DoctorWorkingHour.StartHour));
+                b.Property(x => x.EndHour).IsRequired().HasColumnName(nameof(DoctorWorkingHour.EndHour));
+
+                // Unique constraint: Prevent multiple working hours entries for the same doctor on the same day
+                b.HasIndex(x => new { x.DoctorId, x.DayOfWeek }).IsUnique();
             });
             
             builder.Entity<DoctorLeave>(b =>

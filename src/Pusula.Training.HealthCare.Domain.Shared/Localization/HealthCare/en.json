@@ -23,6 +23,8 @@
     "Permission:Edit": "Edit",
     "Permission:Delete": "Delete",
     "Permission:Appointments": "Appointments",
+    "RememberMe": "Remember Me",
+    "ForgotPassword": "Forgot Password",
     "FirstName": "First Name",
     "LastName": "Last Name",
     "BirthDate": "Birth Date",
@@ -151,7 +153,26 @@
     "Permission:Doctors": "Doctors",
     "Menu:Doctors": "Doctors",
     "Permission:DoctorLeaves" : "Doctor Leave",
-    "Leaves" : "Leaves"
-    
+    "Leaves" : "Leaves",
+    "Duration": "Duration",
+    "MedPlus": "MedPlus+",
+    "MedPlusHealth": "MedPlus+ Healthcare",
+    "MedPlusSolutions": "MedPlus+ HealthCare Solutions",
+    "Gender:M": "M",
+    "Gender:F": "F",
+    "Error:UnExpectedErrorOcurred": "An unexpected error occurred.",
+    "DoctorNotAvailable": "is unavailable on the selected day.",
+    "AvailableAppointments": "Available Appointments",
+    "SendReminder": "Send Reminder",
+    "DoctorNotFound": "Doctors not found.",
+    "AppointmentInformationWillBeSent": "Appointment information will be sent the doctor and patient soon.",
+    "GoBackToPatient":  "Go Back To Patient Details",
+    "NewAppointment": "New Appointment",
+    "AppointmentOverview": "Appointment Overview",
+    "LatestAppointments": "Latest Appointments",
+    "AppointmentSchedule": "Appointment Schedule",
+    "ActiveAppointments": "Active Appointments",
+    "PRM": "PRM",
+    "UpdateDoctor": "Update Doctor"
   }
 }

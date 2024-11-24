@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Pusula.Training.HealthCare.Migrations
 {
     /// <inheritdoc />
-    public partial class Medical_Staff_Created : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -455,12 +455,35 @@ namespace Pusula.Training.HealthCare.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AppDoctorWorkingHours",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    DoctorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DayOfWeek = table.Column<int>(type: "integer", nullable: false),
+                    StartHour = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    EndHour = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppDoctorWorkingHours", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AppMedicalServices",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     Cost = table.Column<double>(type: "double precision", precision: 18, scale: 6, nullable: false),
+                    Duration = table.Column<int>(type: "integer", nullable: false),
                     ServiceCreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
@@ -1113,6 +1136,51 @@ namespace Pusula.Training.HealthCare.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AppAppointments",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    DoctorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PatientId = table.Column<Guid>(type: "uuid", nullable: false),
+                    MedicalServiceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AppointmentDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    StartTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    EndTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    ReminderSent = table.Column<bool>(type: "boolean", nullable: false),
+                    Amount = table.Column<double>(type: "double precision", nullable: false),
+                    ExtraProperties = table.Column<string>(type: "text", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppAppointments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppAppointments_AppDoctors_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "AppDoctors",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AppAppointments_AppMedicalServices_MedicalServiceId",
+                        column: x => x.MedicalServiceId,
+                        principalTable: "AppMedicalServices",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AppAppointments_AppPatients_PatientId",
+                        column: x => x.PatientId,
+                        principalTable: "AppPatients",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AppDoctorLeaves",
                 columns: table => new
                 {
@@ -1357,6 +1425,22 @@ namespace Pusula.Training.HealthCare.Migrations
                 column: "UserName");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppAppointments_DoctorId",
+                table: "AppAppointments",
+                column: "DoctorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppAppointments_MedicalServiceId",
+                table: "AppAppointments",
+                column: "MedicalServiceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppAppointments_PatientId_AppointmentDate_StartTime_EndTime",
+                table: "AppAppointments",
+                columns: new[] { "PatientId", "AppointmentDate", "StartTime", "EndTime" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AppDepartmentMedicalServices_DepartmentId",
                 table: "AppDepartmentMedicalServices",
                 column: "DepartmentId");
@@ -1396,6 +1480,12 @@ namespace Pusula.Training.HealthCare.Migrations
                 name: "IX_AppDoctors_TitleId",
                 table: "AppDoctors",
                 column: "TitleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppDoctorWorkingHours_DoctorId_DayOfWeek",
+                table: "AppDoctorWorkingHours",
+                columns: new[] { "DoctorId", "DayOfWeek" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppMedicalServices_Name",
@@ -1535,10 +1625,16 @@ namespace Pusula.Training.HealthCare.Migrations
                 name: "AbpUserTokens");
 
             migrationBuilder.DropTable(
+                name: "AppAppointments");
+
+            migrationBuilder.DropTable(
                 name: "AppDepartmentMedicalServices");
 
             migrationBuilder.DropTable(
                 name: "AppDoctorLeaves");
+
+            migrationBuilder.DropTable(
+                name: "AppDoctorWorkingHours");
 
             migrationBuilder.DropTable(
                 name: "AppMedicalStaff");

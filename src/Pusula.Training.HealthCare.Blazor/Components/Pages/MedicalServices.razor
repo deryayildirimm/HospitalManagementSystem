@@ -13,7 +13,7 @@
 @inject IMedicalServicesAppService MedicalServicesAppService
 
 @inject IUiMessageService UiMessageService
-@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> Lh
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
 
@@ -21,9 +21,6 @@
 <PageHeader Title="@L["MedicalServices"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
 
 </PageHeader>
-
-
-
 
 @* ************************* SEARCH ************************* *@
 <Card>
@@ -46,7 +43,7 @@
 
         <Row Class="mt-3 mb-3">
             <div class="col-md-12">
-                <a href="javascript:;" class="text-decoration-none" @onclick="() => ShowAdvancedFilters = !ShowAdvancedFilters">@L["SeeAdvancedFilters"]</a>
+                <a href="javascript:" class="text-decoration-none" @onclick="() => ShowAdvancedFilters = !ShowAdvancedFilters">@L["SeeAdvancedFilters"]</a>
             </div>
         </Row>
 
@@ -177,6 +174,11 @@
                 </DataGridColumn>
 
                 <DataGridColumn TItem="MedicalServiceDto"
+                                Field="Duration"
+                                Caption="@L["Duration"]">
+                </DataGridColumn>
+
+                <DataGridColumn TItem="MedicalServiceDto"
                                 Field="Cost"
                                 Caption="@L["Cost"]">
                 </DataGridColumn>
@@ -230,7 +232,7 @@
                              ValidateOnLoad="false">
 
 
-                    <Validation MessageLocalizer="@LH.Localize">
+                    <Validation MessageLocalizer="@Lh.Localize">
                         <Field>
                             <FieldLabel>@L["Name"] *</FieldLabel>
                             <TextEdit @bind-Text="@NewMedicalService.Name" MaxLength="MedicalServiceConsts.NameMaxLength">
@@ -241,19 +243,37 @@
                         </Field>
                     </Validation>
 
-                    <FieldLabel>@L["Cost"] *</FieldLabel>
-                    <NumericPicker TValue="double" @bind-Value="@NewMedicalService.Cost" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue" Decimals="0">
-                        <Feedback>
-                            <ValidationError/>
-                        </Feedback>
-                    </NumericPicker>
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["Cost"] *</FieldLabel>
+                            <NumericPicker TValue="double" @bind-Value="@NewMedicalService.Cost" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue" Decimals="0">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </NumericPicker>
+                        </Field>
+                    </Validation>
+
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["Duration"] *</FieldLabel>
+                            <NumericPicker TValue="int" @bind-Value="@NewMedicalService.Duration" Min="MedicalServiceConsts.DurationMinValue" Max="MedicalServiceConsts.DurationMaxValue" Decimals="0">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </NumericPicker>
+                        </Field>
+                    </Validation>
 
                     <Field>
                         <FieldLabel>@L["Department"]</FieldLabel>
-                        <MultiSelectDropdown Items="@DepartmentsCreateSelectionItems" Text="@L["SelectDepartment"]"/>
+                        <SfMultiSelect @ref="CreateDepartmentDropdown" TValue="string[]" TItem="SelectionItem" PopupHeight="350px" PopupWidth="350px" Placeholder="@L["SelectDepartment"]" DataSource="@DepartmentsCreateSelectionItems">
+                            <MultiSelectFieldSettings Value="DisplayName" Text="DisplayName"></MultiSelectFieldSettings>
+                            <MultiSelectEvents TValue="string[]" TItem="SelectionItem" ValueChange="OnDepartmentValueChange"></MultiSelectEvents>
+                        </SfMultiSelect>
                     </Field>
-
-                    <Validation MessageLocalizer="@LH.Localize">
+                    
+                    <Validation MessageLocalizer="@Lh.Localize">
                         <Field>
                             <FieldLabel>@L["ServiceDate"]</FieldLabel>
                             <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewMedicalService.ServiceCreatedAt">
@@ -293,7 +313,7 @@
                              Model="@EditingMedicalService"
                              ValidateOnLoad="false">
 
-                    <Validation MessageLocalizer="@LH.Localize">
+                    <Validation MessageLocalizer="@Lh.Localize">
                         <Field>
                             <FieldLabel>@L["Name"] *</FieldLabel>
                             <TextEdit @bind-Text="@EditingMedicalService.Name" MaxLength="MedicalServiceConsts.NameMaxLength">
@@ -304,19 +324,37 @@
                         </Field>
                     </Validation>
 
-                    <FieldLabel>@L["Cost"] *</FieldLabel>
-                    <NumericPicker TValue="double" @bind-Value="@EditingMedicalService.Cost" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue" Decimals="0">
-                        <Feedback>
-                            <ValidationError/>
-                        </Feedback>
-                    </NumericPicker>
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["Cost"] *</FieldLabel>
+                            <NumericPicker TValue="double" @bind-Value="@EditingMedicalService.Cost" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue" Decimals="0">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </NumericPicker>
+                        </Field>
+                    </Validation>
 
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["Duration"] *</FieldLabel>
+                            <NumericPicker TValue="int" @bind-Value="@EditingMedicalService.Duration" Min="MedicalServiceConsts.DurationMinValue" Max="MedicalServiceConsts.DurationMaxValue" Decimals="0">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </NumericPicker>
+                        </Field>
+                    </Validation>
+                    
                     <Field>
                         <FieldLabel>@L["Department"]</FieldLabel>
-                        <MultiSelectDropdown Items="@DepartmentsUpdateSelectionItems" Text="@L["SelectDepartment"]"/>
+                        <SfMultiSelect @ref="UpdateDepartmentDropdown" TValue="string[]" TItem="SelectionItem" PopupHeight="350px" PopupWidth="350px" Placeholder="@L["SelectDepartment"]" DataSource="@DepartmentsUpdateSelectionItems">
+                            <MultiSelectFieldSettings Value="DisplayName" Text="DisplayName"></MultiSelectFieldSettings>
+                            <MultiSelectEvents TValue="string[]" TItem="SelectionItem" ValueChange="OnDepartmentValueChange"></MultiSelectEvents>
+                        </SfMultiSelect>
                     </Field>
 
-                    <Validation MessageLocalizer="@LH.Localize">
+                    <Validation MessageLocalizer="@Lh.Localize">
                         <Field>
                             <FieldLabel>@L["ServiceDate"]</FieldLabel>
                             <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingMedicalService.ServiceCreatedAt">
@@ -344,7 +382,7 @@
     <Toast Background="Background.Success" @bind-Visible="@ToastVisible">
         <ToastHeader Background="Background.Success">
             <Strong TextColor="TextColor.Light" TextSize="TextSize.Small" Margin="Margin.IsAuto.FromEnd">@EditStatus</Strong>
-            <CloseButton />
+            <CloseButton/>
         </ToastHeader>
         <ToastBody TextColor="TextColor.Light" TextSize="TextSize.Small">
             @EditMessage

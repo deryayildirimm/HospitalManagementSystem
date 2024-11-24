@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Patients;
+using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Shared;
 using System;
@@ -43,6 +44,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<MedicalService, MedicalServiceExcelDto>();
         CreateMap<MedicalServiceDto, MedicalServiceUpdateDto>();
         CreateMap<Department, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
+        CreateMap<MedicalServiceWithDepartments, MedicalServiceWithDepartmentsDto>();
         
         CreateMap<Title, TitleDto>();
         CreateMap<TitleDto, TitleUpdateDto>();
@@ -73,5 +75,18 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<DistrictWithNavigationProperties, DistrictWithNavigationPropertiesDto>();
         CreateMap<District, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
+        
+        CreateMap<Appointment, AppointmentDto>();
+        CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();
+        
+        
+        CreateMap<AppointmentWithNavigationProperties, AppointmentExcelDto>()
+            .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(src => src.Doctor.FirstName + " " + src.Doctor.LastName))
+            .ForMember(dest => dest.PatientName, opt => opt.MapFrom(src => src.Patient.FirstName + " " + src.Patient.LastName))
+            .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.MedicalService.Name))
+            .ForMember(dest => dest.PatientNumber, opt => opt.MapFrom(src => src.Patient.PatientNumber))
+            .ForMember(dest => dest.AppointmentDate, opt => opt.MapFrom(src =>
+                $"{src.Appointment.StartTime:yyyy-MM-dd}, {src.Appointment.StartTime:HH:mm} - {src.Appointment.EndTime:HH:mm}"));
+        
     }
 }

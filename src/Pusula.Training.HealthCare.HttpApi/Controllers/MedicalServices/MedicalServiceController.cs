@@ -26,6 +26,13 @@ public class MedicalServiceController(IMedicalServicesAppService medicalServices
         medicalServicesAppService.GetListAsync(input);
 
     [HttpGet]
+    [Route("with-departments")]
+    public Task<PagedResultDto<MedicalServiceWithDepartmentsDto>> GetMedicalServiceWithDepartmentsAsync(GetMedicalServiceInput input)
+    {
+        return medicalServicesAppService.GetMedicalServiceWithDepartmentsAsync(input);
+    }
+
+    [HttpGet]
     [Route("department-lookup")]
     public Task<PagedResultDto<LookupDto<Guid>>> GetDepartmentLookupAsync(LookupRequestDto input) => medicalServicesAppService.GetDepartmentLookupAsync(input);
     

@@ -139,6 +139,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
             .WhereIf(!string.IsNullOrWhiteSpace(insuranceNo), e => e.InsuranceNo!.Contains(insuranceNo!))
             .WhereIf(discountGroup.HasValue, e => e.DiscountGroup != null && e.DiscountGroup == discountGroup)
             .WhereIf(gender.HasValue, e => e.Gender == gender)
-            .WhereIf(isDeleted == true, e => e.IsDeleted); // Sadece isDeleted true ise filtre uygula
+            .WhereIf(isDeleted == true, e => e.IsDeleted)// Sadece isDeleted true ise filtre uygula
+            .WhereIf(patientNumber.HasValue, e => e.PatientNumber == patientNumber); 
     }
 }

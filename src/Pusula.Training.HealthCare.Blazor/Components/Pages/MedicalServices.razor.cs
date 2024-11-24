@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Blazor.Models;
+using Syncfusion.Blazor.DropDowns;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using Volo.Abp.BlazoriseUI.Components;
@@ -47,9 +48,13 @@ public partial class MedicalServices
     protected string SelectedCreateTab = "medical-service-create-tab";
     protected string SelectedEditTab = "medical-service-edit-tab";
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; } = [];
-    private List<SelectionItem> DepartmentsCreateSelectionItems { get; set; } = new List<SelectionItem>();
+    private List<SelectionItem> DepartmentsCreateSelectionItems { get; set; } = [];
     private List<SelectionItem> DepartmentsUpdateSelectionItems { get; set; } = [];
     private List<MedicalServiceDto> SelectedMedicalServices { get; set; } = [];
+    private SfMultiSelect<string[], SelectionItem> CreateDepartmentDropdown { get; set; }
+    private SfMultiSelect<string[], SelectionItem> UpdateDepartmentDropdown { get; set; }
+
+    private List<string> SelectedDepartments { get; set; }
     private bool AllMedicalServicesSelected { get; set; }
 
     public MedicalServices()
@@ -62,8 +67,11 @@ public partial class MedicalServices
             SkipCount = (CurrentPage - 1) * PageSize,
             Sorting = CurrentSorting
         };
+        CreateDepartmentDropdown = new SfMultiSelect<string[], SelectionItem>();
+        UpdateDepartmentDropdown = new SfMultiSelect<string[], SelectionItem>();
         MedicalServiceList = [];
         DepartmentsCollection = new List<LookupDto<Guid>>();
+        SelectedDepartments = [];
     }
 
     protected override async Task OnInitializedAsync()
@@ -157,6 +165,17 @@ public partial class MedicalServices
         await GetMedicalServicesAsync();
         await InvokeAsync(StateHasChanged);
     }
+    
+    public void OnDepartmentValueChange(MultiSelectChangeEventArgs<string[]> args)
+    {
+        if (args.Value == null)
+        {
+            return;
+        }
+        
+        SelectedDepartments.Clear();
+        SelectedDepartments.AddRange(args.Value);
+    }
 
     private async Task OpenCreateMedicalServiceModalAsync()
     {
@@ -164,9 +183,7 @@ public partial class MedicalServices
         {
             ServiceCreatedAt = DateTime.Now,
         };
-
-        ResetCreateSelectedDepartments();
-
+        
         SelectedCreateTab = "medical-service-create-tab";
 
         await NewMedicalServiceValidations.ClearAll();
@@ -179,9 +196,7 @@ public partial class MedicalServices
         {
             ServiceCreatedAt = DateTime.Now,
         };
-
-        //TODO State reset issue
-        ResetCreateSelectedDepartments();
+        
         await InvokeAsync(StateHasChanged);
         await CreateMedicalServiceModal.Hide();
     }
@@ -195,7 +210,6 @@ public partial class MedicalServices
         EditingMedicalServiceId = service.Id;
         EditingMedicalService = ObjectMapper.Map<MedicalServiceDto, MedicalServiceUpdateDto>(service);
 
-        ResetUpdateSelectedDepartments();
         EditingMedicalService.DepartmentNames.Clear();
         await EditingMedicalServiceValidations.ClearAll();
         await EditMedicalServiceModal.Show();
@@ -215,17 +229,21 @@ public partial class MedicalServices
             {
                 return;
             }
-
-            HandleCreateDepartmentSelections();
-            
-            if (await MedicalServicesAppService.CreateAsync(NewMedicalService)!= null)
-            {
-                ToastVisible = true;
-                EditStatus = @L["Created"];
-                EditMessage =@L["CreatedSuccess"];
-            }
             
             NewMedicalService.DepartmentNames.Clear();
+            NewMedicalService.DepartmentNames.AddRange(SelectedDepartments);
+
+            await MedicalServicesAppService.CreateAsync(NewMedicalService);
+
+            ToastVisible = true;
+            EditStatus = @L["Created"];
+            EditMessage = @L["CreatedSuccess"];
+
+            NewMedicalService.DepartmentNames.Clear();
+            SelectedDepartments.Clear();
+            CreateDepartmentDropdown.Text = null;
+            CreateDepartmentDropdown.Value = [];
+
             await GetMedicalServicesAsync();
             await CloseCreateMedicalServiceModalAsync();
         }
@@ -244,14 +262,19 @@ public partial class MedicalServices
                 return;
             }
 
-            HandleUpdateDepartmentSelections();
+            EditingMedicalService.DepartmentNames.Clear();
+            EditingMedicalService.DepartmentNames.AddRange(SelectedDepartments);
+            
+            await MedicalServicesAppService.UpdateAsync(EditingMedicalServiceId, EditingMedicalService);
 
-            if (await MedicalServicesAppService.UpdateAsync(EditingMedicalServiceId, EditingMedicalService) != null)
-            {
-                ToastVisible = true;
-                EditStatus = @L["Updated"];
-                EditMessage =@L["UpdatedSuccess"];
-            }
+            ToastVisible = true;
+            EditStatus = @L["Updated"];
+            EditMessage =@L["UpdatedSuccess"];
+            
+            EditingMedicalService.DepartmentNames.Clear();
+            SelectedDepartments.Clear();
+            UpdateDepartmentDropdown.Text = null;
+            UpdateDepartmentDropdown.Value = [];
             
             await GetMedicalServicesAsync();
             await CloseEditMedicalServiceModalAsync();
@@ -265,8 +288,6 @@ public partial class MedicalServices
     private async Task CloseEditMedicalServiceModalAsync()
     {
         EditingMedicalService = new MedicalServiceUpdateDto();
-        EditingMedicalService.DepartmentNames.Clear(); 
-        ResetUpdateSelectedDepartments();
         await EditMedicalServiceModal.Hide();
     }
 
@@ -356,70 +377,5 @@ public partial class MedicalServices
 
         await GetMedicalServicesAsync();
     }
-
-    private void HandleCreateDepartmentSelections()
-    {
-        try
-        {
-            if (DepartmentsCreateSelectionItems.Count == 0)
-            {
-                return;
-            }
-
-            var selectedNames = DepartmentsCreateSelectionItems.Where(x => x.IsSelected).Select(x => x.DisplayName)
-                .ToList();
-
-            NewMedicalService.DepartmentNames.Clear();
-            NewMedicalService.DepartmentNames.AddRange(selectedNames);
-        }
-        catch (Exception ex)
-        {
-            HandleErrorAsync(ex);
-        }
-    }
-
-    private void ResetCreateSelectedDepartments()
-    {
-        if (DepartmentsCreateSelectionItems.Count > 0)
-        {
-            foreach (var item in DepartmentsCreateSelectionItems)
-            {
-                item.IsSelected = false;
-            }
-        }
-    }
-
-    private void HandleUpdateDepartmentSelections()
-    {
-        try
-        {
-            if (DepartmentsUpdateSelectionItems.Count == 0)
-            {
-                return;
-            }
-
-            var departmentNames = DepartmentsUpdateSelectionItems.Where(x => x.IsSelected).Select(x => x.DisplayName)
-                .ToList();
-            EditingMedicalService.DepartmentNames.AddRange(departmentNames);
-            
-        }
-        catch (Exception ex)
-        {
-            HandleErrorAsync(ex);
-        }
-    }
-
-    private void ResetUpdateSelectedDepartments()
-    {
-        
-        if (DepartmentsCreateSelectionItems.Count > 0)
-        {
-            foreach (var item in DepartmentsUpdateSelectionItems)
-            {
-                item.IsSelected = false;
-            }
-        }
-        
-        StateHasChanged();
-    }
+    
 }
