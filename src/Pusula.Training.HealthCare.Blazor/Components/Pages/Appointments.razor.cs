@@ -136,7 +136,7 @@ public partial class Appointments
         SlotDaysLoading = false;
         IsCurrentStepValid = false;
         ActiveStep = 0;
-        ScreenWidth = 850;
+        ScreenWidth = 1100;
     }
 
     protected override async Task OnInitializedAsync()

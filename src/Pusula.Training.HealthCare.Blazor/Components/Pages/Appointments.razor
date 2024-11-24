@@ -17,9 +17,7 @@
 @inject IDoctorsAppService DoctorsAppService
 @inject IPatientsAppService PatientsAppService
 @inject IUiMessageService UiMessageService
-@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
 @inject NavigationManager NavigationManager
-@inject IJSRuntime JS
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["Appointments"]">
@@ -109,7 +107,7 @@
     </SfStepper>
 </Div>
 
-
+@* Step 1 - Select Doctor and Service *@
 @if (ActiveStep == 0)
 {
     <Div>
@@ -207,8 +205,8 @@
         </div>
     </Div>
 }
-//Doctor selection
 
+@* Step 2 - Schedule *@
 else if (ActiveStep == 1)
 {
     <Div Padding="Padding.Is2">
@@ -322,8 +320,8 @@ else if (ActiveStep == 1)
         </div>
     </Div>
 }
-//Scheduling
 
+@* Step 3 - Confirmation *@
 else if (ActiveStep == 2)
 {
     <Div Padding="Padding.Is2" Class="container">
@@ -411,9 +409,8 @@ else if (ActiveStep == 2)
         </div>
     </Div>
 }
-//Confirmation
 
-//Result
+@* Step 4 - Result *@
 else if (ActiveStep == 3)
 {
     <Div Padding="Padding.Is2">
@@ -460,5 +457,3 @@ else if (ActiveStep == 3)
 </Card>
 </div>
 </div>
-
-<script src="/js/WindowHelper.js"></script>
