@@ -38,7 +38,7 @@
                         {
                             <Div Class="rounded-1 shadow border-black p-2">
                                 <h6> @($"{item.ServiceName}")</h6>
-                                <h6> @($"{DoctorWithNavigation.Title.TitleName} {DoctorWithNavigation.Doctor.FirstName} {DoctorWithNavigation.Doctor.LastName}")</h6>
+                                <h6> @DoctorNameInfo</h6>
                                 <h6> @($"{item.PatientName}")</h6>
                                 <h6>@item.StartTime.ToString("dd/MM/yyyy") @($"{item.StartTime:HH:mm} - {item.EndTime:HH:mm}")</h6>
                             </Div>

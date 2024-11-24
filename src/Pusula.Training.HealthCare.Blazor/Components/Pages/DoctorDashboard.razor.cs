@@ -16,32 +16,34 @@ public partial class DoctorDashboard : ComponentBase
     private List<AppointmentData> DataSource { get; set; }
 
     private GetAppointmentsWithNavigationPropertiesInput AppointmentsFilter { get; set; }
-    
-    private Guid DoctorId { get; set; }
-    
+
     private DoctorWithNavigationPropertiesDto DoctorWithNavigation { get; set; }
+    private GetDoctorsInput DoctorsInput { get; set; }
     private string DoctorNameInfo { get; set; }
 
     #region FilterData
 
     private int AppointmentPageSize { get; set; } = 20;
     private int AppointmentCurrentPage { get; set; } = 1;
+
     #endregion
 
     public DoctorDashboard()
     {
-        
-        DoctorId = Guid.Parse("3a166c0c-bea0-a560-d3f0-4b6f3271c922");
         DoctorWithNavigation = new DoctorWithNavigationPropertiesDto();
         CurrentDate = DateTime.Now;
         AppointmentsFilter = new GetAppointmentsWithNavigationPropertiesInput
         {
-            DoctorId = DoctorId,
             AppointmentMinDate = CurrentDate,
             AppointmentMaxDate = CurrentDate.AddDays(7),
             MaxResultCount = AppointmentPageSize,
             SkipCount = (AppointmentCurrentPage - 1) * AppointmentPageSize,
         };
+        DoctorsInput = new GetDoctorsInput
+        {
+            MaxResultCount = 1
+        };
+
         DataSource = [];
         DoctorNameInfo = "";
     }
@@ -56,22 +58,31 @@ public partial class DoctorDashboard : ComponentBase
     {
         try
         {
-            DoctorWithNavigation = await DoctorAppService.GetWithNavigationPropertiesAsync(DoctorId);
-            DoctorNameInfo =
-                $"{DoctorWithNavigation.Title.TitleName} {DoctorWithNavigation.Doctor.FirstName} {DoctorWithNavigation.Doctor.LastName}";
+            var doctors = (await DoctorAppService.GetListAsync(DoctorsInput)).Items;
+
+            if (doctors.Any())
+            {
+                DoctorWithNavigation = doctors[0];
+                DoctorNameInfo =
+                    $"{DoctorWithNavigation.Title.TitleName} {DoctorWithNavigation.Doctor.FirstName} {DoctorWithNavigation.Doctor.LastName}";
+
+                AppointmentsFilter.DoctorId = DoctorWithNavigation.Doctor.Id;
+            }
         }
         catch (Exception e)
         {
             throw new UserFriendlyException(e.Message);
         }
     }
-    
+
     private async Task GetAppointments()
     {
         try
         {
-            
-            var items = ((await AppointmentAppService.GetListWithNavigationPropertiesAsync(AppointmentsFilter)).Items).ToList();
+            var items = (await AppointmentAppService.GetListWithNavigationPropertiesAsync(AppointmentsFilter))
+                .Items
+                .ToList();
+
             if (items.Count > 0)
             {
                 DataSource = items.Select(x => new AppointmentData
@@ -83,7 +94,6 @@ public partial class DoctorDashboard : ComponentBase
                     EndTime = x.Appointment.EndTime,
                     ServiceName = x.MedicalService.Name
                 }).ToList();
-
             }
         }
         catch (Exception e)
@@ -92,8 +102,8 @@ public partial class DoctorDashboard : ComponentBase
             throw new UserFriendlyException(e.Message);
         }
     }
-    
-    
+
+
     public class AppointmentData
     {
         public Guid Id { get; set; }

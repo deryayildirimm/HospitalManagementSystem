@@ -59,7 +59,9 @@ namespace Pusula.Training.HealthCare
         private async Task SeedMedicalServiceRecords()
         {
             if (await medicalServiceRepository.GetCountAsync() > 0)
+            {
                 return;
+            }
 
             await medicalServiceRepository.InsertAsync(
                 new MedicalService(Guid.NewGuid(), "X-Ray", 300.00, 20, DateTime.Now), true);
@@ -94,7 +96,9 @@ namespace Pusula.Training.HealthCare
         private async Task SeedDepartmentRecords()
         {
             if (await departmentRepository.GetCountAsync() > 0)
+            {
                 return;
+            }
 
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Cardiology"), true);
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Radiology"), true);
@@ -112,7 +116,9 @@ namespace Pusula.Training.HealthCare
         {
             if (await medicalServiceRepository.GetCountAsync() == 0
                 || await medicalServiceRepository.GetCountAsync() == 0)
+            {
                 return;
+            }
 
             var medicalServices = await medicalServiceRepository.GetListAsync();
             var departments = await departmentRepository.GetListAsync();
@@ -140,7 +146,9 @@ namespace Pusula.Training.HealthCare
         private async Task SeedPatientRecords()
         {
             if (await patientRepository.GetCountAsync() > 0)
+            {
                 return;
+            }
 
             var patient1 = new Patient(
                 Guid.NewGuid(),
