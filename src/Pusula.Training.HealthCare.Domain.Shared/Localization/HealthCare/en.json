@@ -172,6 +172,7 @@
     "LatestAppointments": "Latest Appointments",
     "AppointmentSchedule": "Appointment Schedule",
     "ActiveAppointments": "Active Appointments",
-    "PRM": "PRM"
+    "PRM": "PRM",
+    "UpdateDoctor": "Update Doctor"
   }
 }

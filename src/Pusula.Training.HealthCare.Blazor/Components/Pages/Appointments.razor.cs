@@ -136,28 +136,19 @@ public partial class Appointments
         SlotDaysLoading = false;
         IsCurrentStepValid = false;
         ActiveStep = 0;
+        ScreenWidth = 850;
     }
 
     protected override async Task OnInitializedAsync()
     {
         await GetPatient();
         await GetServices();
+        SetDayLoadCount();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            try
-            {
-                ScreenWidth = await JS.InvokeAsync<double>("getWindowSize");
-                SetDayLoadCount();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-        }
+        return Task.CompletedTask;
     }
 
     private async Task CancelProcess()
