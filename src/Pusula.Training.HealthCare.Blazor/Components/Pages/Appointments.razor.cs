@@ -302,16 +302,17 @@ public partial class Appointments
         try
         {
             IsServiceListLoading = true;
-
-            var services =
-                (await MedicalServiceAppService
-                    .GetMedicalServiceWithDepartmentsAsync(MedicalServiceFilter)).Items;
-
-            MedicalServiceWithDepartmentsList = services.ToList();
-
+            
             await ClearServiceSelection();
             ServicesList = [];
-            ServicesList = services.Select(x => x.MedicalService)
+            
+            MedicalServiceWithDepartmentsList =
+                (await MedicalServiceAppService
+                    .GetMedicalServiceWithDepartmentsAsync(MedicalServiceFilter))
+                .Items
+                .ToList();
+            
+            ServicesList = MedicalServiceWithDepartmentsList.Select(x => x.MedicalService)
                 .Select(y => new SelectionItem
                 {
                     DisplayName = y.Name,

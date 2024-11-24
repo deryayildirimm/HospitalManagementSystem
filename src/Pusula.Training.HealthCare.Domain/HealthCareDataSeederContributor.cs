@@ -43,9 +43,9 @@ namespace Pusula.Training.HealthCare
 
         private async Task SetRoles()
         {
+            await SeedCityRecords();
             await SeedPatientRecords();
             await SeedRoleRecords();
-            await SeedCityRecords();
             await SeedDistrictRecords();
             await SeedMedicalServiceRecords();
             await SeedDepartmentRecords();
@@ -217,24 +217,22 @@ namespace Pusula.Training.HealthCare
         private async Task SeedCityRecords()
         {
             if (await cityRepository.GetCountAsync() > 0)
-                return;
-            
-            var cities = new List<City>
             {
-                new City(guidGenerator.Create(),"Istanbul"),
-                new City (guidGenerator.Create(), "Ankara" ),
-                new City(guidGenerator.Create(),"İzmir"),
-                new City (guidGenerator.Create(), "Bursa" ),
-                new City(guidGenerator.Create(),"Antalya")
-            };
+                return;
+            }
 
-            await cityRepository.InsertManyAsync(cities);
+            var c1 = new City(guidGenerator.Create(), "Istanbul");
+            var c2 = new City(guidGenerator.Create(), "Ankara");
+            var c3 = new City(guidGenerator.Create(), "İzmir");
+            var c4 = new City(guidGenerator.Create(), "Antalya");
+            var c5 = new City(guidGenerator.Create(), "Bursa");
+
+            await cityRepository.InsertManyAsync([c1, c2, c3, c4, c5], true);
         }
 
         private async Task SeedDistrictRecords()
         {
-            
-            if (await cityRepository.GetCountAsync() == 0 || await districtRepository.GetCountAsync() > 0)
+            if (await districtRepository.GetCountAsync() > 0)
                 return;
 
             var cityDistricts = new Dictionary<string, List<string>>
@@ -245,9 +243,9 @@ namespace Pusula.Training.HealthCare
                 { "Bursa", ["Nilüfer", "Osmangazi", "Yıldırım", "Gemlik", "İnegöl"] },
                 { "Antalya", ["Muratpaşa", "Kepez", "Konyaaltı", "Alanya", "Manavgat"] }
             };
-            
+
             var cities = await cityRepository.GetListAsync();
-            
+
             foreach (var city in cities)
             {
                 if (!cityDistricts.TryGetValue(city.Name, out var districts))
@@ -255,7 +253,8 @@ namespace Pusula.Training.HealthCare
                     continue;
                 }
 
-                foreach (var district in districts.Select(districtName => new District(guidGenerator.Create(), city.Id, districtName)))
+                foreach (var district in districts.Select(districtName =>
+                             new District(guidGenerator.Create(), city.Id, districtName)))
                 {
                     await districtRepository.InsertAsync(district);
                 }
@@ -277,8 +276,8 @@ namespace Pusula.Training.HealthCare
 
         private async Task SeedDoctorRecords()
         {
-            if (await titleRepository.GetCountAsync() == 0 
-                || await departmentRepository.GetCountAsync() == 0 
+            if (await titleRepository.GetCountAsync() == 0
+                || await departmentRepository.GetCountAsync() == 0
                 || await cityRepository.GetCountAsync() == 0
                 || await districtRepository.GetCountAsync() == 0)
                 return;
@@ -286,15 +285,15 @@ namespace Pusula.Training.HealthCare
             var titles = await titleRepository.GetListAsync();
             var departments = await departmentRepository.GetListAsync();
             var cityTitles = await cityRepository.GetListAsync();
-            var districtTitles = await districtRepository.GetListAsync();
-            
-            var city = cityTitles.First(c => c.Name == "İstanbul");
-            var district = districtTitles.First(d => d.Name == "Kadıköy");
+            var districtTitles = await districtRepository.GetListWithNavigationPropertiesAsync();
+
+            var city = cityTitles.First(x => x.Name == "Istanbul");
+            var district = districtTitles.First(d => d.City.Name == "Istanbul");
 
             var d1 = new Doctor(
                 guidGenerator.Create(),
                 city.Id,
-                district.Id,
+                district.District.Id,
                 titles.First(t => t.TitleName == "Dr.").Id,
                 departments[0].Id,
                 "Arif",
@@ -310,7 +309,7 @@ namespace Pusula.Training.HealthCare
             var d2 = new Doctor(
                 guidGenerator.Create(),
                 city.Id,
-                district.Id,
+                district.District.Id,
                 titles.First(t => t.TitleName == "Dr.").Id,
                 departments[0].Id,
                 "Fatma",
@@ -326,7 +325,7 @@ namespace Pusula.Training.HealthCare
             var d3 = new Doctor(
                 guidGenerator.Create(),
                 city.Id,
-                district.Id,
+                district.District.Id,
                 titles.First(t => t.TitleName == "Dr.").Id,
                 departments[0].Id,
                 "Mehmet",
@@ -342,7 +341,7 @@ namespace Pusula.Training.HealthCare
             var d4 = new Doctor(
                 guidGenerator.Create(),
                 city.Id,
-                district.Id,
+                district.District.Id,
                 titles.First(t => t.TitleName == "Prof.").Id,
                 departments[1].Id,
                 "Merve",
@@ -358,7 +357,7 @@ namespace Pusula.Training.HealthCare
             var d5 = new Doctor(
                 guidGenerator.Create(),
                 city.Id,
-                district.Id,
+                district.District.Id,
                 titles.First(t => t.TitleName == "Prof.").Id,
                 departments[1].Id,
                 "Zeynep",
@@ -374,7 +373,7 @@ namespace Pusula.Training.HealthCare
             var d6 = new Doctor(
                 guidGenerator.Create(),
                 city.Id,
-                district.Id,
+                district.District.Id,
                 titles.First(t => t.TitleName == "Yrd. Doç.").Id,
                 departments[3].Id,
                 "Ahmet",
@@ -390,7 +389,7 @@ namespace Pusula.Training.HealthCare
             var d7 = new Doctor(
                 guidGenerator.Create(),
                 city.Id,
-                district.Id,
+                district.District.Id,
                 titles.First(t => t.TitleName == "Dr.").Id,
                 departments[2].Id,
                 "Elif",
@@ -406,7 +405,7 @@ namespace Pusula.Training.HealthCare
             var d8 = new Doctor(
                 guidGenerator.Create(),
                 city.Id,
-                district.Id,
+                district.District.Id,
                 titles.First(t => t.TitleName == "Prof.").Id,
                 departments[4].Id,
                 "Mehmet",
@@ -422,7 +421,7 @@ namespace Pusula.Training.HealthCare
             var d9 = new Doctor(
                 guidGenerator.Create(),
                 city.Id,
-                district.Id,
+                district.District.Id,
                 titles.First(t => t.TitleName == "Yrd. Doç.").Id,
                 departments[5].Id,
                 "Ayşe",
@@ -434,7 +433,6 @@ namespace Pusula.Training.HealthCare
                 "ayse.yildiz@example.com",
                 "555-8901234"
             );
-
 
             await doctorRepository.InsertAsync(d1, true);
             await doctorRepository.InsertAsync(d2, true);

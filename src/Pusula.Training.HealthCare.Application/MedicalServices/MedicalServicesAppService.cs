@@ -58,7 +58,7 @@ public class MedicalServicesAppService(
         return new PagedResultDto<MedicalServiceWithDepartmentsDto>
         {
             TotalCount = totalCount,
-            Items = ObjectMapper.Map<List<MedicalServiceWithDepartments>, List<MedicalServiceWithDepartmentsDto>>(items)
+            Items = ObjectMapper.Map<List<MedicalServiceWithDepartments>, List<MedicalServiceWithDepartmentsDto>>(items)        
         };
     }
 

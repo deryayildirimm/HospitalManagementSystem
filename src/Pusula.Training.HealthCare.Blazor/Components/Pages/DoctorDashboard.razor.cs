@@ -31,7 +31,7 @@ public partial class DoctorDashboard : ComponentBase
     public DoctorDashboard()
     {
         
-        DoctorId = Guid.Parse("3a166153-7c6c-ed73-e8dc-8939028e1f7e");
+        DoctorId = Guid.Parse("3a166c0c-bea0-a560-d3f0-4b6f3271c922");
         DoctorWithNavigation = new DoctorWithNavigationPropertiesDto();
         CurrentDate = DateTime.Now;
         AppointmentsFilter = new GetAppointmentsWithNavigationPropertiesInput
