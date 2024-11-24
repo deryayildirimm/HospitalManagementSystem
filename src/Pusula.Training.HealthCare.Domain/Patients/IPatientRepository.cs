@@ -69,4 +69,9 @@ public interface IPatientRepository : IRepository<Patient, Guid>
         EnumGender? gender = null,
         bool? isDeleted = null,
         CancellationToken cancellationToken = default);
+    
+    Task<Patient> GetPatientByNumberAsync(
+        int patientNumber ,
+        CancellationToken cancellationToken = default
+    );
 }

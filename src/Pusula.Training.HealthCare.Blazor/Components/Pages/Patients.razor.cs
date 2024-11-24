@@ -134,7 +134,7 @@ public partial class Patients
     {
         //seçili hastayı servise kaydediyoruz 
         //   patientService.SetPatient(patientDto);
-        NavigationManager.NavigateTo($"/patients/detail/{patientDto.Id}");
+        NavigationManager.NavigateTo($"/patients/{patientDto.PatientNumber}/detail");
     }
 
     
