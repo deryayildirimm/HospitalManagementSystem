@@ -12,6 +12,8 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
     public virtual string Name { get; set; }
 
     public virtual double Cost { get; set; }
+    
+    public virtual int Duration { get; set; }
 
     public virtual DateTime ServiceCreatedAt { get; set; }
 
@@ -23,22 +25,46 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
         Name = string.Empty;
         Cost = 0;
         ServiceCreatedAt = DateTime.Now;
+        Duration = 0;
     }
 
-    public MedicalService(Guid id, string name, double cost, DateTime serviceCreatedAt)
+    public MedicalService(Guid id, string name, double cost, int duration, DateTime serviceCreatedAt)
+    {
+        SetId(id);
+        SetName(name);
+        SetCost(cost);
+        SetServiceCreatedAt(serviceCreatedAt);
+        SetDuration(duration);
+    }
+
+    private void SetId(Guid id)
     {
         Check.NotNull(id, nameof(id));
-        Check.NotNullOrWhiteSpace(name, nameof(name));
-        Check.NotNull(serviceCreatedAt, nameof(serviceCreatedAt));
-        Check.Range(cost, nameof(cost), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
-
         Id = id;
+    }
+    
+    public void SetName(string name)
+    {
+        Check.NotNullOrWhiteSpace(name, nameof(name));
         Name = name;
+    }
+
+    public void SetCost(double cost)
+    {
+        Check.Range(cost, nameof(cost), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
         Cost = cost;
+    }
+
+    public void SetServiceCreatedAt(DateTime serviceCreatedAt)
+    {
+        Check.NotNull(serviceCreatedAt, nameof(serviceCreatedAt));
         ServiceCreatedAt = serviceCreatedAt;
     }
 
-    public void SetDepartments(ICollection<Department>? newDepartments)
+    public void SetDuration(int duration)
     {
+        Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue, MedicalServiceConsts.DurationMaxValue);
+        Duration = duration;
     }
+
 }

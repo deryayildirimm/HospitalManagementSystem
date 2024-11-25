@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Pusula.Training.HealthCare.BloodTests;
 using Pusula.Training.HealthCare.BloodTests.Category;
+using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 
 
@@ -13,11 +16,12 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
 public partial class MyPatients
 {
+    private GetDoctorsInput DoctorsInput { get; set; } = new();
     private IReadOnlyList<PatientDto> Patients { get; set; }
     private IReadOnlyList<TestCategoryDto>? Categories { get; set; }
     private List<Guid>? SelectedCategoryIds { get; set; } 
     private PatientDto? Patient { get; set; }
-    private GetPatientsInput Filter { get; set; }
+    private GetPatientsInput Filter { get; set; } = new();
     private bool CanCreateBloodTest { get; set; }
     private bool Disabled => SelectedCategoryIds?.Count == 0; 
     private bool IsDialogVisible = false;
@@ -25,7 +29,9 @@ public partial class MyPatients
     private int CurrentPage { get; set; } = 1;
     private int TotalCount { get; set; }
     private string CurrentSorting { get; set; } = string.Empty;
-
+    private DoctorWithNavigationPropertiesDto DoctorWithNavigation { get; set; }
+    private string DoctorNameInfo { get; set; }
+    private Guid DoctorId { get; set; } 
 
     public MyPatients()
     {
@@ -42,6 +48,7 @@ public partial class MyPatients
     {
         await SetPermissionsAsync();
         await GetPatientsAsync();
+        await GetDoctor();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -98,7 +105,7 @@ public partial class MyPatients
             {
                 var bloodTest = await BloodTestAppService.CreateAsync(new BloodTestCreateDto
                 {
-                    DoctorId = new Guid("3a1674bd-45da-1710-731d-62e9fd62c483"),
+                    DoctorId = DoctorId,
                     PatientId = Patient!.Id,
                     TestCategoryId = items,
                     Status = BloodTestStatus.Requested,
@@ -135,5 +142,22 @@ public partial class MyPatients
     private string GetCardCssClass(Guid categoryId)
     {
         return SelectedCategoryIds!.Contains(categoryId) ? "custom-card selected-card" : "custom-card";
+    }
+
+    private async Task GetDoctor()
+    {
+        try
+        {
+            var doctors = (await DoctorAppService.GetListAsync(DoctorsInput)).Items;
+
+            if (doctors.Any())
+            {
+                DoctorId = doctors[0].Doctor.Id;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new UserFriendlyException(e.Message);
+        }
     }
 }

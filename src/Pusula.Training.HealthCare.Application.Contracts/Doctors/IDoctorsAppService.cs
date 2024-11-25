@@ -17,9 +17,14 @@ public interface IDoctorsAppService : IApplicationService
 
     Task<DoctorDto> GetAsync(Guid id);
 
+    Task<PagedResultDto<LookupDto<Guid>>> GetCityLookupAsync(LookupRequestDto input);
+
+    Task<PagedResultDto<LookupDto<Guid>>> GetDistrictLookupAsync(Guid? cityId, LookupRequestDto input);
+
     Task<PagedResultDto<LookupDto<Guid>>> GetTitleLookupAsync(LookupRequestDto input);
 
     Task<PagedResultDto<LookupDto<Guid>>> GetDepartmentLookupAsync(LookupRequestDto input);
+    Task<PagedResultDto<DoctorWithNavigationPropertiesDto>> GetByDepartmentIdsAsync(GetDoctorsWithDepartmentIdsInput input);
 
     Task DeleteAsync(Guid id);
 
@@ -28,7 +33,7 @@ public interface IDoctorsAppService : IApplicationService
     Task<DoctorDto> UpdateAsync(DoctorUpdateDto input);
 
     Task<IRemoteStreamContent> GetListAsExcelFileAsync(DoctorExcelDownloadDto input);
-    Task DeleteByIdsAsync(List<Guid> protocolIds);
+    Task DeleteByIdsAsync(List<Guid> doctorIds);
 
     Task DeleteAllAsync(GetDoctorsInput input);
     Task<Pusula.Training.HealthCare.Shared.DownloadTokenResultDto> GetDownloadTokenAsync();

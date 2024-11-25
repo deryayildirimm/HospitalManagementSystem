@@ -9,8 +9,12 @@ public class MedicalServiceCreateDto
     [Required] 
     public string Name { get; set; } = string.Empty;
     
-    [Required] 
-    public List<string> DepartmentNames = new List<string>();
+    [Required]
+    [Range(MedicalServiceConsts.DurationMinValue, MedicalServiceConsts.DurationMaxValue)]
+    public int Duration { get; set; }
+    
+    [Required]
+    public readonly List<string> DepartmentNames = [];
 
     [Required]
     [Range(MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue)]

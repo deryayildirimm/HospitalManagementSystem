@@ -16,18 +16,10 @@ namespace Pusula.Training.HealthCare.Controllers.Titles;
 public class TitleController(ITitlesAppService titlesAppService) : HealthCareController, ITitlesAppService
 {
     [HttpGet]
-    public async Task<PagedResultDto<TitleDto>> GetListAsync([FromQuery] GetTitlesInput input)
-    {
-        Console.Write("ALOOOOOO");
-        return await titlesAppService.GetListAsync(input);
-    }
+    public async Task<PagedResultDto<TitleDto>> GetListAsync([FromQuery] GetTitlesInput input) => await titlesAppService.GetListAsync(input);
 
     [HttpGet("{id}")]
-    public Task<TitleDto> GetAsync(Guid id)
-    {
-        Console.Write("Id ile Get");
-        return titlesAppService.GetAsync(id);
-    }
+    public Task<TitleDto> GetAsync(Guid id) => titlesAppService.GetAsync(id);
     
     [HttpPost]
     public Task<TitleDto> CreateAsync(TitleCreateDto input) => titlesAppService.CreateAsync(input);

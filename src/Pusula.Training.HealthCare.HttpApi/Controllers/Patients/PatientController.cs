@@ -32,6 +32,7 @@ public class PatientController : HealthCareController, IPatientsAppService
         return _patientsAppService.GetListAsync(input);
     }
 
+    // iptal etmedim belki ileride bunu kullanır ön yüzde farklı bir yöntem uygularız
     [HttpGet]
     [Route("{id}")]
     public virtual Task<PatientDto> GetAsync(Guid id)
@@ -39,6 +40,14 @@ public class PatientController : HealthCareController, IPatientsAppService
         return _patientsAppService.GetAsync(id);
     }
 
+    [HttpGet]
+    [Route("{PatientNumber}/detail")]
+    public virtual Task<PatientDto> GetPatientByNumberAsync(int PatientNumber)
+    {
+        return _patientsAppService.GetPatientByNumberAsync(PatientNumber);
+    }
+
+    
     [HttpPost]
     public virtual Task<PatientDto> CreateAsync(PatientCreateDto input)
     {

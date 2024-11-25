@@ -4,6 +4,7 @@
     @using Pusula.Training.HealthCare.BloodTests
     @using Pusula.Training.HealthCare.BloodTests.Category
     @using Pusula.Training.HealthCare.BloodTests.Tests
+@using Pusula.Training.HealthCare.Doctors
     @using Pusula.Training.HealthCare.Patients
     @using Pusula.Training.HealthCare.Localization
     @using Microsoft.AspNetCore.Authorization
@@ -22,6 +23,7 @@
     @inject IBloodTestAppService BloodTestAppService
     @inject IBloodTestResultAppService bloodTestResultAppService
     @inject ITestAppService testAppService
+    @inject IDoctorsAppService DoctorAppService
     @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
     @inject NavigationManager NavigationManager
     @* @inject ICurrentUser CurrentUser*@

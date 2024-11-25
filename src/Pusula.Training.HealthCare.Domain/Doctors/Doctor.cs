@@ -9,27 +9,29 @@ namespace Pusula.Training.HealthCare.Doctors;
 public class Doctor : FullAuditedAggregateRoot<Guid>
 {
     [NotNull]
-    public virtual string FirstName { get; set; }
+    public virtual string FirstName { get; protected set; }
     [NotNull]
-    public virtual string LastName { get; set; }
+    public virtual string LastName { get; protected set; }
     [NotNull]
-    public virtual string IdentityNumber { get; set; }
+    public virtual string IdentityNumber { get; protected set; }
     [NotNull]
-    public virtual DateTime BirthDate { get; set; }
+    public virtual DateTime BirthDate { get; protected set; }
     [NotNull]
-    public virtual EnumGender Gender { get; set; }
+    public virtual EnumGender Gender { get; protected set; }
     [CanBeNull]
-    public virtual string? Email { get; set; }
+    public virtual string? Email { get; protected set; }
     [CanBeNull]
-    public virtual string? PhoneNumber { get; set; }
+    public virtual string? PhoneNumber { get; protected set; }
     [NotNull]
-    public virtual int YearOfExperience { get; set; }
+    public virtual DateTime StartDate { get; protected set; }
     [NotNull]
-    public virtual string City { get; set; }
+    public virtual Guid CityId { get; protected set; }
     [NotNull]
-    public virtual string District { get; set; }
-    public virtual Guid DepartmentId { get; set; }
-    public virtual Guid TitleId { get; set; }
+    public virtual Guid DistrictId { get; protected set; }
+    [NotNull]
+    public virtual Guid DepartmentId { get; protected set; }
+    [NotNull]
+    public virtual Guid TitleId { get; protected set; }
 
     protected Doctor()
     {
@@ -38,23 +40,22 @@ public class Doctor : FullAuditedAggregateRoot<Guid>
         IdentityNumber = string.Empty;
         BirthDate = DateTime.Now;
         Gender = EnumGender.OTHER;
-        YearOfExperience = 0;
-        City = string.Empty;
-        District = string.Empty;
+        StartDate = DateTime.Now;
+        CityId = Guid.Empty;
+        DistrictId = Guid.Empty;
         DepartmentId = Guid.Empty;
         TitleId = Guid.Empty;
     }
 
-    public Doctor(Guid id, Guid titleId, Guid departmentId, string firstName, string lastName, string identityNumber, DateTime birthDate, EnumGender gender,
-        int yearOfExperience, string city, string district, string? email = null, string? phoneNumber = null )
+    public Doctor(Guid id, Guid cityId, Guid districtId, Guid titleId, Guid departmentId, string firstName, string lastName, string identityNumber, DateTime birthDate, EnumGender gender,
+        DateTime startDate, string? email = null, string? phoneNumber = null )
     {
         Check.NotNullOrWhiteSpace(firstName, nameof(firstName), DoctorConsts.FirstNameMaxLength, DoctorConsts.FirstNameMinLength);
         Check.NotNullOrWhiteSpace(lastName, nameof(lastName), DoctorConsts.LastNameMaxLength, DoctorConsts.LastNameMinLength);
         Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber), DoctorConsts.IdentityNumberLength, DoctorConsts.IdentityNumberLength);
         Check.Range((int)gender, nameof(gender), DoctorConsts.GenderMinValue, DoctorConsts.GenderMaxValue);
-        Check.Range(yearOfExperience, nameof(yearOfExperience), 0, 100);
-        Check.NotNullOrWhiteSpace(city, nameof(city), DoctorConsts.CityMaxLength, DoctorConsts.CityMinLength);
-        Check.NotNullOrWhiteSpace(district, nameof(district), DoctorConsts.DistrictMaxLength, DoctorConsts.DistrictMinLength);
+        Check.NotNullOrWhiteSpace(cityId.ToString(), nameof(cityId));
+        Check.NotNullOrWhiteSpace(districtId.ToString(), nameof(districtId));
         Check.NotNullOrWhiteSpace(departmentId.ToString(), nameof(departmentId));
         Check.NotNullOrWhiteSpace(titleId.ToString(), nameof(titleId));
         
@@ -65,12 +66,25 @@ public class Doctor : FullAuditedAggregateRoot<Guid>
         IdentityNumber = identityNumber;
         BirthDate = birthDate;
         Gender = gender;
-        YearOfExperience = yearOfExperience;
-        City = city;
-        District = district;
+        StartDate = startDate;
+        CityId = cityId;
+        DistrictId = districtId;
         Email = email;
         PhoneNumber = phoneNumber;
         TitleId = titleId;
         DepartmentId = departmentId;
     }
+
+    public void SetFirstName(string firstName) => FirstName = firstName;
+    public void SetLastName(string lastName) => LastName = lastName;
+    public void SetIdentityNumber(string identityNumber) => IdentityNumber = identityNumber;
+    public void SetBirthDate(DateTime birthDate) => BirthDate = birthDate;
+    public void SetGender(EnumGender gender) => Gender = gender;
+    public void SetStartDate(DateTime startDate) => StartDate = startDate;
+    public void SetEmail(string? email) => Email = email;
+    public void SetPhoneNumber(string? phoneNumber) => PhoneNumber = phoneNumber;
+    public void SetCityId(Guid cityId) => CityId = cityId;
+    public void SetDistrictId(Guid districtId) => DistrictId = districtId;
+    public void SetTitleId(Guid titleId) => TitleId = titleId;
+    public void SetDepartmentId(Guid departmentId) => DepartmentId = departmentId;
 }

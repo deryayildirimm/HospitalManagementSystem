@@ -1,4 +1,4 @@
- using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -15,6 +15,7 @@ using Volo.Abp.Caching;
 using Volo.Abp.Content;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using Pusula.Training.HealthCare.Exceptions;
 
 namespace Pusula.Training.HealthCare.MedicalServices;
 
@@ -41,6 +42,24 @@ public class MedicalServicesAppService(
         {
             TotalCount = totalCount,
             Items = ObjectMapper.Map<List<MedicalService>, List<MedicalServiceDto>>(items)
+        };
+    }
+
+    public async Task<PagedResultDto<MedicalServiceWithDepartmentsDto>> GetMedicalServiceWithDepartmentsAsync(
+        GetMedicalServiceInput input)
+    {
+        var totalCount =
+            await medicalServiceRepository.GetCountAsync(input.Name, input.CostMin, input.CostMax, input.ServiceDateMin,
+                input.ServiceDateMax);
+
+        var items = await medicalServiceRepository.GetMedicalServiceWithDepartmentsAsync(input.Name,
+            input.CostMin, input.CostMax, input.ServiceDateMin, input.ServiceDateMax, input.Sorting,
+            input.MaxResultCount, input.SkipCount);
+
+        return new PagedResultDto<MedicalServiceWithDepartmentsDto>
+        {
+            TotalCount = totalCount,
+            Items = ObjectMapper.Map<List<MedicalServiceWithDepartments>, List<MedicalServiceWithDepartmentsDto>>(items)        
         };
     }
 
@@ -75,29 +94,54 @@ public class MedicalServicesAppService(
     [Authorize(HealthCarePermissions.MedicalServices.Create)]
     public virtual async Task<MedicalServiceDto> CreateAsync(MedicalServiceCreateDto input)
     {
-        var medicalService = await medicalServiceManager.CreateAsync(
-            input.Name,
-            input.ServiceCreatedAt,
-            input.Cost,
-            input.DepartmentNames
-        );
+        try
+        {
+            var medicalService = await medicalServiceManager.CreateAsync(
+                input.Name,
+                input.ServiceCreatedAt,
+                input.Cost,
+                input.Duration,
+                input.DepartmentNames
+            );
 
-        return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
+            return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
+        }
+        catch (InvalidDepartmentsException e)
+        {
+            throw new UserFriendlyException(e.Message);
+        }
+        catch (Exception e)
+        {
+            throw new UserFriendlyException(e.Message);
+        }
     }
+
 
     [Authorize(HealthCarePermissions.MedicalServices.Edit)]
     public virtual async Task<MedicalServiceDto> UpdateAsync(Guid id, MedicalServiceUpdateDto input)
     {
-        var medicalService = await medicalServiceManager.UpdateAsync(
-            id,
-            input.Name,
-            input.Cost,
-            input.ServiceCreatedAt,
-            input.DepartmentNames,
-            input.ConcurrencyStamp
-        );
+        try
+        {
+            var medicalService = await medicalServiceManager.UpdateAsync(
+                id,
+                input.Name,
+                input.Cost,
+                input.Duration,
+                input.ServiceCreatedAt,
+                input.DepartmentNames,
+                input.ConcurrencyStamp
+            );
 
-        return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
+            return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
+        }
+        catch (MedicalServiceNotFoundException e)
+        {
+            throw new UserFriendlyException(e.Message);
+        }
+        catch (Exception)
+        {
+            throw new UserFriendlyException(@L["MedicalServiceDuplicateEntry"]);
+        }
     }
 
     [AllowAnonymous]

@@ -51,6 +51,26 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         doctorPermission.AddChild(HealthCarePermissions.Doctors.Create, L("Permission:Create"));
         doctorPermission.AddChild(HealthCarePermissions.Doctors.Edit, L("Permission:Edit"));
         doctorPermission.AddChild(HealthCarePermissions.Doctors.Delete, L("Permission:Delete"));
+        
+        var doctorLeavePermission = myGroup.AddPermission(HealthCarePermissions.DoctorLeaves.Default, L("Permission:DoctorLeaves"));
+        doctorLeavePermission.AddChild(HealthCarePermissions.DoctorLeaves.Create, L("Permission:Create"));
+        doctorLeavePermission.AddChild(HealthCarePermissions.DoctorLeaves.Edit, L("Permission:Edit"));
+        doctorLeavePermission.AddChild(HealthCarePermissions.DoctorLeaves.Delete, L("Permission:Delete"));
+        
+        var medicalStaffPermission = myGroup.AddPermission(HealthCarePermissions.MedicalStaff.Default, L("Permission:MedicalStaff"));
+        medicalStaffPermission.AddChild(HealthCarePermissions.MedicalStaff.Create, L("Permission:Create"));
+        medicalStaffPermission.AddChild(HealthCarePermissions.MedicalStaff.Edit, L("Permission:Edit"));
+        medicalStaffPermission.AddChild(HealthCarePermissions.MedicalStaff.Delete, L("Permission:Delete"));
+
+        var cityPermission = myGroup.AddPermission(HealthCarePermissions.Cities.Default, L("Permission:Cities"));
+        cityPermission.AddChild(HealthCarePermissions.Cities.Create, L("Permission:Create"));
+        cityPermission.AddChild(HealthCarePermissions.Cities.Edit, L("Permission:Edit"));
+        cityPermission.AddChild(HealthCarePermissions.Cities.Delete, L("Permission:Delete"));
+
+        var districtPermission = myGroup.AddPermission(HealthCarePermissions.Districts.Default, L("Permission:Districts"));
+        districtPermission.AddChild(HealthCarePermissions.Districts.Create, L("Permission:Create"));
+        districtPermission.AddChild(HealthCarePermissions.Districts.Edit, L("Permission:Edit"));
+        districtPermission.AddChild(HealthCarePermissions.Districts.Delete, L("Permission:Delete"));
 
         var bloodTestPermission = myGroup.AddPermission(HealthCarePermissions.BloodTests.Default, L("Permission:BloodTests"));
         bloodTestPermission.AddChild(HealthCarePermissions.BloodTests.Create, L("Permission:Create"));

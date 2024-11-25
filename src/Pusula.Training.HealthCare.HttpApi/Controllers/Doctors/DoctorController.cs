@@ -33,6 +33,16 @@ public class DoctorController(IDoctorsAppService doctorsAppService) : HealthCare
         doctorsAppService.GetAsync(id);
 
     [HttpGet]
+    [Route("city-lookup")]
+    public Task<PagedResultDto<LookupDto<Guid>>> GetCityLookupAsync(LookupRequestDto input) => 
+        doctorsAppService.GetCityLookupAsync(input);
+
+    [HttpGet]
+    [Route("district-lookup")]
+    public Task<PagedResultDto<LookupDto<Guid>>> GetDistrictLookupAsync(Guid? cityId, LookupRequestDto input) => 
+        doctorsAppService.GetDistrictLookupAsync(cityId, input);
+
+    [HttpGet]
     [Route("title-lookup")]
     public Task<PagedResultDto<LookupDto<Guid>>> GetTitleLookupAsync(LookupRequestDto input) => 
         doctorsAppService.GetTitleLookupAsync(input);
@@ -57,10 +67,15 @@ public class DoctorController(IDoctorsAppService doctorsAppService) : HealthCare
     [Route("as-excel-file")]
     public Task<IRemoteStreamContent> GetListAsExcelFileAsync(DoctorExcelDownloadDto input) => 
         doctorsAppService.GetListAsExcelFileAsync(input);
+    
+    [HttpGet]
+    [Route("by-department-ids")]
+    public Task<PagedResultDto<DoctorWithNavigationPropertiesDto>> GetByDepartmentIdsAsync(GetDoctorsWithDepartmentIdsInput input) => 
+        doctorsAppService.GetByDepartmentIdsAsync(input);
 
     [HttpDelete]
     [Route("")]
-    public Task DeleteByIdsAsync(List<Guid> protocolIds) => doctorsAppService.DeleteByIdsAsync(protocolIds);
+    public Task DeleteByIdsAsync(List<Guid> doctorIds) => doctorsAppService.DeleteByIdsAsync(doctorIds);
 
     [HttpDelete]
     [Route("all")]

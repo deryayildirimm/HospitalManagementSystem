@@ -5,6 +5,7 @@ namespace Pusula.Training.HealthCare.MedicalServices;
 
 public class GetMedicalServiceInput : PagedAndSortedResultRequestDto
 {
+    public string? FilterText { get; set; }
     public string? Name { get; set; }
     public DateTime? ServiceDateMin { get; set; }
     public DateTime? ServiceDateMax { get; set; }

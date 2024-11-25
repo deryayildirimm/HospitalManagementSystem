@@ -20,20 +20,27 @@
 		<PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
 		<PackageReference Include="Serilog.Sinks.Async" Version="1.5.0" />
 		<PackageReference Include="Serilog.Sinks.Elasticsearch" Version="10.0.0" />
-		<PackageReference Include="Syncfusion.Blazor.Cards" Version="27.1.58" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Syncfusion.Blazor.Core" Version="27.1.58" />
-		<PackageReference Include="Syncfusion.Blazor.Data" Version="27.1.58" />
-		<PackageReference Include="Syncfusion.Blazor.DropDowns" Version="27.1.58" />
-		<PackageReference Include="Syncfusion.Blazor.Grid" Version="27.1.58" />
-		<PackageReference Include="Syncfusion.Blazor.Inputs" Version="27.1.58" />
-		<PackageReference Include="Syncfusion.Blazor.Navigations" Version="27.1.58" />
-		<PackageReference Include="Syncfusion.Blazor.Themes" Version="27.1.58" />
-		<PackageReference Include="Volo.Abp.AspNetCore.Components.Server.LeptonXLiteTheme" Version="3.2.0" />
-		<PackageReference Include="Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite" Version="3.2.0" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="27.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.Cards" Version="27.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.DataForm" Version="27.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="27.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="27.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="27.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.Lists" Version="27.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.Navigations" Version="27.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.Schedule" Version="27.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="27.2.3" />
+	 <PackageReference Include="Syncfusion.Blazor.Core" Version="27.2.3" />
+	<PackageReference Include="Syncfusion.Blazor.Data" Version="27.2.3" />
+    <PackageReference Include="Volo.Abp.AspNetCore.Components.Server.LeptonXLiteTheme" Version="3.2.0" />
+    <PackageReference Include="Volo.Abp.AspNetCore.Mvc.UI.Theme.LeptonXLite" Version="3.2.0" />
+  </ItemGroup>
+
+		
+
 
 	<ItemGroup>
 		<ProjectReference Include="..\Pusula.Training.HealthCare.Application\Pusula.Training.HealthCare.Application.csproj" />
@@ -58,16 +65,17 @@
 		</None>
 	</ItemGroup>
 
-	<ItemGroup>
-		<Compile Remove="Logs\**" />
-		<Content Remove="Logs\**" />
-		<EmbeddedResource Remove="Logs\**" />
-		<None Remove="Logs\**" />
-		<None Include="wwwroot\js\WindowHelper.js" />
-		<None Include="wwwroot\styles\Login.css">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Logs\**" />
+    <Content Remove="Logs\**" />
+    <EmbeddedResource Remove="Logs\**" />
+    <None Remove="Logs\**" />
+    <None Include="wwwroot\js\WindowHelper.js" />
+    <None Include="wwwroot\PatientDetail.css" />
+    <None Include="wwwroot\styles\Login.css">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 
 	<ItemGroup>
 		<None Update="Pages\**\*.js">
@@ -78,9 +86,14 @@
 		</None>
 	</ItemGroup>
 
-	<ItemGroup>
-		<_ContentIncludedByDefault Remove="Components\Pages\Account\Login.cshtml" />
-		<_ContentIncludedByDefault Remove="wwwroot\images\LottieFiles\Check.json" />
-	</ItemGroup>
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Components\Pages\Account\Login.cshtml" />
+    <_ContentIncludedByDefault Remove="wwwroot\images\LottieFiles\Check.json" />
+    <_ContentIncludedByDefault Remove="Themes\LeptonXLite\Layouts\Account\Default.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="Themes\LeptonXLite\Layouts\Account\Default.cshtml" />
+  </ItemGroup>
 
 </Project>
