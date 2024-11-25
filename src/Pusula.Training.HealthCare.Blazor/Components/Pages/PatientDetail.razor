@@ -116,38 +116,75 @@
 
 <div class="main-section">
     <div class="main-wrapper">
+    
         <div class="box">
-
-        </div>
-   
-        <div class="box">
-            <SfGrid TValue="AppointmentViewModel" DataSource="AppointmentList" AllowPaging="true" >
+            <div class="header-wrapper">
+                <ul class="active-mobile" style="float: left">
+                    <li><a @onclick="async () => await ScheduledApp()" style="cursor: pointer" >Scheduled</a></li>
+                    <li><a @onclick="async () => await CompletedApp()" style="cursor: pointer" >Completed</a></li>
+                    <li><a @onclick="async () => await CancelledApp() " style="cursor: pointer" >Cancelled <i class="fa-solid fa-caret-down"></i> </a>
+                    </li>
+             
+                </ul>
+            </div>
+            <SfGrid TValue="AppointmentViewModel" DataSource="AppointmentList" AllowPaging="true">
                 @if (AppointmentList == null || !AppointmentList.Any())
                 {
                     <p>Veri bulunamadı.</p>
                 }
                 else
                 {
-                    <h3>Randevular</h3>
-                  
+                    <h5>
+                        <strong>@_status</strong> 
+                    </h5>
+
                 }
                 <GridPageSettings PageSize="5"></GridPageSettings>
                 <GridColumns>
-                    <GridColumn Field="@nameof(AppointmentViewModel.PatientName)" TextAlign="TextAlign.Center" Width="120"></GridColumn>
-                    <GridColumn Field="@nameof(AppointmentViewModel.DoctorName)" HeaderText="First Name" Width="130"></GridColumn>
-                    <GridColumn Field="@nameof(AppointmentViewModel.Date)" HeaderText="Last Name" Width="120"></GridColumn>
-                    <GridColumn Field="@nameof(AppointmentViewModel.Service)" HeaderText="Last Name" Width="120"></GridColumn>
-                    <GridColumn Field="@nameof(AppointmentViewModel.Status)" HeaderText="Last Name" Width="120"></GridColumn>
-                 
+                    
+                    <GridColumn Field="@nameof(AppointmentViewModel.DoctorName)" HeaderText="Doctor Name"></GridColumn>
+                    <GridColumn Field="@nameof(AppointmentViewModel.Date)" HeaderText="Date"></GridColumn>
+                    <GridColumn Field="@nameof(AppointmentViewModel.Service)" HeaderText="Service"></GridColumn>
+                    <GridColumn Field="@nameof(AppointmentViewModel.Status)" HeaderText="Status"></GridColumn>
+
+                </GridColumns>
+            </SfGrid>
+
+        </div>
+   
+        <div class="box">
+
+            <div class="header-wrapper">
+                <ul class="active-mobile" style="float: left">
+                    <li><a  >Medical Conditions </a></li>
+                </ul>
+            </div>
+            <SfGrid TValue="MedicalConditionViewModel" DataSource="MedicalConditions" AllowPaging="true" AllowSorting="true">
+                <GridPageSettings PageSize="5"></GridPageSettings>
+                <GridColumns>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.DiseaseName)" HeaderText="Disease Name"  TextAlign="TextAlign.Left"></GridColumn>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.DiagnosisDate)" HeaderText="Diagnosis Date"  TextAlign="TextAlign.Center" Format="dd.MM.yyyy"></GridColumn>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.TreatmentStatus)" HeaderText="Treatment Status"  TextAlign="TextAlign.Center"></GridColumn>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.DoctorNotes)" HeaderText="Doctor's Notes"  TextAlign="TextAlign.Left"></GridColumn>
                 </GridColumns>
             </SfGrid>
         </div>
      
         <div class="box">
-           
-              
-             
+            <div style="display: none">
+            <SfGrid TValue="MedicalConditionViewModel" DataSource="MedicalConditions" AllowPaging="true" AllowSorting="true">
+                <GridPageSettings PageSize="5"></GridPageSettings>
+                <GridColumns>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.DiseaseName)" HeaderText="Disease Name" TextAlign="TextAlign.Left"></GridColumn>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.DiagnosisDate)" HeaderText="Diagnosis Date"  TextAlign="TextAlign.Center" Format="dd.MM.yyyy"></GridColumn>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.TreatmentStatus)" HeaderText="Treatment Status"  TextAlign="TextAlign.Center"></GridColumn>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.DoctorNotes)" HeaderText="Doctor's Notes" TextAlign="TextAlign.Left"></GridColumn>
+                </GridColumns>
+            </SfGrid>
         </div>
+
+
+    </div>
         <div class="box">
             <!--
             <SfToolbar>

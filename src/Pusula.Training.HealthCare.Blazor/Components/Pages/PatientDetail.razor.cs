@@ -60,6 +60,8 @@ public partial class PatientDetail
     private bool CanDeletePatient { get; set; }
     private PatientCreateDto NewPatient { get; set; }
     private PatientUpdateDto EditingPatient { get; set; }
+
+    private EnumAppointmentStatus? _status { get; set; } = EnumAppointmentStatus.Scheduled;
     
     private Validations EditingPatientValidations { get; set; } = new();
     private Guid EditingPatientId { get; set; }
@@ -87,7 +89,9 @@ public partial class PatientDetail
             SkipCount = (CurrentPage - 1) * PageSize,
             Sorting = CurrentSorting
         };
+        
         AppointmentList = [];
+        
     }
 
     protected override async Task OnInitializedAsync()
@@ -186,30 +190,37 @@ public partial class PatientDetail
                         .IsGrantedAsync(HealthCarePermissions.Patients.Delete);
     }
     
+    #region DateTime formats 
+    /*
+     * @DateTime.Now.ToString("dd.MM.yyyy")       // 25.11.2024
+     * @DateTime.Now.ToString("yyyy-MM-dd")       // 2024-11-25
+     * @DateTime.Now.ToString("dd MMMM yyyy")     // 25 November 2024
+     * @DateTime.Now.ToString("HH:mm:ss")         // 14:35:48
+     * @DateTime.Now.ToString("dd.MM.yyyy HH:mm") // 25.11.2024 14:35
+     */
+    
+
+    #endregion
+
+    
     
     #region fetching all data (appointment, doctor, medical_service)
      
     private async Task GetAppointmentsAsync()
     {
-        
-        FilterText.MaxResultCount = PageSize;
-        FilterText.SkipCount = (CurrentPage - 1) * PageSize;
-        FilterText.Sorting = CurrentSorting;
-        
-     
-      //  FilterText.PatientId = patient.Id;
-     //   FilterText.PatientNumber = PatientNumber;
-      //  FilterText.Status = EnumAppointmentStatus.Scheduled; // yaklaşan randevular önceliğimiz 
+
+        FilterText.PatientNumber = PatientNumber;
+      
+        FilterText.Status = _status; 
         var apps = (await AppointmentAppService.GetListWithNavigationPropertiesAsync(FilterText)).Items;
 
         AppointmentList = apps.Select(x => new AppointmentViewModel
         {
             
-            
             PatientName = x.Patient?.FirstName + " " + x.Patient?.LastName ?? "Unknown",
             DoctorName = x.Doctor?.FirstName + " " + x.Doctor?.LastName ?? "Unknown",
-            Date = x.Appointment?.AppointmentDate ?? DateTime.MinValue,
-            Status = x.Appointment?.Status ?? EnumAppointmentStatus.Scheduled,
+            Date = x.Appointment?.AppointmentDate.Date.ToString("dd MMMM yyyy") ,
+            Status = x.Appointment?.Status ,
             Service = x.MedicalService?.Name ?? "Not Available"
             
         }).ToList();
@@ -217,9 +228,6 @@ public partial class PatientDetail
         // cancelled ayrı gösterilir 
         TotalCount = (int)apps.Count; // total mıktarı ogrendık
      
-        /*
-         *  AppointmnetList.Doctor.Name;  -> direkt isme ulaştım bu şekilde
-         */
      
     }
     #endregion
@@ -277,10 +285,27 @@ public partial class PatientDetail
     }
 
     #endregion
-   
-    
 
+    #region statuye göre veri çekme 
     
+    protected virtual async Task CompletedApp()
+    {
+        _status = EnumAppointmentStatus.Completed;
+        await GetAppointmentsAsync();
+    }
+    
+    protected virtual async Task CancelledApp()
+    {
+        _status = EnumAppointmentStatus.Cancelled;
+        await GetAppointmentsAsync();
+    }
+    protected virtual async Task ScheduledApp()
+    {
+        _status = EnumAppointmentStatus.Scheduled;
+        await GetAppointmentsAsync();
+    }
+
+    #endregion
     private async Task UpdatePatientAsync()
     {
         try
@@ -308,9 +333,7 @@ public partial class PatientDetail
         NewPatient.RelativePhoneNumber = e.Value?.ToString();
     }
     
-
-
-
+    
     private async Task GetNationalitiesListAsync()
     {
         Nationalities = await CountryAppService.GetCountryPhoneCodesAsync();
@@ -361,5 +384,45 @@ public partial class PatientDetail
                      .ToList();
         return Task.CompletedTask;
     }
+
+    #region Fake Data For MedicalCondition
+
+    
+
+ 
+    private List<MedicalConditionViewModel> MedicalConditions = new()
+    {
+        new MedicalConditionViewModel
+        {
+            DiseaseName = "Diabetes",
+            DiagnosisDate = new DateTime(2020, 5, 15),
+            TreatmentStatus = "Ongoing",
+            DoctorNotes = "Patient needs to monitor blood sugar levels regularly."
+        },
+        new MedicalConditionViewModel
+        {
+            DiseaseName = "Hypertension",
+            DiagnosisDate = new DateTime(2019, 11, 20),
+            TreatmentStatus = "Under Control",
+            DoctorNotes = "Low-sodium diet and regular exercise recommended."
+        },
+        new MedicalConditionViewModel
+        {
+            DiseaseName = "Asthma",
+            DiagnosisDate = new DateTime(2021, 3, 10),
+            TreatmentStatus = "Stable",
+            DoctorNotes = "Inhaler prescribed for emergencies."
+        }
+    };
+
+    public class MedicalConditionViewModel
+    {
+        public string DiseaseName { get; set; }
+        public DateTime DiagnosisDate { get; set; }
+        public string TreatmentStatus { get; set; }
+        public string DoctorNotes { get; set; }
+    }
+    
+    #endregion
 
 }
