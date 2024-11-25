@@ -53,6 +53,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Doctor, DoctorDto>();
         CreateMap<Doctor, DoctorExcelDto>();
         CreateMap<DoctorDto, DoctorUpdateDto>();
+        CreateMap<DoctorWithNavigationPropertiesDto, DoctorUpdateDto>();
         CreateMap<DoctorWithNavigationProperties, DoctorWithNavigationPropertiesDto>();
         
         CreateMap<DoctorLeave, DoctorLeaveDto>();
