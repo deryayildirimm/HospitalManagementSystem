@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Blazor.Models;
 using Pusula.Training.HealthCare.Doctors;
@@ -19,8 +18,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
 public partial class Appointments
 {
-    
-    #pragma warning disable BL0005
+#pragma warning disable BL0005
     [Parameter] public int PatientNo { get; set; }
 
     #region Stepper
@@ -293,16 +291,16 @@ public partial class Appointments
         try
         {
             IsServiceListLoading = true;
-            
+
             await ClearServiceSelection();
             ServicesList = [];
-            
+
             MedicalServiceWithDepartmentsList =
                 (await MedicalServiceAppService
                     .GetMedicalServiceWithDepartmentsAsync(MedicalServiceFilter))
                 .Items
                 .ToList();
-            
+
             ServicesList = MedicalServiceWithDepartmentsList.Select(x => x.MedicalService)
                 .Select(y => new SelectionItem
                 {
@@ -553,19 +551,17 @@ public partial class Appointments
                     options.CancelButtonText = L["No"];
                 }))
             {
+                IsFinalResultSuccess = false;
                 return;
             }
 
             await AppointmentAppService.CreateAsync(NewAppointment);
-
             IsFinalResultSuccess = true;
+            await OnNextStep();
         }
         catch (Exception)
         {
             IsFinalResultSuccess = false;
-        }
-        finally
-        {
             await OnNextStep();
         }
     }
@@ -600,48 +596,55 @@ public partial class Appointments
 
     private async Task HandleStepChange(StepperChangeEventArgs args)
     {
-        if (args.ActiveStep == args.PreviousStep)
+        try
         {
-            return;
-        }
-
-        IsUserNavigatingReverse = args.ActiveStep < args.PreviousStep;
-
-        if (!IsUserNavigatingReverse)
-        {
-            SetValidState(args);
-        }
-        else
-        {
-            for (var i = args.ActiveStep; i <= args.PreviousStep; i++)
+            if (args.ActiveStep == args.PreviousStep)
             {
-                switch (i)
+                return;
+            }
+
+            IsUserNavigatingReverse = args.ActiveStep < args.PreviousStep;
+
+            if (!IsUserNavigatingReverse)
+            {
+                SetValidState(args);
+            }
+            else
+            {
+                for (var i = args.ActiveStep; i <= args.PreviousStep; i++)
                 {
-                    case 0:
-                        SelectServiceStepper.IsValid = null;
-                        break;
-                    case 1:
-                        ScheduleStepper.IsValid = null;
-                        break;
-                    case 2:
-                        ConfirmationStepper.IsValid = null;
-                        break;
-                    case 3:
-                        ResultStepper.IsValid = null;
-                        break;
+                    switch (i)
+                    {
+                        case 0:
+                            SelectServiceStepper.IsValid = null;
+                            break;
+                        case 1:
+                            ScheduleStepper.IsValid = null;
+                            break;
+                        case 2:
+                            ConfirmationStepper.IsValid = null;
+                            break;
+                        case 3:
+                            ResultStepper.IsValid = null;
+                            break;
+                    }
+                }
+
+                IsCurrentStepValid = true;
+            }
+
+            if (IsCurrentStepValid)
+            {
+                ActiveStep = args.ActiveStep;
+                if (ActiveStep == 1)
+                {
+                    await GetAppointmentDays();
                 }
             }
-
-            IsCurrentStepValid = true;
         }
-
-        if (IsCurrentStepValid)
+        catch (Exception e)
         {
-            ActiveStep = args.ActiveStep;
-            if (ActiveStep == 1)
-            {
-                await GetAppointmentDays();
-            }
+            throw new UserFriendlyException(e.Message);
         }
     }
 

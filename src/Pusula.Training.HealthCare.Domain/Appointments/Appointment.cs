@@ -20,10 +20,10 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
     public virtual DateTime AppointmentDate { get; protected set; }
     
     [NotNull]
-    public DateTime StartTime { get; set; }
+    public virtual DateTime StartTime { get; set; }
 
     [NotNull]
-    public DateTime EndTime { get; set; } 
+    public virtual DateTime EndTime { get; set; } 
 
     [NotNull]
     public virtual EnumAppointmentStatus Status { get; protected set; }
@@ -71,13 +71,13 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
         DoctorId = doctorId;
     }
 
-    public void SetPatientId(Guid patientId)
+    private void SetPatientId(Guid patientId)
     {
         Check.NotNull(patientId, nameof(patientId));
         PatientId = patientId;
     }
 
-    public void SetMedicalServiceId(Guid medicalServiceId)
+    private void SetMedicalServiceId(Guid medicalServiceId)
     {
         Check.NotNull(medicalServiceId, nameof(medicalServiceId));
         MedicalServiceId = medicalServiceId;
@@ -143,6 +143,4 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
         Check.Range(amount, nameof(amount), AppointmentConsts.MinAmount, AppointmentConsts.MaxAmount);
         Amount = amount;
     }
-    
-    
 }

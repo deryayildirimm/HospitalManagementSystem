@@ -23,11 +23,13 @@ public class AppointmentCreateDto
     [Required]
     public DateTime EndTime { get; set; }
     
+    [StringLength(AppointmentConsts.MaxNotesLength)]
     public string? Notes { get; set; } = string.Empty;
     
     [Required]
     public bool ReminderSent { get; set; }
     
     [Required]
+    [Range(AppointmentConsts.MinAmount, AppointmentConsts.MaxAmount)]
     public double Amount { get; set; }
 }

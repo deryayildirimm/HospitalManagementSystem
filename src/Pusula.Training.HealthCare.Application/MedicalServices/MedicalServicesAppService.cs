@@ -15,6 +15,7 @@ using Volo.Abp.Caching;
 using Volo.Abp.Content;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using Pusula.Training.HealthCare.Exceptions;
 
 namespace Pusula.Training.HealthCare.MedicalServices;
 
@@ -105,6 +106,10 @@ public class MedicalServicesAppService(
 
             return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
         }
+        catch (InvalidDepartmentsException e)
+        {
+            throw new UserFriendlyException(e.Message);
+        }
         catch (Exception e)
         {
             throw new UserFriendlyException(e.Message);
@@ -128,6 +133,10 @@ public class MedicalServicesAppService(
             );
 
             return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
+        }
+        catch (MedicalServiceNotFoundException e)
+        {
+            throw new UserFriendlyException(e.Message);
         }
         catch (Exception)
         {
