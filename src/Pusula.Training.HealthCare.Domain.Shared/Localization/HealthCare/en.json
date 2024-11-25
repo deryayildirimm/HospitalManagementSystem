@@ -152,6 +152,8 @@
     "Permission:Titles": "Titles",
     "Permission:Doctors": "Doctors",
     "Menu:Doctors": "Doctors",
+    "Permission:MedicalStaff": "Medical Staff",
+    "Menu:MedicalStaff": "Medical Staff",
     "Permission:DoctorLeaves" : "Doctor Leave",
     "Leaves" : "Leaves",
     "Duration": "Duration",

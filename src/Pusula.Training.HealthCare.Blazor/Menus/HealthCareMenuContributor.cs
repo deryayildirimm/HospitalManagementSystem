@@ -86,6 +86,15 @@ public class HealthCareMenuContributor : IMenuContributor
                 requiredPermissionName: HealthCarePermissions.Doctors.Default)
         );
 
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
+                HealthCareMenus.MedicalStaff,
+                l["Menu:MedicalStaff"],
+                url: "/medical-staff",
+                icon: "fa fa-user-md",
+                requiredPermissionName: HealthCarePermissions.MedicalStaff.Default)
+        );
+
         return Task.CompletedTask;
     }
 
