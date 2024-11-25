@@ -46,7 +46,7 @@ public partial class PatientDetail
     
     private IReadOnlyList<PatientUpdateDto> EditPatient { get; set; }
     
- //   private IReadOnlyList<AppointmentWithNavigationPropertiesDto> AppointmentList { get; set; }
+    private IReadOnlyList<AppointmentWithNavigationPropertiesDto> AppointmentList { get; set; }
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private int TotalCount { get; set; }
@@ -65,7 +65,7 @@ public partial class PatientDetail
     private Modal EditPatientModal { get; set; } = new();
     private GetPatientsInput Filter { get; set; }
     
-  //  private GetAppointmentsWithNavigationPropertiesInput FilterText { get; set; }
+    private GetAppointmentsWithNavigationPropertiesInput FilterText { get; set; }
     
     private List<PatientDto> SelectedPatients { get; set; } = [];
     private IEnumerable<CountryPhoneCodeDto> Nationalities = [];
@@ -88,8 +88,14 @@ public partial class PatientDetail
             SkipCount = (CurrentPage - 1) * PageSize,
             Sorting = CurrentSorting
         };
+        FilterText = new GetAppointmentsWithNavigationPropertiesInput
+        {
+            MaxResultCount = PageSize,
+            SkipCount = (CurrentPage - 1) * PageSize,
+            Sorting = CurrentSorting
+        };
         PatientList = [];
-   //     AppointmentList = [];
+        AppointmentList = [];
     }
 
     protected override async Task OnInitializedAsync()
@@ -136,7 +142,7 @@ public partial class PatientDetail
         }
     }
     */
-    #region API Fetch
+    #region Fetch Patient
         private async Task GetPatientAsync()
         {
             try
@@ -201,33 +207,33 @@ public partial class PatientDetail
 
         await ClearSelection();
     }
-
     #region fetching all data (appointment, doctor, medical_service)
      
     private async Task GetAppointmentsAsync()
     {
         
-    //    FilterText.MaxResultCount = PageSize;
-    //    FilterText.SkipCount = (CurrentPage - 1) * PageSize;
-     //   FilterText.Sorting = CurrentSorting;
+        FilterText.MaxResultCount = PageSize;
+        FilterText.SkipCount = (CurrentPage - 1) * PageSize;
+        FilterText.Sorting = CurrentSorting;
         
      
      // !!  FilterText.PatientId = patient.Id;
-     // !! FilterText.PatientNumber = PatientNumber;
-     // !! FilterText.Status = EnumAppointmentStatus.Scheduled; // yaklaşan randevular önceliğimiz 
-      //  var result = await AppointmentAppService.GetListWithNavigationPropertiesAsync(FilterText);
+     FilterText.PatientNumber = PatientNumber;
+      FilterText.Status = EnumAppointmentStatus.Scheduled; // yaklaşan randevular önceliğimiz 
+        var result = await AppointmentAppService.GetListWithNavigationPropertiesAsync(FilterText);
         //doldurduk
-    //    AppointmentList = result.Items;
+        AppointmentList = result.Items;
      // diger kısımda completed, missed  bunlar da geçmiş randevular olarak listeenicek kırmızı olanlar missed olur 
      // cancelled ayrı gösterilir 
-     //   TotalCount = (int)result.TotalCount; // total mıktarı ogrendık
+       TotalCount = (int)result.TotalCount; // total mıktarı ogrendık
      
-     /*
-      *  AppointmnetList.Doctor.Name;  -> direkt isme ulaştım bu şekilde 
-      */
+        /*
+         *  AppointmnetList.Doctor.Name;  -> direkt isme ulaştım bu şekilde
+         */
      
     }
     #endregion
+
 
     
     protected virtual async Task SearchAsync()

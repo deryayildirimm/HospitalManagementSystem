@@ -129,14 +129,14 @@
 <div class="main-section">
     <div class="main-wrapper">
         <div class="box">
-            <SfGrid TValue="PatientDto" DataSource="PatientList" ID="Grid" AllowPaging="true">
+            <SfGrid TValue="PatientDto" DataSource="PatientList"  AllowPaging="true">
                 @if (PatientList == null || !PatientList.Any())
                 {
-                <p>Veri bulunamadı.</p>
+                    <p>Veri bulunamadı.</p>
                 }
                 else
                 {
-                <h3>Bekleyen Randevular </h3>
+                    <h3>Bekleyen Randevular </h3>
                 }
                 <GridPageSettings PageSize="5"></GridPageSettings>
                 <GridColumns>
@@ -149,22 +149,55 @@
             </SfGrid>
 
         </div>
+    <!--
         <div class="box">
-            <SfGrid TValue="PatientDto" DataSource="PatientList" ID="Grid">
-                @if (PatientList == null || !PatientList.Any())
+            <SfGrid TValue="AppointmentWithNavigationPropertiesDto" DataSource="AppointmentList" >
+                @if (AppointmentList == null || !AppointmentList.Any())
+                {
+                    <p>Veri bulunamadı.</p>
+                }
+                else
+                {
+                    <h3>Eski Randevular</h3>
+                  
+                }
+                <GridColumns>
+                    <GridColumn Field="@nameof(AppointmentWithNavigationPropertiesDto.Appointment.AppointmentDate)" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                    <GridColumn Field="@nameof(AppointmentWithNavigationPropertiesDto.Appointment.Status)" HeaderText="First Name" Width="130"></GridColumn>
+                    <GridColumn Field="@nameof(AppointmentWithNavigationPropertiesDto.Appointment.StartTime)" HeaderText="Last Name" Width="120"></GridColumn>
+                 
+                </GridColumns>
+            </SfGrid>
+        </div>
+        -->
+        <div class="box">
+           
+                @if (AppointmentList == null || !AppointmentList.Any())
                 {
                 <p>Veri bulunamadı.</p>
                 }
                 else
                 {
-                <h3>Eski Randevular</h3>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Doktor</th>
+                            <th>Tarih</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var appointment in AppointmentList)
+                        {
+                            <tr>
+                                <td>@appointment.Doctor.FirstName</td>
+                                <td>@appointment.Appointment.AppointmentDate</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+
                 }
-                <GridColumns>
-                    <GridColumn Field="@nameof(PatientDto.Id)" TextAlign="TextAlign.Center" HeaderText="Patient ID" Width="120"></GridColumn>
-                    <GridColumn Field="@nameof(PatientDto.FirstName)" HeaderText="First Name" Width="130"></GridColumn>
-                    <GridColumn Field="@nameof(PatientDto.LastName)" HeaderText="Last Name" Width="120"></GridColumn>
-                </GridColumns>
-            </SfGrid>
+             
         </div>
         <div class="box">
             <SfToolbar>
