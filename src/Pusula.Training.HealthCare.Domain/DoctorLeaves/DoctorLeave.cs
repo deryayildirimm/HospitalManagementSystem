@@ -8,13 +8,13 @@ namespace Pusula.Training.HealthCare.DoctorLeaves;
 public class DoctorLeave : FullAuditedAggregateRoot<Guid>
 {
     [NotNull]
-    public virtual Guid DoctorId { get; set; }
+    public virtual Guid DoctorId { get; protected set; }
     [NotNull]
-    public virtual DateTime StartDate { get; set; }
+    public virtual DateTime StartDate { get; protected set; }
     [NotNull]
-    public virtual DateTime EndDate { get; set; }
-    [CanBeNull]
-    public virtual string? Reason { get; set; }
+    public virtual DateTime EndDate { get; protected set; }
+
+    [CanBeNull] public virtual string? Reason { get; set; } = string.Empty;
 
 
     protected DoctorLeave()
@@ -27,17 +27,43 @@ public class DoctorLeave : FullAuditedAggregateRoot<Guid>
     public DoctorLeave(Guid id, Guid doctorId, DateTime startDate, DateTime endDate, string? reason = null)
     {
        
-        Check.NotNullOrWhiteSpace(doctorId.ToString(), nameof(doctorId));
-        Check.NotNull(startDate, nameof(startDate));
-        Check.NotNull(endDate, nameof(endDate));
-        
-        Id = id;
-        DoctorId = doctorId;
-        StartDate = startDate;
-        EndDate = endDate;
-        Reason = reason;
+        SetId(id);
+        SetDoctorId(doctorId);
+        SetStartDate(startDate);
+        SetEndDate(endDate);
+        SetReason(reason);
 
     }
+    
+    public void SetDoctorId(Guid id)
+    {
+        Check.NotNull(id, nameof(id));
+        Id = id;
+    }
+
+    public void SetId(Guid id)
+    {
+        Check.NotNull(id, nameof(id));
+        Id = id;
+    }
+    
+    public void SetStartDate(DateTime startDate)
+    {
+        Check.NotNull(startDate, nameof(startDate));
+        StartDate = startDate;
+    }
+
+    public void SetEndDate(DateTime endDate)
+    {
+        Check.NotNull(endDate, nameof(endDate));
+        EndDate = endDate;
+    }
+
+    public void SetReason(string? reason)
+    {
+        Reason = reason;
+    }
+
     
     
 }

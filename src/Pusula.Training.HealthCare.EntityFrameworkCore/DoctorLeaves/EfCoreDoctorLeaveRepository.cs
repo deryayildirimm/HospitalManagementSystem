@@ -65,31 +65,7 @@ public class EfCoreDoctorLeaveRepository(IDbContextProvider<HealthCareDbContext>
         var query = ApplyFilter((await GetDbSetAsync()), filterText,doctorId, startDateMin, startDateMax, endDateMin, endDateMax, reason );
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
-
-    // kotu kod sımdılık ıdare edıverın duzenlıycem calısırsa 
-    public virtual async Task<List<DoctorLeave>> GetListByDoctorNumberAsync(
-        Guid? doctorId,
-        string? identityNumber,
-        CancellationToken cancellationToken = default)
-    {
-      
-        var dbContext = await GetDbContextAsync();
-        // DoctorId varsa sorgulama yap; yoksa IdentityNumber ile doktor bul
-        // doctorId varsa kullan, yoksa identityNumber ile doktorId bul
-        var doctorIdToQuery = doctorId 
-                              ?? (await dbContext.Doctors
-                                  .Where(d => d.IdentityNumber == identityNumber)
-                                  .Select(d => (Guid?)d.Id)
-                                  .FirstOrDefaultAsync(cancellationToken))
-                              ?? throw new BusinessException("DoctorNotFound")
-                                  .WithData("IdentityNumber", identityNumber ?? "null");
-
-        // DoctorId'ye göre DoctorLeave sorgula
-        return await dbContext.DoctorLeaves
-            .Where(dl => dl.DoctorId == doctorIdToQuery)
-            .ToListAsync(cancellationToken);
-       
-    }
+    
     protected virtual IQueryable<DoctorLeave> ApplyFilter(
         IQueryable<DoctorLeave> query,
         string? filterText = null,

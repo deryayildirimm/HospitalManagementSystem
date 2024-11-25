@@ -35,7 +35,7 @@ public class DoctorLeaveManager(IDoctorLeaveRepository repo) : DomainService
         
         try
         {
-             Check.NotNullOrWhiteSpace(doctorId.ToString(), nameof(doctorId));
+            Check.NotNull(doctorId, nameof(doctorId));
              Check.NotNull(startDate, nameof(startDate));
              Check.NotNull(endDate, nameof(endDate));
         
@@ -47,10 +47,10 @@ public class DoctorLeaveManager(IDoctorLeaveRepository repo) : DomainService
         
              var leaves = await repo.GetAsync(id);
         
-             leaves.DoctorId = doctorId;
-             leaves.StartDate = startDate;
-             leaves.EndDate = endDate;
-             leaves.Reason = reason;
+             leaves.SetDoctorId(doctorId);
+             leaves.SetStartDate(startDate);
+             leaves.SetEndDate(endDate);
+             leaves.SetReason(reason);
         
              leaves.SetConcurrencyStampIfNotNull(concurrencyStamp);
              return await repo.UpdateAsync(leaves);
