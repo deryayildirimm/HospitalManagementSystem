@@ -13,6 +13,8 @@ public interface IPatientsAppService : IApplicationService
     Task<PagedResultDto<PatientDto>> GetListAsync(GetPatientsInput input);
 
     Task<PatientDto> GetAsync(Guid id);
+    
+    Task<PatientDto> GetPatientByNumberAsync(int number);
 
     Task DeleteAsync(Guid id);
 

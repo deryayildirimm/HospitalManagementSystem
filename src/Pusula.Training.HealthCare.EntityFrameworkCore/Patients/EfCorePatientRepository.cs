@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
+using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
 
@@ -73,6 +74,21 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
           .ThenBy(string.IsNullOrWhiteSpace(sorting) ? PatientConsts.GetDefaultSorting(false) : sorting); // Ardından mevcut sıralamayı uygula
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
+    
+       
+    public virtual async Task<Patient> GetPatientByNumberAsync(
+        int patientNumber ,
+        CancellationToken cancellationToken = default)
+    {
+        var dbContext = await GetDbContextAsync();
+        
+        return await dbContext.Patients
+                   .Where(a => a.PatientNumber == patientNumber)
+                   .FirstOrDefaultAsync(cancellationToken)
+               ?? throw new EntityNotFoundException(typeof(Patient), patientNumber);
+    }
+
+    
 
     public virtual async Task<long> GetCountAsync(
         string? filterText = null,

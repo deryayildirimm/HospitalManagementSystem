@@ -42,8 +42,4 @@ public interface IDoctorLeaveRepository : IRepository<DoctorLeave, Guid>
         string? reason = null,
         CancellationToken cancellationToken = default);
 
-    Task<List<DoctorLeave>> GetListByDoctorNumberAsync(
-        Guid? doctorId,
-        string? identityNumber, 
-        CancellationToken cancellationToken = default);
 }
