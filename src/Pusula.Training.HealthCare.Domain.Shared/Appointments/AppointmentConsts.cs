@@ -15,7 +15,7 @@ public static class AppointmentConsts
     public const double MaxAmount = 1000000000.0;
     
     public const int MinOffset = 0;
-    public const int MaxOffset = 0;
+    public const int MaxOffset = 30;
     
     public const double StatusMinValue = 0;
     public const double StatusMaxValue = 3;
