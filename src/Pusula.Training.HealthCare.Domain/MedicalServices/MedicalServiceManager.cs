@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Exceptions;
 using Volo.Abp;
 using Volo.Abp.Data;
 using Volo.Abp.Domain.Services;
@@ -33,7 +34,7 @@ public class MedicalServiceManager(
 
         if (departments == null || departments.Count == 0)
         {
-            throw new UserFriendlyException("Invalid departments.");
+            throw new InvalidDepartmentsException();
         }
 
         foreach (var department in departments)
@@ -71,13 +72,13 @@ public class MedicalServiceManager(
 
         if (service == null)
         {
-            throw new UserFriendlyException($"Medical service with was not found.");
+            throw new MedicalServiceNotFoundException();
         }
 
-        service.Name = name;
-        service.Cost = cost;
-        service.Duration = duration;
-        service.ServiceCreatedAt = serviceCreatedAt;
+        service.SetName(name);
+        service.SetCost(cost);
+        service.SetDuration(duration);
+        service.SetServiceCreatedAt(serviceCreatedAt);
         service.SetConcurrencyStampIfNotNull(concurrencyStamp);
 
         var departments = await departmentRepository

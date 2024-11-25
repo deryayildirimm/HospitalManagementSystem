@@ -87,11 +87,22 @@ public class AppointmentAppService(
     public virtual async Task<PagedResultDto<AppointmentWithNavigationPropertiesDto>>
         GetListWithNavigationPropertiesAsync(GetAppointmentsWithNavigationPropertiesInput input)
     {
-        var totalCount = await appointmentRepository.GetCountAsync(
-            input.DoctorId, input.PatientId, input.MedicalServiceId,
-            input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
-            input.Status, input.ReminderSent, input.MinAmount,
-            input.MaxAmount);
+        var totalCount = await appointmentRepository.GetCountByNavigationPropertiesAsync(
+            doctorId: input.DoctorId,
+            patientId: input.PatientId,
+            medicalServiceId: input.MedicalServiceId,
+            patientName: input.PatientName,
+            doctorName: input.DoctorName,
+            serviceName: input.ServiceName,
+            patientNumber: input.PatientNumber,
+            appointmentMinDate: input.AppointmentMinDate,
+            appointmentMaxDate: input.AppointmentMaxDate,
+            startTime: input.StartTime,
+            endTime: input.EndTime,
+            status: input.Status,
+            reminderSent: input.ReminderSent,
+            minAmount: input.MinAmount,
+            maxAmount: input.MaxAmount);
 
         var items = await appointmentRepository.GetListWithNavigationPropertiesAsync(
             doctorId: input.DoctorId,

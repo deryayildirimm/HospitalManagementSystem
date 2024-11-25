@@ -20,6 +20,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
 public partial class MedicalServices
 {
+    #pragma warning disable BL0005
     protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     protected bool ShowAdvancedFilters { get; set; }

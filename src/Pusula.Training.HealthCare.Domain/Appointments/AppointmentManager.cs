@@ -215,7 +215,7 @@ public class AppointmentManager(
             appointmentDate: appointmentDate,
             startTime: startTime,
             endTime: endTime,
-            EnumAppointmentStatus.Scheduled,
+            status: EnumAppointmentStatus.Scheduled,
             notes: notes,
             reminderSent: reminderSent,
             amount: amount
@@ -224,7 +224,7 @@ public class AppointmentManager(
         return await appointmentRepository.InsertAsync(appointment);
     }
 
-    public async Task<Appointment> UpdateAsync(Guid id, DateTime appointmentDate, DateTime startTime,
+    public virtual async Task<Appointment> UpdateAsync(Guid id, DateTime appointmentDate, DateTime startTime,
         DateTime endTime, EnumAppointmentStatus status, bool reminderSent, double amount,
         [CanBeNull] string? notes = null)
     {
@@ -234,6 +234,7 @@ public class AppointmentManager(
         Check.NotNull(reminderSent, nameof(reminderSent));
         Check.NotNull(amount, nameof(amount));
         Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
+        Check.Range((int)status, nameof(status), AppointmentConsts.StatusMinValue, AppointmentConsts.StatusMaxValue);
 
         var appointment = await appointmentRepository.GetAsync(id);
 

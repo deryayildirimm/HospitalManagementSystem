@@ -17,5 +17,6 @@ public class GetAppointmentsLookupInput
     public DateTime StartDate { get; set; }
     
     [Required]
+    [Range(AppointmentConsts.MinOffset, AppointmentConsts.MaxOffset)]
     public int Offset { get; set; }
 }

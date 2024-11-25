@@ -30,16 +30,41 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
 
     public MedicalService(Guid id, string name, double cost, int duration, DateTime serviceCreatedAt)
     {
+        SetId(id);
+        SetName(name);
+        SetCost(cost);
+        SetServiceCreatedAt(serviceCreatedAt);
+        SetDuration(duration);
+    }
+
+    private void SetId(Guid id)
+    {
         Check.NotNull(id, nameof(id));
-        Check.NotNullOrWhiteSpace(name, nameof(name));
-        Check.NotNull(serviceCreatedAt, nameof(serviceCreatedAt));
-        Check.Range(cost, nameof(cost), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
-        Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue, MedicalServiceConsts.DurationMaxValue);
-        
         Id = id;
+    }
+    
+    public void SetName(string name)
+    {
+        Check.NotNullOrWhiteSpace(name, nameof(name));
         Name = name;
+    }
+
+    public void SetCost(double cost)
+    {
+        Check.Range(cost, nameof(cost), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
         Cost = cost;
+    }
+
+    public void SetServiceCreatedAt(DateTime serviceCreatedAt)
+    {
+        Check.NotNull(serviceCreatedAt, nameof(serviceCreatedAt));
         ServiceCreatedAt = serviceCreatedAt;
+    }
+
+    public void SetDuration(int duration)
+    {
+        Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue, MedicalServiceConsts.DurationMaxValue);
         Duration = duration;
     }
+
 }

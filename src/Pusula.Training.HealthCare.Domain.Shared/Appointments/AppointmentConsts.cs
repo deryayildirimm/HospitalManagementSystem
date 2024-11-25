@@ -13,6 +13,12 @@ public static class AppointmentConsts
     
     public const double MinAmount = 0.0;
     public const double MaxAmount = 1000000000.0;
+    
+    public const int MinOffset = 0;
+    public const int MaxOffset = 0;
+    
+    public const double StatusMinValue = 0;
+    public const double StatusMaxValue = 3;
 
     public static readonly TimeSpan MinAppointmentTime = TimeSpan.FromHours(7);
     public static readonly TimeSpan MaxAppointmentTime = TimeSpan.FromHours(18);
