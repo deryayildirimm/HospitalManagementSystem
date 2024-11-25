@@ -9,12 +9,12 @@
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 @using Syncfusion.Blazor.Grids
-
-
-
+@using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Cards
 
 @using Volo.Abp.AspNetCore.Components.Web
+@using IconName = Syncfusion.Blazor.Buttons.IconName
+@using IconSize = Syncfusion.Blazor.Buttons.IconSize
 
 @using Volo.Abp.Http.Client
 @inherits HealthCareComponentBase
@@ -96,8 +96,14 @@
                     <h5><strong>Adres:</strong> @patient?.Address</h5>
                 </div>
                 <div class="card-content">
-
-                    <SfCard> Sample Card </SfCard>
+                    <h4 style="margin-top: 20px; box-shadow: none; padding : 5px"> <strong>Latest Appointments</strong>
+                        <span style="margin : 12px 0 0 12px">
+                            <SfIcon Name="IconName.Clock" Size="IconSize.Large" > </SfIcon>
+                        </span>
+                    </h4>  
+                    <SfCard>
+                        <h5><strong>Adres:</strong> @patient?.Address</h5>
+                    </SfCard>
                 </div>
             </div>
             <div class="btn-wrapper">
@@ -111,29 +117,11 @@
 <div class="main-section">
     <div class="main-wrapper">
         <div class="box">
-            <SfGrid TValue="PatientDto" DataSource="PatientList"  AllowPaging="true">
-                @if (PatientList == null || !PatientList.Any())
-                {
-                    <p>Veri bulunamadı.</p>
-                }
-                else
-                {
-                    <h3>Bekleyen Randevular </h3>
-                }
-                <GridPageSettings PageSize="5"></GridPageSettings>
-                <GridColumns>
-                    <GridColumn Field="@nameof(PatientDto.Id)" TextAlign="TextAlign.Center" HeaderText="Patient ID" Width="120"></GridColumn>
-                    <GridColumn Field="@nameof(PatientDto.FirstName)" HeaderText="First Name" Width="130"></GridColumn>
-                    <GridColumn Field="@nameof(PatientDto.LastName)" HeaderText="Last Name" Width="120"></GridColumn>
-                    <GridColumn Field="@nameof(PatientDto.PatientNumber)" HeaderText="Patient Number" Width="120"></GridColumn>
-                    <GridColumn Field="@nameof(PatientDto.Relative)" HeaderText="Relative" Width="120"></GridColumn>
-                </GridColumns>
-            </SfGrid>
 
         </div>
    
         <div class="box">
-            <SfGrid TValue="AppointmentViewModel" DataSource="AppointmentList" >
+            <SfGrid TValue="AppointmentViewModel" DataSource="AppointmentList" AllowPaging="true" >
                 @if (AppointmentList == null || !AppointmentList.Any())
                 {
                     <p>Veri bulunamadı.</p>
@@ -143,6 +131,7 @@
                     <h3>Randevular</h3>
                   
                 }
+                <GridPageSettings PageSize="5"></GridPageSettings>
                 <GridColumns>
                     <GridColumn Field="@nameof(AppointmentViewModel.PatientName)" TextAlign="TextAlign.Center" Width="120"></GridColumn>
                     <GridColumn Field="@nameof(AppointmentViewModel.DoctorName)" HeaderText="First Name" Width="130"></GridColumn>
@@ -160,6 +149,7 @@
              
         </div>
         <div class="box">
+            <!--
             <SfToolbar>
                 <ToolbarItems>
                     <ToolbarItem Text="Add"></ToolbarItem>
@@ -167,8 +157,8 @@
                     <ToolbarItem Text="Delete"></ToolbarItem>
                 </ToolbarItems>
             </SfToolbar>
-            <SfGrid   TValue="PatientDto" DataSource="@PatientList" >
-                <GridEditSettings  AllowEditing="true" AllowDeleting="true" Mode="@EditMode.Dialog">
+            <SfGrid TValue="PatientDto" DataSource="@PatientList">
+                <GridEditSettings AllowEditing="true" AllowDeleting="true" Mode="@EditMode.Dialog">
                 </GridEditSettings>
                 <GridColumns>
                     <GridColumn Field=@nameof(PatientDto.Id) HeaderText="Order ID" IsPrimaryKey="true" TextAlign="@TextAlign.Center" HeaderTextAlign="@TextAlign.Center" Width="140"></GridColumn>
@@ -178,7 +168,7 @@
                     <GridColumn Field=@nameof(PatientDto.Nationality) HeaderText="Ship Country" Width="150"></GridColumn>
                 </GridColumns>
             </SfGrid>
-
+-->
         </div>
      
     </div>
@@ -186,17 +176,6 @@
 
 </div>
 
-<footer>
-    <div class="footer-wrapper">
-        <p>Copyright © Your Website 2023</p>
-
-        <ul>
-            <li><a href="">Privacy</a></li>
-            <li><a href="">Terms</a></li>
-            <li><a href="">Contacts</a></li>
-        </ul>
-    </div>
-</footer>
 }
 @* ************************* EDIT MODAL ************************* *@
 <Modal @ref="EditPatientModal" Closing="@EditPatientModal.CancelClosingModalWhenFocusLost">
