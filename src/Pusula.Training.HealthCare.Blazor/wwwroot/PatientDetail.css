@@ -118,9 +118,11 @@ header {
     margin-top: 10%;
 
 }
+
 .e-card:hover{
     box-shadow :0 4px 8px rgba(0,0,0,0.3);
     background: none;
+    cursor: pointer;
 }
 
 
@@ -135,6 +137,8 @@ header {
 }
 .card-content h5 {
     box-shadow: none;
+    padding: 2px;
+    margin-left: 3px;
 }
 
 .hero-wrapper .left-box p {
