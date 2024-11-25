@@ -644,8 +644,7 @@ public partial class Appointments
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            throw new UserFriendlyException(e.Message);
         }
     }
 
