@@ -404,6 +404,29 @@
                 </div>
             </div>
 
+            <ModalFooter>
+                <Row class="justify-content-between align-items-center" style="width: 100%;">
+                    <Column>
+                        <Div style="display: flex; align-items: center; color: gray; font-style: italic; background-color: #f9f9f9; padding: 8px; border-radius: 5px;">
+                            <Icon class="fa-circle" style="color: red; font-size: 6px; margin-right: 5px;" />
+                            <Paragraph style="margin: 0;">
+                                @L["The fields shown in red are required to be filled"]
+                            </Paragraph>
+                        </Div>
+                    </Column>
+                    <Column class="text-end">
+                        <Button Color="Color.Danger" Clicked="CloseCreateDoctorModalAsync">
+                            @L["Cancel"]
+                        </Button>
+                        <Button Type="Blazorise.ButtonType.Submit" Form="CreateDoctorForm" Clicked="CreateDoctorAsync" Color="Color.Info">
+                            @L["Submit"]
+                        </Button>
+                    </Column>
+                </Row>
+            </ModalFooter>
+        </EditForm>
+    </ModalContent>
+</Modal>
             <div class="form-row">
                 <div class="col-md-6 mb-3">
                     <label>@L["PhoneNumber"]</label>
@@ -492,6 +515,26 @@
                         </SfDropDownList>
                     </div>
 
+            <ModalFooter>
+                <Row class="justify-content-between align-items-center" style="width: 100%;">
+                    <Column>
+                        <Div style="display: flex; align-items: center; color: gray; font-style: italic; background-color: #f9f9f9; padding: 8px; border-radius: 5px;">
+                            <Icon class="fa-circle" style="color: red; font-size: 6px; margin-right: 5px;" />
+                            <Paragraph style="margin: 0;">
+                                @L["The fields shown in red are required to be filled"]
+                            </Paragraph>
+                        </Div>
+                    </Column>
+                    <Column class="text-end">
+                        <Button Color="Color.Danger" Clicked="CloseEditDoctorModalAsync">
+                            @L["Cancel"]
+                        </Button>
+                        <Button Type="Blazorise.ButtonType.Submit" Form="CreateDoctorForm" Clicked="UpdateDoctorAsync" Color="Color.Info">
+                            @L["Submit"]
+                        </Button>
+                    </Column>
+                </Row>
+            </ModalFooter>
 
                     <div class="col-md-6 mb-3">
                         <label>@L["City"]</label>

@@ -23,7 +23,7 @@ public partial class DoctorDashboard : ComponentBase
 
     #region FilterData
 
-    private int AppointmentPageSize { get; set; } = 20;
+    private int AppointmentPageSize { get; set; } = 50;
     private int AppointmentCurrentPage { get; set; } = 1;
 
     #endregion

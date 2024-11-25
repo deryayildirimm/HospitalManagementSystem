@@ -25,6 +25,9 @@
     "Permission:Appointments": "Appointments",
     "RememberMe": "Remember Me",
     "ForgotPassword": "Forgot Password",
+    "Permission:BloodTests": "Blood Tests",
+    "Permission:TestCategories": "Test Categories",
+    "Permission:BloodTestResults": "BloodTest Results",
     "FirstName": "First Name",
     "LastName": "Last Name",
     "BirthDate": "Birth Date",
@@ -147,9 +150,8 @@
     "MedicalServiceDuplicateEntry": "You already added this service to department(s) before.",
     "UpdatedSuccess": "Record successfully updated",
     "Updated": "Updated",
-    "Created":  "Created",
+    "Created": "Created",
     "CreatedSuccess": "Record successfully created.",
-    "Permission:Titles": "Titles",
     "Permission:Doctors": "Doctors",
     "Menu:Doctors": "Doctors",
     "Permission:MedicalStaff": "Medical Staff",
@@ -175,6 +177,11 @@
     "AppointmentSchedule": "Appointment Schedule",
     "ActiveAppointments": "Active Appointments",
     "PRM": "PRM",
-    "UpdateDoctor": "Update Doctor"
+    "UpdateDoctor": "Update Doctor",
+    "ChooseBloodTests": "Choose Blood Tests",
+    "MyPatients": "My Patients",
+    "BloodTests": "Blood Tests",
+    "Menu:BloodTests": "Blood Tests",
+    "Menu:MyPatients": "My Patients"
   }
 }

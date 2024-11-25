@@ -71,6 +71,22 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         districtPermission.AddChild(HealthCarePermissions.Districts.Create, L("Permission:Create"));
         districtPermission.AddChild(HealthCarePermissions.Districts.Edit, L("Permission:Edit"));
         districtPermission.AddChild(HealthCarePermissions.Districts.Delete, L("Permission:Delete"));
+
+        var bloodTestPermission = myGroup.AddPermission(HealthCarePermissions.BloodTests.Default, L("Permission:BloodTests"));
+        bloodTestPermission.AddChild(HealthCarePermissions.BloodTests.Create, L("Permission:Create"));
+        bloodTestPermission.AddChild(HealthCarePermissions.BloodTests.Edit, L("Permission:Edit"));
+        bloodTestPermission.AddChild(HealthCarePermissions.BloodTests.Delete, L("Permission:Delete"));
+        
+        var testCategoriesPermission = myGroup.AddPermission(HealthCarePermissions.TestCategories.Default, L("Permission:TestCategories"));
+        testCategoriesPermission.AddChild(HealthCarePermissions.TestCategories.Create, L("Permission:Create"));
+        testCategoriesPermission.AddChild(HealthCarePermissions.TestCategories.Edit, L("Permission:Edit"));
+        testCategoriesPermission.AddChild(HealthCarePermissions.TestCategories.Delete, L("Permission:Delete"));
+
+        var bloodTestResultPermission = myGroup.AddPermission(HealthCarePermissions.BloodTestResults.Default, L("Permission:BloodTestResults"));
+        bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Create, L("Permission:Create"));
+        bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Edit, L("Permission:Edit"));
+        bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Delete, L("Permission:Delete"));
+
     }
 
     private static LocalizableString L(string name)

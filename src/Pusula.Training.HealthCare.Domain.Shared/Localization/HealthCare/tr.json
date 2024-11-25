@@ -32,6 +32,15 @@
     "ChooseNationality": "Uyruk Seç",
     "UpdatePatient": "Hasta Güncelle",
     "Doctor" : "Doktor",
-    "Leave" : "İzin"
+    "Leave" : "İzin",
+    "UpdatePatient": "Hasta Güncelle",
+    "ChooseBloodTests": "Kan Testi Seç",
+    "Biochemical Tests": "Biyokimyasal Testler",
+    "Hematological Tests": "Hematolojik Testler",
+    "Hormonal Tests": "Hormonal Testler",
+    "MyPatients": "Hastalarım",
+    "BloodTests": "Kan Testleri",
+    "Menu:BloodTests": "Kan Tahlilleri",
+    "Menu:MyPatients": "Hastalarım"
   }
 }
