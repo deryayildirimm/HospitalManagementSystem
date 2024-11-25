@@ -21,10 +21,6 @@
     --lpx-logo-icon: url('./images/login/medplus.png');
 }
 
-.lpx-logo-container {
-    padding: 8px !important;
-}
-
 .clickable {
-    cursor: pointer;
+    cursor: pointer;
 }
