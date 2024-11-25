@@ -49,6 +49,8 @@ public partial class PatientDetail
     private IReadOnlyList<PatientUpdateDto> EditPatient { get; set; }
     
    private  List<AppointmentViewModel> AppointmentList { get; set; }
+   
+   private IReadOnlyList<AppointmentWithNavigationPropertiesDto> FetchedAppointmentList { get; set; }
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private int TotalCount { get; set; }
@@ -219,16 +221,17 @@ public partial class PatientDetail
             
             PatientName = x.Patient?.FirstName + " " + x.Patient?.LastName ?? "Unknown",
             DoctorName = x.Doctor?.FirstName + " " + x.Doctor?.LastName ?? "Unknown",
-            Date = x.Appointment?.AppointmentDate.Date.ToString("dd MMMM yyyy") ,
-            Status = x.Appointment?.Status ,
+            Date = x.Appointment?.AppointmentDate.Date.ToString("dd MMMM yyyy") ??  DateTime.MinValue.ToString("dd MMMM yyyy"),
+            Status = x.Appointment?.Status ?? EnumAppointmentStatus.Scheduled, 
             Service = x.MedicalService?.Name ?? "Not Available"
             
         }).ToList();
-        // diger kısımda completed, missed  bunlar da geçmiş randevular olarak listeenicek kırmızı olanlar missed olur 
-        // cancelled ayrı gösterilir 
-        TotalCount = (int)apps.Count; // total mıktarı ogrendık
-     
-     
+    
+        TotalCount = (int)apps.Count;
+
+        FetchedAppointmentList = apps;
+
+
     }
     #endregion
     
