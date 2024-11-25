@@ -96,13 +96,11 @@ header {
 .patient-card{
     display: grid;
     grid-template-columns: 2fr 1fr;
-    width: 100%;
-    flex-wrap: wrap;
+    width: 95%;
 }
 .card-header {
     width: 80%;
     color: var(--primary-color);
-
 }
 
 .card-header h4{
@@ -110,9 +108,33 @@ header {
     padding: 10px;
 
 }
+
+
+
+.e-card{
+    background: none;
+    border: none;
+    box-shadow :0 4px 8px rgba(0,0,0,0.2);
+    margin-top: 10%;
+
+}
+.e-card:hover{
+    box-shadow :0 4px 8px rgba(0,0,0,0.3);
+    background: none;
+}
+
+
 .patient-card h5{
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     padding: 10px;
+}
+.card-content{
+    margin-top: 10%;
+    box-shadow:0 1px 3px rgba(0,0,0,0.1);
+    padding: 0.5rem;
+}
+.card-content h5 {
+    box-shadow: none;
 }
 
 .hero-wrapper .left-box p {
@@ -290,7 +312,7 @@ footer {
     }
 
     .hero-wrapper .left-box {
-        width: 40%;
+        width: 60%;
         margin: 0 1rem 0 0;
     }
 }
@@ -523,24 +545,7 @@ footer {
     }
 
 
-    footer {
-        text-align: center;
-        justify-content: center;
-        display: flex;
-        /* *** */
-    }
 
-    .footer-wrapper {
-        text-align: center;
-        display: block;
-        justify-content: center;
-        padding: 1rem;
-    }
-
-    .footer-wrapper ul {
-        text-align: center;
-        padding: 1rem;
-    }
 
 
 

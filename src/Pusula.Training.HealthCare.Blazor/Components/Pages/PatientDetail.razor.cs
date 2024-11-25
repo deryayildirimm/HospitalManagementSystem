@@ -10,12 +10,14 @@ using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Validators;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Pusula.Training.HealthCare.Appointments;
+using Pusula.Training.HealthCare.Blazor.Models;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using Volo.Abp.BlazoriseUI.Components;
@@ -33,7 +35,7 @@ public partial class PatientDetail
     [Parameter]
     public int PatientNumber { get; set; }
 
-    private PatientDto patient;
+    private PatientDto patient = new PatientDto();
     
     private string PatientGender = "MALE";
 
@@ -46,14 +48,13 @@ public partial class PatientDetail
     
     private IReadOnlyList<PatientUpdateDto> EditPatient { get; set; }
     
-    private IReadOnlyList<AppointmentWithNavigationPropertiesDto> AppointmentList { get; set; }
+   private  List<AppointmentViewModel> AppointmentList { get; set; }
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private int TotalCount { get; set; }
     private string CurrentSorting { get; set; } = string.Empty;
    
     public string? RelativeCountryCode { get; set; }
-    private bool AllPatientsSelected { get; set; }
     private bool CanCreatePatient { get; set; }
     private bool CanEditPatient { get; set; }
     private bool CanDeletePatient { get; set; }
@@ -63,11 +64,9 @@ public partial class PatientDetail
     private Validations EditingPatientValidations { get; set; } = new();
     private Guid EditingPatientId { get; set; }
     private Modal EditPatientModal { get; set; } = new();
-    private GetPatientsInput Filter { get; set; }
     
     private GetAppointmentsWithNavigationPropertiesInput FilterText { get; set; }
     
-    private List<PatientDto> SelectedPatients { get; set; } = [];
     private IEnumerable<CountryPhoneCodeDto> Nationalities = [];
     private IEnumerable<KeyValuePair<int, string>> Genders = [];
     private IEnumerable<KeyValuePair<int, string>> Relatives = [];
@@ -82,26 +81,18 @@ public partial class PatientDetail
     {
         NewPatient = new PatientCreateDto();
         EditingPatient = new PatientUpdateDto();
-        Filter = new GetPatientsInput
-        {
-            MaxResultCount = PageSize,
-            SkipCount = (CurrentPage - 1) * PageSize,
-            Sorting = CurrentSorting
-        };
         FilterText = new GetAppointmentsWithNavigationPropertiesInput
         {
             MaxResultCount = PageSize,
             SkipCount = (CurrentPage - 1) * PageSize,
             Sorting = CurrentSorting
         };
-        PatientList = [];
         AppointmentList = [];
     }
 
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
-        await GetPatientsAsync(); // bunu kaldırıcaz zaten test amaçlı duruyor 
         await GetPatientAsync();
         await GetAppointmentsAsync();
     }
@@ -114,7 +105,7 @@ public partial class PatientDetail
             await SetBreadcrumbItemsAsync();
             await SetToolbarItemsAsync();
             await InvokeAsync(StateHasChanged);
-        //    VisibleProperty = false;
+      
         }
     }
     /*
@@ -173,7 +164,7 @@ public partial class PatientDetail
 
     protected virtual ValueTask SetToolbarItemsAsync()
     {
-        Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
+     
       
         return ValueTask.CompletedTask;
     }
@@ -194,19 +185,8 @@ public partial class PatientDetail
         CanDeletePatient = await AuthorizationService
                         .IsGrantedAsync(HealthCarePermissions.Patients.Delete);
     }
-
-    private async Task GetPatientsAsync()
-    {
-        Filter.MaxResultCount = PageSize;
-        Filter.SkipCount = (CurrentPage - 1) * PageSize;
-        Filter.Sorting = CurrentSorting;
-        
-        var result = await PatientsAppService.GetListAsync(Filter);
-        PatientList = result.Items;
-        TotalCount = (int)result.TotalCount;
-
-        await ClearSelection();
-    }
+    
+    
     #region fetching all data (appointment, doctor, medical_service)
      
     private async Task GetAppointmentsAsync()
@@ -217,15 +197,25 @@ public partial class PatientDetail
         FilterText.Sorting = CurrentSorting;
         
      
-     // !!  FilterText.PatientId = patient.Id;
-     FilterText.PatientNumber = PatientNumber;
-      FilterText.Status = EnumAppointmentStatus.Scheduled; // yaklaşan randevular önceliğimiz 
-        var result = await AppointmentAppService.GetListWithNavigationPropertiesAsync(FilterText);
-        //doldurduk
-        AppointmentList = result.Items;
-     // diger kısımda completed, missed  bunlar da geçmiş randevular olarak listeenicek kırmızı olanlar missed olur 
-     // cancelled ayrı gösterilir 
-       TotalCount = (int)result.TotalCount; // total mıktarı ogrendık
+      //  FilterText.PatientId = patient.Id;
+     //   FilterText.PatientNumber = PatientNumber;
+      //  FilterText.Status = EnumAppointmentStatus.Scheduled; // yaklaşan randevular önceliğimiz 
+        var apps = (await AppointmentAppService.GetListWithNavigationPropertiesAsync(FilterText)).Items;
+
+        AppointmentList = apps.Select(x => new AppointmentViewModel
+        {
+            
+            
+            PatientName = x.Patient?.FirstName + " " + x.Patient?.LastName ?? "Unknown",
+            DoctorName = x.Doctor?.FirstName + " " + x.Doctor?.LastName ?? "Unknown",
+            Date = x.Appointment?.AppointmentDate ?? DateTime.MinValue,
+            Status = x.Appointment?.Status ?? EnumAppointmentStatus.Scheduled,
+            Service = x.MedicalService?.Name ?? "Not Available"
+            
+        }).ToList();
+        // diger kısımda completed, missed  bunlar da geçmiş randevular olarak listeenicek kırmızı olanlar missed olur 
+        // cancelled ayrı gösterilir 
+        TotalCount = (int)apps.Count; // total mıktarı ogrendık
      
         /*
          *  AppointmnetList.Doctor.Name;  -> direkt isme ulaştım bu şekilde
@@ -233,39 +223,7 @@ public partial class PatientDetail
      
     }
     #endregion
-
-
     
-    protected virtual async Task SearchAsync()
-    {
-        CurrentPage = 1;
-        await GetPatientsAsync();
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task DownloadAsExcelAsync()
-    {
-        var token = (await PatientsAppService.GetDownloadTokenAsync()).Token;
-        var remoteService = await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ?? await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        var culture = CultureInfo.CurrentUICulture.Name ?? CultureInfo.CurrentCulture.Name;
-        if (!culture.IsNullOrEmpty())
-        {
-            culture = "&culture=" + culture;
-        }
-        await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/patients/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&FirstName={HttpUtility.UrlEncode(Filter.FirstName)}&LastName={HttpUtility.UrlEncode(Filter.LastName)}&BirthDateMin={Filter.BirthDateMin?.ToString("O")}&BirthDateMax={Filter.BirthDateMax?.ToString("O")}&IdentityNumber={HttpUtility.UrlEncode(Filter.IdentityNumber)}&EmailAddress={HttpUtility.UrlEncode(Filter.EmailAddress)}&MobilePhoneNumber={HttpUtility.UrlEncode(Filter.MobilePhoneNumber)}&Gender={Filter.Gender}", forceLoad: true);
-    }
-
-    private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<PatientDto> e)
-    {
-        CurrentSorting = e.Columns
-            .Where(c => c.SortDirection != SortDirection.Default)
-            .Select(c => c.Field + (c.SortDirection == SortDirection.Descending ? " DESC" : ""))
-            .JoinAsString(",");
-        CurrentPage = e.Page;
-        await GetPatientsAsync();
-        await InvokeAsync(StateHasChanged);
-    }
     
 
     private async Task OpenEditPatientModalAsync(PatientDto input)
@@ -288,13 +246,14 @@ public partial class PatientDetail
         await EditPatientModal.Show();
     }
     
-
-
+    
     private async Task CloseEditPatientModalAsync()
     {
         await EditPatientModal.Hide();
     }
 
+    #region bunu appointment dilmesi için dönüştürücez
+    
     private async Task DeletePatientAsync(PatientDto input)
     {
 
@@ -302,9 +261,9 @@ public partial class PatientDetail
         if (!confirmed) return;
 
         await PatientsAppService.DeleteAsync(input.Id);
-        await GetPatientsAsync();
+        
     }
-
+    #endregion
     #region randevu iptali için metod şu anlık boş
 
     private async Task DeleteAppointmentAsync(AppointmentDto input)
@@ -332,7 +291,7 @@ public partial class PatientDetail
             }
 
             await PatientsAppService.UpdateAsync(EditingPatientId, EditingPatient);
-            await GetPatientsAsync();
+           
             await GetPatientAsync();
             await EditPatientModal.Hide();
           
@@ -348,65 +307,8 @@ public partial class PatientDetail
     {
         NewPatient.RelativePhoneNumber = e.Value?.ToString();
     }
-
-    private Task SelectAllItems()
-    {
-        AllPatientsSelected = true;
-
-        return Task.CompletedTask;
-    }
-
-    private Task ClearSelection()
-    {
-        AllPatientsSelected = false;
-        SelectedPatients.Clear();
-
-        return Task.CompletedTask;
-    }
     
 
-    private Task ClearPhone()
-    {
-
-        MobilePhoneNumber = string.Empty;
-        RelativePhoneNumber = string.Empty;
-        RelativeCountryCode = "";
-        return Task.CompletedTask;
-    }
-
-    private Task SelectedPatientRowsChanged()
-    {
-        if (SelectedPatients.Count != PageSize)
-        {
-            AllPatientsSelected = false;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    private async Task DeleteSelectedPatientsAsync()
-    {
-        var message = AllPatientsSelected ? L["DeleteAllRecords"].Value : L["DeleteSelectedRecords", SelectedPatients.Count].Value;
-
-        if (!await UiMessageService.Confirm(message))
-        {
-            return;
-        }
-
-        if (AllPatientsSelected)
-        {
-            await PatientsAppService.DeleteAllAsync(Filter);
-        }
-        else
-        {
-            await PatientsAppService.DeleteByIdsAsync(SelectedPatients.Select(x => x.Id).ToList());
-        }
-
-        SelectedPatients.Clear();
-        AllPatientsSelected = false;
-
-        await GetPatientsAsync();
-    }
 
 
     private async Task GetNationalitiesListAsync()
