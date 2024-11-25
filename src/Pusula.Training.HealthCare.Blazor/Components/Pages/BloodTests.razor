@@ -1,0 +1,314 @@
+﻿@page "/BloodTest"
+
+@attribute [Authorize(HealthCarePermissions.BloodTests.Edit)]
+@using Pusula.Training.HealthCare.BloodTests
+@using Pusula.Training.HealthCare.BloodTests.Tests
+@using Pusula.Training.HealthCare.Countries
+@using Pusula.Training.HealthCare.Departments
+@using Pusula.Training.HealthCare.Doctors
+@using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.Titles
+@using Syncfusion.Blazor.Cards
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Spinner
+@inject IPatientsAppService patientAppService
+@inject IDoctorsAppService doctorAppService
+@inject IBloodTestAppService bloodTestAppService
+@inject IDepartmentsAppService departmentAppService
+@inject IBloodTestResultAppService bloodTestResultAppService
+@inject ITitlesAppService titleAppService
+@inherits HealthCareComponentBase
+
+<div class="control-section">
+
+    @if (isLoading)
+    {
+        <SfSpinner @bind-Visible="@isLoading">
+        </SfSpinner>
+    }
+    else if (groupedBloodTests.Any(card => card.Status == BloodTestStatus.Requested.ToString()))
+    {
+        <div class='row e-card-layout'>
+            <div class="col-lg-8">
+                @foreach (var card in groupedBloodTests.Where(card => card.Status == BloodTestStatus.Requested.ToString()))
+                {
+                    <SfCard style="margin-bottom:20px;">
+                        <td>
+                            <h2 class="card-header">Blood Test</h2>
+                            <p class="card-subtitle">Comprehensive analysis for your health</p>
+                        </td>
+
+                        <CardContent>
+                            <table style="margin-bottom: 10px;">
+                                <tr>
+                                    <td class="AvatarCell">
+                                        <img src="https://localhost:44398/images/avatar.jpg" class="TempImage" />
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <div class="patient-info">
+                                <h3>Patient Information</h3>
+                                <table class="info-table">
+                                    <tr>
+                                        <td class="label">Name:</td>
+                                        <td>@card.Patient.FirstName</td>
+                                        <td class="label">Surname:</td>
+                                        <td>@card.Patient.LastName</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label">TC/Passport No:</td>
+                                        @if (card.Patient.Nationality == CountryConsts.CurrentCountry)
+                                        {
+                                            <td>@card.Patient.IdentityNumber</td>
+                                        }
+                                        else
+                                        {
+                                            <td>@card.Patient.PassportNumber</td>
+                                        }
+                                        <td class="label">Gender:</td>
+                                        <td>@card.Patient.Gender</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label">Date of Birth:</td>
+                                        <td>@card.Patient.BirthDate.ToString("MM.dd.yyyy")</td>
+                                        <td class="label">Nationality:</td>
+                                        <td>@card.Patient.Nationality</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="label">Patient ID:</td>
+                                        <td>@card.Patient.PatientNumber</td>
+                                        <td class="label">Test Requested:</td>
+                                        <td>@card.DateRequested</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <div class="doctor-info">
+                                <h3>Doctor Information</h3>
+                                <table class="info-table">
+                                    <tr>
+                                        <td class="label">Name & Title:</td>
+                                        <td>@card.Title.TitleName @card.Doctor.FirstName @card.Doctor.LastName</td>
+                                        <td class="label">Department:</td>
+                                        <td>@card.Department.Name</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            @if (expandedCards.ContainsKey(card) && expandedCards[card])
+                            {
+                                <div class="test-categories-container">
+                                    <h3 id="price-header">Test Categories with Prices</h3>
+                                    <ul class="category-list">
+                                        @foreach (var category in card.SelectedCategories.OrderBy(c => c.Name))
+                                        {
+                                            <li class="category-item">
+                                                <span class="category-name">@category.Name</span> 
+                                                <span class="category-price">@category.Price₺</span> 
+                                            </li>
+                                        }
+                                    </ul>
+
+                                    <div class="total-price">
+                                        <strong>Total Price: </strong>
+                                        @((card.SelectedCategories.Sum(c => c.Price)))₺
+                                    </div>
+
+                                    <div class="okey-btn">
+                                        <SfButton CssClass="e-primary" @onclick="() => UpdateTestsStatusAndGenerateResultsAsync(card)">Okey</SfButton>
+                                    </div>
+                                </div>
+                            }
+                        </CardContent>
+
+                        <Syncfusion.Blazor.Cards.CardFooter>
+                            <CardFooterContent>
+                                <SfButton CssClass="e-outline" @onclick="@(() => ToggleExpand(card))">
+                                    @(expandedCards.ContainsKey(card) && expandedCards[card] ? "Close" : "Details")
+                                </SfButton>
+                            </CardFooterContent>
+                        </Syncfusion.Blazor.Cards.CardFooter>
+                    </SfCard>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="no-tests-message">
+            <h2>No Pending Blood Tests</h2>
+            <p>There are currently no blood tests awaiting approval.</p>
+        </div>
+    }
+</div>
+
+
+<style>
+    .TempImage {
+        height: 100px;
+        width: 100px;
+        border-radius: 50%; 
+        object-fit: cover;
+    }
+
+    .AvatarCell {
+        width: 100%;
+        text-align: center;
+    }
+
+    .card-header {
+        text-align: center;
+        font-weight: 600; 
+        font-size: 1.5rem; 
+        font-family: 'Helvetica', Arial, sans-serif; 
+        color: #2C3E50; 
+        padding: 15px;
+        margin-bottom: 10px; 
+    }
+
+    .card-subtitle {
+        font-size: 1.2rem;
+        font-weight: normal;
+        color: #7f8c8d; 
+        text-align: center;
+        margin-bottom: 10px;
+    }
+
+    .e-card-layout {
+        display: flex;
+        margin: auto;
+        justify-content: center;
+        align-items: center;
+    }
+
+    table {
+        width: 100%;
+    }
+
+    .TextCenter {
+        text-align: center;
+    }
+
+    .doctor-patient-info {
+        margin-bottom: 20px;
+    }
+
+    .doctor-info, .patient-info {
+        margin-bottom: 20px;
+    }
+
+        .doctor-info h3, .patient-info h3 {
+            font-size: 1.2rem;
+            color: #2980b9; 
+            margin-bottom: 10px;
+        }
+
+    .info-table {
+        width: 100%;
+        border-spacing: 10px;
+        border-collapse: collapse;
+    }
+
+        .info-table td {
+            padding: 8px;
+            font-size: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .info-table .label {
+            font-weight: bold;
+            color: #333;
+        }
+
+    .no-tests-message {
+        text-align: center;
+        margin: 50px auto;
+        padding: 20px;
+        border: 2px dashed #2C3E50;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        color: #7f8c8d;
+    }
+
+        .no-tests-message h2 {
+            font-size: 1.8rem;
+            color: #2C3E50;
+        }
+
+        .no-tests-message p {
+            font-size: 1.2rem;
+        }
+
+    .test-categories-container {
+        padding: 20px;
+        background-color: #f9f9f9; 
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); 
+        max-width: 500px; 
+        margin: auto;
+    }
+
+    #price-header {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #2980b9; 
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    .category-list {
+        list-style-type: none;
+        padding: 0;
+    }
+
+    .category-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #ddd;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+        .category-item:last-child {
+            border-bottom: none; 
+        }
+
+    .category-name {
+        font-weight: 600;
+    }
+
+    .category-price {
+        color: #2ecc71; 
+        font-weight: 600;
+    }
+
+    .total-price {
+        text-align: right;
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    .okey-btn {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+        .okey-btn .e-primary {
+            background-color: #2980b9; 
+            color: white;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease; 
+        }
+
+            .okey-btn .e-primary:hover {
+                background-color: #1d6f8c; 
+            }
+
+</style>
+

@@ -77,6 +77,24 @@ public class HealthCareMenuContributor : IMenuContributor
                 requiredPermissionName: HealthCarePermissions.MedicalServices.Default)
         );
 
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
+                HealthCareMenus.BloodTests,
+                l["Menu:BloodTests"],
+                url: "/bloodtest",
+                icon: "fa-solid fa-droplet",
+                requiredPermissionName: HealthCarePermissions.BloodTests.Edit)
+        );
+
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
+                HealthCareMenus.MyPatients,
+                l["Menu:MyPatients"],
+                url: "/doctor/my-patients",
+                icon: "fa-solid fa-receipt",
+                requiredPermissionName: HealthCarePermissions.Doctors.Default)
+        );
+
         return Task.CompletedTask;
     }
 
