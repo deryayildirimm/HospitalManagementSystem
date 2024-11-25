@@ -10,12 +10,14 @@ using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Validators;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Pusula.Training.HealthCare.Appointments;
+using Pusula.Training.HealthCare.Blazor.Models;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using Volo.Abp.BlazoriseUI.Components;
@@ -46,7 +48,7 @@ public partial class PatientDetail
     
     private IReadOnlyList<PatientUpdateDto> EditPatient { get; set; }
     
-    private IReadOnlyList<AppointmentWithNavigationPropertiesDto> AppointmentList { get; set; }
+   private  List<AppointmentViewModel> AppointmentList { get; set; }
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private int TotalCount { get; set; }
@@ -207,6 +209,7 @@ public partial class PatientDetail
 
         await ClearSelection();
     }
+    
     #region fetching all data (appointment, doctor, medical_service)
      
     private async Task GetAppointmentsAsync()
@@ -217,15 +220,22 @@ public partial class PatientDetail
         FilterText.Sorting = CurrentSorting;
         
      
-     // !!  FilterText.PatientId = patient.Id;
-     FilterText.PatientNumber = PatientNumber;
-      FilterText.Status = EnumAppointmentStatus.Scheduled; // yaklaşan randevular önceliğimiz 
-        var result = await AppointmentAppService.GetListWithNavigationPropertiesAsync(FilterText);
-        //doldurduk
-        AppointmentList = result.Items;
-     // diger kısımda completed, missed  bunlar da geçmiş randevular olarak listeenicek kırmızı olanlar missed olur 
-     // cancelled ayrı gösterilir 
-       TotalCount = (int)result.TotalCount; // total mıktarı ogrendık
+        FilterText.PatientId = patient.Id;
+        FilterText.PatientNumber = PatientNumber;
+      //  FilterText.Status = EnumAppointmentStatus.Scheduled; // yaklaşan randevular önceliğimiz 
+        var apps = (await AppointmentAppService.GetListWithNavigationPropertiesAsync(FilterText)).Items;
+
+        AppointmentList = apps.Select(x => new AppointmentViewModel
+        {
+            PatientName = x.Patient?.FirstName + " " + x.Patient?.LastName ?? "Unknown",
+            DoctorName = x.Doctor?.FirstName + " " + x.Doctor?.LastName ?? "Unknown",
+            Date = x.Appointment?.AppointmentDate ?? DateTime.MinValue,
+            Status = x.Appointment?.Status ?? EnumAppointmentStatus.Scheduled,
+            Service = x.MedicalService?.Name ?? "Not Available"
+        }).ToList();
+        // diger kısımda completed, missed  bunlar da geçmiş randevular olarak listeenicek kırmızı olanlar missed olur 
+        // cancelled ayrı gösterilir 
+        TotalCount = (int)apps.Count; // total mıktarı ogrendık
      
         /*
          *  AppointmnetList.Doctor.Name;  -> direkt isme ulaştım bu şekilde
