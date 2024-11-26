@@ -72,7 +72,7 @@
     <None Remove="Logs\**" />
     <None Include="wwwroot\js\WindowHelper.js" />
     <None Include="wwwroot\PatientDetail.css" />
-    <None Include="wwwroot\styles\Login.css">
+    <None Include="wwwroot\styles\login.css">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
