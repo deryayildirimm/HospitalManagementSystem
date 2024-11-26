@@ -1,5 +1,5 @@
 trigger:
-- developer
+- development
 
 pool:
   name: pusula-akademi-team2-agent
