@@ -1,5 +1,5 @@
 trigger:
-- devops3
+- developer
 
 pool:
   name: pusula-akademi-team2-agent
