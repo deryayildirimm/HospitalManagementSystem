@@ -176,7 +176,7 @@ namespace Pusula.Training.HealthCare
                 "Yılmaz",
                 "Turkey",
                 new DateTime(1990, 1, 1),
-                "12345678901",
+                "+12345678901",
                 EnumPatientTypes.VIP,
                 EnumInsuranceType.SGK,
                 "A12345678",
@@ -187,7 +187,7 @@ namespace Pusula.Training.HealthCare
                 "A1234567",
                 "ali.yilmaz@example.com",
                 EnumRelative.FATHER,
-                "12344678901",
+                "+12344678901",
                 "İstanbul",
                 EnumDiscountGroup.STAFF
             );
@@ -199,7 +199,7 @@ namespace Pusula.Training.HealthCare
                 "Demir",
                 "ENGLISH",
                 new DateTime(1985, 5, 10),
-                "98765432109",
+                "+98765432109",
                 EnumPatientTypes.NORMAL,
                 EnumInsuranceType.PRIVATE,
                 "B98765432",
@@ -210,7 +210,7 @@ namespace Pusula.Training.HealthCare
                 "B7654321",
                 "mehmet.demir@example.com",
                 EnumRelative.MOTHER,
-                "09876543210",
+                "+09876543210",
                 "Ankara",
                 EnumDiscountGroup.STAFF
             );
@@ -222,7 +222,7 @@ namespace Pusula.Training.HealthCare
                 "Kaya",
                 "German",
                 new DateTime(1992, 3, 15),
-                "12312312345",
+                "+12312312345",
                 EnumPatientTypes.VIP,
                 EnumInsuranceType.SGK,
                 "C12312312",
@@ -233,7 +233,7 @@ namespace Pusula.Training.HealthCare
                 "C1231234",
                 "ayse.kaya@example.com",
                 EnumRelative.FATHER,
-                "11223344556",
+                "+11223344556",
                 "Izmir",
                 EnumDiscountGroup.CONTRACTED
             );

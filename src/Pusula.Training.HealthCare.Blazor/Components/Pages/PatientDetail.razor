@@ -90,24 +90,31 @@
                     <h4 > <strong>@patient?.FirstName @patient?.LastName</strong> </h4>
                     <h5> <strong>Identity Number :</strong>@patient?.IdentityNumber      <span style="margin-left: 10px">@patient?.Gender</span>  </h5>
 
-                    <h5><strong>Doğum Tarihi:</strong> @patient?.BirthDate.ToString("dd.MM.yyyy") </h5>
-                    <h5><strong>Telefon:</strong> @patient?.MobilePhoneNumber</h5>
+                    <h5><strong>Birth Date:</strong> @patient?.BirthDate.ToString("dd.MM.yyyy") </h5>
+                    <h5><strong>Phone:</strong> @patient?.MobilePhoneNumber</h5>
                     <h5><strong>Nationality:</strong> @patient?.Nationality</h5>
                     <h5><strong>Patient Number:</strong> @patient?.PatientNumber</h5>
-                    <h5><strong>Adres:</strong> @patient?.Address</h5>
+                    <h5><strong>Address:</strong> @patient?.Address</h5>
                 </div>
                 <div class="card-content">
                     <h4 style="margin-top: 20px; box-shadow: none; padding : 5px"> <strong>Latest Appointment</strong>
                         <span style="margin : 12px 0 0 12px">
                             <SfIcon Name="IconName.Clock" Size="IconSize.Large" > </SfIcon>
                         </span>
-                    </h4>  
-                    <SfCard >
-                        <h5>@AppointmentList[0].Service</h5>
-                        <h5> Yrd. Doç.  @AppointmentList[0].DoctorName</h5>
-                        <h5>ABC Hospital</h5> 
-                        <h5> @AppointmentList[0].Date</h5>
+                    </h4>
+                    @if (AppointmentList != null && AppointmentList.Any())
+                    {
+                    <SfCard>
+                        <h5>@AppointmentList[0]?.Service</h5>
+                        <h5>Yrd. Doç. @AppointmentList[0]?.DoctorName</h5>
+                        <h5>ABC Hospital</h5>
+                        <h5>@AppointmentList[0]?.Date</h5>
                     </SfCard>
+                    }
+                    else
+                    {
+                    <p>No appointment available.</p>
+                    }
                 </div>
             </div>
             <div class="btn-wrapper">
@@ -160,7 +167,7 @@
 
             <div class="header-wrapper">
                 <ul class="active-mobile" style="float: left">
-                    <li><a  >Medical Conditions </a></li>
+                    <li><a >Medical Conditions </a></li>
                 </ul>
             </div>
             <SfGrid TValue="MedicalConditionViewModel" DataSource="MedicalConditions" AllowPaging="true" AllowSorting="true">
@@ -175,47 +182,19 @@
         </div>
      
         <div class="box">
-            <div style="display: none">
-            <SfGrid TValue="MedicalConditionViewModel" DataSource="MedicalConditions" AllowPaging="true" AllowSorting="true">
-                <GridPageSettings PageSize="5"></GridPageSettings>
-                <GridColumns>
-                    <GridColumn Field="@nameof(MedicalConditionViewModel.DiseaseName)" HeaderText="Disease Name" TextAlign="TextAlign.Left"></GridColumn>
-                    <GridColumn Field="@nameof(MedicalConditionViewModel.DiagnosisDate)" HeaderText="Diagnosis Date"  TextAlign="TextAlign.Center" Format="dd.MM.yyyy"></GridColumn>
-                    <GridColumn Field="@nameof(MedicalConditionViewModel.TreatmentStatus)" HeaderText="Treatment Status"  TextAlign="TextAlign.Center"></GridColumn>
-                    <GridColumn Field="@nameof(MedicalConditionViewModel.DoctorNotes)" HeaderText="Doctor's Notes" TextAlign="TextAlign.Left"></GridColumn>
-                </GridColumns>
-            </SfGrid>
+           
         </div>
 
 
     </div>
         <div class="box">
-            <!--  for latest usage 
-            <SfToolbar>
-                <ToolbarItems>
-                    <ToolbarItem Text="Add"></ToolbarItem>
-                    <ToolbarItem Text="Edit"></ToolbarItem>
-                    <ToolbarItem Text="Delete"></ToolbarItem>
-                </ToolbarItems>
-            </SfToolbar>
-            <SfGrid TValue="PatientDto" DataSource="@PatientList">
-                <GridEditSettings AllowEditing="true" AllowDeleting="true" Mode="@EditMode.Dialog">
-                </GridEditSettings>
-                <GridColumns>
-                    <GridColumn Field=@nameof(PatientDto.Id) HeaderText="Order ID" IsPrimaryKey="true" TextAlign="@TextAlign.Center" HeaderTextAlign="@TextAlign.Center" Width="140"></GridColumn>
-                    <GridColumn Field=@nameof(PatientDto.PatientNumber) HeaderText="Customer Name" Width="150"></GridColumn>
-                    <GridColumn Field=@nameof(PatientDto.Address) HeaderText="Freight" Format="C2" Width="140" TextAlign="@TextAlign.Right" HeaderTextAlign="@TextAlign.Right"></GridColumn>
-                    <GridColumn Field=@nameof(PatientDto.FirstName) HeaderText="Order Date" Format="d" Type="ColumnType.Date" Width="160"></GridColumn>
-                    <GridColumn Field=@nameof(PatientDto.Nationality) HeaderText="Ship Country" Width="150"></GridColumn>
-                </GridColumns>
-            </SfGrid>
--->
+
         </div>
      
     </div>
 
 
-</div>
+
 
 }
 @* ************************* EDIT MODAL ************************* *@
