@@ -1,0 +1,26 @@
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 80
+
+
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+RUN apt-get update && \
+    apt-get install -y nodejs npm
+
+COPY . .
+WORKDIR /src/src/Pusula.Training.HealthCare.Blazor
+RUN dotnet restore "Pusula.Training.HealthCare.Blazor.csproj"
+RUN dotnet build "Pusula.Training.HealthCare.Blazor.csproj" -c Release -o /app/build
+RUN dotnet tool install -g Volo.Abp.Cli --version 8.0.0
+ENV PATH="/root/.dotnet/tools:${PATH}"
+RUN abp install-libs
+RUN dotnet publish "Pusula.Training.HealthCare.Blazor.csproj" -c Release -o /app/publish
+
+
+FROM base AS final
+
+WORKDIR /app
+COPY --from=build /app/publish .
+
+ENTRYPOINT ["dotnet", "Pusula.Training.HealthCare.Blazor.dll"]

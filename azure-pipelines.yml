@@ -1,0 +1,29 @@
+trigger:
+- devops3
+
+pool:
+  name: pusula-akademi-team2-agent
+
+name: $(Date:yyyyMMdd).$(Rev:r)
+variables:
+  imageTag: "$(Build.BuildNumber)"
+
+steps:
+- task: Docker@2
+  inputs:
+    repository: 'Blazorapp'
+    command: 'build'
+    Dockerfile: '**/Dockerfile-BlazorApp'
+    tags: $(imageTag)
+    buildArguments: '--memory=4g --cpu-shares=1024'
+
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: 'docker tag blazorapp:$(imageTag) registry.gitlab.com/medplus1/medplusproject:$(imageTag)'
+- task: Docker@2
+  inputs:
+    containerRegistry: 'GitLab'
+    repository: 'medplus1/medplusproject'
+    command: 'push'
+    tags: '$(imageTag)'
