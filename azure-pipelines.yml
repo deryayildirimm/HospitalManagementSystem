@@ -15,6 +15,8 @@ steps:
     command: 'build'
     Dockerfile: '**/Dockerfile-BlazorApp'
     tags: $(imageTag)
+    buildArguments: '--memory=4g --cpu-shares=1024'
+
 - task: Bash@3
   inputs:
     targetType: 'inline'
