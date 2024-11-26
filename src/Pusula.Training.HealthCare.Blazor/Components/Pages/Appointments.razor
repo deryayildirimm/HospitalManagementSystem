@@ -120,7 +120,7 @@
                             <Addons>
                                 <Addon AddonType="AddonType.Start">
                                     <AddonLabel
-                                        Border="Border.RoundedStart"
+                                        Border="Blazorise.Border.RoundedStart"
                                         Padding="Padding.Is2"
                                         Style="background-color: var(--bs-gray-300)">
                                         <Icon IconSize="IconSize.Large"
@@ -132,7 +132,7 @@
                                     <TextEdit
                                         Class="px-1"
                                         Style="background-color: var(--bs-gray-300)"
-                                        Border="Border.RoundedEnd"
+                                        Border="Blazorise.Border.RoundedEnd"
                                         Autofocus="true"
                                         Text="@MedicalServiceFilter.Name"
                                         TextChanged="@OnDoctorSearchChanged"
@@ -171,7 +171,7 @@
                     <Addons>
                         <Addon AddonType="AddonType.Start">
                             <AddonLabel
-                                Border="Border.RoundedStart"
+                                Border="Blazorise.Border.RoundedStart"
                                 Padding="Padding.Is2"
                                 Style="background-color: var(--bs-gray-300)">
                                 <Icon IconSize="IconSize.Large" Name="IconName.Search"></Icon>
@@ -188,7 +188,7 @@
                             </TextEdit>
                         </Addon>
                         <Addon AddonType="AddonType.End">
-                            <Button Clicked="ClearServiceSearch" Class="px-2" Border="Border.RoundedEnd" Style="background-color: var(--bs-gray-300)">
+                            <Button Clicked="ClearServiceSearch" Class="px-2" Border="Blazorise.Border.RoundedEnd" Style="background-color: var(--bs-gray-300)">
                                 <Icon Name="IconName.Clear" Style="background-color: var(--bs-gray-300)"></Icon>
                             </Button>
                         </Addon>
@@ -198,7 +198,7 @@
                 <SfListBox Height="350px" @ref="SelectServiceDropdown" TValue="SelectionItem[]" DataSource="@ServicesList" TItem="SelectionItem">
                     <ListBoxEvents TValue="SelectionItem[]" ValueChange="OnServiceChange" TItem="SelectionItem"></ListBoxEvents>
                     <ListBoxFieldSettings Text="DisplayName" Value="DisplayName"/>
-                    <ListBoxSelectionSettings ShowCheckbox="true" Mode="SelectionMode.Single"></ListBoxSelectionSettings>
+                    <ListBoxSelectionSettings ShowCheckbox="true" Mode="Syncfusion.Blazor.DropDowns.SelectionMode.Single"></ListBoxSelectionSettings>
                 </SfListBox>
 
             </div>

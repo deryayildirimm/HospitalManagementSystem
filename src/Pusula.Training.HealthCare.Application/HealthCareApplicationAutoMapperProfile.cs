@@ -12,6 +12,10 @@ using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalPersonnel;
 using Pusula.Training.HealthCare.Titles;
+using Pusula.Training.HealthCare.BloodTests;
+using Pusula.Training.HealthCare.BloodTests.Categories;
+using Pusula.Training.HealthCare.BloodTests.Category;
+using Pusula.Training.HealthCare.BloodTests.Tests;
 
 namespace Pusula.Training.HealthCare;
 
@@ -89,5 +93,17 @@ public class HealthCareApplicationAutoMapperProfile : Profile
             .ForMember(dest => dest.AppointmentDate, opt => opt.MapFrom(src =>
                 $"{src.Appointment.StartTime:yyyy-MM-dd}, {src.Appointment.StartTime:HH:mm} - {src.Appointment.EndTime:HH:mm}"));
         
+        CreateMap<Doctor, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.FirstName));
+
+        CreateMap<TestCategory, TestCategoryDto>();
+        CreateMap<BloodTest, BloodTestDto>();
+        CreateMap<BloodTestWithNavigationProperties, BloodTestWithNavigationPropertiesDto>();
+
+        CreateMap<BloodTestResult, BloodTestResultDto>();
+        CreateMap<BloodTestResultWithNavigationProperties, BloodTestResultWithNavigationPropertiesDto>();
+
+
+        CreateMap<Test, TestDto>();
+        CreateMap<TestWithNavigationProperties, TestWithNavigationPropertiesDto>();
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -19,7 +19,7 @@ public class Program
     {
         var configuration = new ConfigurationBuilder()
             .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json")
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
             .AddEnvironmentVariables()
             .Build();
 
@@ -47,14 +47,27 @@ public class Program
         {
             Log.Information("Starting web host.");
             var builder = WebApplication.CreateBuilder(args);
+
+            // Statik varlıklar için
             builder.WebHost.UseStaticWebAssets();
-            builder.Services.AddSyncfusionBlazor();
+
+            // Syncfusion için lisans kaydı
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(configuration["SyncFusion:Key"]);
+
+            // Syncfusion Blazor hizmeti ekleniyor
+            builder.Services.AddSyncfusionBlazor();
+
+
+            // Serilog ve diğer ayarları ekleme
             builder.Host.AddAppSettingsSecretsJson()
                 .UseAutofac()
                 .UseSerilog();
+
+            // Modül yapılandırması
             await builder.AddApplicationAsync<HealthCareBlazorModule>();
             var app = builder.Build();
+
+            // Uygulama başlatma ve çalıştırma
             await app.InitializeApplicationAsync();
             await app.RunAsync();
             return 0;

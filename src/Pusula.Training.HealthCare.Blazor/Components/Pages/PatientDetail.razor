@@ -4,6 +4,7 @@
 @using Pusula.Training.HealthCare.Countries
 @using Pusula.Training.HealthCare.Patients
 @using Pusula.Training.HealthCare.Localization
+@using Syncfusion.Blazor.Spinner
 @using global::Pusula.Training.HealthCare.Appointments
 @using global::Pusula.Training.HealthCare.Permissions
 @using Volo.Abp.AspNetCore.Components.Messages
@@ -548,7 +549,7 @@
                         <Button Color="Color.Danger" Clicked="CloseEditPatientModalAsync">
                             @L["Cancel"]
                         </Button>
-                        <Button Type="ButtonType.Submit" Form="CreatePatientForm" Clicked="UpdatePatientAsync" Color="Color.Info">
+                        <Button Type="Blazorise.ButtonType.Submit" Form="CreatePatientForm" Clicked="UpdatePatientAsync" Color="Color.Info">
                             @L["Submit"]
                         </Button>
                     </Column>
