@@ -7,6 +7,7 @@
 @using Pusula.Training.HealthCare.Localization
 @using Pusula.Training.HealthCare.MedicalServices
 @using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Shared
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
@@ -342,6 +343,21 @@ else if (ActiveStep == 2)
                         <div>
                             <Label Class="form-label">@L["EAppointmentPaymentID"]</Label>
                             <TextEdit Disabled="true" @bind-Value="PaymentId" Placeholder="@L["EAppointmentPaymentID"]" Class="form-control"/>
+                        </div>
+                        <div class="flex flex-column">
+                            <div>
+                                <Label Class="form-label">@L["AppointmentType"]</Label>  
+                            </div>
+                            <SfDropDownList 
+                                TValue="Guid" 
+                                TItem="LookupDto<Guid>"
+                                @bind-Value="StepperModel.AppointmentTypeId"
+                                Placeholder="@L["Select"]" 
+                                AllowFiltering="true" 
+                                DataSource="@AppointmentTypesCollection" 
+                                Width="300px">
+                                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                            </SfDropDownList>
                         </div>
                         <div>
                             <Label Class="form-label">@L["SendReminder"]</Label>

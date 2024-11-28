@@ -13,7 +13,7 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Pusula.Training.HealthCare.Migrations
 {
     [DbContext(typeof(HealthCareDbContext))]
-    [Migration("20241127190614_Initial")]
+    [Migration("20241128184949_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -82,9 +82,6 @@ namespace Pusula.Training.HealthCare.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.ToTable("AppAppointmentTypes", (string)null);
                 });
 
@@ -100,6 +97,9 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.Property<DateTime>("AppointmentDate")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("AppointmentDate");
+
+                    b.Property<Guid>("AppointmentTypeId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -174,6 +174,8 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnName("Status");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppointmentTypeId");
 
                     b.HasIndex("DoctorId");
 
@@ -577,9 +579,6 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.HasKey("MedicalServiceId", "DepartmentId");
 
                     b.HasIndex("DepartmentId");
-
-                    b.HasIndex("MedicalServiceId", "DepartmentId")
-                        .IsUnique();
 
                     b.ToTable("AppDepartmentMedicalServices", (string)null);
                 });
@@ -1008,7 +1007,6 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnName("ConcurrencyStamp");
 
                     b.Property<double>("Cost")
-                        .HasPrecision(18, 6)
                         .HasColumnType("double precision")
                         .HasColumnName("Cost");
 
@@ -1061,9 +1059,6 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnName("ServiceCreatedAt");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
 
                     b.ToTable("AppMedicalServices", (string)null);
                 });
@@ -3147,6 +3142,12 @@ namespace Pusula.Training.HealthCare.Migrations
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Appointments.Appointment", b =>
                 {
+                    b.HasOne("Pusula.Training.HealthCare.AppointmentTypes.AppointmentType", null)
+                        .WithMany()
+                        .HasForeignKey("AppointmentTypeId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("Pusula.Training.HealthCare.Doctors.Doctor", null)
                         .WithMany()
                         .HasForeignKey("DoctorId")
@@ -3215,15 +3216,11 @@ namespace Pusula.Training.HealthCare.Migrations
                 {
                     b.HasOne("Pusula.Training.HealthCare.Departments.Department", "Department")
                         .WithMany("DepartmentMedicalServices")
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DepartmentId");
 
                     b.HasOne("Pusula.Training.HealthCare.MedicalServices.MedicalService", "MedicalService")
                         .WithMany("DepartmentMedicalServices")
-                        .HasForeignKey("MedicalServiceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MedicalServiceId");
 
                     b.Navigation("Department");
 

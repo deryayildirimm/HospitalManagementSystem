@@ -132,6 +132,7 @@
     "SaveProceed": "Save And Proceed",
     "Proceed": "Proceed",
     "SelectService": "Select Your Service",
+    "Select": "Select",
     "SelectAppointment": "Select Appointment",
     "Back": "Back",
     "NotAvailable": "Not Available",
@@ -195,6 +196,7 @@
     "Menu:MyPatients": "My Patients",
     "UpdateAppointmentType": "Update Appointment Type",
     "NewAppointmentType": "New Appointment Type",
+    "AppointmentType": "Appointment Type",
     "DeleteRecord": "Delete Record",
     "AreYouSureDeleteCount": "All {0} items on this page are selected"
   }

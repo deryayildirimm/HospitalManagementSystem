@@ -2,10 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
 using MiniExcelLibs;
+using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Exceptions;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Shared;
@@ -22,6 +24,7 @@ namespace Pusula.Training.HealthCare.Appointments;
 public class AppointmentAppService(
     IAppointmentRepository appointmentRepository,
     IAppointmentManager appointmentManager,
+    IAppointmentTypeRepository appointmentTypeRepository,
     IDistributedCache<AppointmentDownloadTokenCacheItem, string> downloadTokenCache
 ) : HealthCareAppService, IAppointmentAppService
 {
@@ -67,13 +70,13 @@ public class AppointmentAppService(
     {
         var totalCount = await appointmentRepository.GetCountAsync(
             input.DoctorId, input.PatientId, input.MedicalServiceId,
-            input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
+            input.AppointmentTypeId, input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
             input.Status, input.ReminderSent, input.MinAmount,
             input.MaxAmount);
 
         var items = await appointmentRepository.GetListAsync(
             input.DoctorId, input.PatientId, input.MedicalServiceId,
-            input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
+            input.AppointmentTypeId, input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
             input.Status, input.ReminderSent, input.MinAmount,
             input.MaxAmount, input.Sorting, input.MaxResultCount, input.SkipCount);
 
@@ -147,6 +150,7 @@ public class AppointmentAppService(
                 input.DoctorId,
                 input.PatientId,
                 input.MedicalServiceId,
+                input.AppointmentTypeId,
                 input.AppointmentDate,
                 input.StartTime,
                 input.EndTime,
@@ -203,6 +207,23 @@ public class AppointmentAppService(
         }
     }
 
+
+    public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetAppointmentTypeLookupAsync(LookupRequestDto input)
+    {
+        var query = (await appointmentTypeRepository.GetQueryableAsync())
+            .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
+                x => x.Name.Contains(input.Filter!));
+
+        var lookupData =
+            await query.PageBy(input.SkipCount, input.MaxResultCount).ToDynamicListAsync<AppointmentType>();
+        var totalCount = query.Count();
+        return new PagedResultDto<LookupDto<Guid>>
+        {
+            TotalCount = totalCount,
+            Items = ObjectMapper.Map<List<AppointmentType>, List<LookupDto<Guid>>>(lookupData)
+        };
+    }
+
     [AllowAnonymous]
     public virtual async Task<IRemoteStreamContent> GetListAsExcelFileAsync(AppointmentExcelDownloadDto input)
     {
@@ -216,11 +237,12 @@ public class AppointmentAppService(
             doctorId: input.DoctorId,
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
+            appointmentTypeId: input.AppointmentTypeId,
             patientName: input.PatientName,
             doctorName: input.DoctorName,
             serviceName: input.ServiceName,
             patientNumber: input.PatientNumber,
-            input.AppointmentMinDate, 
+            input.AppointmentMinDate,
             input.AppointmentMaxDate,
             startTime: input.StartTime,
             endTime: input.EndTime,
@@ -252,7 +274,7 @@ public class AppointmentAppService(
     {
         await appointmentRepository.DeleteAllAsync(
             input.DoctorId, input.PatientId, input.MedicalServiceId,
-            input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
+            input.AppointmentTypeId, input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
             input.Status, input.ReminderSent, input.MinAmount,
             input.MaxAmount);
     }

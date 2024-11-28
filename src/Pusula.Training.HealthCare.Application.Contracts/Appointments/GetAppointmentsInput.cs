@@ -10,6 +10,7 @@ public class GetAppointmentsInput : PagedAndSortedResultRequestDto
     public Guid? DoctorId { get; set; }
     public Guid? PatientId { get; set; }
     public Guid? MedicalServiceId { get; set; }
+    public Guid? AppointmentTypeId { get; set; }
     public DateTime? AppointmentMinDate { get; set; }
     public DateTime? AppointmentMaxDate { get; set; }
     public DateTime? StartTime { get; set; }

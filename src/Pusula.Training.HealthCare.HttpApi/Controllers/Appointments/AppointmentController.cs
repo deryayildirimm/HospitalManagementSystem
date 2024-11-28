@@ -78,4 +78,9 @@ public class AppointmentController(IAppointmentAppService appointmentAppService)
     [Route("download-token")]
     public virtual Task<DownloadTokenResultDto> GetDownloadTokenAsync()
         => appointmentAppService.GetDownloadTokenAsync();
+
+    [HttpGet]
+    [Route("appointment-type-lookup")]
+    public Task<PagedResultDto<LookupDto<Guid>>> GetAppointmentTypeLookupAsync(LookupRequestDto input)
+        => appointmentAppService.GetAppointmentTypeLookupAsync(input);
 }

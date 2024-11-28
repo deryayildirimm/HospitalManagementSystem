@@ -109,5 +109,8 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<AppointmentType, AppointmentTypeDto>();
         CreateMap<AppointmentTypeDto, AppointmentTypeUpdateDto>();
         CreateMap<AppointmentType, AppointmentTypeExcelDto>();
+        
+        CreateMap<AppointmentType, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
     }
 }

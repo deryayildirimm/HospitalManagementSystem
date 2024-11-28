@@ -28,7 +28,8 @@ public class AppointmentTypeManager(
 
     public virtual async Task<AppointmentType> UpdateAsync(
         Guid id,
-        string name, [CanBeNull] string? concurrencyStamp = null
+        string name,
+        [CanBeNull] string? concurrencyStamp = null
     )
     {
         Check.NotNullOrWhiteSpace(name, nameof(name));
@@ -37,8 +38,8 @@ public class AppointmentTypeManager(
         var appointmentType = await appointmentTypeRepository.GetAsync(id);
 
         appointmentType.SetName(name);
-
         appointmentType.SetConcurrencyStampIfNotNull(concurrencyStamp);
+
         return await appointmentTypeRepository.UpdateAsync(appointmentType);
     }
 }

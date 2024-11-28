@@ -156,6 +156,11 @@ public class HealthCareDbContext :
                 b.ConfigureByConvention();
                 b.Property(x => x.Name).HasColumnName(nameof(Department.Name)).IsRequired()
                     .HasMaxLength(DepartmentConsts.NameMaxLength);
+                
+                b.HasMany(x => x.DepartmentMedicalServices)
+                    .WithOne(e => e.Department)
+                    .IsRequired(false)
+                    .HasForeignKey(e => e.DepartmentId);
             });
 
             builder.Entity<Protocol>(b =>
@@ -176,18 +181,24 @@ public class HealthCareDbContext :
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "MedicalServices", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-
-                b.Property(x => x.Name).HasColumnName(nameof(MedicalService.Name)).IsRequired()
+                
+                b.Property(x => x.Name)
+                    .HasColumnName(nameof(MedicalService.Name))
+                    .IsRequired()
                     .HasMaxLength(MedicalServiceConsts.NameMaxLength);
 
                 b.Property(x => x.Cost)
                     .HasColumnName(nameof(MedicalService.Cost))
-                    .IsRequired()
-                    .HasPrecision(18, 6);
+                    .IsRequired();
 
-                b.Property(x => x.ServiceCreatedAt).HasColumnName(nameof(MedicalService.ServiceCreatedAt)).IsRequired();
-
-                b.HasIndex(e => new { e.Name }).IsUnique();
+                b.Property(x => x.ServiceCreatedAt)
+                    .HasColumnName(nameof(MedicalService.ServiceCreatedAt))
+                    .IsRequired();
+                
+                b.HasMany(x => x.DepartmentMedicalServices)
+                    .WithOne(e => e.MedicalService)
+                    .IsRequired(false)
+                    .HasForeignKey(e => e.MedicalServiceId);
             });
 
             builder.Entity<DepartmentMedicalService>(b =>
@@ -204,8 +215,6 @@ public class HealthCareDbContext :
                 b.HasOne<MedicalService>(sc => sc.MedicalService)
                     .WithMany(x => x.DepartmentMedicalServices)
                     .HasForeignKey(x => x.MedicalServiceId);
-
-                b.HasIndex(x => new { x.MedicalServiceId, x.DepartmentId }).IsUnique();
             });
 
             builder.Entity<Doctor>(b =>
@@ -284,6 +293,9 @@ public class HealthCareDbContext :
 
                 b.HasOne<Doctor>().WithMany().IsRequired().HasForeignKey(x => x.DoctorId)
                     .OnDelete(DeleteBehavior.NoAction);
+                
+                b.HasOne<AppointmentType>().WithMany().IsRequired().HasForeignKey(x => x.AppointmentTypeId)
+                    .OnDelete(DeleteBehavior.NoAction);
 
                 b.HasOne<Patient>().WithMany().IsRequired().HasForeignKey(x => x.PatientId)
                     .OnDelete(DeleteBehavior.NoAction);
@@ -298,9 +310,6 @@ public class HealthCareDbContext :
                 b.ConfigureByConvention();
                 b.Property(x => x.Name).HasColumnName(nameof(AppointmentType.Name)).IsRequired()
                     .HasMaxLength(AppointmentTypeConsts.NameMaxLength);
-                
-                //Name must be unique
-                b.HasIndex(e => new { e.Name }).IsUnique();
             });
 
             builder.Entity<DoctorWorkingHour>(b =>

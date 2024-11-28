@@ -138,13 +138,18 @@ public class AppointmentManager(
         return availableDays;
     }
 
-    public virtual async Task<Appointment> CreateAsync(Guid doctorId, Guid patientId, Guid medicalServiceId,
+    public virtual async Task<Appointment> CreateAsync(
+        Guid doctorId, 
+        Guid patientId, 
+        Guid medicalServiceId,
+        Guid appointmentTypeId,
         DateTime appointmentDate, DateTime startTime,
         DateTime endTime, bool reminderSent, double amount, string? notes = null)
     {
         Check.NotNull(doctorId, nameof(doctorId));
         Check.NotNull(patientId, nameof(patientId));
         Check.NotNull(medicalServiceId, nameof(doctorId));
+        Check.NotNull(appointmentTypeId, nameof(appointmentTypeId));
         Check.NotNull(appointmentDate, nameof(appointmentDate));
         Check.NotNull(startTime, nameof(startTime));
         Check.NotNull(endTime, nameof(endTime));
@@ -172,6 +177,7 @@ public class AppointmentManager(
             doctorId: doctorId,
             patientId: patientId,
             medicalServiceId: medicalServiceId,
+            appointmentTypeId: appointmentTypeId,
             appointmentDate: appointmentDate,
             startTime: startTime,
             endTime: endTime,
@@ -184,8 +190,13 @@ public class AppointmentManager(
         return await appointmentRepository.InsertAsync(appointment);
     }
 
-    public virtual async Task<Appointment> UpdateAsync(Guid id, DateTime appointmentDate, DateTime startTime,
-        DateTime endTime, EnumAppointmentStatus status, bool reminderSent, double amount,
+    public virtual async Task<Appointment> UpdateAsync(
+        Guid id, 
+        DateTime appointmentDate, 
+        DateTime startTime,
+        DateTime endTime, 
+        EnumAppointmentStatus status, 
+        bool reminderSent, double amount,
         [CanBeNull] string? notes = null)
     {
         Check.NotNull(appointmentDate, nameof(appointmentDate));

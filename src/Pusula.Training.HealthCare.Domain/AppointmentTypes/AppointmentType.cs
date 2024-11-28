@@ -7,7 +7,8 @@ namespace Pusula.Training.HealthCare.AppointmentTypes;
 
 public class AppointmentType : FullAuditedAggregateRoot<Guid>
 {
-    [NotNull] public virtual string Name { get; set; }
+    [NotNull] 
+    public virtual string Name { get; protected set; }
 
     protected AppointmentType()
     {
@@ -16,14 +17,8 @@ public class AppointmentType : FullAuditedAggregateRoot<Guid>
 
     public AppointmentType(Guid id, string name)
     {
-        SetId(id);
-        SetName(name);
-    }
-    
-    private void SetId(Guid id)
-    {
-        Check.NotNull(id, nameof(id));
         Id = id;
+        SetName(name);
     }
 
     public void SetName(string name)

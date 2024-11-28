@@ -9,6 +9,7 @@ using Pusula.Training.HealthCare.Blazor.Models;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
+using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Navigations;
 using Volo.Abp;
@@ -53,6 +54,7 @@ public partial class Appointments
     private int DoctorLoadingShimmerCount { get; set; } = 5;
     private GetDoctorsWithDepartmentIdsInput DoctorsWithDepartmentIdsInput { get; set; }
     private int DoctorPageSize { get; } = 50;
+    private int TypePageSize { get; } = 50;
     private int DoctorCurrentPage { get; set; } = 1;
     private string DoctorCurrentSorting { get; set; } = string.Empty;
 
@@ -65,6 +67,7 @@ public partial class Appointments
     #endregion
 
     private PatientDto Patient { get; set; }
+    private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; } = [];
     private List<SelectionItem> ServicesList { get; set; }
     private SfListBox<SelectionItem[], SelectionItem> SelectServiceDropdown { get; set; } = null!;
     private AppointmentCreateDto NewAppointment { get; set; }
@@ -95,8 +98,12 @@ public partial class Appointments
     private bool IsThirdStepValid =>
         IsSecondStepValid &&
         !string.IsNullOrEmpty(StepperModel.PatientName) &&
+        IsAppointmentTypeIdValid(StepperModel.AppointmentTypeId) &&
         !string.IsNullOrEmpty(StepperModel.HospitalName);
 
+    private static bool IsAppointmentTypeIdValid(Guid? appointmentTypeId) =>
+        appointmentTypeId.HasValue && appointmentTypeId.Value != Guid.Empty;
+    
     public Appointments()
     {
         Patient = new PatientDto();
@@ -141,6 +148,7 @@ public partial class Appointments
     {
         await GetPatient();
         await GetServices();
+        await GetAppointmentTypes();
         SetDayLoadCount();
     }
 
@@ -265,24 +273,33 @@ public partial class Appointments
     {
         try
         {
-            var patientFilter = new GetPatientsInput
-            {
-                PatientNumber = PatientNo
-            };
-
-            var patients = (await PatientsAppService.GetListAsync(patientFilter)).Items;
-
-            if (patients.Count > 0)
-            {
-                Patient = patients[0];
-                StepperModel.PatientId = Patient.Id;
-                StepperModel.PatientName = Patient.FirstName + " " + Patient.LastName;
-            }
+            var patient = await PatientsAppService.GetPatientByNumberAsync(PatientNo);
+            Patient = patient;
+            StepperModel.PatientId = Patient.Id;
+            StepperModel.PatientName = Patient.FirstName + " " + Patient.LastName;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             throw;
+        }
+    }
+
+    private async Task GetAppointmentTypes(string? newValue = null)
+    {
+        try
+        {
+            IsServiceListLoading = true;
+            AppointmentTypesCollection =
+                (await AppointmentAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto { Filter = newValue, MaxResultCount = TypePageSize}))
+                .Items;
+
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            AppointmentTypesCollection = [];
+            throw new UserFriendlyException(e.Message);
         }
     }
 
@@ -541,6 +558,7 @@ public partial class Appointments
             NewAppointment.Amount = StepperModel.Amount;
             NewAppointment.Notes = StepperModel.Note;
             NewAppointment.ReminderSent = StepperModel.ReminderSent;
+            NewAppointment.AppointmentTypeId = StepperModel.AppointmentTypeId;
 
             var message = L["ConfirmMessage"];
             var confirm = L["Confirm"];
@@ -566,7 +584,7 @@ public partial class Appointments
         }
     }
 
-    private DateTime ConvertToDateTime(DateTime appointmentDate, string timeString)
+    private static DateTime ConvertToDateTime(DateTime appointmentDate, string timeString)
     {
         if (TimeSpan.TryParse(timeString, out var time))
         {

@@ -33,7 +33,7 @@ public class DepartmentManager(IDepartmentRepository departmentRepository) : Dom
 
         var department = await departmentRepository.GetAsync(id);
 
-        department.Name = name;
+        department.SetName(name);
 
         department.SetConcurrencyStampIfNotNull(concurrencyStamp);
         return await departmentRepository.UpdateAsync(department);

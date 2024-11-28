@@ -66,13 +66,10 @@
                 }
                 <GridColumn Field="@nameof(AppointmentTypeDto.Name)" HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
                 <GridColumn HeaderText="@L["Actions"]" Width="150">
-                    <Template>
-                        @{
-                            var type = (context as AppointmentTypeDto);
-                        }
-                        <SfButton IconCss="e-icons e-edit" CssClass="e-primary" OnClick="@(args => OpenEditDialog(type))">
+                    <Template Context="context">
+                        <SfButton IconCss="e-icons e-edit" CssClass="e-primary" OnClick="@(() => OpenEditDialog((AppointmentTypeDto)context))">
                         </SfButton>
-                        <SfButton IconCss="e-icons e-delete" CssClass="e-danger" OnClick="@(args => DeleteTypeAsync(type))">
+                        <SfButton IconCss="e-icons e-delete" CssClass="e-danger" OnClick="@(() => DeleteTypeAsync((AppointmentTypeDto)context))">
                         </SfButton>
                     </Template>
                 </GridColumn>

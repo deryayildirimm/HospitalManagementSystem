@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Appointments;
@@ -46,6 +47,7 @@ namespace Pusula.Training.HealthCare
         public async Task SeedAsync(DataSeedContext context)
         {
             await SeedCityRecords();
+            await SeedAppointmentTypes();
             await SeedPatientRecords();
             await SeedRoleRecords();
             await SeedDistrictRecords();
@@ -58,7 +60,6 @@ namespace Pusula.Training.HealthCare
             await SeedAppointments();
             await SeedTestCategoryRecords();
             await SeedTestRecords();
-            await SeedAppointmentTypes();
         }
 
         private async Task SeedTitles()
@@ -133,32 +134,31 @@ namespace Pusula.Training.HealthCare
         private async Task SeedMedicalServiceToDepartments()
         {
             if (await medicalServiceRepository.GetCountAsync() == 0
-                || await medicalServiceRepository.GetCountAsync() == 0)
+                || await departmentRepository.GetCountAsync() == 0)
             {
                 return;
             }
 
-            var medicalServices = await medicalServiceRepository.GetListAsync();
-            var departments = await departmentRepository.GetListAsync();
+            var medicalServices = await medicalServiceRepository.GetListAsync(includeDetails: true);
+            var departments = await departmentRepository.GetListAsync(includeDetails: true);
+
+            var medicalServiceIndex = 0;
 
             foreach (var department in departments)
             {
-                var random = new Random();
-
-                var randomServices = medicalServices.OrderBy(ms => random.Next()).Take(2).ToList();
-                foreach (var service in randomServices)
+                if (medicalServiceIndex >= medicalServices.Count)
                 {
-                    var departmentMedicalService = new DepartmentMedicalService
-                    {
-                        MedicalServiceId = service.Id,
-                        DepartmentId = department.Id
-                    };
-
-                    service.DepartmentMedicalServices.Add(departmentMedicalService);
+                    medicalServiceIndex = 0;
                 }
-            }
 
-            await departmentRepository.UpdateManyAsync(departments, true);
+                var service = medicalServices[medicalServiceIndex];
+
+                service.DepartmentMedicalServices = new Collection<DepartmentMedicalService>();
+                
+                service.AddDepartment(department.Id);
+                await medicalServiceRepository.UpdateAsync(service, true);
+                medicalServiceIndex++;
+            }
         }
 
         private async Task SeedPatientRecords()
@@ -560,12 +560,16 @@ namespace Pusula.Training.HealthCare
         {
             if (await medicalServiceRepository.GetCountAsync() == 0
                 || await patientRepository.GetCountAsync() == 0
-                || await doctorRepository.GetCountAsync() == 0)
+                || await doctorRepository.GetCountAsync() == 0
+                || await appointmentTypeRepository.GetCountAsync() == 0)
+            {
                 return;
+            }
 
             var medicalServices = await medicalServiceRepository.GetListAsync();
             var doctors = await doctorRepository.GetListAsync();
             var patients = await patientRepository.GetListAsync();
+            var types = await appointmentTypeRepository.GetListAsync();
 
             var random = new Random();
             var startHour = TimeSpan.FromHours(9);
@@ -591,7 +595,7 @@ namespace Pusula.Training.HealthCare
                 var patientAppointments =
                     new HashSet<(DateTime, TimeSpan)>();
 
-                for (int i = 0; i < 10; i++)
+                for (var i = 0; i < 10; i++)
                 {
                     bool isSlotTaken;
                     TimeSpan appointmentTime;
@@ -611,6 +615,7 @@ namespace Pusula.Training.HealthCare
                             doctor.Id,
                             patient.Id,
                             medicalService.Id,
+                            types[random.Next(types.Count)].Id,
                             appointmentDate,
                             appointmentDate + appointmentTime,
                             appointmentDate + appointmentTime + serviceDuration,
@@ -672,19 +677,18 @@ namespace Pusula.Training.HealthCare
 
         private async Task SeedAppointmentTypes()
         {
-            if (await appointmentTypeRepository.GetCountAsync() == 0)
-                return;
-
-            var appointmentTypes = new List<AppointmentType>
+            if (await appointmentTypeRepository.GetCountAsync() > 0)
             {
-                new AppointmentType(guidGenerator.Create(), "General Checkup"),
-                new AppointmentType(guidGenerator.Create(), "Operation"),
-                new AppointmentType(guidGenerator.Create(), "Dental Appointment"),
-                new AppointmentType(guidGenerator.Create(), "Pediatrics"),
-                new AppointmentType(guidGenerator.Create(), "Cardiology Consultation")
-            };
+                return;
+            }
 
-            await appointmentTypeRepository.InsertManyAsync(appointmentTypes, true);
+            await appointmentTypeRepository.InsertAsync(new AppointmentType(guidGenerator.Create(), "Operation"), true);
+            await appointmentTypeRepository.InsertAsync(new AppointmentType(guidGenerator.Create(), "General Checkup"),
+                true);
+            await appointmentTypeRepository.InsertAsync(
+                new AppointmentType(guidGenerator.Create(), "Cardiology Consultation"), true);
+            await appointmentTypeRepository.InsertAsync(
+                new AppointmentType(guidGenerator.Create(), "Pediatrics"), true);
         }
     }
 }

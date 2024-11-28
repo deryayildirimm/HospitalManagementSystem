@@ -59,7 +59,7 @@ public class MedicalServicesAppService(
         return new PagedResultDto<MedicalServiceWithDepartmentsDto>
         {
             TotalCount = totalCount,
-            Items = ObjectMapper.Map<List<MedicalServiceWithDepartments>, List<MedicalServiceWithDepartmentsDto>>(items)        
+            Items = ObjectMapper.Map<List<MedicalServiceWithDepartments>, List<MedicalServiceWithDepartmentsDto>>(items)
         };
     }
 
@@ -165,16 +165,12 @@ public class MedicalServicesAppService(
     }
 
     public async Task DeleteByIdsAsync(List<Guid> medicalServiceIds)
-    {
-        await medicalServiceRepository.DeleteManyAsync(medicalServiceIds);
-    }
+        => await medicalServiceRepository.DeleteManyAsync(medicalServiceIds);
 
 
     [Authorize(HealthCarePermissions.MedicalServices.Delete)]
     public virtual async Task DeleteAllAsync(GetMedicalServiceInput input)
-    {
-        await medicalServiceRepository.DeleteAllAsync(input.Name, input.CostMin, input.CostMax);
-    }
+        => await medicalServiceRepository.DeleteAllAsync(input.Name, input.CostMin, input.CostMax);
 
     public virtual async Task<DownloadTokenResultDto> GetDownloadTokenAsync()
     {

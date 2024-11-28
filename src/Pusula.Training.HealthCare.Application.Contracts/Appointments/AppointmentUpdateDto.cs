@@ -17,6 +17,9 @@ public class AppointmentUpdateDto
     public Guid MedicalServiceId { get; set; }
     
     [Required]
+    public Guid AppointmentTypeId { get; set; }
+    
+    [Required]
     public DateTime AppointmentDate { get; set; }
     
     [Required]

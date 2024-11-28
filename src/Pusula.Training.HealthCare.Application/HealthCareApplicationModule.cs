@@ -59,11 +59,7 @@ public class HealthCareApplicationModule : AbpModule
         {
             options.AddMaps<HealthCareApplicationModule>();
         });
-
-#if DEBUG
-        context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
-#endif
-
+        
         Configure<AbpBackgroundJobWorkerOptions>(options =>
         {
             options.DefaultFirstWaitDuration = 10;
