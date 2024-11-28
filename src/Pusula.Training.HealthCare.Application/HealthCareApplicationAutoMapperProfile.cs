@@ -5,6 +5,7 @@ using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Shared;
 using System;
+using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Cities;
 using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.DoctorLeaves;
@@ -101,9 +102,12 @@ public class HealthCareApplicationAutoMapperProfile : Profile
 
         CreateMap<BloodTestResult, BloodTestResultDto>();
         CreateMap<BloodTestResultWithNavigationProperties, BloodTestResultWithNavigationPropertiesDto>();
-
-
+        
         CreateMap<Test, TestDto>();
         CreateMap<TestWithNavigationProperties, TestWithNavigationPropertiesDto>();
+        
+        CreateMap<AppointmentType, AppointmentTypeDto>();
+        CreateMap<AppointmentTypeDto, AppointmentTypeUpdateDto>();
+        CreateMap<AppointmentType, AppointmentTypeExcelDto>();
     }
 }

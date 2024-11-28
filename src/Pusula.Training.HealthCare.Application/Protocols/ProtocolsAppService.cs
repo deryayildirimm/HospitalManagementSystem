@@ -54,7 +54,7 @@ namespace Pusula.Training.HealthCare.Protocols
         {
             var query = (await patientRepository.GetQueryableAsync())
                 .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                    x => x.FirstName != null && x.FirstName.Contains(input.Filter!));
+                    x => x.FirstName.Contains(input.Filter!));
 
             var lookupData = await query.PageBy(input.SkipCount, input.MaxResultCount).ToDynamicListAsync<Patients.Patient>();
             var totalCount = query.Count();
@@ -69,7 +69,7 @@ namespace Pusula.Training.HealthCare.Protocols
         {
             var query = (await departmentRepository.GetQueryableAsync())
                 .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                    x => x.Name != null && x.Name.Contains(input.Filter!));
+                    x => x.Name.Contains(input.Filter!));
 
             var lookupData = await query.PageBy(input.SkipCount, input.MaxResultCount).ToDynamicListAsync<Departments.Department>();
             var totalCount = query.Count();

@@ -23,69 +23,29 @@ public class AppointmentManager(
         Guid medicalServiceId,
         DateTime date)
     {
-        //Check doctor's working hours on the selected date
-        var workingHour = await doctorWorkingHourRepository
-            .FirstOrDefaultAsync(x => x.DoctorId == doctorId
-                                      && date.DayOfWeek == x.DayOfWeek);
+        var workingHour = await GetDoctorWorkingHourAsync(doctorId, date);
+        var medicalService = await GetMedicalServiceAsync(medicalServiceId);
+        var doctorAppointmentTimes = await GetDoctorAppointmentTimesAsync(doctorId, date);
 
-        if (workingHour == null)
+        var slots = GenerateAppointmentSlots(
+            startTime: workingHour.StartHour,
+            endTime: workingHour.EndHour,
+            durationMinutes: medicalService.Duration,
+            date: date,
+            offset: 1,
+            skipPastSlots: true);
+
+        return slots.Select(slot => new AppointmentSlotDto
         {
-            throw new DoctorNotWorkingException();
-        }
-
-        //Check if medical service exist
-        var medicalService = await medicalServiceRepository
-            .FirstOrDefaultAsync(x => x.Id == medicalServiceId);
-
-        if (medicalService == null)
-        {
-            throw new MedicalServiceNotFoundException();
-        }
-
-        //Check doctor's appointments on the selected date
-        var doctorAppointments = await appointmentRepository
-            .GetListAsync(x => x.DoctorId == doctorId
-                               && x.AppointmentDate.Date == date.Date);
-
-        //Retrieve doctor's appointment times on the selected date
-        var doctorAppointmentTimes = doctorAppointments.Select(x => new
-        {
-            StartTime = x.StartTime.TimeOfDay,
-            EndTime = x.EndTime.TimeOfDay
+            DoctorId = doctorId,
+            MedicalServiceId = medicalService.Id,
+            Date = date,
+            StartTime = slot.StartTime,
+            EndTime = slot.EndTime,
+            AvailabilityValue = !doctorAppointmentTimes.Any(appointment =>
+                appointment.StartTime < TimeSpan.Parse(slot.EndTime) &&
+                appointment.EndTime > TimeSpan.Parse(slot.StartTime))
         }).ToList();
-
-        var startTime = workingHour.StartHour;
-        var endTime = workingHour.EndHour;
-        var serviceDuration = TimeSpan.FromMinutes(medicalService.Duration);
-
-        var availableSlots = new List<AppointmentSlotDto>();
-
-        for (var appointmentTime = startTime;
-             appointmentTime + serviceDuration <= endTime;
-             appointmentTime += serviceDuration)
-        {
-            // Skip creating slots for past times on the current date
-            if (date.Date == DateTime.Now.Date && appointmentTime < DateTime.Now.TimeOfDay)
-            {
-                continue;
-            }
-
-            //Check if doctor has another appointment at the same time
-            var isAvailable = !doctorAppointmentTimes.Any(slot =>
-                appointmentTime >= slot.StartTime && appointmentTime < slot.EndTime);
-
-            availableSlots.Add(new AppointmentSlotDto
-            {
-                Date = date,
-                StartTime = appointmentTime.ToString(@"hh\:mm"),
-                EndTime = appointmentTime.Add(serviceDuration).ToString(@"hh\:mm"),
-                DoctorId = doctorId,
-                MedicalServiceId = medicalService.Id,
-                AvailabilityValue = isAvailable,
-            });
-        }
-
-        return availableSlots;
     }
 
     public virtual async Task<List<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(Guid doctorId,
@@ -247,5 +207,79 @@ public class AppointmentManager(
         appointment.SetAmount(amount);
 
         return await appointmentRepository.UpdateAsync(appointment);
+    }
+
+    private async Task<DoctorWorkingHour> GetDoctorWorkingHourAsync(Guid doctorId, DateTime date)
+    {
+        var workingHour = await doctorWorkingHourRepository
+            .FirstOrDefaultAsync(x => x.DoctorId == doctorId && date.DayOfWeek == x.DayOfWeek);
+
+        if (workingHour == null)
+        {
+            throw new DoctorNotWorkingException();
+        }
+
+        return workingHour;
+    }
+
+    private async Task<MedicalService> GetMedicalServiceAsync(Guid medicalServiceId)
+    {
+        var medicalService = await medicalServiceRepository
+            .FirstOrDefaultAsync(x => x.Id == medicalServiceId);
+
+        if (medicalService == null)
+        {
+            throw new MedicalServiceNotFoundException();
+        }
+
+        return medicalService;
+    }
+
+    private async Task<List<(TimeSpan StartTime, TimeSpan EndTime)>> GetDoctorAppointmentTimesAsync(Guid doctorId,
+        DateTime date)
+    {
+        return (await appointmentRepository
+                .GetListAsync(x => x.DoctorId == doctorId && x.AppointmentDate.Date == date.Date))
+            .Select(x => (StartTime: x.StartTime.TimeOfDay, EndTime: x.EndTime.TimeOfDay))
+            .ToList();
+    }
+    
+    private async Task<List<Appointment>> GetAppointments(Guid doctorId, DateTime startDate, int offset)
+    {
+        return await appointmentRepository
+            .GetListAsync(x => x.DoctorId == doctorId
+                               && x.AppointmentDate.Date >= startDate.Date
+                               && x.AppointmentDate.Date < startDate.Date.AddDays(offset));
+    }
+
+    private List<AppointmentSlotBaseDto> GenerateAppointmentSlots(
+        TimeSpan startTime,
+        TimeSpan endTime,
+        int durationMinutes,
+        DateTime date,
+        int offset,
+        bool skipPastSlots = true)
+    {
+        var slots = new List<AppointmentSlotBaseDto>();
+        var serviceDuration = TimeSpan.FromMinutes(durationMinutes);
+
+        for (var appointmentTime = startTime;
+             appointmentTime + serviceDuration <= endTime;
+             appointmentTime += serviceDuration)
+        {
+            if (skipPastSlots && date.Date == DateTime.Now.Date && appointmentTime < DateTime.Now.TimeOfDay)
+            {
+                continue;
+            }
+
+            slots.Add(new AppointmentSlotBaseDto
+            {
+                Date = date,
+                StartTime = appointmentTime.ToString(@"hh\:mm"),
+                EndTime = appointmentTime.Add(serviceDuration).ToString(@"hh\:mm"),
+            });
+        }
+
+        return slots;
     }
 }

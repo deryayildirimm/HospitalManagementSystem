@@ -18,7 +18,8 @@ namespace Pusula.Training.HealthCare.Departments
     [RemoteService(IsEnabled = false)]
     [Authorize(HealthCarePermissions.Departments.Default)]
     public class DepartmentsAppService(IDepartmentRepository departmentRepository, 
-        DepartmentManager departmentManager, IDistributedCache<DepartmentDownloadTokenCacheItem, string> downloadTokenCache) 
+        DepartmentManager departmentManager, 
+        IDistributedCache<DepartmentDownloadTokenCacheItem, string> downloadTokenCache) 
         : HealthCareAppService, IDepartmentsAppService
     {
         public virtual async Task<PagedResultDto<DepartmentDto>> GetListAsync(GetDepartmentsInput input)

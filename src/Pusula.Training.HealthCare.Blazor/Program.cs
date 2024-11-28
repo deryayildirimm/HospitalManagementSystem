@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Pusula.Training.HealthCare.Blazor.Services;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
@@ -57,6 +58,7 @@ public class Program
             // Syncfusion Blazor hizmeti ekleniyor
             builder.Services.AddSyncfusionBlazor();
 
+            builder.Services.AddScoped<AppointmentTypeAdaptor>();
 
             // Serilog ve diğer ayarları ekleme
             builder.Host.AddAppSettingsSecretsJson()

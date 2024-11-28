@@ -1,5 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
+using Pusula.Training.HealthCare.Appointments;
+using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Cities;
 using Volo.Abp.Uow;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
@@ -20,6 +22,7 @@ using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalPersonnel;
+using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Titles;
 
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
@@ -63,6 +66,9 @@ public class HealthCareEntityFrameworkCoreModule : AbpModule
             options.AddRepository<MedicalStaff, EfCoreMedicalStaffRepository>();
             options.AddRepository<City, EfCoreCityRepository>();
             options.AddRepository<District, EfCoreDistrictRepository>();
+            options.AddRepository<MedicalService, EfCoreMedicalServiceRepository>();
+            options.AddRepository<Appointment, EfCoreAppointmentRepository>();
+            options.AddRepository<AppointmentType, EfCoreAppointmentTypeRepository>();
         });
 
         Configure<AbpDbContextOptions>(options =>

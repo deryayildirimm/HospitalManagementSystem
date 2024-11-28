@@ -64,6 +64,16 @@
     "Menu:Patients": "Patients",
     "Menu:HealthCare": "Health Care",
     "Menu:MedicalServices": "Medical Services",
+    "Menu:Operations": "Operations",
+    "Menu:Appointment": "Appointments",
+    "Menu:Reports": "Reports",
+    "Menu:AppointmentList": "Appointment List",
+    "Menu:AppointmentsOverview": "Appointments Overview",
+    "Menu:Appointments": "Appointments",
+    "Menu:AppointmentTypes": "Appointment Types",
+    "Permission:AppointmentTypes": "Appointment Types",
+    "Menu:Definitions" : "Definitions",
+    "AppointmentTypes": "Appointment Types",
     "Patient": "Patient",
     "Permission:Protocols": "Protocols",
     "Type": "Type",
@@ -182,6 +192,10 @@
     "MyPatients": "My Patients",
     "BloodTests": "Blood Tests",
     "Menu:BloodTests": "Blood Tests",
-    "Menu:MyPatients": "My Patients"
+    "Menu:MyPatients": "My Patients",
+    "UpdateAppointmentType": "Update Appointment Type",
+    "NewAppointmentType": "New Appointment Type",
+    "DeleteRecord": "Delete Record",
+    "AreYouSureDeleteCount": "All {0} items on this page are selected"
   }
 }

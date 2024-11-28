@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pusula.Training.HealthCare.Appointments;
+using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Cities;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.DoctorLeaves;
@@ -57,6 +58,7 @@ public class HealthCareDbContext :
     public DbSet<BloodTestResult> BloodTestResults { get; set; } = null!;
 
     public DbSet<Appointment> Appointments { get; set; } = null!;
+    public DbSet<AppointmentType> AppointmentTypes { get; set; } = null!;
     public DbSet<DoctorWorkingHour> DoctorWorkingHours { get; set; } = null!;
 
     #region Entities from the modules
@@ -258,7 +260,7 @@ public class HealthCareDbContext :
                 b.Property(a => a.StartTime)
                     .IsRequired()
                     .HasColumnName(nameof(Appointment.StartTime));
-                
+
                 b.Property(a => a.EndTime)
                     .IsRequired()
                     .HasColumnName(nameof(Appointment.EndTime));
@@ -290,6 +292,17 @@ public class HealthCareDbContext :
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
+            builder.Entity<AppointmentType>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "AppointmentTypes", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.Name).HasColumnName(nameof(AppointmentType.Name)).IsRequired()
+                    .HasMaxLength(AppointmentTypeConsts.NameMaxLength);
+                
+                //Name must be unique
+                b.HasIndex(e => new { e.Name }).IsUnique();
+            });
+
             builder.Entity<DoctorWorkingHour>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "DoctorWorkingHours", HealthCareConsts.DbSchema);
@@ -303,7 +316,7 @@ public class HealthCareDbContext :
                 // Unique constraint: Prevent multiple working hours entries for the same doctor on the same day
                 b.HasIndex(x => new { x.DoctorId, x.DayOfWeek }).IsUnique();
             });
-            
+
             builder.Entity<DoctorLeave>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "DoctorLeaves", HealthCareConsts.DbSchema);
@@ -313,9 +326,8 @@ public class HealthCareDbContext :
                 b.Property(x => x.Reason).HasColumnName(nameof(DoctorLeave.Reason)).HasMaxLength(200);
                 b.HasOne<Doctor>().WithMany().IsRequired().HasForeignKey(x => x.DoctorId)
                     .OnDelete(DeleteBehavior.Cascade);
-
             });
-            
+
             builder.Entity<MedicalStaff>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "MedicalStaff", HealthCareConsts.DbSchema);
@@ -381,7 +393,7 @@ public class HealthCareDbContext :
                 b.Property(x => x.Name).HasColumnName(nameof(TestCategory.Name)).IsRequired()
                     .HasMaxLength(BloodTestConst.CategoryNameMax);
                 b.Property(x => x.Description).HasColumnName(nameof(TestCategory.Description)).IsRequired()
-                   .HasMaxLength(BloodTestConst.CategoryDescriptionMax);
+                    .HasMaxLength(BloodTestConst.CategoryDescriptionMax);
                 b.Property(x => x.Url).HasColumnName(nameof(TestCategory.Url)).IsRequired();
                 b.Property(x => x.Price).HasColumnName(nameof(TestCategory.Price)).IsRequired();
             });
@@ -395,7 +407,7 @@ public class HealthCareDbContext :
                 b.Property(x => x.MinValue).HasColumnName(nameof(Test.MinValue)).IsRequired();
                 b.Property(x => x.MaxValue).HasColumnName(nameof(Test.MaxValue)).IsRequired();
                 b.HasOne<TestCategory>().WithMany().IsRequired().HasForeignKey(x => x.TestCategoryId)
-                   .OnDelete(DeleteBehavior.NoAction);
+                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             builder.Entity<BloodTestResult>(b =>
@@ -403,13 +415,13 @@ public class HealthCareDbContext :
                 b.ToTable(HealthCareConsts.DbTablePrefix + "BloodTestResults", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
                 b.Property(x => x.Value).HasColumnName(nameof(BloodTestResult.Value)).IsRequired();
-                b.Property(x => x.BloodResultStatus).HasColumnName(nameof(BloodTestResult.BloodResultStatus)).IsRequired();
+                b.Property(x => x.BloodResultStatus).HasColumnName(nameof(BloodTestResult.BloodResultStatus))
+                    .IsRequired();
                 b.HasOne<BloodTest>().WithMany().IsRequired().HasForeignKey(x => x.BloodTestId)
-                   .OnDelete(DeleteBehavior.NoAction);
+                    .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne<Test>().WithMany().IsRequired().HasForeignKey(x => x.TestId)
-                   .OnDelete(DeleteBehavior.NoAction);
+                    .OnDelete(DeleteBehavior.NoAction);
             });
-            
         }
     }
 }

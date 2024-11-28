@@ -42,6 +42,12 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         appointmentPermission.AddChild(HealthCarePermissions.Appointments.Edit, L("Permission:Edit"));
         appointmentPermission.AddChild(HealthCarePermissions.Appointments.Delete, L("Permission:Delete"));
 
+        var appointmentTypesPermission = myGroup.AddPermission(HealthCarePermissions.AppointmentTypes.Default, L("Permission:AppointmentTypes"));
+        appointmentTypesPermission.AddChild(HealthCarePermissions.AppointmentTypes.Create, L("Permission:Create"));
+        appointmentTypesPermission.AddChild(HealthCarePermissions.AppointmentTypes.Edit, L("Permission:Edit"));
+        appointmentTypesPermission.AddChild(HealthCarePermissions.AppointmentTypes.Delete, L("Permission:Delete"));
+        
+        
         var titlePermission = myGroup.AddPermission(HealthCarePermissions.Titles.Default, L("Permission:Titles"));
         titlePermission.AddChild(HealthCarePermissions.Titles.Create, L("Permission:Create"));
         titlePermission.AddChild(HealthCarePermissions.Titles.Edit, L("Permission:Edit"));
@@ -87,6 +93,9 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Edit, L("Permission:Edit"));
         bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Delete, L("Permission:Delete"));
 
+        
+        
+        
     }
 
     private static LocalizableString L(string name)

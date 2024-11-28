@@ -18,11 +18,11 @@ namespace Pusula.Training.HealthCare.Controllers.Appointments;
 public class AppointmentController(IAppointmentAppService appointmentAppService)
     : HealthCareController, IAppointmentAppService
 {
-    
     [HttpGet]
     [Route("available-days-lookup")]
-    public virtual Task<PagedResultDto<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(GetAppointmentsLookupInput input)
-    => appointmentAppService.GetAvailableDaysLookupAsync(input);
+    public virtual Task<PagedResultDto<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(
+        GetAppointmentsLookupInput input)
+        => appointmentAppService.GetAvailableDaysLookupAsync(input);
 
     [HttpGet]
     [Route("available-slots")]

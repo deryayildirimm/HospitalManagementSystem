@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Appointments;
+using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Cities;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Tests;
@@ -31,6 +32,7 @@ namespace Pusula.Training.HealthCare
         IPatientRepository patientRepository,
         IDepartmentRepository departmentRepository,
         IAppointmentRepository appointmentRepository,
+        IAppointmentTypeRepository appointmentTypeRepository,
         ITitleRepository titleRepository,
         IMedicalServiceRepository medicalServiceRepository,
         IRepository<Doctor> doctorRepository,
@@ -42,11 +44,6 @@ namespace Pusula.Training.HealthCare
         IRepository<Test, Guid> testRepository) : IDataSeedContributor, ITransientDependency
     {
         public async Task SeedAsync(DataSeedContext context)
-        {
-            await SetRoles();
-        }
-
-        private async Task SetRoles()
         {
             await SeedCityRecords();
             await SeedPatientRecords();
@@ -61,6 +58,7 @@ namespace Pusula.Training.HealthCare
             await SeedAppointments();
             await SeedTestCategoryRecords();
             await SeedTestRecords();
+            await SeedAppointmentTypes();
         }
 
         private async Task SeedTitles()
@@ -75,6 +73,7 @@ namespace Pusula.Training.HealthCare
 
             await titleRepository.InsertManyAsync(titles, autoSave: true);
         }
+
         private async Task SeedMedicalServiceRecords()
         {
             if (await medicalServiceRepository.GetCountAsync() > 0)
@@ -247,11 +246,15 @@ namespace Pusula.Training.HealthCare
                 return;
 
             await testCategoryRepository.InsertAsync(
-                new TestCategory(Guid.NewGuid(), "Hematological Tests", "Measures blood cells (red blood cells, white blood cells) and related values.", "1.png", 1500),true);
+                new TestCategory(Guid.NewGuid(), "Hematological Tests",
+                    "Measures blood cells (red blood cells, white blood cells) and related values.", "1.png", 1500),
+                true);
             await testCategoryRepository.InsertAsync(
-                new TestCategory(Guid.NewGuid(), "Biochemical Tests", "Measures vitamins, mineral levels and other chemical values.", "2.jpg", 2000),true);
+                new TestCategory(Guid.NewGuid(), "Biochemical Tests",
+                    "Measures vitamins, mineral levels and other chemical values.", "2.jpg", 2000), true);
             await testCategoryRepository.InsertAsync(
-                new TestCategory(Guid.NewGuid(), "Hormonal Tests", "Measures hormone levels and endocrine functions.", "3.jpg", 2500),true);
+                new TestCategory(Guid.NewGuid(), "Hormonal Tests", "Measures hormone levels and endocrine functions.",
+                    "3.jpg", 2500), true);
         }
 
         private async Task SeedTestRecords()
@@ -260,8 +263,10 @@ namespace Pusula.Training.HealthCare
             if (testCount > 0)
                 return;
 
-            var hematologicalCategory = await testCategoryRepository.FirstOrDefaultAsync(tc => tc.Name == "Hematological Tests");
-            var biochemicalCategory = await testCategoryRepository.FirstOrDefaultAsync(tc => tc.Name == "Biochemical Tests");
+            var hematologicalCategory =
+                await testCategoryRepository.FirstOrDefaultAsync(tc => tc.Name == "Hematological Tests");
+            var biochemicalCategory =
+                await testCategoryRepository.FirstOrDefaultAsync(tc => tc.Name == "Biochemical Tests");
             var hormonalCategory = await testCategoryRepository.FirstOrDefaultAsync(tc => tc.Name == "Hormonal Tests");
 
             if (hematologicalCategory == null || biochemicalCategory == null || hormonalCategory == null)
@@ -271,19 +276,19 @@ namespace Pusula.Training.HealthCare
 
             var testList = new List<Test>
             {
-                new Test(guidGenerator.Create(),hematologicalCategory.Id,"Hemoglobin",13.5,17.5),
-                new Test(guidGenerator.Create(),hematologicalCategory.Id,"Hematocrit",38.0,50.0),
-                new Test(guidGenerator.Create(),hematologicalCategory.Id,"White Blood Cell Count",4.0,11.0),
+                new Test(guidGenerator.Create(), hematologicalCategory.Id, "Hemoglobin", 13.5, 17.5),
+                new Test(guidGenerator.Create(), hematologicalCategory.Id, "Hematocrit", 38.0, 50.0),
+                new Test(guidGenerator.Create(), hematologicalCategory.Id, "White Blood Cell Count", 4.0, 11.0),
 
-                new Test(guidGenerator.Create(),biochemicalCategory.Id,"Glucose",70,99),
-                new Test(guidGenerator.Create(),biochemicalCategory.Id,"Cholesterol",125,200),
-                new Test(guidGenerator.Create(),biochemicalCategory.Id,"Creatinine",0.6,1.2),
+                new Test(guidGenerator.Create(), biochemicalCategory.Id, "Glucose", 70, 99),
+                new Test(guidGenerator.Create(), biochemicalCategory.Id, "Cholesterol", 125, 200),
+                new Test(guidGenerator.Create(), biochemicalCategory.Id, "Creatinine", 0.6, 1.2),
 
-                new Test(guidGenerator.Create(),hormonalCategory.Id,"TSH",0.5,5.5),
-                new Test(guidGenerator.Create(),hormonalCategory.Id,"Free T3",2.3,4.2),
-                new Test(guidGenerator.Create(),hormonalCategory.Id,"Free T4",0.7,1.8)
+                new Test(guidGenerator.Create(), hormonalCategory.Id, "TSH", 0.5, 5.5),
+                new Test(guidGenerator.Create(), hormonalCategory.Id, "Free T3", 2.3, 4.2),
+                new Test(guidGenerator.Create(), hormonalCategory.Id, "Free T4", 0.7, 1.8)
             };
-            await testRepository.InsertManyAsync(testList);
+            await testRepository.InsertManyAsync(testList, true);
         }
 
         private async Task SeedCityRecords()
@@ -503,6 +508,7 @@ namespace Pusula.Training.HealthCare
             await doctorRepository.InsertAsync(d8, true);
             await doctorRepository.InsertAsync(d9, true);
         }
+
         private async Task SeedRoleRecords()
         {
             var doctor = new IdentityRole(guidGenerator.Create(), "doctor", null)
@@ -524,7 +530,7 @@ namespace Pusula.Training.HealthCare
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Patients.Default, true);
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Patients.Create, true);
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Patients.Delete, true);
-            
+
             //Doctor permissions
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Doctors.Default, true);
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Doctors.Create, true);
@@ -641,7 +647,7 @@ namespace Pusula.Training.HealthCare
                 }
             }
 
-            await appointmentRepository.InsertManyAsync(allAppointments);
+            await appointmentRepository.InsertManyAsync(allAppointments, true);
         }
 
         private async Task SeedDoctorWorkingHours()
@@ -662,6 +668,23 @@ namespace Pusula.Training.HealthCare
                     await doctorWorkingHourRepository.InsertAsync(doctorWorkingHour);
                 }
             }
+        }
+
+        private async Task SeedAppointmentTypes()
+        {
+            if (await appointmentTypeRepository.GetCountAsync() == 0)
+                return;
+
+            var appointmentTypes = new List<AppointmentType>
+            {
+                new AppointmentType(guidGenerator.Create(), "General Checkup"),
+                new AppointmentType(guidGenerator.Create(), "Operation"),
+                new AppointmentType(guidGenerator.Create(), "Dental Appointment"),
+                new AppointmentType(guidGenerator.Create(), "Pediatrics"),
+                new AppointmentType(guidGenerator.Create(), "Cardiology Consultation")
+            };
+
+            await appointmentTypeRepository.InsertManyAsync(appointmentTypes, true);
         }
     }
 }
