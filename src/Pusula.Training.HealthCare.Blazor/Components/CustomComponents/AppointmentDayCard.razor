@@ -1,0 +1,18 @@
+
+<div class="day-card @(Item.IsSelected ? "active" : "")" @onclick="() => OnSelectAppointmentDay.InvokeAsync(Item)">
+    <div class="day-name">@Item.Date.ToString("ddd")</div>
+    <div class="day-number">@Item.Date.Day</div>
+    <div class="month">@Item.Date.ToString("MMM")</div>
+    <div class="is-day-available @(Item.AvailabilityValue ? "success-color" : "fail-color")">
+    </div>
+    <div class="available-slots">
+        <div class="small-circle @(Item.AvailableSlotCount > 0 ? "success-color" : "fail-color")">
+        </div>
+        <Text Class="month">@Item.AvailableSlotCount</Text>
+    </div>
+</div>
+
+@code {
+    [Parameter] public AppointmentDayLookupItem Item { get; set; } = null!;
+    [Parameter] public EventCallback<AppointmentDayLookupItem> OnSelectAppointmentDay { get; set; }
+}

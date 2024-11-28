@@ -103,7 +103,7 @@ public partial class Appointments
 
     private static bool IsAppointmentTypeIdValid(Guid? appointmentTypeId) =>
         appointmentTypeId.HasValue && appointmentTypeId.Value != Guid.Empty;
-    
+
     public Appointments()
     {
         Patient = new PatientDto();
@@ -291,7 +291,8 @@ public partial class Appointments
         {
             IsServiceListLoading = true;
             AppointmentTypesCollection =
-                (await AppointmentAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto { Filter = newValue, MaxResultCount = TypePageSize}))
+                (await AppointmentAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto
+                    { Filter = newValue, MaxResultCount = TypePageSize }))
                 .Items;
 
             StateHasChanged();
