@@ -335,11 +335,11 @@ public class HealthCareDbContext :
                 b.Property(x => x.PhoneNumber).HasColumnName(nameof(MedicalStaff.PhoneNumber))
                     .HasMaxLength(MedicalStaffConsts.PhoneNumberMaxLength);
                 b.Property(x => x.StartDate).HasColumnName(nameof(MedicalStaff.StartDate)).IsRequired();
-                b.HasOne<City>().WithMany().IsRequired().HasForeignKey(x => x.CityId)
+                b.HasOne(m => m.City).WithMany().IsRequired().HasForeignKey(x => x.CityId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<District>().WithMany().IsRequired().HasForeignKey(x => x.DistrictId)
+                b.HasOne(m => m.District).WithMany().IsRequired().HasForeignKey(x => x.DistrictId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
+                b.HasOne(m => m.Department).WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 

@@ -222,6 +222,17 @@
                     </Template>
                 </GridColumn>
 
+                <GridColumn HeaderText="@L["Location"]">
+                    <Template>
+                        @{
+                        var medicalStaff = (context as MedicalStaffWithNavigationPropertiesDto);
+                        var city = medicalStaff?.MedicalStaff.City?.Name ?? "";
+                        var district = medicalStaff?.District?.Name ?? "";
+                        }
+                        @city - @district
+                    </Template>
+                </GridColumn>
+                
                 <GridColumn HeaderText="@L["Department"]">
                     <Template>
                         @{
