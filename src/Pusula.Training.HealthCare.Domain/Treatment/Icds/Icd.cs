@@ -25,17 +25,27 @@ public class Icd : FullAuditedAggregateRoot<Guid>
 
     public Icd(Guid id, string codeChapter, string codeNumber, string detail)
     {
-        Check.NotNullOrWhiteSpace(codeChapter, nameof(codeChapter), IcdConsts.CodeChapterLength, IcdConsts.CodeChapterLength);
-        Check.NotNullOrWhiteSpace(codeNumber, nameof(codeNumber), IcdConsts.CodeNumberMaxLength, IcdConsts.CodeNumberMinLength);
-        Check.NotNullOrWhiteSpace(detail, nameof(detail), IcdConsts.DetailMaxLength, IcdConsts.DetailMinLength);
-        
         Id = id;
+        SetCodeChapter(codeChapter);
+        SetCodeNumber(codeNumber);
+        SetDetail(detail);
+    }
+
+    public void SetCodeChapter(string codeChapter)
+    {
+        Check.NotNullOrWhiteSpace(codeChapter, nameof(codeChapter), IcdConsts.CodeChapterLength, IcdConsts.CodeChapterLength);
         CodeChapter = codeChapter.ToUpper();
+    }
+
+    public void SetCodeNumber(string codeNumber)
+    {
+        Check.NotNullOrWhiteSpace(codeNumber, nameof(codeNumber), IcdConsts.CodeNumberMaxLength, IcdConsts.CodeNumberMinLength);
         CodeNumber = codeNumber.ToUpper();
+    }
+
+    public void SetDetail(string detail)
+    {
+        Check.NotNullOrWhiteSpace(detail, nameof(detail), IcdConsts.DetailMaxLength, IcdConsts.DetailMinLength);
         Detail = detail;
     }
-    
-    public void SetCodeChapter(string codeChapter) => CodeChapter = codeChapter.ToUpper();
-    public void SetCodeNumber(string codeNumber) => CodeNumber = codeNumber.ToUpper();
-    public void SetDetail(string detail) => Detail = detail;
 }

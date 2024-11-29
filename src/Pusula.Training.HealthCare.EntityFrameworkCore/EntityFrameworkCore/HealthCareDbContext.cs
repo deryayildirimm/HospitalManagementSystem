@@ -28,6 +28,7 @@ using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Tests;
+using Pusula.Training.HealthCare.Treatment.Icds;
 
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
 
@@ -55,6 +56,7 @@ public class HealthCareDbContext :
     public DbSet<TestCategory> TestCategories { get; set; } = null!;
     public DbSet<Test> Tests { get; set; } = null!;
     public DbSet<BloodTestResult> BloodTestResults { get; set; } = null!;
+    public DbSet<Icd> Icds { get; set; } = null!;
 
     public DbSet<Appointment> Appointments { get; set; } = null!;
     public DbSet<DoctorWorkingHour> DoctorWorkingHours { get; set; } = null!;
@@ -409,7 +411,18 @@ public class HealthCareDbContext :
                 b.HasOne<Test>().WithMany().IsRequired().HasForeignKey(x => x.TestId)
                    .OnDelete(DeleteBehavior.NoAction);
             });
-            
+
+            builder.Entity<Icd>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Icds", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.CodeChapter).HasColumnName(nameof(Icd.CodeChapter)).IsRequired()
+                    .HasMaxLength(IcdConsts.CodeChapterLength);
+                b.Property(x => x.CodeNumber).HasColumnName(nameof(Icd.CodeNumber)).IsRequired()
+                    .HasMaxLength(IcdConsts.CodeNumberMaxLength);
+                b.Property(x => x.Detail).HasColumnName(nameof(Icd.Detail)).IsRequired()
+                    .HasMaxLength(IcdConsts.DetailMaxLength);
+            });
         }
     }
 }

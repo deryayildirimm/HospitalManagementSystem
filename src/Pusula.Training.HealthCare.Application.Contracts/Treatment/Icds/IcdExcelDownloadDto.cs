@@ -1,14 +1,11 @@
-﻿using Volo.Abp.Application.Dtos;
+﻿namespace Pusula.Training.HealthCare.Treatment.Icds;
 
-namespace Pusula.Training.HealthCare.Treatment.Icds;
-
-public class GetIcdsInput : PagedAndSortedResultRequestDto
+public class IcdExcelDownloadDto
 {
+    public string DownloadToken { get; set; } = null!;
     public string? FilterText { get; set; }
     public string? Code { get; set; }
     public string? CodeChapter { get; set; }
     public string? CodeNumber { get; set; }
     public string? Detail { get; set; }
-    
-    public GetIcdsInput() { }
 }
