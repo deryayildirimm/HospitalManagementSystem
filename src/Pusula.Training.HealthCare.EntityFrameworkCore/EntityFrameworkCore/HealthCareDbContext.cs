@@ -225,13 +225,13 @@ public class HealthCareDbContext :
                 b.Property(x => x.PhoneNumber).HasColumnName(nameof(Doctor.PhoneNumber))
                     .HasMaxLength(DoctorConsts.PhoneNumberMaxLength);
                 b.Property(x => x.StartDate).HasColumnName(nameof(Doctor.StartDate)).IsRequired();
-                b.HasOne<City>().WithMany().IsRequired().HasForeignKey(x => x.CityId)
+                b.HasOne(d => d.City).WithMany().IsRequired().HasForeignKey(x => x.CityId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<District>().WithMany().IsRequired().HasForeignKey(x => x.DistrictId)
+                b.HasOne(d => d.District).WithMany().IsRequired().HasForeignKey(x => x.DistrictId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Title>().WithMany().IsRequired().HasForeignKey(x => x.TitleId)
+                b.HasOne(d => d.Title).WithMany().IsRequired().HasForeignKey(x => x.TitleId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
+                b.HasOne(d => d.Department).WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 

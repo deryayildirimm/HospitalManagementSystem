@@ -243,6 +243,18 @@
                     </Template>
                 </GridColumn>
 
+
+                <GridColumn HeaderText="@L["Location"]">
+                    <Template>
+                        @{
+                        var doctor = (context as DoctorWithNavigationPropertiesDto);
+                        var city = doctor?.Doctor.City?.Name ?? "";
+                        var district = doctor?.District?.Name ?? "";
+                        }
+                        @city - @district
+                    </Template>
+                </GridColumn>
+
                 <GridColumn HeaderText="@L["Department"]">
                     <Template>
                         @{
@@ -253,7 +265,7 @@
                     </Template>
                 </GridColumn>
 
-                <GridColumn HeaderText="@L["Email"]" width="200px">
+                <GridColumn HeaderText="@L["Email"]">
                     <Template>
                         @{
                         var doctor = (context as DoctorWithNavigationPropertiesDto);

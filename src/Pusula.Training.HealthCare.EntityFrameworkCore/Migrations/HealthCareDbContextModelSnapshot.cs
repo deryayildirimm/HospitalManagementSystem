@@ -3256,29 +3256,37 @@ namespace Pusula.Training.HealthCare.Migrations
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Doctors.Doctor", b =>
                 {
-                    b.HasOne("Pusula.Training.HealthCare.Cities.City", null)
+                    b.HasOne("Pusula.Training.HealthCare.Cities.City", "City")
                         .WithMany()
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Pusula.Training.HealthCare.Departments.Department", null)
+                    b.HasOne("Pusula.Training.HealthCare.Departments.Department", "Department")
                         .WithMany()
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Pusula.Training.HealthCare.Districts.District", null)
+                    b.HasOne("Pusula.Training.HealthCare.Districts.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Pusula.Training.HealthCare.Titles.Title", null)
+                    b.HasOne("Pusula.Training.HealthCare.Titles.Title", "Title")
                         .WithMany()
                         .HasForeignKey("TitleId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("City");
+
+                    b.Navigation("Department");
+
+                    b.Navigation("District");
+
+                    b.Navigation("Title");
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.MedicalPersonnel.MedicalStaff", b =>
