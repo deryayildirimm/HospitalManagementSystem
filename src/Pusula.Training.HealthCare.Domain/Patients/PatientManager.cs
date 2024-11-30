@@ -7,7 +7,7 @@ using Volo.Abp.Domain.Services;
 
 namespace Pusula.Training.HealthCare.Patients;
 
-public class PatientManager(IPatientRepository patientRepository ,    IDataFilter _dataFilter) : DomainService
+public class PatientManager(IPatientRepository patientRepository ) : DomainService
 {
     public virtual async Task<Patient> CreateAsync(int patientNumber, string firstName, string lastName, string nationality, DateTime birthDate, string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
         string? mothersName = null, string? fathersName = null, string? identityNumber = null, string? passportNumber = null, string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
@@ -47,9 +47,7 @@ public class PatientManager(IPatientRepository patientRepository ,    IDataFilte
         Check.Range((int)insuranceType, nameof(insuranceType), PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue);
         Check.NotNullOrWhiteSpace(insuranceNo, nameof(insuranceNo), PatientConsts.InsuranceNumberMaxLength, PatientConsts.InsuranceNumberMinLength);
         Check.NotNull(isDeleted, nameof(isDeleted));
-        // silinmiş veriler uzerınde de işlem yapabilmek için eklendi
-        using (_dataFilter.Disable<ISoftDelete>())
-        {
+       
             var patient = await patientRepository.GetAsync(id);
 
             patient.FirstName = firstName;
@@ -74,8 +72,7 @@ public class PatientManager(IPatientRepository patientRepository ,    IDataFilte
             
             patient.SetConcurrencyStampIfNotNull(concurrencyStamp);
             return await patientRepository.UpdateAsync(patient);
-        }
         
- 
+        
     }
 }

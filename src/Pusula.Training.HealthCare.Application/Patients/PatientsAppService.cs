@@ -22,14 +22,11 @@ namespace Pusula.Training.HealthCare.Patients
     [Authorize(HealthCarePermissions.Patients.Default)]
     public class PatientsAppService(IPatientRepository patientRepository, PatientManager patientManager,
         IDistributedCache<PatientDownloadTokenCacheItem, string> downloadTokenCache,
-        IDistributedEventBus distributedEventBus,
-        IDataFilter _dataFilter) : HealthCareAppService, IPatientsAppService
+        IDistributedEventBus distributedEventBus) : HealthCareAppService, IPatientsAppService
     {
         public virtual async Task<PagedResultDto<PatientDto>> GetListAsync(GetPatientsInput input)
         {
-            // ISoftDelete filtresini IsDeleted durumuna göre devre dışı bırak veya etkinleştir
-            using (_dataFilter.Disable<ISoftDelete>())
-            {
+         
                 var totalCount = await patientRepository.GetCountAsync(input.FilterText, input.PatientNumber, input.FirstName,
                     input.LastName, input.IdentityNumber,
                     input.Nationality, input.PassportNumber, input.BirthDateMin, input.BirthDateMax, input.EmailAddress,
@@ -46,19 +43,18 @@ namespace Pusula.Training.HealthCare.Patients
                     TotalCount = totalCount,
                     Items = ObjectMapper.Map<List<Patient>, List<PatientDto>>(items)
                 };
-            }
+            
         }
 
         public virtual async Task<PatientDto> GetAsync(Guid id)
         {
-            using (_dataFilter.Disable<ISoftDelete>())
-            {
+            
                 await distributedEventBus.PublishAsync(new PatientViewedEto { Id = id, ViewedAt = Clock.Now },
                     onUnitOfWorkComplete: false);
 
                 var patient = await patientRepository.GetAsync(id);
                 return ObjectMapper.Map<Patient, PatientDto>(patient);
-            }
+            
         }
         
         public virtual async Task<PatientDto> GetPatientByNumberAsync(int number)
