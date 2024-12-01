@@ -181,7 +181,17 @@
     "ChooseBloodTests": "Choose Blood Tests",
     "MyPatients": "My Patients",
     "BloodTests": "Blood Tests",
+    "NewIcd": "New Icd",
+    "CodeNumber": "Code Number",
+    "EnterCodeNumber": "Enter Code Number",
+    "EnterDetail": "Enter Detail",
     "Menu:BloodTests": "Blood Tests",
-    "Menu:MyPatients": "My Patients"
+    "Menu:MyPatients": "My Patients",
+    "Menu:Treatment":  "Treatment",
+    "Menu:Definitions":  "Definitions",
+    "Menu:Icds":  "Icds",
+    "Menu:Operations":  "Operations",
+    "Menu:Reports":  "Reports",
+    "Menu:IcdReport":  "IcdReport"
   }
 }

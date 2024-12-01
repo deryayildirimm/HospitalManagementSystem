@@ -84,6 +84,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         
         CreateMap<Icd, IcdDto>();
         CreateMap<Icd, IcdExcelDto>();
+        CreateMap<IcdDto, IcdExcelDto>();
         CreateMap<IcdDto, IcdUpdateDto>();
         CreateMap<Icd, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
 

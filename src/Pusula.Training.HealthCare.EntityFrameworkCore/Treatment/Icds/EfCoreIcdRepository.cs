@@ -61,14 +61,11 @@ public class EfCoreIcdRepository(IDbContextProvider<HealthCareDbContext> dbConte
         string? codeNumber = null, 
         string? detail = null)
     {
-        if (!string.IsNullOrWhiteSpace(codeNumber))
-        {
-            Console.WriteLine("AAAAAAAAAAAAAAAAAAAAAA");
-        }
         return query
             .WhereIf(!string.IsNullOrWhiteSpace(filterText), e =>  e.CodeNumber.ToUpper().Contains(filterText!.ToUpper()) 
-                                                                  || detail!.ToLower().Contains(filterText!.ToLower()))
+                                                                  || e.Detail.ToLower().Contains(filterText!.ToLower())
+                                                                  || filterText!.ToLower().Contains(e.Detail.ToLower()))
             .WhereIf(!string.IsNullOrWhiteSpace(codeNumber), e => e.CodeNumber.ToUpper().Contains(codeNumber!.ToUpper()))
-            .WhereIf(!string.IsNullOrWhiteSpace(detail), e => e.CodeNumber.ToLower().Contains(detail!.ToLower()));
+            .WhereIf(!string.IsNullOrWhiteSpace(detail), e => e.Detail.ToLower().Contains(detail!.ToLower()));
     }
 }

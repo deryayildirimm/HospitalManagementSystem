@@ -78,7 +78,8 @@ public class IcdsAppService(
             input.FilterText, input.CodeNumber, input.Detail);
         var items = icds.Select(item => new
         {
-            item.CodeNumber
+            item.CodeNumber,
+            item.Detail
         });
 
         var memoryStream = new MemoryStream();
