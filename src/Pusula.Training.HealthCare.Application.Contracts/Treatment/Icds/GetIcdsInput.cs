@@ -5,8 +5,6 @@ namespace Pusula.Training.HealthCare.Treatment.Icds;
 public class GetIcdsInput : PagedAndSortedResultRequestDto
 {
     public string? FilterText { get; set; }
-    public string? Code { get; set; }
-    public string? CodeChapter { get; set; }
     public string? CodeNumber { get; set; }
     public string? Detail { get; set; }
     

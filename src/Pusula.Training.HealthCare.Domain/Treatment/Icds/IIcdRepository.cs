@@ -10,16 +10,12 @@ public interface IIcdRepository : IRepository<Icd, Guid>
 {
     Task DeleteAllAsync(
         string? filterText = null,
-        string? code = null,
-        string? codeChapter = null,
         string? codeNumber = null,
         string? detail = null,
         CancellationToken cancellationToken = default);
 
     Task<List<Icd>> GetListAsync(
         string? filterText = null,
-        string? code = null,
-        string? codeChapter = null,
         string? codeNumber = null,
         string? detail = null,
         string? sorting = null,
@@ -29,8 +25,6 @@ public interface IIcdRepository : IRepository<Icd, Guid>
 
     Task<long> GetCountAsync(
         string? filterText = null,
-        string? code = null,
-        string? codeChapter = null,
         string? codeNumber = null,
         string? detail = null,
         string? sorting = null,

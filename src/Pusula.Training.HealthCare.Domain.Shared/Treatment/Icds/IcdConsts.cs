@@ -2,18 +2,16 @@
 
 public class IcdConsts
 {
-    private const string DefaultSorting = "{0}Code asc";
+    private const string DefaultSorting = "{0}CodeNumber asc";
 
     public static string GetDefaultSorting(bool withEntityName)
     {
         return string.Format(DefaultSorting, withEntityName ? "Icd." : string.Empty);
     }
-
-    public const int CodeChapterLength = 1;
     
-    public const int CodeNumberMaxLength = 6;
+    public const int CodeNumberMaxLength = 7;
     public const int DetailMaxLength = 150;
     
     public const int DetailMinLength = 2;
-    public const int CodeNumberMinLength = 2;
+    public const int CodeNumberMinLength = 3;
 }

@@ -7,7 +7,7 @@ using Volo.Abp.Content;
 
 namespace Pusula.Training.HealthCare.Treatment.Icds;
 
-public interface IIcdAppService : IApplicationService
+public interface IIcdsAppService : IApplicationService
 {
     Task<PagedResultDto<IcdDto>> GetListAsync(GetIcdsInput input);
 

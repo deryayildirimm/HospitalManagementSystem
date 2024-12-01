@@ -416,8 +416,6 @@ public class HealthCareDbContext :
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "Icds", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                b.Property(x => x.CodeChapter).HasColumnName(nameof(Icd.CodeChapter)).IsRequired()
-                    .HasMaxLength(IcdConsts.CodeChapterLength);
                 b.Property(x => x.CodeNumber).HasColumnName(nameof(Icd.CodeNumber)).IsRequired()
                     .HasMaxLength(IcdConsts.CodeNumberMaxLength);
                 b.Property(x => x.Detail).HasColumnName(nameof(Icd.Detail)).IsRequired()

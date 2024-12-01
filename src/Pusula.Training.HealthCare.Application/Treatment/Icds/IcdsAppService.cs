@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
 using MiniExcelLibs;
 using Pusula.Training.HealthCare.Permissions;
+using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Authorization;
 using Volo.Abp.Caching;
@@ -14,18 +15,18 @@ using Volo.Abp.Content;
 
 namespace Pusula.Training.HealthCare.Treatment.Icds;
 
+[RemoteService(IsEnabled = false)]
+[Authorize(HealthCarePermissions.Icds.Default)]
 public class IcdsAppService(
         IIcdRepository icdRepository,
         IcdManager icdManager,
         IDistributedCache<IcdDownloadTokenCacheItem, string> downloadTokenCache
-        ) : HealthCareAppService, IIcdAppService
+        ) : HealthCareAppService, IIcdsAppService
 {
     public virtual async Task<PagedResultDto<IcdDto>> GetListAsync(GetIcdsInput input)
     {
-        var totalCount = await icdRepository.GetCountAsync(input.FilterText, input.Code, input.CodeChapter, 
-            input.CodeNumber, input.Detail);
-        var items = await icdRepository.GetListAsync(input.FilterText, input.Code, input.CodeChapter, 
-            input.CodeNumber, input.Detail, input.Sorting, input.MaxResultCount, input.SkipCount);
+        var totalCount = await icdRepository.GetCountAsync(input.FilterText, input.CodeNumber, input.Detail);
+        var items = await icdRepository.GetListAsync(input.FilterText, input.CodeNumber, input.Detail, input.Sorting, input.MaxResultCount, input.SkipCount);
 
         return new PagedResultDto<IcdDto>
         {
@@ -49,7 +50,7 @@ public class IcdsAppService(
     public virtual async Task<IcdDto> CreateAsync(IcdCreateDto input)
     {
         var icd = await icdManager.CreateAsync(
-            input.CodeChapter, input.CodeNumber,input.Detail
+            input.CodeNumber,input.Detail
         );
 
         return ObjectMapper.Map<Icd, IcdDto>(icd);
@@ -59,7 +60,7 @@ public class IcdsAppService(
     public virtual async Task<IcdDto> UpdateAsync(IcdUpdateDto input)
     {
         var icd = await icdManager.UpdateAsync(
-        input.Id, input.CodeChapter, input.CodeNumber,input.Detail);
+        input.Id, input.CodeNumber,input.Detail);
 
         return ObjectMapper.Map<Icd, IcdDto>(icd);
     }
@@ -74,10 +75,9 @@ public class IcdsAppService(
         }
 
         var icds = await icdRepository.GetListAsync(
-            input.FilterText, input.Code, input.CodeChapter, input.CodeNumber, input.Detail);
+            input.FilterText, input.CodeNumber, input.Detail);
         var items = icds.Select(item => new
         {
-            item.CodeChapter,
             item.CodeNumber
         });
 
@@ -97,7 +97,7 @@ public class IcdsAppService(
     [Authorize(HealthCarePermissions.Icds.Delete)]
     public virtual async Task DeleteAllAsync(GetIcdsInput input)
     {
-        await icdRepository.DeleteAllAsync( input.FilterText, input.Code, input.CodeChapter, input.CodeNumber, input.Detail);
+        await icdRepository.DeleteAllAsync( input.FilterText, input.CodeNumber, input.Detail);
     }
     
     public virtual async Task<Shared.DownloadTokenResultDto> GetDownloadTokenAsync()
