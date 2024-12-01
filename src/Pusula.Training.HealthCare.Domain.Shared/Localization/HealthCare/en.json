@@ -183,6 +183,7 @@
     "BloodTests": "Blood Tests",
     "Menu:BloodTests": "Blood Tests",
     "Menu:MyPatients": "My Patients",
+    "Permission:ProtocolTypes" : "Protocol Types",
     "InvalidDateRange" : "The start date cannot be greater than the end date.",
     "Healthcare error occured!!" : "Healthcare error occured!!",
     "The provided download token is invalid." : "The provided download token is invalid."

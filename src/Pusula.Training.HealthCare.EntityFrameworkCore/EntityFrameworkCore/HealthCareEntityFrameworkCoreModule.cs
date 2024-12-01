@@ -20,6 +20,7 @@ using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalPersonnel;
+using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Titles;
 
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
@@ -56,6 +57,7 @@ public class HealthCareEntityFrameworkCoreModule : AbpModule
 
             options.AddRepository<Patient, EfCorePatientRepository>();
             options.AddRepository<Protocol, EfCoreProtocolRepository>();
+            options.AddRepository<ProtocolType, EfCoreProtocolTypeRepository>();
             options.AddRepository<Department, EfCoreDepartmentRepository>();
             options.AddRepository<Title, EfCoreTitleRepository>();
             options.AddRepository<Doctor, EfCoreDoctorRepository>();
@@ -63,6 +65,7 @@ public class HealthCareEntityFrameworkCoreModule : AbpModule
             options.AddRepository<MedicalStaff, EfCoreMedicalStaffRepository>();
             options.AddRepository<City, EfCoreCityRepository>();
             options.AddRepository<District, EfCoreDistrictRepository>();
+            
         });
 
         Configure<AbpDbContextOptions>(options =>

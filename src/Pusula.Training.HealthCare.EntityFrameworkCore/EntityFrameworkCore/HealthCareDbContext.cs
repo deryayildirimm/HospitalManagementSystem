@@ -28,6 +28,7 @@ using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Tests;
+using Pusula.Training.HealthCare.ProtocolTypes;
 
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
 
@@ -42,6 +43,7 @@ public class HealthCareDbContext :
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     public DbSet<Department> Departments { get; set; } = null!;
     public DbSet<Protocol> Protocols { get; set; } = null!;
+    public DbSet<ProtocolType> ProtocolTypes { get; set; } = null!;
     public DbSet<Patient> Patients { get; set; } = null!;
     public DbSet<MedicalService> Services { get; set; } = null!;
     public DbSet<DepartmentMedicalService> DepartmentMedicalServices { get; set; } = null!;
@@ -58,6 +60,8 @@ public class HealthCareDbContext :
 
     public DbSet<Appointment> Appointments { get; set; } = null!;
     public DbSet<DoctorWorkingHour> DoctorWorkingHours { get; set; } = null!;
+    
+    
 
     #region Entities from the modules
 
@@ -169,6 +173,15 @@ public class HealthCareDbContext :
                 b.HasOne(p => p.Department).WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
+            
+            builder.Entity<ProtocolType>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "ProtocolTypes", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                    b.Property(x => x.Name).HasColumnName(nameof(ProtocolType.Name)).IsRequired()
+                        .HasMaxLength(ProtocolTypeConsts.NameMaxLength);
+            });
+
 
             builder.Entity<MedicalService>(b =>
             {

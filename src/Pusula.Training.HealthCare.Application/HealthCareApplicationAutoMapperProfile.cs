@@ -16,6 +16,7 @@ using Pusula.Training.HealthCare.BloodTests;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Category;
 using Pusula.Training.HealthCare.BloodTests.Tests;
+using Pusula.Training.HealthCare.ProtocolTypes;
 
 namespace Pusula.Training.HealthCare;
 
@@ -37,6 +38,12 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Protocol, ProtocolExcelDto>();
         CreateMap<ProtocolDto, ProtocolUpdateDto>();
         CreateMap<ProtocolWithNavigationProperties, ProtocolWithNavigationPropertiesDto>();
+        
+        CreateMap<ProtocolType, ProtocolTypeDto>();
+      //  CreateMap<ProtocolType, ProtocolExcelDto>();  henüz bu kısmı yazmadık excel tarafını o yüzden 
+        CreateMap<ProtocolTypeDto, ProtocolTypeUpdateDto>();
+    
+
 
         CreateMap<Department, DepartmentDto>();
         CreateMap<Department, DepartmentExcelDto>();

@@ -9,7 +9,7 @@ using Volo.Abp.Domain.Services;
 
 namespace Pusula.Training.HealthCare.DoctorLeaves;
 
-public class DoctorLeaveManager(IDoctorLeaveRepository repo) : DomainService, IDoctorLeaveManager
+public class DoctorLeaveManager(IDoctorLeaveRepository doctorLeaveRepository) : DomainService, IDoctorLeaveManager
 {
      public virtual async Task<DoctorLeave> CreateAsync( Guid doctorId, DateTime startDate, DateTime endDate, string? reason=null )
     {
@@ -24,7 +24,7 @@ public class DoctorLeaveManager(IDoctorLeaveRepository repo) : DomainService, ID
             var leaves = new DoctorLeave(
                 GuidGenerator.Create(), doctorId, startDate, endDate, reason);
 
-            return await repo.InsertAsync(leaves);
+            return await doctorLeaveRepository.InsertAsync(leaves);
     
    
     }
@@ -41,7 +41,7 @@ public class DoctorLeaveManager(IDoctorLeaveRepository repo) : DomainService, ID
                  HealthCareDomainErrorCodes.InvalidDateRange_CODE, 
                  startDate > endDate);
         
-             var leaves = await repo.GetAsync(id);
+             var leaves = await doctorLeaveRepository.GetAsync(id);
         
              leaves.SetDoctorId(doctorId);
              leaves.SetStartDate(startDate);
@@ -49,7 +49,8 @@ public class DoctorLeaveManager(IDoctorLeaveRepository repo) : DomainService, ID
              leaves.SetReason(reason);
         
              leaves.SetConcurrencyStampIfNotNull(concurrencyStamp);
-             return await repo.UpdateAsync(leaves);
+             return await doctorLeaveRepository.UpdateAsync(leaves);
+    
        
     }
         
