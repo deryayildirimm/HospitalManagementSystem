@@ -285,7 +285,7 @@
                         var medicalStaff = (context as MedicalStaffWithNavigationPropertiesDto);
                         }
                         <div class="d-flex justify-content-around">
-                            <SfButton CssClass="e-primary" OnClick="@(args => EditModal(medicalStaff))">
+                            <SfButton CssClass="e-primary" OnClick="@(args => OpenEditModal(medicalStaff))">
                                 <span class="e-icons e-edit white-icon"></span>
                             </SfButton>
                             <SfButton CssClass="e-danger" OnClick="@(args => DeleteMedicalStaffAsync(medicalStaff))">
@@ -302,7 +302,8 @@
 
 @* ************************* CREATE MODAL ************************* *@
 <SfDialog Width="800px" IsModal="true" Header="@L["CreateMedicalStaff"]"
-          ShowCloseIcon="true" @bind-Visible="@IsVisibleCreate" Close="CloseCreateMedicalStaffModalAsync">
+          ShowCloseIcon="true" @bind-Visible="@IsVisibleCreate">
+    <DialogEvents Closed="@CloseCreateMedicalStaffModal" ></DialogEvents>
     <DialogTemplates>
         <Header>
             <div style="display: inline-flex; align-items: center;">
@@ -319,13 +320,13 @@
                     <label>@L["IdentityNumber"]</label>
                     <SfTextBox TValue="string" @bind-Value="@NewMedicalStaff.IdentityNumber" Placeholder="@L["EnterIdentityNumber"]"
                                MaxLength="MedicalStaffConsts.IdentityNumberLength">
-                        <TextBoxEvents OnInput="() => ValidateField('IdentityNumber')" />
+                        <TextBoxEvents OnInput="() => ValidateField('IdentityNumber')"/>
                     </SfTextBox>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>@L["BirthDate"]</label>
-                    <SfDatePicker TValue="DateTime" @bind-Value="@NewMedicalStaff.BirthDate" Placeholder="@L["SelectBirthDate"]" />
+                    <SfDatePicker TValue="DateTime" @bind-Value="@NewMedicalStaff.BirthDate" Placeholder="@L["SelectBirthDate"]"/>
                 </div>
             </div>
 
@@ -333,7 +334,7 @@
 
                 <div class="col-md-6 mb-3">
                     <label>@L["StartDate"]</label>
-                    <SfDatePicker TValue="DateTime" @bind-Value="@NewMedicalStaff.StartDate" Placeholder="@L["SelectStartDate"]" />
+                    <SfDatePicker TValue="DateTime" @bind-Value="@NewMedicalStaff.StartDate" Placeholder="@L["SelectStartDate"]"/>
                 </div>
             </div>
 
@@ -341,13 +342,13 @@
                 <div class="col-md-6 mb-3">
                     <label>@L["FirstName"]</label>
                     <SfTextBox TValue="string" @bind-Value="@NewMedicalStaff.FirstName" Placeholder="@L["EnterFirstName"]"
-                               MaxLength="MedicalStaffConsts.FirstNameMaxLength" />
+                               MaxLength="MedicalStaffConsts.FirstNameMaxLength"/>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>@L["LastName"]</label>
                     <SfTextBox TValue="string" @bind-Value="@NewMedicalStaff.LastName" Placeholder="@L["EnterLastName"]"
-                               MaxLength="MedicalStaffConsts.LastNameMaxLength" />
+                               MaxLength="MedicalStaffConsts.LastNameMaxLength"/>
                 </div>
             </div>
 
@@ -391,28 +392,29 @@
                 <div class="col-md-6 mb-3">
                     <label>@L["PhoneNumber"]</label>
                     <SfTextBox TValue="string" @bind-Value="@PhoneNumber" Placeholder="@L["EnterPhoneNumber"]"
-                               MaxLength="MedicalStaffConsts.PhoneNumberMaxLength" />
+                               MaxLength="MedicalStaffConsts.PhoneNumberMaxLength"/>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>@L["Email"]</label>
                     <SfTextBox TValue="string" @bind-Value="@NewMedicalStaff.Email" Placeholder="@L["EnterEmail"]"
-                               MaxLength="MedicalStaffConsts.EmailMaxLength" InputType="InputType.Email" />
+                               MaxLength="MedicalStaffConsts.EmailMaxLength" InputType="InputType.Email"/>
                 </div>
             </div>
         </SfForm>
     </EditForm>
 
     <DialogFooter>
-        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseCreateMedicalStaffModalAsync" />
-        <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="CreateMedicalStaffAsync" />
+        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseCreateMedicalStaffModal"/>
+        <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="CreateMedicalStaffAsync"/>
     </DialogFooter>
 </SfDialog>
 
 @* ************************* EDIT MODAL ************************* *@
 
 <SfDialog Width="800px" IsModal="true" Header="@L["UpdateMedicalStaff"]"
-          ShowCloseIcon="true" Visible="@IsVisibleEdit" Close="CloseEditMedicalStaffModalAsync">
+          ShowCloseIcon="true" Visible="@IsVisibleEdit">
+    <DialogEvents Closed="@CloseEditMedicalStaffModal" ></DialogEvents>
     <DialogTemplates>
         <Header>
             <div style="display: inline-flex; align-items: center;">
@@ -428,90 +430,90 @@
                 <div class="col-md-6 mb-3">
                     <label>@L["IdentityNumber"]</label>
                     <SfTextBox TValue="string" @bind-Value="@EditingMedicalStaff.IdentityNumber" Placeholder="@L["EnterIdentityNumber"]"
-                               MaxLength="MedicalStaffConsts.IdentityNumberLength" />
+                               MaxLength="MedicalStaffConsts.IdentityNumberLength"/>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>@L["BirthDate"]</label>
-                    <SfDatePicker TValue="DateTime" @bind-Value="@EditingMedicalStaff.BirthDate" Placeholder="@L["SelectBirthDate"]" />
+                    <SfDatePicker TValue="DateTime" @bind-Value="@EditingMedicalStaff.BirthDate" Placeholder="@L["SelectBirthDate"]"/>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="col-md-6 mb-3">
                     <label>@L["StartDate"]</label>
-                    <SfDatePicker TValue="DateTime" @bind-Value="@EditingMedicalStaff.StartDate" Placeholder="@L["SelectStartDate"]" />
+                    <SfDatePicker TValue="DateTime" @bind-Value="@EditingMedicalStaff.StartDate" Placeholder="@L["SelectStartDate"]"/>
                 </div>
             </div>
 
-                <div class="form-row">
-                    <div class="col-md-6 mb-3">
-                        <label>@L["FirstName"]</label>
-                        <SfTextBox TValue="string" @bind-Value="@EditingMedicalStaff.FirstName" Placeholder="@L["EnterFirstName"]"
-                                   MaxLength="MedicalStaffConsts.FirstNameMaxLength" />
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label>@L["LastName"]</label>
-                        <SfTextBox TValue="string" @bind-Value="@EditingMedicalStaff.LastName" Placeholder="@L["EnterLastName"]"
-                                   MaxLength="MedicalStaffConsts.LastNameMaxLength" />
-                    </div>
+            <div class="form-row">
+                <div class="col-md-6 mb-3">
+                    <label>@L["FirstName"]</label>
+                    <SfTextBox TValue="string" @bind-Value="@EditingMedicalStaff.FirstName" Placeholder="@L["EnterFirstName"]"
+                               MaxLength="MedicalStaffConsts.FirstNameMaxLength"/>
                 </div>
 
-                <div class="form-row">
-                    <div class="col-md-6 mb-3">
-                        <label>@L["Gender"]</label>
-                        <SfDropDownList TValue="EnumGender" @bind-Value="@EditingMedicalStaff.Gender" DataSource="@Genders"
-                                        Placeholder="@L["SelectGender"]" TItem="KeyValuePair<EnumGender, string>">
-                            <DropDownListFieldSettings Text="Value" Value="Key"></DropDownListFieldSettings>
-                        </SfDropDownList>
-                    </div>
+                <div class="col-md-6 mb-3">
+                    <label>@L["LastName"]</label>
+                    <SfTextBox TValue="string" @bind-Value="@EditingMedicalStaff.LastName" Placeholder="@L["EnterLastName"]"
+                               MaxLength="MedicalStaffConsts.LastNameMaxLength"/>
+                </div>
+            </div>
 
-
-                    <div class="col-md-6 mb-3">
-                        <label>@L["City"]</label>
-                        <SfDropDownList TValue="Guid" @bind-Value="@EditingMedicalStaff.CityId" DataSource="@CitiesCollection"
-                                        Placeholder="@L["SelectCity"]" TItem="LookupDto<Guid>">
-                            <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@ChangeCityCreate"></DropDownListEvents>
-                            <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
-                        </SfDropDownList>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label>@L["District"]</label>
-                        <SfDropDownList TValue="Guid" @bind-Value="@EditingMedicalStaff.DistrictId" DataSource="@DistrictsCollection"
-                                        Placeholder="@L["SelectDistrict"]" TItem="LookupDto<Guid>">
-                            <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
-                        </SfDropDownList>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label>@L["Department"]</label>
-                        <SfDropDownList TValue="Guid" @bind-Value="@EditingMedicalStaff.DepartmentId" DataSource="@DepartmentsCollection"
-                                        Placeholder="@L["SelectDepartment"]" TItem="LookupDto<Guid>">
-                            <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
-                        </SfDropDownList>
-                    </div>
+            <div class="form-row">
+                <div class="col-md-6 mb-3">
+                    <label>@L["Gender"]</label>
+                    <SfDropDownList TValue="EnumGender" @bind-Value="@EditingMedicalStaff.Gender" DataSource="@Genders"
+                                    Placeholder="@L["SelectGender"]" TItem="KeyValuePair<EnumGender, string>">
+                        <DropDownListFieldSettings Text="Value" Value="Key"></DropDownListFieldSettings>
+                    </SfDropDownList>
                 </div>
 
-                <div class="form-row">
-                    <div class="col-md-6 mb-3">
-                        <label>@L["PhoneNumber"]</label>
-                        <SfTextBox TValue="string" @bind-Value="@EditingMedicalStaff.PhoneNumber" Placeholder="@L["EnterPhoneNumber"]"
-                                   MaxLength="MedicalStaffConsts.PhoneNumberMaxLength" />
-                    </div>
 
-                    <div class="col-md-6 mb-3">
-                        <label>@L["Email"]</label>
-                        <SfTextBox TValue="string" @bind-Value="@EditingMedicalStaff.Email" Placeholder="@L["EnterEmail"]"
-                                   MaxLength="MedicalStaffConsts.EmailMaxLength" InputType="InputType.Email" />
-                    </div>
+                <div class="col-md-6 mb-3">
+                    <label>@L["City"]</label>
+                    <SfDropDownList TValue="Guid" @bind-Value="@EditingMedicalStaff.CityId" DataSource="@CitiesCollection"
+                                    Placeholder="@L["SelectCity"]" TItem="LookupDto<Guid>">
+                        <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@ChangeCityCreate"></DropDownListEvents>
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
                 </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>@L["District"]</label>
+                    <SfDropDownList TValue="Guid" @bind-Value="@EditingMedicalStaff.DistrictId" DataSource="@DistrictsCollection"
+                                    Placeholder="@L["SelectDistrict"]" TItem="LookupDto<Guid>">
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>@L["Department"]</label>
+                    <SfDropDownList TValue="Guid" @bind-Value="@EditingMedicalStaff.DepartmentId" DataSource="@DepartmentsCollection"
+                                    Placeholder="@L["SelectDepartment"]" TItem="LookupDto<Guid>">
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="col-md-6 mb-3">
+                    <label>@L["PhoneNumber"]</label>
+                    <SfTextBox TValue="string" @bind-Value="@EditingMedicalStaff.PhoneNumber" Placeholder="@L["EnterPhoneNumber"]"
+                               MaxLength="MedicalStaffConsts.PhoneNumberMaxLength"/>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <label>@L["Email"]</label>
+                    <SfTextBox TValue="string" @bind-Value="@EditingMedicalStaff.Email" Placeholder="@L["EnterEmail"]"
+                               MaxLength="MedicalStaffConsts.EmailMaxLength" InputType="InputType.Email"/>
+                </div>
+            </div>
         </SfForm>
     </EditForm>
 
     <DialogFooter>
-        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseEditMedicalStaffModalAsync" />
-        <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="UpdateMedicalStaffAsync" />
+        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseEditMedicalStaffModal"/>
+        <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="UpdateMedicalStaffAsync"/>
     </DialogFooter>
 </SfDialog>
