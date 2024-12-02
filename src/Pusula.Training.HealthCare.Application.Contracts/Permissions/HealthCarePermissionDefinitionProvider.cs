@@ -87,6 +87,11 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Edit, L("Permission:Edit"));
         bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Delete, L("Permission:Delete"));
 
+        var icdPermission = myGroup.AddPermission(HealthCarePermissions.Icds.Default, L("Permission:Icds"));
+        icdPermission.AddChild(HealthCarePermissions.Icds.Create, L("Permission:Create"));
+        icdPermission.AddChild(HealthCarePermissions.Icds.Edit, L("Permission:Edit"));
+        icdPermission.AddChild(HealthCarePermissions.Icds.Delete, L("Permission:Delete"));
+
     }
 
     private static LocalizableString L(string name)

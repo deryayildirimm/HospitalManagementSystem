@@ -14,4 +14,7 @@ public class HealthCareMenus
     public const string BloodTests = Prefix + ".BloodTests";
     public const string MyPatients = Prefix + ".MyPatients";
     public const string MedicalStaff = Prefix + ".MedicalStaff";
+    public const string Treatment = Prefix + ".Treatment";
+    public const string Icds = Treatment + ".Icds";
+    public const string IcdReport = Treatment + ".IcdReport";
 }

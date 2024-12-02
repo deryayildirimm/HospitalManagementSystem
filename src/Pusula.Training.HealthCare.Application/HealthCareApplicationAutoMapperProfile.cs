@@ -16,6 +16,7 @@ using Pusula.Training.HealthCare.BloodTests;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Category;
 using Pusula.Training.HealthCare.BloodTests.Tests;
+using Pusula.Training.HealthCare.Treatment.Icds;
 
 namespace Pusula.Training.HealthCare;
 
@@ -81,6 +82,12 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<District, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
         
+        CreateMap<Icd, IcdDto>();
+        CreateMap<Icd, IcdExcelDto>();
+        CreateMap<IcdDto, IcdExcelDto>();
+        CreateMap<IcdDto, IcdUpdateDto>();
+        CreateMap<Icd, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
+
         CreateMap<Appointment, AppointmentDto>();
         CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();
         
@@ -101,7 +108,6 @@ public class HealthCareApplicationAutoMapperProfile : Profile
 
         CreateMap<BloodTestResult, BloodTestResultDto>();
         CreateMap<BloodTestResultWithNavigationProperties, BloodTestResultWithNavigationPropertiesDto>();
-
 
         CreateMap<Test, TestDto>();
         CreateMap<TestWithNavigationProperties, TestWithNavigationPropertiesDto>();

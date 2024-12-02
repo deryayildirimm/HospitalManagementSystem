@@ -40,7 +40,17 @@
     "Hormonal Tests": "Hormonal Testler",
     "MyPatients": "Hastalarım",
     "BloodTests": "Kan Testleri",
+    "NewIcd": "Yeni Icd",
+    "CodeNumber": "Kod",
+    "EnterCodeNumber": "Kodu Giriniz",
+    "EnterDetail": "Detayı Giriniz",
     "Menu:BloodTests": "Kan Tahlilleri",
-    "Menu:MyPatients": "Hastalarım"
+    "Menu:MyPatients": "Hastalarım",
+    "Menu:Treatment":  "Tedavi",
+    "Menu:Definitions":  "Tanımlar",
+    "Menu:Icds":  "Icd",
+    "Menu:Operations":  "İşlemler",
+    "Menu:Reports":  "Raporlar",
+    "Menu:IcdReport":  "Icd Raporu"
   }
 }
