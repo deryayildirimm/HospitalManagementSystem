@@ -42,64 +42,28 @@ public class AppointmentAppService(
 
     public virtual async Task<PagedResultDto<AppointmentSlotDto>> GetAvailableSlotsAsync(GetAppointmentSlotInput input)
     {
-        try
-        {
-            var availableSlots = await appointmentManager
-                .GetAppointmentSlotsAsync(input.DoctorId, input.MedicalServiceId, input.Date);
+        var availableSlots = await appointmentManager
+            .GetAppointmentSlotsAsync(input.DoctorId, input.MedicalServiceId, input.Date);
 
-            return new PagedResultDto<AppointmentSlotDto>(
-                availableSlots.Count,
-                availableSlots.ToList()
-            );
-        }
-        catch (MedicalServiceNotFoundException ex)
-        {
-            throw new UserFriendlyException(ex.Message);
-        }
-        catch (DoctorNotWorkingException ex)
-        {
-            throw new UserFriendlyException(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            throw new ApplicationException(@L["UnExpectedErrorOcurred"], ex);
-        }
+        return new PagedResultDto<AppointmentSlotDto>(
+            availableSlots.Count,
+            availableSlots.ToList()
+        );
     }
 
     public virtual async Task<PagedResultDto<AppointmentDto>> GetListAsync(GetAppointmentsInput input)
     {
         var totalCount = await appointmentRepository.GetCountAsync(
-            input.DoctorId, input.PatientId, input.MedicalServiceId,
-            input.AppointmentTypeId, input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
-            input.Status, input.ReminderSent, input.MinAmount,
-            input.MaxAmount);
-
-        var items = await appointmentRepository.GetListAsync(
-            input.DoctorId, input.PatientId, input.MedicalServiceId,
-            input.AppointmentTypeId, input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
-            input.Status, input.ReminderSent, input.MinAmount,
-            input.MaxAmount, input.Sorting, input.MaxResultCount, input.SkipCount);
-
-        return new PagedResultDto<AppointmentDto>
-        {
-            TotalCount = totalCount,
-            Items = ObjectMapper.Map<List<Appointment>, List<AppointmentDto>>(items)
-        };
-    }
-
-    public virtual async Task<PagedResultDto<AppointmentWithNavigationPropertiesDto>>
-        GetListWithNavigationPropertiesAsync(GetAppointmentsWithNavigationPropertiesInput input)
-    {
-        var totalCount = await appointmentRepository.GetCountByNavigationPropertiesAsync(
             doctorId: input.DoctorId,
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
+            appointmentTypeId: input.AppointmentTypeId,
             patientName: input.PatientName,
             doctorName: input.DoctorName,
             serviceName: input.ServiceName,
             patientNumber: input.PatientNumber,
-            appointmentMinDate: input.AppointmentMinDate,
-            appointmentMaxDate: input.AppointmentMaxDate,
+            input.AppointmentMinDate,
+            input.AppointmentMaxDate,
             startTime: input.StartTime,
             endTime: input.EndTime,
             status: input.Status,
@@ -107,31 +71,28 @@ public class AppointmentAppService(
             minAmount: input.MinAmount,
             maxAmount: input.MaxAmount);
 
-        var items = await appointmentRepository.GetListWithNavigationPropertiesAsync(
+        var items = await appointmentRepository.GetListAsync(
             doctorId: input.DoctorId,
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
+            appointmentTypeId: input.AppointmentTypeId,
             patientName: input.PatientName,
             doctorName: input.DoctorName,
             serviceName: input.ServiceName,
             patientNumber: input.PatientNumber,
-            appointmentMinDate: input.AppointmentMinDate,
-            appointmentMaxDate: input.AppointmentMaxDate,
+            input.AppointmentMinDate,
+            input.AppointmentMaxDate,
             startTime: input.StartTime,
             endTime: input.EndTime,
             status: input.Status,
             reminderSent: input.ReminderSent,
             minAmount: input.MinAmount,
-            maxAmount: input.MaxAmount,
-            sorting: input.Sorting,
-            maxResultCount: input.MaxResultCount,
-            skipCount: input.SkipCount);
+            maxAmount: input.MaxAmount, input.Sorting, input.MaxResultCount, input.SkipCount);
 
-        return new PagedResultDto<AppointmentWithNavigationPropertiesDto>
+        return new PagedResultDto<AppointmentDto>
         {
             TotalCount = totalCount,
-            Items = ObjectMapper
-                .Map<List<AppointmentWithNavigationProperties>, List<AppointmentWithNavigationPropertiesDto>>(items)
+            Items = ObjectMapper.Map<List<Appointment>, List<AppointmentDto>>(items)
         };
     }
 
@@ -144,67 +105,37 @@ public class AppointmentAppService(
 
     public virtual async Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
     {
-        try
-        {
-            var appointment = await appointmentManager.CreateAsync(
-                input.DoctorId,
-                input.PatientId,
-                input.MedicalServiceId,
-                input.AppointmentTypeId,
-                input.AppointmentDate,
-                input.StartTime,
-                input.EndTime,
-                input.ReminderSent,
-                input.Amount,
-                input.Notes
-            );
+        var appointment = await appointmentManager.CreateAsync(
+            input.DoctorId,
+            input.PatientId,
+            input.MedicalServiceId,
+            input.AppointmentTypeId,
+            input.AppointmentDate,
+            input.StartTime,
+            input.EndTime,
+            input.ReminderSent,
+            input.Amount,
+            input.Notes
+        );
 
-            return ObjectMapper.Map<Appointment, AppointmentDto>(appointment);
-        }
-        catch (AppointmentAlreadyTakenException ex)
-        {
-            throw new UserFriendlyException(ex.Message);
-        }
-        catch (AppointmentDateNotValidException ex)
-        {
-            throw new UserFriendlyException(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            throw new ApplicationException(@L["UnExpectedErrorOcurred"], ex);
-        }
+        return ObjectMapper.Map<Appointment, AppointmentDto>(appointment);
     }
 
     [Authorize(HealthCarePermissions.Appointments.Edit)]
     public virtual async Task<AppointmentDto> UpdateAsync(Guid id, AppointmentUpdateDto input)
     {
-        try
-        {
-            var appointment = await appointmentManager.UpdateAsync(
-                id,
-                input.AppointmentDate,
-                input.StartTime,
-                input.EndTime,
-                input.Status,
-                input.ReminderSent,
-                input.Amount,
-                input.Notes
-            );
+        var appointment = await appointmentManager.UpdateAsync(
+            id,
+            input.AppointmentDate,
+            input.StartTime,
+            input.EndTime,
+            input.Status,
+            input.ReminderSent,
+            input.Amount,
+            input.Notes
+        );
 
-            return ObjectMapper.Map<Appointment, AppointmentDto>(appointment);
-        }
-        catch (AppointmentAlreadyTakenException ex)
-        {
-            throw new UserFriendlyException(ex.Message);
-        }
-        catch (AppointmentDateNotValidException ex)
-        {
-            throw new UserFriendlyException(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            throw new ApplicationException(@L["UnExpectedErrorOcurred"], ex);
-        }
+        return ObjectMapper.Map<Appointment, AppointmentDto>(appointment);
     }
 
 
@@ -233,7 +164,7 @@ public class AppointmentAppService(
             throw new AbpAuthorizationException("Invalid download token: " + input.DownloadToken);
         }
 
-        var items = await appointmentRepository.GetListWithNavigationPropertiesAsync(
+        var items = await appointmentRepository.GetListAsync(
             doctorId: input.DoctorId,
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
@@ -256,7 +187,7 @@ public class AppointmentAppService(
 
         var memoryStream = new MemoryStream();
         await memoryStream.SaveAsAsync(
-            ObjectMapper.Map<List<AppointmentWithNavigationProperties>, List<AppointmentExcelDto>>(items));
+            ObjectMapper.Map<List<Appointment>, List<AppointmentExcelDto>>(items));
         memoryStream.Seek(0, SeekOrigin.Begin);
 
         return new RemoteStreamContent(memoryStream, "Appointments.xlsx",

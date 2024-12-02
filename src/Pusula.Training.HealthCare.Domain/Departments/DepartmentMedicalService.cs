@@ -15,6 +15,6 @@ public class DepartmentMedicalService : Entity
     
     public override object?[] GetKeys()
     {
-        return new object?[] { MedicalServiceId, DepartmentId };
+        return [MedicalServiceId, DepartmentId];
     }
 }

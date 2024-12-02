@@ -174,7 +174,6 @@ public partial class MedicalServices
             return;
         }
         
-        SelectedDepartments.Clear();
         SelectedDepartments.AddRange(args.Value);
     }
 
@@ -241,9 +240,7 @@ public partial class MedicalServices
             EditMessage = @L["CreatedSuccess"];
 
             NewMedicalService.DepartmentNames.Clear();
-            SelectedDepartments.Clear();
-            CreateDepartmentDropdown.Text = null;
-            CreateDepartmentDropdown.Value = [];
+           
 
             await GetMedicalServicesAsync();
             await CloseCreateMedicalServiceModalAsync();
@@ -251,6 +248,12 @@ public partial class MedicalServices
         catch (Exception ex)
         {
             await HandleErrorAsync(ex);
+        }
+        finally
+        {
+            SelectedDepartments.Clear();
+            CreateDepartmentDropdown.Text = null;
+            CreateDepartmentDropdown.Value = [];
         }
     }
 
@@ -272,17 +275,18 @@ public partial class MedicalServices
             EditStatus = @L["Updated"];
             EditMessage =@L["UpdatedSuccess"];
             
+            await GetMedicalServicesAsync();
+            await CloseEditMedicalServiceModalAsync();
+        }
+        catch (Exception e)
+        {
+            await UiMessageService.Error(e.Message);
+        }finally
+        {
             EditingMedicalService.DepartmentNames.Clear();
             SelectedDepartments.Clear();
             UpdateDepartmentDropdown.Text = null;
             UpdateDepartmentDropdown.Value = [];
-            
-            await GetMedicalServicesAsync();
-            await CloseEditMedicalServiceModalAsync();
-        }
-        catch (Exception)
-        {
-            await UiMessageService.Error(@L["MedicalServiceDuplicateEntry"]);
         }
     }
 

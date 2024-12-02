@@ -15,7 +15,7 @@ public partial class DoctorDashboard : ComponentBase
 
     private List<AppointmentData> DataSource { get; set; }
 
-    private GetAppointmentsWithNavigationPropertiesInput AppointmentsFilter { get; set; }
+    private GetAppointmentsInput AppointmentsFilter { get; set; }
 
     private DoctorWithNavigationPropertiesDto DoctorWithNavigation { get; set; }
     private GetDoctorsInput DoctorsInput { get; set; }
@@ -32,7 +32,7 @@ public partial class DoctorDashboard : ComponentBase
     {
         DoctorWithNavigation = new DoctorWithNavigationPropertiesDto();
         CurrentDate = DateTime.Now;
-        AppointmentsFilter = new GetAppointmentsWithNavigationPropertiesInput
+        AppointmentsFilter = new GetAppointmentsInput
         {
             AppointmentMinDate = CurrentDate,
             AppointmentMaxDate = CurrentDate.AddDays(7),
@@ -79,7 +79,7 @@ public partial class DoctorDashboard : ComponentBase
     {
         try
         {
-            var items = (await AppointmentAppService.GetListWithNavigationPropertiesAsync(AppointmentsFilter))
+            var items = (await AppointmentAppService.GetListAsync(AppointmentsFilter))
                 .Items
                 .ToList();
 
@@ -87,11 +87,11 @@ public partial class DoctorDashboard : ComponentBase
             {
                 DataSource = items.Select(x => new AppointmentData
                 {
-                    Id = x.Appointment.Id,
+                    Id = x.Id,
                     PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
                     DoctorName = x.Doctor.FirstName + " " + x.Doctor.LastName,
-                    StartTime = x.Appointment.StartTime,
-                    EndTime = x.Appointment.EndTime,
+                    StartTime = x.StartTime,
+                    EndTime = x.EndTime,
                     ServiceName = x.MedicalService.Name
                 }).ToList();
             }

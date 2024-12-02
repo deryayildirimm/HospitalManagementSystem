@@ -16,6 +16,8 @@ using Volo.Abp.Content;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using Pusula.Training.HealthCare.Exceptions;
+using Pusula.Training.HealthCare.GlobalExceptions;
+using Volo.Abp.Domain.Repositories;
 
 namespace Pusula.Training.HealthCare.MedicalServices;
 
@@ -94,54 +96,38 @@ public class MedicalServicesAppService(
     [Authorize(HealthCarePermissions.MedicalServices.Create)]
     public virtual async Task<MedicalServiceDto> CreateAsync(MedicalServiceCreateDto input)
     {
-        try
-        {
-            var medicalService = await medicalServiceManager.CreateAsync(
-                input.Name,
-                input.ServiceCreatedAt,
-                input.Cost,
-                input.Duration,
-                input.DepartmentNames
-            );
+        
+        HealthcareGlobalException.ThrowIf("You have already a record with this name.",HealthCareDomainErrorCodes.NameExists, await medicalServiceRepository.FirstOrDefaultAsync(x => x.Name == input.Name) is not null);
+        
+        var medicalService = await medicalServiceManager.CreateAsync(
+            input.Name,
+            input.ServiceCreatedAt,
+            input.Cost,
+            input.Duration,
+            input.DepartmentNames
+        );
 
-            return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
-        }
-        catch (InvalidDepartmentsException e)
-        {
-            throw new UserFriendlyException(e.Message);
-        }
-        catch (Exception e)
-        {
-            throw new UserFriendlyException(e.Message);
-        }
+        return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
     }
 
 
     [Authorize(HealthCarePermissions.MedicalServices.Edit)]
     public virtual async Task<MedicalServiceDto> UpdateAsync(Guid id, MedicalServiceUpdateDto input)
     {
-        try
-        {
-            var medicalService = await medicalServiceManager.UpdateAsync(
-                id,
-                input.Name,
-                input.Cost,
-                input.Duration,
-                input.ServiceCreatedAt,
-                input.DepartmentNames,
-                input.ConcurrencyStamp
-            );
+        
+        HealthcareGlobalException.ThrowIf("You have already a record with this name.",HealthCareDomainErrorCodes.NameExists, await medicalServiceRepository.FirstOrDefaultAsync(x => x.Name == input.Name && x.Id != id) is not null);
 
-            return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
-        }
-        catch (MedicalServiceNotFoundException e)
-        {
-            throw new UserFriendlyException(e.Message);
-        }
-        catch (Exception)
-        {
-            throw new UserFriendlyException(@L["MedicalServiceDuplicateEntry"]);
-        }
+        var medicalService = await medicalServiceManager.UpdateAsync(
+            id,
+            input.Name,
+            input.Cost,
+            input.Duration,
+            input.ServiceCreatedAt,
+            input.DepartmentNames,
+            input.ConcurrencyStamp
+        );
+
+        return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
     }
 
     [AllowAnonymous]

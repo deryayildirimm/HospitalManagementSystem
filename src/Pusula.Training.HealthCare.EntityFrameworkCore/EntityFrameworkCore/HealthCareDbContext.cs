@@ -159,7 +159,6 @@ public class HealthCareDbContext :
                 
                 b.HasMany(x => x.DepartmentMedicalServices)
                     .WithOne(e => e.Department)
-                    .IsRequired(false)
                     .HasForeignKey(e => e.DepartmentId);
             });
 
@@ -197,7 +196,6 @@ public class HealthCareDbContext :
                 
                 b.HasMany(x => x.DepartmentMedicalServices)
                     .WithOne(e => e.MedicalService)
-                    .IsRequired(false)
                     .HasForeignKey(e => e.MedicalServiceId);
             });
 
@@ -210,10 +208,12 @@ public class HealthCareDbContext :
 
                 b.HasOne<Department>(sc => sc.Department)
                     .WithMany(x => x.DepartmentMedicalServices)
+                    .IsRequired(false)
                     .HasForeignKey(x => x.DepartmentId);
 
                 b.HasOne<MedicalService>(sc => sc.MedicalService)
                     .WithMany(x => x.DepartmentMedicalServices)
+                    .IsRequired(false)
                     .HasForeignKey(x => x.MedicalServiceId);
             });
 
@@ -258,10 +258,6 @@ public class HealthCareDbContext :
                 b.ConfigureByConvention();
                 b.HasKey(a => a.Id);
 
-                //Patient cannot make more than one appointment at a time 
-                b.HasIndex(a => new { a.PatientId, a.AppointmentDate, a.StartTime, a.EndTime })
-                    .IsUnique();
-
                 b.Property(a => a.AppointmentDate)
                     .IsRequired()
                     .HasColumnName(nameof(Appointment.AppointmentDate));
@@ -291,16 +287,28 @@ public class HealthCareDbContext :
                     .IsRequired()
                     .HasColumnName(nameof(Appointment.Amount));
 
-                b.HasOne<Doctor>().WithMany().IsRequired().HasForeignKey(x => x.DoctorId)
+                b.HasOne(a => a.Doctor)
+                    .WithMany()
+                    .IsRequired()
+                    .HasForeignKey(a => a.DoctorId)
                     .OnDelete(DeleteBehavior.NoAction);
-                
-                b.HasOne<AppointmentType>().WithMany().IsRequired().HasForeignKey(x => x.AppointmentTypeId)
+    
+                b.HasOne(a => a.AppointmentType)
+                    .WithMany()
+                    .IsRequired()
+                    .HasForeignKey(a => a.AppointmentTypeId)
                     .OnDelete(DeleteBehavior.NoAction);
 
-                b.HasOne<Patient>().WithMany().IsRequired().HasForeignKey(x => x.PatientId)
+                b.HasOne(a => a.Patient)
+                    .WithMany()
+                    .IsRequired()
+                    .HasForeignKey(a => a.PatientId)
                     .OnDelete(DeleteBehavior.NoAction);
 
-                b.HasOne<MedicalService>().WithMany().IsRequired().HasForeignKey(x => x.MedicalServiceId)
+                b.HasOne(a => a.MedicalService)
+                    .WithMany()
+                    .IsRequired()
+                    .HasForeignKey(a => a.MedicalServiceId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 

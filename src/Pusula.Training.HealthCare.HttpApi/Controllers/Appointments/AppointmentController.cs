@@ -34,12 +34,6 @@ public class AppointmentController(IAppointmentAppService appointmentAppService)
         => appointmentAppService.GetListAsync(input);
 
     [HttpGet]
-    [Route("with-navigation-properties")]
-    public virtual Task<PagedResultDto<AppointmentWithNavigationPropertiesDto>> GetListWithNavigationPropertiesAsync(
-        GetAppointmentsWithNavigationPropertiesInput input)
-        => appointmentAppService.GetListWithNavigationPropertiesAsync(input);
-
-    [HttpGet]
     [Route("{id}")]
     public virtual Task<AppointmentDto> GetAsync(Guid id)
         => appointmentAppService.GetAsync(id);

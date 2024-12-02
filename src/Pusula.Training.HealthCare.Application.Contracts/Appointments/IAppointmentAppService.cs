@@ -17,9 +17,6 @@ public interface IAppointmentAppService : IApplicationService
 
     Task<PagedResultDto<AppointmentDto>> GetListAsync(GetAppointmentsInput input);
 
-    Task<PagedResultDto<AppointmentWithNavigationPropertiesDto>> GetListWithNavigationPropertiesAsync(
-        GetAppointmentsWithNavigationPropertiesInput input);
-
     Task<AppointmentDto> GetAsync(Guid id);
 
     Task DeleteAsync(Guid id);

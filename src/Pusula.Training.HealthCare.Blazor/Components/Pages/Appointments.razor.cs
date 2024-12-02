@@ -195,7 +195,7 @@ public partial class Appointments
         catch (Exception e)
         {
             DaysLookupList = [];
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
         finally
         {
@@ -280,8 +280,7 @@ public partial class Appointments
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            await UiMessageService.Error(e.Message);
         }
     }
 
@@ -300,7 +299,7 @@ public partial class Appointments
         catch (Exception e)
         {
             AppointmentTypesCollection = [];
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
     }
 
@@ -332,7 +331,7 @@ public partial class Appointments
         }
         catch (Exception e)
         {
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
         finally
         {
@@ -376,7 +375,7 @@ public partial class Appointments
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            await UiMessageService.Error(e.Message);
         }
         finally
         {
@@ -663,7 +662,7 @@ public partial class Appointments
         }
         catch (Exception e)
         {
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
     }
 

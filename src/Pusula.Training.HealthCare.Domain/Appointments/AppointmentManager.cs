@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.Exceptions;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.MedicalServices;
 using Volo.Abp;
 using Volo.Abp.Data;
@@ -157,20 +158,15 @@ public class AppointmentManager(
         Check.NotNull(amount, nameof(amount));
         Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
 
-        if (startTime < DateTime.Now || endTime < DateTime.Now || startTime >= endTime)
-        {
-            throw new AppointmentDateNotValidException();
-        }
+        var appointmentDateIsValid = startTime < DateTime.Now || endTime < DateTime.Now || startTime >= endTime;
+        HealthcareGlobalException.ThrowIf("Not valid date.",HealthCareDomainErrorCodes.AppointmentDateNotValid, appointmentDateIsValid);
 
         var isAppointmentTaken = await appointmentRepository
             .FirstOrDefaultAsync(x => x.DoctorId == doctorId
                                       && x.AppointmentDate.Date == appointmentDate.Date
                                       && x.StartTime == startTime);
 
-        if (isAppointmentTaken != null)
-        {
-            throw new AppointmentAlreadyTakenException();
-        }
+        HealthcareGlobalException.ThrowIf("Selected appointment already taken.",HealthCareDomainErrorCodes.AppointmentAlreadyTaken, isAppointmentTaken is not null);
 
         var appointment = new Appointment(
             id: GuidGenerator.Create(),
@@ -225,10 +221,7 @@ public class AppointmentManager(
         var workingHour = await doctorWorkingHourRepository
             .FirstOrDefaultAsync(x => x.DoctorId == doctorId && date.DayOfWeek == x.DayOfWeek);
 
-        if (workingHour == null)
-        {
-            throw new DoctorNotWorkingException();
-        }
+        HealthcareGlobalException.ThrowIf("Doctor doesnt work at these dates.",HealthCareDomainErrorCodes.DoctorWorkingHourNotFound, workingHour is null);
 
         return workingHour;
     }
@@ -238,10 +231,7 @@ public class AppointmentManager(
         var medicalService = await medicalServiceRepository
             .FirstOrDefaultAsync(x => x.Id == medicalServiceId);
 
-        if (medicalService == null)
-        {
-            throw new MedicalServiceNotFoundException();
-        }
+        HealthcareGlobalException.ThrowIf("MedicalService Not Found.",HealthCareDomainErrorCodes.MedicalServiceNotFound, medicalService is null);
 
         return medicalService;
     }

@@ -4,8 +4,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Exceptions;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Volo.Abp;
 using Volo.Abp.Data;
+using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Domain.Services;
 
 namespace Pusula.Training.HealthCare.MedicalServices;
@@ -58,14 +60,10 @@ public class MedicalServiceManager(
         Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue,
             MedicalServiceConsts.DurationMaxValue);
 
-        var service = await medicalServiceRepository.GetAsync(id);
+        var service = await medicalServiceRepository.FirstOrDefaultAsync(x => x.Id == id);
 
-        //TODO Will be removed
-        if (service == null)
-        {
-            throw new MedicalServiceNotFoundException();
-        }
-
+        HealthcareGlobalException.ThrowIf("MedicalService not found.",HealthCareDomainErrorCodes.MedicalServiceNotFound, service is null);
+        
         service.SetName(name);
         service.SetCost(cost);
         service.SetDuration(duration);
@@ -86,14 +84,8 @@ public class MedicalServiceManager(
         var departmentIds = (await departmentRepository.GetListByNamesAsync(departmentNames.ToArray()))
             .Select(x => x.Id)
             .ToList();
-
-        if (departmentIds.Count == 0)
-        {
-            service.RemoveAllDepartments();
-            return; //TODO Exception will be added 
-        }
-
-        service.DepartmentMedicalServices = new List<DepartmentMedicalService>();
+        
+        HealthcareGlobalException.ThrowIf("Departments not found.",HealthCareDomainErrorCodes.DepartmentsNotFound, departmentIds.Count == 0);
 
         foreach (var id in departmentIds)
         {

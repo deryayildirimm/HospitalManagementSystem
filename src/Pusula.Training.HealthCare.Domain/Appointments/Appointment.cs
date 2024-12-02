@@ -1,5 +1,9 @@
 using System;
 using JetBrains.Annotations;
+using Pusula.Training.HealthCare.AppointmentTypes;
+using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.MedicalServices;
+using Pusula.Training.HealthCare.Patients;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -18,6 +22,14 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
     
     [NotNull]
     public virtual Guid AppointmentTypeId { get; protected set; }
+    
+    public virtual Doctor Doctor { get; protected set; }
+    
+    public virtual Patient Patient { get; protected set; }
+    
+    public virtual MedicalService MedicalService { get; protected set; }
+    
+    public virtual AppointmentType AppointmentType { get; protected set; }
 
     [NotNull]
     public virtual DateTime AppointmentDate { get; protected set; }

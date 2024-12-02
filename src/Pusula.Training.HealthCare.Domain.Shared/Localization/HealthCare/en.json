@@ -198,6 +198,14 @@
     "NewAppointmentType": "New Appointment Type",
     "AppointmentType": "Appointment Type",
     "DeleteRecord": "Delete Record",
-    "AreYouSureDeleteCount": "All {0} items on this page are selected"
+    "AreYouSureDeleteCount": "All {0} items on this page are selected",
+    "HealthCareError:DoctorNotFound": "Doctors not found.",
+    "HealthCareError:DoctorWorkingHourNotFound" : "Doctor doesnt work at these dates.",
+    "HealthCareError:MedicalServiceNotFound":"MedicalService Not Found.",
+    "HealthCareError:AppointmentAlreadyTaken":"Selected appointment already taken.",
+    "HealthCareError:AppointmentDateNotValid": "Appointment date must be greater than now.",
+    "HealthCareError:DateNotInPast": "Date must be in the future",
+    "HealthCareError:InvalidDepartments" : "Some of these departments already connected with the selected medical service.",
+    "HealthCareError:NameAlreadyExist": "You have already a record with this name."
   }
 }

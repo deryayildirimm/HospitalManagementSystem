@@ -24,24 +24,6 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         CancellationToken cancellationToken = default);
     
     Task<List<Appointment>> GetListAsync(
-        Guid? doctorId = null, 
-        Guid? patientId = null,
-        Guid? medicalServiceId = null,
-        Guid? appointmentTypeId = null,
-        DateTime? appointmentMinDate = null,
-        DateTime? appointmentMaxDate = null,
-        DateTime? startTime = null,
-        DateTime? endTime = null,
-        EnumAppointmentStatus? status = null,
-        bool? reminderSent = null,
-        double? minAmount = null,
-        double? maxAmount = null,
-        string? sorting = null,
-        int maxResultCount = int.MaxValue,
-        int skipCount = 0,
-        CancellationToken cancellationToken = default);
-    
-    Task<List<AppointmentWithNavigationProperties>> GetListWithNavigationPropertiesAsync(
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
@@ -56,7 +38,7 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         DateTime? endTime = null,
         EnumAppointmentStatus? status = null,
         bool? reminderSent = null,
-        double? minAmount = null, 
+        double? minAmount = null,
         double? maxAmount = null,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
@@ -68,21 +50,6 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         Guid? patientId = null,
         Guid? medicalServiceId = null,
         Guid? appointmentTypeId = null,
-        DateTime? appointmentMinDate = null,
-        DateTime? appointmentMaxDate = null,
-        DateTime? startTime = null,
-        DateTime? endTime = null,
-        EnumAppointmentStatus? status = null,
-        bool? reminderSent = null,
-        double? minAmount = null,
-        double? maxAmount = null,
-        CancellationToken cancellationToken = default);
-    
-    Task<long> GetCountByNavigationPropertiesAsync(
-        Guid? doctorId = null,
-        Guid? patientId = null,
-        Guid? medicalServiceId = null,
-        Guid? appointmentTypeId = null,
         string? patientName = null,
         string? doctorName = null,
         string? serviceName = null,
@@ -96,5 +63,6 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         double? minAmount = null,
         double? maxAmount = null,
         CancellationToken cancellationToken = default);
+    
 
 }

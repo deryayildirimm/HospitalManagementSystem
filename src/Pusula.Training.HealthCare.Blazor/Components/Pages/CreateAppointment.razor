@@ -1,0 +1,59 @@
+@page "/appointments/create"
+@using Pusula.Training.HealthCare.Permissions
+@attribute [Authorize(HealthCarePermissions.Appointments.Default)]
+
+@using Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.Appointments
+@using Pusula.Training.HealthCare.Doctors
+@using Pusula.Training.HealthCare.Shared
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@inherits HealthCareComponentBase
+
+@inject IAppointmentAppService AppointmentAppService
+@inject IDoctorsAppService DoctorsAppService
+@inject IUiMessageService UiMessageService
+@inject NavigationManager NavigationManager
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["NewAppointment"]">
+    <link href="../Components/Pages/CreateAppointment.razor.css" rel="stylesheet"/>
+</PageHeader>
+
+<div class="row py-3">
+    <div class="col-sm-12 col-md-4 p-2">
+        <div class="card border-1 border-black py-4 px-3 d-flex flex-column gap-1">
+            <div class="flex flex-column">
+                <div>
+                    <Label Class="form-label">@L["AppointmentType"]</Label>
+                </div>
+                <SfDropDownList
+                    TValue="Guid"
+                    TItem="LookupDto<Guid>"
+                    Placeholder="@L["Select"]"
+                    AllowFiltering="true"
+                    DataSource="@AppointmentTypesCollection"
+                    Width="300px">
+                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
+            </div>
+            <div class="flex flex-column">
+                <div>
+                    <Label Class="form-label">@L["Doctors"]</Label>
+                </div>
+                <SfDropDownList
+                    TValue="Guid"
+                    TItem="LookupDto<Guid>"
+                    Placeholder="@L["Select"]"
+                    AllowFiltering="true"
+                    DataSource="@AppointmentTypesCollection"
+                    Width="300px">
+                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 col-md-8 p-2">
+        
+    </div>
+</div>

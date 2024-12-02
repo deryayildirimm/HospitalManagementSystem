@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
 using MiniExcelLibs;
-using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Shared;
 using Volo.Abp;
@@ -13,6 +13,7 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Authorization;
 using Volo.Abp.Caching;
 using Volo.Abp.Content;
+using Volo.Abp.Domain.Repositories;
 
 namespace Pusula.Training.HealthCare.AppointmentTypes;
 
@@ -51,6 +52,8 @@ public class AppointmentTypesAppService(
     [Authorize(HealthCarePermissions.AppointmentTypes.Create)]
     public virtual async Task<AppointmentTypeDto> CreateAsync(AppointmentTypeCreateDto input)
     {
+        HealthcareGlobalException.ThrowIf("You have already a record with this name.",HealthCareDomainErrorCodes.NameExists, await appointmentTypeRepository.FirstOrDefaultAsync(x => x.Name == input.Name) is not null);
+
         var department = await appointmentTypeManager.CreateAsync(
             input.Name
         );
@@ -61,6 +64,8 @@ public class AppointmentTypesAppService(
     [Authorize(HealthCarePermissions.AppointmentTypes.Edit)]
     public virtual async Task<AppointmentTypeDto> UpdateAsync(Guid id, AppointmentTypeUpdateDto input)
     {
+        HealthcareGlobalException.ThrowIf("You have already a record with this name.",HealthCareDomainErrorCodes.NameExists, await appointmentTypeRepository.FirstOrDefaultAsync(x => x.Name == input.Name && x.Id != id) is not null);
+
         var department = await appointmentTypeManager.UpdateAsync(
             id,
             input.Name, input.ConcurrencyStamp
