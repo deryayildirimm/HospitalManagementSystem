@@ -28,6 +28,9 @@ using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Tests;
+using Pusula.Training.HealthCare.Treatment.Examinations;
+using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
+using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
 using Pusula.Training.HealthCare.Treatment.Icds;
 
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
@@ -56,7 +59,12 @@ public class HealthCareDbContext :
     public DbSet<TestCategory> TestCategories { get; set; } = null!;
     public DbSet<Test> Tests { get; set; } = null!;
     public DbSet<BloodTestResult> BloodTestResults { get; set; } = null!;
+    
+    // Treatment
     public DbSet<Icd> Icds { get; set; } = null!;
+    public DbSet<Examination> Examinations { get; set; } = null!;
+    public DbSet<FamilyHistory> FamilyHistories { get; set; } = null!;
+    public DbSet<Background> Backgrounds { get; set; } = null!;
 
     public DbSet<Appointment> Appointments { get; set; } = null!;
     public DbSet<DoctorWorkingHour> DoctorWorkingHours { get; set; } = null!;
@@ -420,6 +428,84 @@ public class HealthCareDbContext :
                     .HasMaxLength(IcdConsts.CodeNumberMaxLength);
                 b.Property(x => x.Detail).HasColumnName(nameof(Icd.Detail)).IsRequired()
                     .HasMaxLength(IcdConsts.DetailMaxLength);
+            });
+
+            builder.Entity<Examination>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Examinations", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.Date).HasColumnName(nameof(Examination.Date)).IsRequired();
+                b.Property(x => x.Complaint).HasColumnName(nameof(Examination.Complaint)).IsRequired()
+                    .HasMaxLength(ExaminationConsts.ComplaintMaxLength);
+                b.Property(x => x.StartDate).HasColumnName(nameof(Examination.StartDate));
+                b.Property(x => x.Story).HasColumnName(nameof(Examination.Story))
+                    .HasMaxLength(ExaminationConsts.StoryMaxLength);
+                b.HasOne(x => x.Background)
+                    .WithOne(x => x.Examination)
+                    .HasForeignKey<Background>(x => x.ExaminationId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(x => x.FamilyHistory)
+                    .WithOne(x => x.Examination)
+                    .HasForeignKey<FamilyHistory>(x => x.ExaminationId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(d => d.Protocol)
+                    .WithOne()
+                    .HasForeignKey<Examination>(x => x.ProtocolId)
+                    .IsRequired()
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+            
+            builder.Entity<ExaminationIcd>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "ExaminationIcds", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+
+                b.HasKey(x => new { x.ExaminationId, x.IcdId });
+
+                b.HasOne(ei => ei.Examination)
+                    .WithMany(e => e.ExaminationIcd)
+                    .HasForeignKey(ei => ei.ExaminationId);
+
+                b.HasOne(ei => ei.Icd)
+                    .WithMany()
+                    .HasForeignKey(ei => ei.IcdId);
+            });
+
+            builder.Entity<FamilyHistory>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "FamilyHistories", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.MotherDisease).HasColumnName(nameof(FamilyHistory.MotherDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.FatherDisease).HasColumnName(nameof(FamilyHistory.FatherDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.SisterDisease).HasColumnName(nameof(FamilyHistory.SisterDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.BrotherDisease).HasColumnName(nameof(FamilyHistory.BrotherDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.AreParentsRelated).IsRequired();
+                b.HasOne(x => x.Examination)
+                    .WithOne(x => x.FamilyHistory)
+                    .HasForeignKey<FamilyHistory>(x => x.ExaminationId)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired();
+            });
+
+            builder.Entity<Background>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Backgrounds", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.Allergies).HasColumnName(nameof(Background.Allergies))
+                    .HasMaxLength(BackgroundConsts.AllergiesMaxLength);
+                b.Property(x => x.Medications).HasColumnName(nameof(Background.Medications))
+                    .HasMaxLength(BackgroundConsts.MedicationsMaxLength);
+                b.Property(x => x.Habits).HasColumnName(nameof(Background.Habits))
+                    .HasMaxLength(BackgroundConsts.HabitsMaxLength);
+                b.HasOne(x => x.Examination)
+                    .WithOne(x => x.Background)
+                    .HasForeignKey<Background>(x => x.ExaminationId)
+                    .OnDelete(DeleteBehavior.NoAction)
+                    .IsRequired();
             });
         }
     }

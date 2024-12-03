@@ -21,6 +21,9 @@ using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalPersonnel;
 using Pusula.Training.HealthCare.Titles;
+using Pusula.Training.HealthCare.Treatment.Examinations;
+using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
+using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
 using Pusula.Training.HealthCare.Treatment.Icds;
 
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
@@ -65,6 +68,9 @@ public class HealthCareEntityFrameworkCoreModule : AbpModule
             options.AddRepository<City, EfCoreCityRepository>();
             options.AddRepository<District, EfCoreDistrictRepository>();
             options.AddRepository<Icd, EfCoreIcdRepository>();
+            options.AddRepository<Examination, EfCoreExaminationRepository>();
+            options.AddRepository<FamilyHistory, EfCoreFamilyHistoryRepository>();
+            options.AddRepository<Background, EfCoreBackgroundRepository>();
         });
 
         Configure<AbpDbContextOptions>(options =>
