@@ -170,6 +170,7 @@ public class HealthCareDbContext :
                 b.Property(x => x.EndTime).HasColumnName(nameof(Protocol.EndTime));
                 b.HasOne(p => p.Patient).WithMany().IsRequired().HasForeignKey(x => x.PatientId)
                     .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(p => p.ProtocolType).WithMany().IsRequired().HasForeignKey(o => o.ProtocolTypeId).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(p => p.Department).WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
             });

@@ -13,6 +13,8 @@ public class GetProtocolsInput : PagedAndSortedResultRequestDto
     public string? EndTime { get; set; }
     public Guid? PatientId { get; set; }
     public Guid? DepartmentId { get; set; }
+    
+    public Guid? ProtocolTypeId { get; set; }
 
     public GetProtocolsInput()
     {

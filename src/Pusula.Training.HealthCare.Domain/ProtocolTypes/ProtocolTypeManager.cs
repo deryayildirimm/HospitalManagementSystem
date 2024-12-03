@@ -13,7 +13,7 @@ public class ProtocolTypeManager(IProtocolTypeRepository protocolTypeRepository)
     public virtual async Task<ProtocolType> CreateAsync( string? name=null )
     {
         
-        Check.NotNullOrWhiteSpace(name, nameof(name), ProtocolTypeConsts.NameMinLength, ProtocolTypeConsts.NameMaxLength);
+        Check.NotNullOrWhiteSpace(name, nameof(name), ProtocolTypeConsts.NameMaxLength, ProtocolTypeConsts.NameMinLength);
         
         var protocolType = new ProtocolType(
             GuidGenerator.Create(), name);
@@ -26,7 +26,7 @@ public class ProtocolTypeManager(IProtocolTypeRepository protocolTypeRepository)
     public virtual async Task<ProtocolType> UpdateAsync(Guid id,  string? name=null)
     {
         
-        Check.NotNullOrWhiteSpace(name, nameof(name), ProtocolTypeConsts.NameMinLength, ProtocolTypeConsts.NameMaxLength);
+        Check.NotNullOrWhiteSpace(name, nameof(name), ProtocolTypeConsts.NameMaxLength, ProtocolTypeConsts.NameMinLength);
         
         var protocolType = await protocolTypeRepository.GetAsync(id);
         

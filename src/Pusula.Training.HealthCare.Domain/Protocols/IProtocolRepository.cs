@@ -16,6 +16,7 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
         string? endTime = null,
         Guid? patientId = null,
         Guid? departmentId = null,
+        Guid? protocolTypeId = null,
         CancellationToken cancellationToken = default);
     Task<ProtocolWithNavigationProperties> GetWithNavigationPropertiesAsync(
         Guid id,
@@ -30,6 +31,7 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
         string? endTime = null,
         Guid? patientId = null,
         Guid? departmentId = null,
+        Guid? protocolTypeId = null,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
@@ -56,5 +58,6 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
         string? endTime = null,
         Guid? patientId = null,
         Guid? departmentId = null,
+        Guid? protocolTypeId = null,
         CancellationToken cancellationToken = default);
 }

@@ -23,7 +23,7 @@ public class ProtocolType : AuditedAggregateRoot<Guid>
     
     public void SetName(string name)
     {
-        Check.NotNullOrWhiteSpace(name, nameof(name), ProtocolTypeConsts.NameMinLength, ProtocolTypeConsts.NameMaxLength);
+        Check.NotNullOrWhiteSpace(name, nameof(name), ProtocolTypeConsts.NameMaxLength, ProtocolTypeConsts.NameMinLength);
         Name = name;
     }
     
