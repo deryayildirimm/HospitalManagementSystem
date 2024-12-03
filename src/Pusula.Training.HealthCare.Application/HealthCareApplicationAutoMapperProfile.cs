@@ -40,11 +40,10 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<ProtocolWithNavigationProperties, ProtocolWithNavigationPropertiesDto>();
         
         CreateMap<ProtocolType, ProtocolTypeDto>();
-      //  CreateMap<ProtocolType, ProtocolExcelDto>();  henüz bu kısmı yazmadık excel tarafını o yüzden 
         CreateMap<ProtocolTypeDto, ProtocolTypeUpdateDto>();
-    
-
-
+        CreateMap<ProtocolType, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
+        
         CreateMap<Department, DepartmentDto>();
         CreateMap<Department, DepartmentExcelDto>();
         CreateMap<DepartmentDto, DepartmentUpdateDto>();
@@ -66,6 +65,8 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<DoctorDto, DoctorUpdateDto>();
         CreateMap<DoctorWithNavigationPropertiesDto, DoctorUpdateDto>();
         CreateMap<DoctorWithNavigationProperties, DoctorWithNavigationPropertiesDto>();
+        CreateMap<Doctor, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.FirstName));
         
         CreateMap<DoctorLeave, DoctorLeaveDto>();
         CreateMap<DoctorLeave, DoctorLeaveExcelDto>();

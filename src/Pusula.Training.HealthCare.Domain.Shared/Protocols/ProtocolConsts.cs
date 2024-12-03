@@ -9,7 +9,8 @@ namespace Pusula.Training.HealthCare.Protocols
             return string.Format(DefaultSorting, withEntityName ? "Protocol." : string.Empty);
         }
 
-        public const int TypeMinLength = 1;
-        public const int TypeMaxLength = 10;
+        public const int MinNotesLength = 1;
+        public const int MaxNotesLength = 100;
+
     }
 }

@@ -36,10 +36,8 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
     }
 
-    public virtual async Task<ProtocolWithNavigationProperties> GetWithNavigationPropertiesAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-
-        return (await GetDbSetAsync()).Where(b => b.Id == id)
+    public virtual async Task<ProtocolWithNavigationProperties> GetWithNavigationPropertiesAsync
+        (Guid id, CancellationToken cancellationToken = default)  =>  (await GetDbSetAsync()).Where(b => b.Id == id)
             .Select(protocol => new ProtocolWithNavigationProperties
             {
                 Protocol = protocol,
@@ -48,7 +46,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
                 ProtocolType = protocol.ProtocolType,
                 Doctor = protocol.Doctor,
             }).FirstOrDefault()!;
-    }
+    
 
     public virtual async Task<List<ProtocolWithNavigationProperties>> GetListWithNavigationPropertiesAsync(
         string? filterText = null,
@@ -100,9 +98,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         Guid? patientId = null,
         Guid? departmentId = null,
         Guid? protocolTypeId = null,
-        Guid? doctorId = null)
-    {
-        return query
+        Guid? doctorId = null)  =>  query
             .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Protocol.Notes!.Contains(filterText!) )
                 .WhereIf(!string.IsNullOrWhiteSpace(note), e => e.Protocol.Notes.Contains(note!))
                 .WhereIf(startTimeMin.HasValue, e => e.Protocol.StartTime >= startTimeMin!.Value)
@@ -113,7 +109,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
             .WhereIf(protocolTypeId != null && protocolTypeId != Guid.Empty, e => e.Protocol != null && e.Protocol.Id == protocolTypeId)
             .WhereIf(doctorId != null && doctorId != Guid.Empty, e => e.Doctor != null && e.Doctor.Id == doctorId)
                 .WhereIf(departmentId != null && departmentId != Guid.Empty, e => e.Department != null && e.Department.Id == departmentId);
-    }
+    
 
     public virtual async Task<List<Protocol>> GetListAsync(
         string? filterText = null,
@@ -157,9 +153,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         DateTime? startTimeMin = null,
         DateTime? startTimeMax = null,
         DateTime? endTimeMin = null,
-        DateTime? endTimeMax = null)
-    {
-        return query
+        DateTime? endTimeMax = null) => query
             .WhereIf(!string.IsNullOrWhiteSpace(filterText),
                 e => e.Notes!.Contains(filterText!) )
             .WhereIf(!string.IsNullOrWhiteSpace(note), e => e.Notes.Contains(note!))
@@ -168,5 +162,5 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
             .WhereIf(endTimeMin.HasValue, e => e.EndTime >= endTimeMin!.Value)
             .WhereIf(endTimeMax.HasValue, e => e.EndTime <= endTimeMax!.Value);
 
-    }
+    
 }

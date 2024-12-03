@@ -43,11 +43,8 @@ public class ProtocolTypeController(IProtocolTypesAppService typesAppService): H
     
     [HttpGet]
     [Route("download-token")]
-    public virtual Task<DownloadTokenResultDto> GetDownloadTokenAsync()
-    {
-        return typesAppService.GetDownloadTokenAsync();
-    }
-
+    public virtual Task<DownloadTokenResultDto> GetDownloadTokenAsync() => typesAppService.GetDownloadTokenAsync();
+  
     [HttpDelete]
     [Route("")]
     public virtual Task DeleteByIdsAsync(List<Guid> protocolTypesIds) => typesAppService.DeleteByIdsAsync(protocolTypesIds);

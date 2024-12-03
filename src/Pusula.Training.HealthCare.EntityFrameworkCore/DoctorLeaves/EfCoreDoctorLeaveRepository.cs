@@ -74,9 +74,7 @@ public class EfCoreDoctorLeaveRepository(IDbContextProvider<HealthCareDbContext>
         DateTime? startDateMax = null,
         DateTime? endDateMin = null,
         DateTime? endDateMax = null,
-        string? reason = null)
-    {
-        return query
+        string? reason = null) => query
             .WhereIf(!string.IsNullOrWhiteSpace(filterText),
                 e => e.Reason!.Contains(filterText!))
             .WhereIf(!string.IsNullOrWhiteSpace(reason), e => e.Reason!.ToLower().Contains(reason!.ToLower()))
@@ -86,5 +84,5 @@ public class EfCoreDoctorLeaveRepository(IDbContextProvider<HealthCareDbContext>
             .WhereIf(endDateMax.HasValue, e => e.EndDate <= endDateMax!.Value)
             .WhereIf(doctorId.HasValue, e => e.DoctorId == doctorId);
 
-    }
+    
 }

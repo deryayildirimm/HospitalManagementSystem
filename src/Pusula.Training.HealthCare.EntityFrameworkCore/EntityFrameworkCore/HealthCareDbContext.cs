@@ -165,7 +165,7 @@ public class HealthCareDbContext :
                 b.ToTable(HealthCareConsts.DbTablePrefix + "Protocols", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
                 b.Property(x => x.Notes).HasColumnName(nameof(Protocol.Notes))
-                    .HasMaxLength(ProtocolConsts.TypeMaxLength);
+                    .HasMaxLength(ProtocolConsts.MaxNotesLength);
                 b.Property(x => x.StartTime).HasColumnName(nameof(Protocol.StartTime)).IsRequired();
                 b.Property(x => x.EndTime).HasColumnName(nameof(Protocol.EndTime));
                 b.HasOne(p => p.Patient).WithMany().IsRequired().HasForeignKey(x => x.PatientId)
