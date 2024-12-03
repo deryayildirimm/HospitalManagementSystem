@@ -140,7 +140,7 @@ public partial class Protocols
             culture = "&culture=" + culture;
         }
         await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/protocols/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Type={HttpUtility.UrlEncode(Filter.Type)}&StartTimeMin={Filter.StartTimeMin?.ToString("O")}&StartTimeMax={Filter.StartTimeMax?.ToString("O")}&EndTime={HttpUtility.UrlEncode(Filter.EndTime)}&PatientId={Filter.PatientId}&DepartmentId={Filter.DepartmentId}", forceLoad: true);
+   //     NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/protocols/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Type={HttpUtility.UrlEncode(Filter.Type)}&StartTimeMin={Filter.StartTimeMin?.ToString("O")}&StartTimeMax={Filter.StartTimeMax?.ToString("O")}&EndTime={HttpUtility.UrlEncode(Filter.EndTime)}&PatientId={Filter.PatientId}&DepartmentId={Filter.DepartmentId}", forceLoad: true);
     }
 
     private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<ProtocolWithNavigationPropertiesDto> e)
@@ -246,11 +246,13 @@ public partial class Protocols
         }
     }
 
+    /*
     protected virtual async Task OnTypeChangedAsync(string? type)
     {
-        Filter.Type = type;
+      //  Filter.Type = type;
         await SearchAsync();
     }
+    */
     protected virtual async Task OnStartTimeMinChangedAsync(DateTime? startTimeMin)
     {
         Filter.StartTimeMin = startTimeMin.HasValue ? startTimeMin.Value.Date : startTimeMin;
@@ -263,7 +265,7 @@ public partial class Protocols
     }
     protected virtual async Task OnEndTimeChangedAsync(string? endTime)
     {
-        Filter.EndTime = endTime;
+     //   Filter.EndTime = endTime;
         await SearchAsync();
     }
     protected virtual async Task OnPatientIdChangedAsync(Guid? patientId)

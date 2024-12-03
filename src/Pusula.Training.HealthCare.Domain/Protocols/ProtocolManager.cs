@@ -7,20 +7,20 @@ using Volo.Abp.Domain.Services;
 
 namespace Pusula.Training.HealthCare.Protocols;
 
-public class ProtocolManager(IProtocolRepository protocolRepository) : DomainService
+public class ProtocolManager(IProtocolRepository protocolRepository) : DomainService, IProtocolManager
 {
     public virtual async Task<Protocol> CreateAsync(
-    Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId, string type, DateTime startTime, string? endTime = null)
+    Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId,  DateTime startTime,string? note = null, DateTime? endTime = null)
     {
         Check.NotNull(patientId, nameof(patientId));
         Check.NotNull(departmentId, nameof(departmentId));
-        Check.NotNullOrWhiteSpace(type, nameof(type));
-        Check.Length(type, nameof(type), ProtocolConsts.TypeMaxLength, ProtocolConsts.TypeMinLength);
+        Check.NotNullOrWhiteSpace(note, nameof(note));
+        Check.Length(note, nameof(note), ProtocolConsts.TypeMaxLength, ProtocolConsts.TypeMinLength);
         Check.NotNull(startTime, nameof(startTime));
 
         var protocol = new Protocol(
          GuidGenerator.Create(),
-         patientId, departmentId, protocolTypeId,doctorId, type, startTime, endTime
+         patientId, departmentId, protocolTypeId,doctorId,  startTime, note, endTime
          );
 
         return await protocolRepository.InsertAsync(protocol);
@@ -28,20 +28,20 @@ public class ProtocolManager(IProtocolRepository protocolRepository) : DomainSer
 
     public virtual async Task<Protocol> UpdateAsync(
         Guid id,
-        Guid patientId, Guid departmentId,Guid protocolTypeId, Guid doctorId,  string type, DateTime startTime, string? endTime = null, [CanBeNull] string? concurrencyStamp = null
+        Guid patientId, Guid departmentId,Guid protocolTypeId, Guid doctorId, DateTime startTime,string? note = null, DateTime? endTime = null, [CanBeNull] string? concurrencyStamp = null
     )
     {
         Check.NotNull(patientId, nameof(patientId));
         Check.NotNull(departmentId, nameof(departmentId));
-        Check.NotNullOrWhiteSpace(type, nameof(type));
-        Check.Length(type, nameof(type), ProtocolConsts.TypeMaxLength, ProtocolConsts.TypeMinLength);
+        Check.NotNullOrWhiteSpace(note, nameof(note));
+        Check.Length(note, nameof(note), ProtocolConsts.TypeMaxLength, ProtocolConsts.TypeMinLength);
         Check.NotNull(startTime, nameof(startTime));
 
         var protocol = await protocolRepository.GetAsync(id);
 
         protocol.PatientId = patientId;
         protocol.DepartmentId = departmentId;
-        protocol.Type = type;
+        protocol.Notes = note;
         protocol.StartTime = startTime;
         protocol.EndTime = endTime;
         protocol.ProtocolTypeId = protocolTypeId;

@@ -11,13 +11,13 @@ namespace Pusula.Training.HealthCare.Protocols;
 
 public class Protocol : FullAuditedAggregateRoot<Guid>
 {
-    [NotNull]
-    public virtual string Type { get; set; }
+    public virtual string? Notes { get; set; }
 
+    [NotNull]
     public virtual DateTime StartTime { get; set; }
 
     [CanBeNull]
-    public virtual string? EndTime { get; set; }
+    public virtual DateTime? EndTime { get; set; }
     public Guid PatientId { get; set; }
     public virtual Patient Patient { get; set; }
     public Guid DepartmentId { get; set; }
@@ -34,14 +34,14 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
 
     protected Protocol()
     {
-        Type = string.Empty;
+        Notes = string.Empty;
+        StartTime = DateTime.Now;
     }
 
-    public Protocol(Guid id, Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId, string type, DateTime startTime, string? endTime = null) : base(id)
+    public Protocol(Guid id, Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId,  DateTime startTime, string? note = null, DateTime? endTime = null) : base(id)
     {
-        Check.NotNull(type, nameof(type));
-        Check.Length(type, nameof(type), ProtocolConsts.TypeMaxLength, ProtocolConsts.TypeMinLength);
-        Type = type;
+      
+        Notes = note;
         StartTime = startTime;
         EndTime = endTime;
         PatientId = patientId;

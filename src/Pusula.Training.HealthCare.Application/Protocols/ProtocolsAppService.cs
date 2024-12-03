@@ -29,8 +29,8 @@ namespace Pusula.Training.HealthCare.Protocols
     {
         public virtual async Task<PagedResultDto<ProtocolWithNavigationPropertiesDto>> GetListAsync(GetProtocolsInput input)
         {
-            var totalCount = await protocolRepository.GetCountAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTime, input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId);
-            var items = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTime, input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId,input.Sorting, input.MaxResultCount, input.SkipCount);
+            var totalCount = await protocolRepository.GetCountAsync(input.FilterText, input.Notes, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin,input.EndTimeMax, input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId);
+            var items = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Notes, input.StartTimeMin, input.StartTimeMax,  input.EndTimeMin,input.EndTimeMax,input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId,input.Sorting, input.MaxResultCount, input.SkipCount);
 
             return new PagedResultDto<ProtocolWithNavigationPropertiesDto>
             {
@@ -99,7 +99,7 @@ namespace Pusula.Training.HealthCare.Protocols
             }
 
             var protocol = await protocolManager.CreateAsync(
-            input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId,input.Type, input.StartTime, input.EndTime
+            input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId, input.StartTime, input.Notes, input.EndTime
             );
 
             return ObjectMapper.Map<Protocol, ProtocolDto>(protocol);
@@ -119,7 +119,7 @@ namespace Pusula.Training.HealthCare.Protocols
 
             var protocol = await protocolManager.UpdateAsync(
             id,
-            input.PatientId, input.DepartmentId, input.ProtocolTypeId,  input.DoctorId, input.Type, input.StartTime, input.EndTime, input.ConcurrencyStamp
+            input.PatientId, input.DepartmentId, input.ProtocolTypeId,  input.DoctorId,  input.StartTime, input.Notes, input.EndTime, input.ConcurrencyStamp
             );
 
             return ObjectMapper.Map<Protocol, ProtocolDto>(protocol);
@@ -134,15 +134,17 @@ namespace Pusula.Training.HealthCare.Protocols
                 throw new AbpAuthorizationException("Invalid download token: " + input.DownloadToken);
             }
 
-            var protocols = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTime, input.PatientId, input.DepartmentId, input.ProtocolTypeId );
+            var protocols = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin,input.EndTimeMax, input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId );
             var items = protocols.Select(item => new
             {
-                item.Protocol.Type,
+                item.Protocol.Notes,
                 item.Protocol.StartTime,
                 item.Protocol.EndTime,
 
                 Patient = item.Patient?.FirstName,
                 Department = item.Department?.Name,
+                
+                
 
             });
 
@@ -162,7 +164,7 @@ namespace Pusula.Training.HealthCare.Protocols
         [Authorize(HealthCarePermissions.Protocols.Delete)]
         public virtual async Task DeleteAllAsync(GetProtocolsInput input)
         {
-            await protocolRepository.DeleteAllAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTime, input.PatientId, input.DepartmentId);
+            await protocolRepository.DeleteAllAsync(input.FilterText, input.Notes, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin, input.EndTimeMax, input.PatientId, input.DepartmentId, input.DoctorId);
         }
         public virtual async Task<Shared.DownloadTokenResultDto> GetDownloadTokenAsync()
         {
