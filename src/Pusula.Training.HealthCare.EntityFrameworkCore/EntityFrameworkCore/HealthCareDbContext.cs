@@ -29,6 +29,7 @@ using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Tests;
 using Pusula.Training.HealthCare.Treatment.Icds;
+using Pusula.Training.HealthCare.ProtocolTypes;
 
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
 
@@ -43,6 +44,7 @@ public class HealthCareDbContext :
     /* Add DbSet properties for your Aggregate Roots / Entities here. */
     public DbSet<Department> Departments { get; set; } = null!;
     public DbSet<Protocol> Protocols { get; set; } = null!;
+    public DbSet<ProtocolType> ProtocolTypes { get; set; } = null!;
     public DbSet<Patient> Patients { get; set; } = null!;
     public DbSet<MedicalService> Services { get; set; } = null!;
     public DbSet<DepartmentMedicalService> DepartmentMedicalServices { get; set; } = null!;
@@ -162,14 +164,25 @@ public class HealthCareDbContext :
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "Protocols", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                b.Property(x => x.Type).HasColumnName(nameof(Protocol.Type)).IsRequired()
-                    .HasMaxLength(ProtocolConsts.TypeMaxLength);
-                b.Property(x => x.StartTime).HasColumnName(nameof(Protocol.StartTime));
+                b.Property(x => x.Notes).HasColumnName(nameof(Protocol.Notes))
+                    .HasMaxLength(ProtocolConsts.MaxNotesLength);
+                b.Property(x => x.StartTime).HasColumnName(nameof(Protocol.StartTime)).IsRequired();
                 b.Property(x => x.EndTime).HasColumnName(nameof(Protocol.EndTime));
-                b.HasOne<Patient>().WithMany().IsRequired().HasForeignKey(x => x.PatientId)
+                b.HasOne(p => p.Patient).WithMany().IsRequired().HasForeignKey(x => x.PatientId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
+                b.HasOne(p => p.ProtocolType).WithMany().IsRequired().HasForeignKey(o => o.ProtocolTypeId).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(p => p.Department).WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(p => p.Doctor).WithMany().IsRequired().HasForeignKey(p => p.DoctorId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+            
+            builder.Entity<ProtocolType>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "ProtocolTypes", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                    b.Property(x => x.Name).HasColumnName(nameof(ProtocolType.Name)).IsRequired()
+                        .HasMaxLength(ProtocolTypeConsts.NameMaxLength);
             });
 
             builder.Entity<MedicalService>(b =>

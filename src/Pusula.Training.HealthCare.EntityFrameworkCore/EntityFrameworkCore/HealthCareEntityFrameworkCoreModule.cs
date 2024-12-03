@@ -20,6 +20,7 @@ using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalPersonnel;
+using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Titles;
 using Pusula.Training.HealthCare.Treatment.Icds;
 
@@ -57,6 +58,7 @@ public class HealthCareEntityFrameworkCoreModule : AbpModule
 
             options.AddRepository<Patient, EfCorePatientRepository>();
             options.AddRepository<Protocol, EfCoreProtocolRepository>();
+            options.AddRepository<ProtocolType, EfCoreProtocolTypeRepository>();
             options.AddRepository<Department, EfCoreDepartmentRepository>();
             options.AddRepository<Title, EfCoreTitleRepository>();
             options.AddRepository<Doctor, EfCoreDoctorRepository>();

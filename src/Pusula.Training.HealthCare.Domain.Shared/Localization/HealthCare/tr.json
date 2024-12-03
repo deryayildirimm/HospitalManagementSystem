@@ -51,6 +51,11 @@
     "Menu:Icds":  "Icd",
     "Menu:Operations":  "İşlemler",
     "Menu:Reports":  "Raporlar",
-    "Menu:IcdReport":  "Icd Raporu"
+    "Menu:IcdReport":  "Icd Raporu",
+    "Menu:MyPatients": "Hastalarım",
+    "Permission:ProtocolTypes" : "Protokol Tipleri",
+    "InvalidDateRange" : "Başlangıç tarihi bitiş tarihinden büyük olamaz.",
+    "Healthcare error occured!!" : "Bir hata oluştu!!",
+    "The provided download token is invalid." : "Token geçersiz"
   }
 }
