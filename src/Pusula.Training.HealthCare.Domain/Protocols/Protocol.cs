@@ -1,5 +1,7 @@
 using JetBrains.Annotations;
 using System;
+using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Patients;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -15,7 +17,10 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
     [CanBeNull]
     public virtual string? EndTime { get; set; }
     public Guid PatientId { get; set; }
+    public virtual Patient Patient { get; set; }
     public Guid DepartmentId { get; set; }
+    
+    public virtual Department Department { get; set; }
 
     protected Protocol()
     {

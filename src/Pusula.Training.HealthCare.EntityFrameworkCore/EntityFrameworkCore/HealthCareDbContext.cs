@@ -164,9 +164,9 @@ public class HealthCareDbContext :
                     .HasMaxLength(ProtocolConsts.TypeMaxLength);
                 b.Property(x => x.StartTime).HasColumnName(nameof(Protocol.StartTime));
                 b.Property(x => x.EndTime).HasColumnName(nameof(Protocol.EndTime));
-                b.HasOne<Patient>().WithMany().IsRequired().HasForeignKey(x => x.PatientId)
+                b.HasOne(p => p.Patient).WithMany().IsRequired().HasForeignKey(x => x.PatientId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
+                b.HasOne(p => p.Department).WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 

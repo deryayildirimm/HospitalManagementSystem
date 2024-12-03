@@ -36,14 +36,13 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
 
     public virtual async Task<ProtocolWithNavigationProperties> GetWithNavigationPropertiesAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var dbContext = await GetDbContextAsync();
 
         return (await GetDbSetAsync()).Where(b => b.Id == id)
             .Select(protocol => new ProtocolWithNavigationProperties
             {
                 Protocol = protocol,
-                Patient = dbContext.Set<Patient>().FirstOrDefault(c => c.Id == protocol.PatientId)!,
-                Department = dbContext.Set<Department>().FirstOrDefault(c => c.Id == protocol.DepartmentId)!
+                Patient = protocol.Patient,
+                Department = protocol.Department
             }).FirstOrDefault()!;
     }
 
