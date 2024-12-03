@@ -15,6 +15,8 @@ public class GetProtocolsInput : PagedAndSortedResultRequestDto
     public Guid? DepartmentId { get; set; }
     
     public Guid? ProtocolTypeId { get; set; }
+    
+    public Guid? DoctorId { get; set; }
 
     public GetProtocolsInput()
     {

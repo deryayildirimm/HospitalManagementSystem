@@ -1,6 +1,7 @@
 using JetBrains.Annotations;
 using System;
 using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Volo.Abp;
@@ -26,13 +27,17 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
     public Guid ProtocolTypeId { get; set; }
     
     public virtual ProtocolType ProtocolType { get; set; }
+    
+    public Guid DoctorId { get; set; }
+    
+    public virtual Doctor Doctor { get; set; }
 
     protected Protocol()
     {
         Type = string.Empty;
     }
 
-    public Protocol(Guid id, Guid patientId, Guid departmentId, Guid protocolTypeId, string type, DateTime startTime, string? endTime = null) : base(id)
+    public Protocol(Guid id, Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId, string type, DateTime startTime, string? endTime = null) : base(id)
     {
         Check.NotNull(type, nameof(type));
         Check.Length(type, nameof(type), ProtocolConsts.TypeMaxLength, ProtocolConsts.TypeMinLength);
@@ -42,6 +47,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         PatientId = patientId;
         DepartmentId = departmentId;
         ProtocolTypeId = protocolTypeId;
+        DoctorId = doctorId;
     }
 
 }

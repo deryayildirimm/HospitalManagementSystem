@@ -173,6 +173,8 @@ public class HealthCareDbContext :
                 b.HasOne(p => p.ProtocolType).WithMany().IsRequired().HasForeignKey(o => o.ProtocolTypeId).OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(p => p.Department).WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(p => p.Doctor).WithMany().IsRequired().HasForeignKey(p => p.DoctorId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
             
             builder.Entity<ProtocolType>(b =>

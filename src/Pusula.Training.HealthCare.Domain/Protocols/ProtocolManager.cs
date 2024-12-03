@@ -10,7 +10,7 @@ namespace Pusula.Training.HealthCare.Protocols;
 public class ProtocolManager(IProtocolRepository protocolRepository) : DomainService
 {
     public virtual async Task<Protocol> CreateAsync(
-    Guid patientId, Guid departmentId, Guid protocolTypeId, string type, DateTime startTime, string? endTime = null)
+    Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId, string type, DateTime startTime, string? endTime = null)
     {
         Check.NotNull(patientId, nameof(patientId));
         Check.NotNull(departmentId, nameof(departmentId));
@@ -20,7 +20,7 @@ public class ProtocolManager(IProtocolRepository protocolRepository) : DomainSer
 
         var protocol = new Protocol(
          GuidGenerator.Create(),
-         patientId, departmentId, protocolTypeId,type, startTime, endTime
+         patientId, departmentId, protocolTypeId,doctorId, type, startTime, endTime
          );
 
         return await protocolRepository.InsertAsync(protocol);
@@ -28,7 +28,7 @@ public class ProtocolManager(IProtocolRepository protocolRepository) : DomainSer
 
     public virtual async Task<Protocol> UpdateAsync(
         Guid id,
-        Guid patientId, Guid departmentId,Guid protocolTypeId,  string type, DateTime startTime, string? endTime = null, [CanBeNull] string? concurrencyStamp = null
+        Guid patientId, Guid departmentId,Guid protocolTypeId, Guid doctorId,  string type, DateTime startTime, string? endTime = null, [CanBeNull] string? concurrencyStamp = null
     )
     {
         Check.NotNull(patientId, nameof(patientId));
@@ -45,6 +45,7 @@ public class ProtocolManager(IProtocolRepository protocolRepository) : DomainSer
         protocol.StartTime = startTime;
         protocol.EndTime = endTime;
         protocol.ProtocolTypeId = protocolTypeId;
+        protocol.DoctorId = doctorId;
 
         protocol.SetConcurrencyStampIfNotNull(concurrencyStamp);
         return await protocolRepository.UpdateAsync(protocol);
