@@ -477,6 +477,29 @@ namespace Pusula.Training.HealthCare.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AppIcds",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CodeChapter = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: false),
+                    CodeNumber = table.Column<string>(type: "character varying(6)", maxLength: 6, nullable: false),
+                    Detail = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    ExtraProperties = table.Column<string>(type: "text", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppIcds", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AppMedicalServices",
                 columns: table => new
                 {
@@ -1065,7 +1088,9 @@ namespace Pusula.Training.HealthCare.Migrations
                     CityId = table.Column<Guid>(type: "uuid", nullable: false),
                     DistrictId = table.Column<Guid>(type: "uuid", nullable: false),
                     DepartmentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DepartmentId1 = table.Column<Guid>(type: "uuid", nullable: false),
                     TitleId = table.Column<Guid>(type: "uuid", nullable: false),
+                    TitleId1 = table.Column<Guid>(type: "uuid", nullable: false),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -1090,6 +1115,12 @@ namespace Pusula.Training.HealthCare.Migrations
                         principalTable: "AppDepartments",
                         principalColumn: "Id");
                     table.ForeignKey(
+                        name: "FK_AppDoctors_AppDepartments_DepartmentId1",
+                        column: x => x.DepartmentId1,
+                        principalTable: "AppDepartments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_AppDoctors_AppDistricts_DistrictId",
                         column: x => x.DistrictId,
                         principalTable: "AppDistricts",
@@ -1099,6 +1130,12 @@ namespace Pusula.Training.HealthCare.Migrations
                         column: x => x.TitleId,
                         principalTable: "AppTitles",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AppDoctors_AppTitles_TitleId1",
+                        column: x => x.TitleId1,
+                        principalTable: "AppTitles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -1619,6 +1656,11 @@ namespace Pusula.Training.HealthCare.Migrations
                 column: "DepartmentId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppDoctors_DepartmentId1",
+                table: "AppDoctors",
+                column: "DepartmentId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AppDoctors_DistrictId",
                 table: "AppDoctors",
                 column: "DistrictId");
@@ -1627,6 +1669,11 @@ namespace Pusula.Training.HealthCare.Migrations
                 name: "IX_AppDoctors_TitleId",
                 table: "AppDoctors",
                 column: "TitleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppDoctors_TitleId1",
+                table: "AppDoctors",
+                column: "TitleId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppDoctorWorkingHours_DoctorId_DayOfWeek",
@@ -1790,6 +1837,9 @@ namespace Pusula.Training.HealthCare.Migrations
 
             migrationBuilder.DropTable(
                 name: "AppDoctorWorkingHours");
+
+            migrationBuilder.DropTable(
+                name: "AppIcds");
 
             migrationBuilder.DropTable(
                 name: "AppMedicalStaff");

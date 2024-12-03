@@ -166,7 +166,7 @@ public partial class MedicalPersonnel
         NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/patients/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&FirstName={HttpUtility.UrlEncode(Filter.FirstName)}&LastName={HttpUtility.UrlEncode(Filter.LastName)}&BirthDateMin={Filter.BirthDateMin?.ToString("O")}&BirthDateMax={Filter.BirthDateMax?.ToString("O")}&IdentityNumber={HttpUtility.UrlEncode(Filter.IdentityNumber)}&Email={HttpUtility.UrlEncode(Filter.Email)}&PhoneNumber={HttpUtility.UrlEncode(Filter.PhoneNumber)}&Gender={Filter.Gender}", forceLoad: true);
     }
 
-    private void EditModal(MedicalStaffWithNavigationPropertiesDto doctor)
+    private void OpenEditModal(MedicalStaffWithNavigationPropertiesDto doctor)
     {
         EditingMedicalStaffId = doctor.MedicalStaff.Id;
         EditingMedicalStaff = new MedicalStaffUpdateDto {
@@ -183,7 +183,7 @@ public partial class MedicalPersonnel
             PhoneNumber = doctor.MedicalStaff.PhoneNumber,
             StartDate = doctor.MedicalStaff.StartDate
         };
-        IsVisibleEdit = !IsVisibleEdit;
+        IsVisibleEdit = true;
     }
 
     private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<MedicalStaffWithNavigationPropertiesDto> e)
@@ -233,16 +233,6 @@ public partial class MedicalPersonnel
         await GetGendersListAsync();
         NewMedicalStaff = new MedicalStaffCreateDto();
     }
-
-
-    private async Task OpenEditMedicalStaffModalAsync(MedicalStaffWithNavigationPropertiesDto input)
-    {
-        EditingMedicalStaffId = input.MedicalStaff.Id;
-        EditingMedicalStaff = ObjectMapper.Map<MedicalStaffWithNavigationPropertiesDto, MedicalStaffUpdateDto>(input);
-        await GetGendersListAsync();
-        await EditMedicalStaffModal.ShowAsync();
-    }
-    
     
     private async Task DeleteMedicalStaffAsync(MedicalStaffWithNavigationPropertiesDto input)
     {
@@ -260,7 +250,7 @@ public partial class MedicalPersonnel
             NewMedicalStaff.PhoneNumber = $"{PhoneNumber}";
             await MedicalStaffAppService.CreateAsync(NewMedicalStaff);
             await GetMedicalStaffAsync();
-            CloseCreateMedicalStaffModalAsync();
+            CloseCreateMedicalStaffModal();
         }
         catch (Exception ex)
         {
@@ -275,7 +265,7 @@ public partial class MedicalPersonnel
 
             await MedicalStaffAppService.UpdateAsync(EditingMedicalStaff);
             await GetMedicalStaffAsync();
-            CloseEditMedicalStaffModalAsync();
+            CloseEditMedicalStaffModal();
         }
         catch (Exception ex)
         {
@@ -339,12 +329,12 @@ public partial class MedicalPersonnel
         await GetMedicalStaffAsync();
     }
 
-    private void CloseCreateMedicalStaffModalAsync()
+    private void CloseCreateMedicalStaffModal()
     {
         IsVisibleCreate = false;
     }
 
-    private void CloseEditMedicalStaffModalAsync()
+    private void CloseEditMedicalStaffModal()
     {
         IsVisibleEdit = false;
     }

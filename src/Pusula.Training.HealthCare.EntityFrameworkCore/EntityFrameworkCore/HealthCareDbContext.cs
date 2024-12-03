@@ -28,6 +28,7 @@ using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Tests;
+using Pusula.Training.HealthCare.Treatment.Icds;
 using Pusula.Training.HealthCare.ProtocolTypes;
 
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
@@ -57,11 +58,10 @@ public class HealthCareDbContext :
     public DbSet<TestCategory> TestCategories { get; set; } = null!;
     public DbSet<Test> Tests { get; set; } = null!;
     public DbSet<BloodTestResult> BloodTestResults { get; set; } = null!;
+    public DbSet<Icd> Icds { get; set; } = null!;
 
     public DbSet<Appointment> Appointments { get; set; } = null!;
     public DbSet<DoctorWorkingHour> DoctorWorkingHours { get; set; } = null!;
-    
-    
 
     #region Entities from the modules
 
@@ -185,7 +185,6 @@ public class HealthCareDbContext :
                         .HasMaxLength(ProtocolTypeConsts.NameMaxLength);
             });
 
-
             builder.Entity<MedicalService>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "MedicalServices", HealthCareConsts.DbSchema);
@@ -239,13 +238,13 @@ public class HealthCareDbContext :
                 b.Property(x => x.PhoneNumber).HasColumnName(nameof(Doctor.PhoneNumber))
                     .HasMaxLength(DoctorConsts.PhoneNumberMaxLength);
                 b.Property(x => x.StartDate).HasColumnName(nameof(Doctor.StartDate)).IsRequired();
-                b.HasOne<City>().WithMany().IsRequired().HasForeignKey(x => x.CityId)
+                b.HasOne(d => d.City).WithMany().IsRequired().HasForeignKey(x => x.CityId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<District>().WithMany().IsRequired().HasForeignKey(x => x.DistrictId)
+                b.HasOne(d => d.District).WithMany().IsRequired().HasForeignKey(x => x.DistrictId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Title>().WithMany().IsRequired().HasForeignKey(x => x.TitleId)
+                b.HasOne(d => d.Title).WithMany().IsRequired().HasForeignKey(x => x.TitleId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
+                b.HasOne(d => d.Department).WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
@@ -349,11 +348,11 @@ public class HealthCareDbContext :
                 b.Property(x => x.PhoneNumber).HasColumnName(nameof(MedicalStaff.PhoneNumber))
                     .HasMaxLength(MedicalStaffConsts.PhoneNumberMaxLength);
                 b.Property(x => x.StartDate).HasColumnName(nameof(MedicalStaff.StartDate)).IsRequired();
-                b.HasOne<City>().WithMany().IsRequired().HasForeignKey(x => x.CityId)
+                b.HasOne(m => m.City).WithMany().IsRequired().HasForeignKey(x => x.CityId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<District>().WithMany().IsRequired().HasForeignKey(x => x.DistrictId)
+                b.HasOne(m => m.District).WithMany().IsRequired().HasForeignKey(x => x.DistrictId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Department>().WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
+                b.HasOne(m => m.Department).WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
@@ -425,7 +424,16 @@ public class HealthCareDbContext :
                 b.HasOne<Test>().WithMany().IsRequired().HasForeignKey(x => x.TestId)
                    .OnDelete(DeleteBehavior.NoAction);
             });
-            
+
+            builder.Entity<Icd>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Icds", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.CodeNumber).HasColumnName(nameof(Icd.CodeNumber)).IsRequired()
+                    .HasMaxLength(IcdConsts.CodeNumberMaxLength);
+                b.Property(x => x.Detail).HasColumnName(nameof(Icd.Detail)).IsRequired()
+                    .HasMaxLength(IcdConsts.DetailMaxLength);
+            });
         }
     }
 }

@@ -113,6 +113,51 @@ public class HealthCareMenuContributor : IMenuContributor
                 requiredPermissionName: HealthCarePermissions.MedicalStaff.Default)
         );
 
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
+                    name: HealthCareMenus.Treatment,
+                    displayName: l["Menu:Treatment"],
+                    icon: "fa-solid fa-medkit"
+                )
+                .AddItem(
+                    new ApplicationMenuItem(
+                            name: "Definitions",
+                            displayName: l["Menu:Definitions"],
+                            icon: "fa-solid fa-folder"
+                        )
+                        .AddItem(new ApplicationMenuItem(
+                            name: HealthCareMenus.Icds,
+                            displayName: l["Menu:Icds"],
+                            url: "/icds",
+                            icon: "fa-solid fa-plus-square")
+                        )
+                )
+                .AddItem(
+                    new ApplicationMenuItem(
+                            name: "Operations",
+                            displayName: l["Menu:Operations"],
+                            icon: "fa-solid fa-cogs"
+                        )
+                        .AddItem(new ApplicationMenuItem(
+                            name: HealthCareMenus.Protocols,
+                            displayName: l["Menu:Protocols"],
+                            url: "/protocols",
+                            icon: "fa-solid fa-hospital-o")
+                        )
+                )
+                .AddItem(
+                    new ApplicationMenuItem(
+                            name: "Reports",
+                            displayName: l["Menu:Reports"],
+                            icon: "fa-solid fa-chart-bar"
+                        )
+                        .AddItem(new ApplicationMenuItem(
+                            name: HealthCareMenus.IcdReport,
+                            displayName: l["Menu:IcdReport"],
+                            url: "/icd-report",
+                            icon: "fa-solid fa-plus-square")
+                        )
+                ));
         return Task.CompletedTask;
     }
 
