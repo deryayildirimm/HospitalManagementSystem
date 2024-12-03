@@ -69,7 +69,7 @@ namespace Pusula.Training.HealthCare.Protocols
             };
         }
         
-        public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookup(LookupRequestDto input)
+        public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookupAsync(LookupRequestDto input)
         {
             var query = (await protocolTypeRepository.GetQueryableAsync())
                 .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
@@ -196,7 +196,8 @@ namespace Pusula.Training.HealthCare.Protocols
 
                 Patient = item.Patient?.FirstName,
                 Department = item.Department?.Name,
-                
+                Doctor = item.Doctor?.FirstName + " " + item.Doctor?.LastName,
+                ProtocolType = item.ProtocolType?.Name,
                 
 
             });

@@ -41,6 +41,9 @@ public class ProtocolController(IProtocolsAppService _protocolsAppService) : Hea
     [Route("department-lookup")]
     public virtual Task<PagedResultDto<LookupDto<Guid>>> GetDepartmentLookupAsync(LookupRequestDto input) => _protocolsAppService.GetDepartmentLookupAsync(input);
     
+    [HttpGet]
+    [Route("doctor-lookup")]
+    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetDoctorLookUpAsync(LookupRequestDto input) => _protocolsAppService.GetDoctorLookUpAsync(input);
 
     [HttpPost]
     public virtual Task<ProtocolDto> CreateAsync(ProtocolCreateDto input) => _protocolsAppService.CreateAsync(input);
