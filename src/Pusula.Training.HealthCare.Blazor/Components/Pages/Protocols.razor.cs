@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Volo.Abp.Application.Dtos;
@@ -46,6 +47,8 @@ public partial class Protocols
 
     private IReadOnlyList<LookupDto<Guid>> PatientsCollection { get; set; } = [];
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; } = [];
+    private IReadOnlyList<LookupDto<Guid>> DoctorsCollection { get; set; } = [];
+    private IReadOnlyList<LookupDto<Guid>> ProtocolTypesCollection { get; set; } = [];
     private List<ProtocolWithNavigationPropertiesDto> SelectedProtocols { get; set; } = [];
 
     private bool AllProtocolsSelected { get; set; }
@@ -69,7 +72,9 @@ public partial class Protocols
     {
         await SetPermissionsAsync();
         await GetDepartmentCollectionLookupAsync();
-
+        await GetDoctorCollectionLookupAsync();
+        await GetProtocolTypeCollectionLookupAsync();
+        await GetPatientCollectionLookupAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -159,9 +164,6 @@ public partial class Protocols
         NewProtocol = new ProtocolCreateDto
         {
             StartTime = DateTime.Now,
-
-            DepartmentId = DepartmentsCollection.Select(i => i.Id).FirstOrDefault(),
-
         };
 
         SelectedCreateTab = "protocol-create-tab";
@@ -186,8 +188,7 @@ public partial class Protocols
     private async Task OpenEditProtocolModalAsync(ProtocolWithNavigationPropertiesDto input)
     {
         SelectedEditTab = "protocol-edit-tab";
-
-
+        
         var protocol = await ProtocolsAppService.GetWithNavigationPropertiesAsync(input.Protocol.Id);
 
         EditingProtocolId = protocol.Protocol.Id;
@@ -212,7 +213,7 @@ public partial class Protocols
                 return;
             }
 
-            await ProtocolsAppService.CreateAsync(NewProtocol);
+            await ProtocolsAppService.CreateAsync(NewProtocol); // burada create işlemi yapıyor 
             await GetProtocolsAsync();
             await CloseCreateProtocolModalAsync();
         }
@@ -245,14 +246,9 @@ public partial class Protocols
             await HandleErrorAsync(ex);
         }
     }
+    
 
-    /*
-    protected virtual async Task OnTypeChangedAsync(string? type)
-    {
-      //  Filter.Type = type;
-        await SearchAsync();
-    }
-    */
+    
     protected virtual async Task OnStartTimeMinChangedAsync(DateTime? startTimeMin)
     {
         Filter.StartTimeMin = startTimeMin.HasValue ? startTimeMin.Value.Date : startTimeMin;
@@ -263,9 +259,16 @@ public partial class Protocols
         Filter.StartTimeMax = startTimeMax.HasValue ? startTimeMax.Value.Date.AddDays(1).AddSeconds(-1) : startTimeMax;
         await SearchAsync();
     }
-    protected virtual async Task OnEndTimeChangedAsync(string? endTime)
+    
+    protected virtual async Task OnEndTimeMinChangedAsync(DateTime? endTimeMin)
+         {
+             Filter.StartTimeMin = endTimeMin.HasValue ? endTimeMin.Value.Date : endTimeMin;
+             await SearchAsync();
+         }
+    
+    protected virtual async Task OnEndTimeMaxChangedAsync(DateTime? endTimeMax)
     {
-     //   Filter.EndTime = endTime;
+        Filter.StartTimeMin = endTimeMax.HasValue ? endTimeMax.Value.Date : endTimeMax;
         await SearchAsync();
     }
     protected virtual async Task OnPatientIdChangedAsync(Guid? patientId)
@@ -278,8 +281,18 @@ public partial class Protocols
         Filter.DepartmentId = departmentId;
         await SearchAsync();
     }
-
-
+    protected virtual async Task OnDoctorIdChangedAsync(Guid? doctorId)
+    {
+        Filter.DoctorId = doctorId;
+        await SearchAsync();
+    }
+    
+    protected virtual async Task OnProtocolTypeIdChangedAsync(Guid? protocolTypeId)
+    {
+        Filter.ProtocolTypeId = protocolTypeId;
+        await SearchAsync();
+    }
+    
     private async Task GetPatientCollectionLookupAsync(string? newValue = null)
     {
         PatientsCollection = (await ProtocolsAppService.GetPatientLookupAsync(new LookupRequestDto { Filter = newValue })).Items;
@@ -289,10 +302,23 @@ public partial class Protocols
     {
         DepartmentsCollection = (await ProtocolsAppService.GetDepartmentLookupAsync(new LookupRequestDto { Filter = newValue })).Items;
     }
+    
+    private async Task GetDoctorCollectionLookupAsync(string? newValue = null)
+    {
+        DoctorsCollection = (await ProtocolsAppService.GetDoctorLookUpAsync(new LookupRequestDto { Filter = newValue })).Items;
+    }
 
+    #region protocoltype lookup
+  
+    private async Task GetProtocolTypeCollectionLookupAsync(string? newValue = null)
+    {
+        ProtocolTypesCollection = (await ProtocolsAppService.GetProtocolTypeLookUpAsync(new LookupRequestDto { Filter = newValue })).Items;
+    }
+    
 
-
-
+    #endregion
+  
+    
 
     private Task SelectAllItems()
     {

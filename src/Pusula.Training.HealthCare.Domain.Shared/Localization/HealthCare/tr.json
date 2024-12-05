@@ -30,7 +30,6 @@
     "Cancel": "İptal",
     "Submit": "Onayla",
     "ChooseNationality": "Uyruk Seç",
-    "UpdatePatient": "Hasta Güncelle",
     "Doctor" : "Doktor",
     "Leave" : "İzin",
     "UpdatePatient": "Hasta Güncelle",
@@ -52,8 +51,8 @@
     "Menu:Operations":  "İşlemler",
     "Menu:Reports":  "Raporlar",
     "Menu:IcdReport":  "Icd Raporu",
-    "Menu:MyPatients": "Hastalarım",
     "Permission:ProtocolTypes" : "Protokol Tipleri",
+    "Permission:Protocols": "Protokol",
     "InvalidDateRange" : "Başlangıç tarihi bitiş tarihinden büyük olamaz.",
     "Healthcare error occured!!" : "Bir hata oluştu!!",
     "The provided download token is invalid." : "Token geçersiz"

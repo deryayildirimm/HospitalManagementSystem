@@ -17,18 +17,16 @@ public class ProtocolManager(IProtocolRepository protocolRepository) : DomainSer
         Check.NotNull(departmentId, nameof(departmentId));
         Check.NotNull(patientId, nameof(patientId));
         Check.NotNull(startTime, nameof(startTime));
-        Check.NotNull(notes, nameof(notes));
-        Check.NotNull(endTime, nameof(endTime));
         
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidDateRange_MESSAGE, 
             HealthCareDomainErrorCodes.InvalidDateRange_CODE, 
             startTime > endTime);
-
+        
         var protocol = new Protocol(
          GuidGenerator.Create(),
          patientId, departmentId, protocolTypeId,doctorId,  startTime, notes, endTime
          );
-
+        
         return await protocolRepository.InsertAsync(protocol);
     }
 
@@ -37,8 +35,6 @@ public class ProtocolManager(IProtocolRepository protocolRepository) : DomainSer
         Guid patientId, Guid departmentId,Guid protocolTypeId, Guid doctorId, DateTime startTime,string? notes = null, DateTime? endTime = null, [CanBeNull] string? concurrencyStamp = null
     )
     {
-        Check.NotNull(notes, nameof(notes));
-        Check.NotNull(endTime, nameof(endTime));
         
         HealthCareGlobalException.ThrowIf( HealthCareDomainErrorCodes.InvalidDateRange_MESSAGE , 
             HealthCareDomainErrorCodes.InvalidDateRange_CODE, 

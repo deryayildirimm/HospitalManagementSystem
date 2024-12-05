@@ -138,12 +138,7 @@ public class HealthCareMenuContributor : IMenuContributor
                             displayName: l["Menu:Operations"],
                             icon: "fa-solid fa-cogs"
                         )
-                        .AddItem(new ApplicationMenuItem(
-                            name: HealthCareMenus.Protocols,
-                            displayName: l["Menu:Protocols"],
-                            url: "/protocols",
-                            icon: "fa-solid fa-hospital-o")
-                        )
+                    
                 )
                 .AddItem(
                     new ApplicationMenuItem(

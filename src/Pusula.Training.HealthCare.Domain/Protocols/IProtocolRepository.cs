@@ -24,6 +24,7 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
         Guid id,
         CancellationToken cancellationToken = default
     );
+    
 
     Task<List<ProtocolWithNavigationProperties>> GetListWithNavigationPropertiesAsync(
         string? filterText = null,

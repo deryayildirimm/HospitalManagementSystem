@@ -33,7 +33,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Patient, PatientExcelDto>();
         CreateMap<PatientDto, PatientUpdateDto>();
         CreateMap<Patient, LookupDto<Guid>>()
-            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.FirstName));
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}  -  {src.IdentityNumber}"));
 
         CreateMap<Protocol, ProtocolDto>();
         CreateMap<Protocol, ProtocolExcelDto>();

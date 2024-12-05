@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
-using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.Content;
 
 namespace Pusula.Training.HealthCare.Controllers.Protocols;
@@ -44,6 +43,11 @@ public class ProtocolController(IProtocolsAppService _protocolsAppService) : Hea
     [HttpGet]
     [Route("doctor-lookup")]
     public virtual Task<PagedResultDto<LookupDto<Guid>>> GetDoctorLookUpAsync(LookupRequestDto input) => _protocolsAppService.GetDoctorLookUpAsync(input);
+    
+    [HttpGet]
+    [Route("protocol-type-lookup")]
+    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookUpAsync(LookupRequestDto input) => _protocolsAppService.GetProtocolTypeLookUpAsync(input);
+
 
     [HttpPost]
     public virtual Task<ProtocolDto> CreateAsync(ProtocolCreateDto input) => _protocolsAppService.CreateAsync(input);

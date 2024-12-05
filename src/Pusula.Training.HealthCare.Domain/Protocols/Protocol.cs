@@ -50,6 +50,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         SetEndTime(endTime);
         SetProtocolTypeId(protocolTypeId);
         SetNotes(notes);
+        
     }
     
     public void SetId(Guid id)

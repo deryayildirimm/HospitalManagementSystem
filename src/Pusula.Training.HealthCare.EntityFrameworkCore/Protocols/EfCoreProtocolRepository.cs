@@ -99,15 +99,25 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         Guid? departmentId = null,
         Guid? protocolTypeId = null,
         Guid? doctorId = null)  =>  query
-            .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Protocol.Notes!.Contains(filterText!) )
+                    .WhereIf(!string.IsNullOrWhiteSpace(filterText), e =>
+                            (e.Protocol.Notes != null && e.Protocol.Notes.ToLower().Contains(filterText.ToLower())) ||
+                            (e.Department != null && e.Department.Name.ToLower().Contains(filterText.ToLower())) ||
+                            (e.Doctor != null && 
+                             (e.Doctor.FirstName.ToLower().Contains(filterText.ToLower()) || 
+                            e.Doctor.LastName.ToLower().Contains(filterText.ToLower()))) ||
+                            (e.Patient != null && 
+                             (e.Patient.FirstName.ToLower().Contains(filterText.ToLower()) || 
+                              e.Patient.LastName.ToLower().Contains(filterText.ToLower()))) ||
+                            (e.ProtocolType != null && e.ProtocolType.Name.ToLower().Contains(filterText.ToLower()))
+                            )
                 .WhereIf(!string.IsNullOrWhiteSpace(note), e => e.Protocol.Notes.Contains(note!))
                 .WhereIf(startTimeMin.HasValue, e => e.Protocol.StartTime >= startTimeMin!.Value)
                 .WhereIf(startTimeMax.HasValue, e => e.Protocol.StartTime <= startTimeMax!.Value)
-            .WhereIf(endTimeMin.HasValue, e => e.Protocol.EndTime >= endTimeMin!.Value)
-            .WhereIf(endTimeMax.HasValue, e => e.Protocol.EndTime <= endTimeMax!.Value)
+                .WhereIf(endTimeMin.HasValue, e => e.Protocol.EndTime >= endTimeMin!.Value)
+                .WhereIf(endTimeMax.HasValue, e => e.Protocol.EndTime <= endTimeMax!.Value)
                 .WhereIf(patientId != null && patientId != Guid.Empty, e => e.Patient != null && e.Patient.Id == patientId)
-            .WhereIf(protocolTypeId != null && protocolTypeId != Guid.Empty, e => e.Protocol != null && e.Protocol.Id == protocolTypeId)
-            .WhereIf(doctorId != null && doctorId != Guid.Empty, e => e.Doctor != null && e.Doctor.Id == doctorId)
+                .WhereIf(protocolTypeId != null && protocolTypeId != Guid.Empty, e => e.ProtocolType != null && e.ProtocolType.Id == protocolTypeId)
+                .WhereIf(doctorId != null && doctorId != Guid.Empty, e => e.Doctor != null && e.Doctor.Id == doctorId)
                 .WhereIf(departmentId != null && departmentId != Guid.Empty, e => e.Department != null && e.Department.Id == departmentId);
     
 
@@ -124,6 +134,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetQueryableAsync()), filterText, note, startTimeMin, startTimeMax, endTimeMin,endTimeMax);
+        
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? ProtocolConsts.GetDefaultSorting(false) : sorting);
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
