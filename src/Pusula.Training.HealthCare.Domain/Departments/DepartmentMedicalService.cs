@@ -8,10 +8,10 @@ public class DepartmentMedicalService : Entity
 {
     
     public Guid DepartmentId { get; set; }
-    public Department Department { get; set; } = null!;
+    public virtual Department Department { get; set; } = null!;
     
     public Guid MedicalServiceId { get; set; }
-    public MedicalService MedicalService { get; set; } = null!;
+    public virtual  MedicalService MedicalService { get; set; } = null!;
     
     public override object?[] GetKeys()
     {

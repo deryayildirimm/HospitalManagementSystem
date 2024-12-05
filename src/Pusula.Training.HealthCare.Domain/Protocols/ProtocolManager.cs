@@ -30,16 +30,11 @@ public class ProtocolManager(IProtocolRepository protocolRepository,
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidDateRange_MESSAGE, 
             HealthCareDomainErrorCodes.InvalidDateRange_CODE, 
             startTime > endTime);
-        // Repository'den entity'leri getir
-        var patient = await _patientRepository.GetAsync(patientId);
-        var department = await _departmentRepository.GetAsync(departmentId);
-        var protocolType = await _protocolTypeRepository.GetAsync(protocolTypeId);
-        var doctor = await _doctorRepository.GetAsync(doctorId);
       
      
         var protocol = new Protocol(
             GuidGenerator.Create(),
-            patientId, departmentId, protocolTypeId, doctorId, startTime, doctor, patient, department, protocolType,notes, endTime
+            patientId, departmentId, protocolTypeId, doctorId, startTime,notes, endTime
         );
   
         Console.WriteLine(patientId);

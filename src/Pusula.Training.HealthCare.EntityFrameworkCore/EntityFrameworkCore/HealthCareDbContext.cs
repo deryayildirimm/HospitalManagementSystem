@@ -98,6 +98,12 @@ public class HealthCareDbContext :
     {
     }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        // Lazy loading enable 
+        optionsBuilder.UseLazyLoadingProxies();
+    }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

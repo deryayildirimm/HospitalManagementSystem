@@ -39,8 +39,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         StartTime = DateTime.Now;
     }
 
-    public Protocol(Guid id, Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId,  DateTime startTime,
-        Doctor doctor, Patient patient, Department department, ProtocolType protocolType , string? note = null, DateTime? endTime = null ) : base(id)
+    public Protocol(Guid id, Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId,  DateTime startTime, string? note = null, DateTime? endTime = null ) : base(id)
     {
       
         SetId(id);
@@ -52,10 +51,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         SetProtocolTypeId(protocolTypeId);
         SetNote(note);
 
-        Doctor = doctor;
-        Patient = patient;
-        Department = department;
-        ProtocolType = protocolType;
+  
 
     }
     
