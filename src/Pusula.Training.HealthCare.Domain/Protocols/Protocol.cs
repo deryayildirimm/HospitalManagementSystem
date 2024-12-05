@@ -12,7 +12,7 @@ namespace Pusula.Training.HealthCare.Protocols;
 
 public class Protocol : FullAuditedAggregateRoot<Guid>
 {
-    public virtual string? Notes { get; private set; }
+    public virtual string? Note { get; private set; }
 
     [NotNull]
     public virtual DateTime StartTime { get; private set; }
@@ -35,11 +35,12 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
 
     protected Protocol()
     {
-        Notes = string.Empty;
+        Note = string.Empty;
         StartTime = DateTime.Now;
     }
 
-    public Protocol(Guid id, Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId,  DateTime startTime, string? notes = null, DateTime? endTime = null) : base(id)
+    public Protocol(Guid id, Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId,  DateTime startTime,
+        Doctor doctor, Patient patient, Department department, ProtocolType protocolType , string? note = null, DateTime? endTime = null ) : base(id)
     {
       
         SetId(id);
@@ -49,8 +50,13 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         SetStartTime(startTime);
         SetEndTime(endTime);
         SetProtocolTypeId(protocolTypeId);
-        SetNotes(notes);
-        
+        SetNote(note);
+
+        Doctor = doctor;
+        Patient = patient;
+        Department = department;
+        ProtocolType = protocolType;
+
     }
     
     public void SetId(Guid id)
@@ -96,14 +102,14 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         ProtocolTypeId = protocolTypeId;
     }
  
-    public void SetNotes(string? notes)
+    public void SetNote(string? note)
     {
         
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidNoteLength_MESSAGE, 
             HealthCareDomainErrorCodes.InvalidNoteLength_CODE, 
-            !string.IsNullOrWhiteSpace(notes) || (notes?.Length > ProtocolConsts.MaxNotesLength || ProtocolConsts.MinNotesLength < notes?.Length ));
+            !string.IsNullOrWhiteSpace(note) || (note?.Length > ProtocolConsts.MaxNotesLength || ProtocolConsts.MinNotesLength < note?.Length ));
         
-        Notes = notes;
+        Note = note;
     }   
 
     

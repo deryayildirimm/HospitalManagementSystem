@@ -189,7 +189,7 @@ namespace Pusula.Training.HealthCare.Protocols
             var protocols = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin,input.EndTimeMax, input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId );
             var items = protocols.Select(item => new
             {
-                item.Protocol.Notes,
+                item.Protocol.Note,
                 item.Protocol.StartTime,
                 item.Protocol.EndTime,
 

@@ -100,7 +100,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         Guid? protocolTypeId = null,
         Guid? doctorId = null)  =>  query
                     .WhereIf(!string.IsNullOrWhiteSpace(filterText), e =>
-                            (e.Protocol.Notes != null && e.Protocol.Notes.ToLower().Contains(filterText.ToLower())) ||
+                            (e.Protocol.Note != null && e.Protocol.Note.ToLower().Contains(filterText.ToLower())) ||
                             (e.Department != null && e.Department.Name.ToLower().Contains(filterText.ToLower())) ||
                             (e.Doctor != null && 
                              (e.Doctor.FirstName.ToLower().Contains(filterText.ToLower()) || 
@@ -110,7 +110,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
                               e.Patient.LastName.ToLower().Contains(filterText.ToLower()))) ||
                             (e.ProtocolType != null && e.ProtocolType.Name.ToLower().Contains(filterText.ToLower()))
                             )
-                .WhereIf(!string.IsNullOrWhiteSpace(note), e => e.Protocol.Notes.Contains(note!))
+                .WhereIf(!string.IsNullOrWhiteSpace(note), e => e.Protocol.Note.Contains(note!))
                 .WhereIf(startTimeMin.HasValue, e => e.Protocol.StartTime >= startTimeMin!.Value)
                 .WhereIf(startTimeMax.HasValue, e => e.Protocol.StartTime <= startTimeMax!.Value)
                 .WhereIf(endTimeMin.HasValue, e => e.Protocol.EndTime >= endTimeMin!.Value)
@@ -166,8 +166,8 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         DateTime? endTimeMin = null,
         DateTime? endTimeMax = null) => query
             .WhereIf(!string.IsNullOrWhiteSpace(filterText),
-                e => e.Notes!.Contains(filterText!) )
-            .WhereIf(!string.IsNullOrWhiteSpace(note), e => e.Notes.Contains(note!))
+                e => e.Note!.Contains(filterText!) )
+            .WhereIf(!string.IsNullOrWhiteSpace(note), e => e.Note.Contains(note!))
             .WhereIf(startTimeMin.HasValue, e => e.StartTime >= startTimeMin!.Value)
             .WhereIf(startTimeMax.HasValue, e => e.StartTime <= startTimeMax!.Value) 
             .WhereIf(endTimeMin.HasValue, e => e.EndTime >= endTimeMin!.Value)
