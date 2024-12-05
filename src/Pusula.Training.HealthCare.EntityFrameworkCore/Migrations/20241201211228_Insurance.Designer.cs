@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Pusula.Training.HealthCare.Migrations
 {
     [DbContext(typeof(HealthCareDbContext))]
-    partial class HealthCareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241201211228_Insurance")]
+    partial class Insurance
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1122,7 +1125,7 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("DeletionTime");
 
-                    b.Property<int?>("DiscountGroup")
+                    b.Property<int>("DiscountGroup")
                         .HasColumnType("integer")
                         .HasColumnName("DiscountGroup");
 
@@ -1151,10 +1154,20 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("Gender");
 
-                    b.Property<string>("IdentityAndPassportNumber")
+                    b.Property<string>("IdentityNumber")
+                        .HasMaxLength(11)
+                        .HasColumnType("character varying(11)")
+                        .HasColumnName("IdentityNumber");
+
+                    b.Property<string>("InsuranceNo")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("IdentityAndPassportNumber");
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)")
+                        .HasColumnName("InsuranceNo");
+
+                    b.Property<int>("InsuranceType")
+                        .HasColumnType("integer")
+                        .HasColumnName("InsuranceType");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -1177,6 +1190,7 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnName("LastName");
 
                     b.Property<string>("MobilePhoneNumber")
+                        .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("character varying(15)")
                         .HasColumnName("MobilePhoneNumber");
@@ -1187,14 +1201,20 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnName("MothersName");
 
                     b.Property<string>("Nationality")
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("Nationality");
+
+                    b.Property<string>("PassportNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("character varying(9)")
+                        .HasColumnName("PassportNumber");
 
                     b.Property<int>("PatientNumber")
                         .HasColumnType("integer")
                         .HasColumnName("PatientNumber");
 
-                    b.Property<int?>("PatientType")
+                    b.Property<int>("PatientType")
                         .HasColumnType("integer")
                         .HasColumnName("PatientType");
 

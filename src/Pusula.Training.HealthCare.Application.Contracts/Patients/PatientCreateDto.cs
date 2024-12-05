@@ -8,64 +8,48 @@ namespace Pusula.Training.HealthCare.Patients;
 
 public class PatientCreateDto
 {
-    public bool identityField { get; set; } = false;
-    public bool passportField { get; set; } = false;
 
     [Required]
-    [StringLength(PatientConsts.NameMaxLength)]
+    [StringLength(PatientConsts.NameMaxLength,MinimumLength = PatientConsts.NameMinLength)]
     public string FirstName { get; set; } = null!;
 
     [Required]
-    [StringLength(PatientConsts.LastNameMaxLength)]
+    [StringLength(PatientConsts.LastNameMaxLength, MinimumLength =PatientConsts.LastNameMinLength)]
     public string LastName { get; set; } = null!;
 
-    [StringLength(PatientConsts.NameMaxLength)]
+    [StringLength(PatientConsts.NameMaxLength, MinimumLength = PatientConsts.NameMinLength)]
     public string? MothersName { get; set; }
 
-    [StringLength(PatientConsts.NameMaxLength)]
+    [StringLength(PatientConsts.NameMaxLength, MinimumLength = PatientConsts.NameMinLength)]
     public string? FathersName { get; set; }
 
     [IdentityNumberValidator]
-    public string IdentityNumber { get; set; } = null!;
+    public string IdentityAndPassportNumber { get; set; } = null!;
 
-    [Required]
-    public string Nationality { get; set; } = null!;
-
-    [PassportNumberValidator]
-    public string? PassportNumber { get; set; } = null!;
+    public string? Nationality { get; set; } 
 
     [Required]
     public DateTime BirthDate { get; set; }
 
     [EmailAddress]
     [StringLength(PatientConsts.EmailAddressMaxLength)]
-    public string EmailAddress { get; set; } = null!;
+    public string? EmailAddress { get; set; }
 
-    [Required]
-    public string MobilePhoneNumber { get; set; } = null!;
+    public string? MobilePhoneNumber { get; set; } 
 
     [Range(PatientConsts.RelativeMinValue, PatientConsts.RelativeMaxValue)]
     public EnumRelative Relative { get; set; }
 
     public string? RelativePhoneNumber { get; set; }
 
-    [Required]
     [Range(PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue)]
     public EnumPatientTypes PatientType { get; set; }
 
     [StringLength(PatientConsts.AddressMaxLength)]
     public string? Address { get; set; }
 
-    [Required]
-    [Range(PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue)]
-    public EnumInsuranceType InsuranceType { get; set; }
-
-    [Required]
-    [InsuranceNumberValidator]
-    public string InsuranceNo { get; set; } = null!;
-
     [Range(PatientConsts.DiscountGroupMinValue, PatientConsts.DiscountGroupMaxValue)]
-    public EnumDiscountGroup DiscountGroup { get; set; }
+    public EnumDiscountGroup DiscountGroup { get; set; } 
 
     [Required]
     [Range(PatientConsts.GenderMinValue, PatientConsts.GenderMaxValue)]

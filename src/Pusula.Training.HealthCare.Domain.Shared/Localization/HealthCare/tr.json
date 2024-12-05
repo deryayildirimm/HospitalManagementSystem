@@ -31,8 +31,8 @@
     "Submit": "Onayla",
     "ChooseNationality": "Uyruk Seç",
     "UpdatePatient": "Hasta Güncelle",
-    "Doctor" : "Doktor",
-    "Leave" : "İzin",
+    "Doctor": "Doktor",
+    "Leave": "İzin",
     "UpdatePatient": "Hasta Güncelle",
     "ChooseBloodTests": "Kan Testi Seç",
     "Biochemical Tests": "Biyokimyasal Testler",
@@ -41,6 +41,7 @@
     "MyPatients": "Hastalarım",
     "BloodTests": "Kan Testleri",
     "Menu:BloodTests": "Kan Tahlilleri",
-    "Menu:MyPatients": "Hastalarım"
+    "Menu:MyPatients": "Hastalarım",
+    "IdentityNumber/PassportNumber": "TC/Pasaport No"
   }
 }

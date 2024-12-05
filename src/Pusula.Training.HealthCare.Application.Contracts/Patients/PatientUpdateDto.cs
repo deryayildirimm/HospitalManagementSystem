@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using Pusula.Training.HealthCare.Validators;
 using System;
 using System.ComponentModel.DataAnnotations;
@@ -7,8 +8,6 @@ namespace Pusula.Training.HealthCare.Patients;
 
 public class PatientUpdateDto : IHasConcurrencyStamp
 {
-    public bool identityField { get; set; } = false;
-    public bool passportField { get; set; } = false;
 
     [Required]
     [StringLength(PatientConsts.NameMaxLength)]
@@ -25,24 +24,19 @@ public class PatientUpdateDto : IHasConcurrencyStamp
     public string? FathersName { get; set; }
 
     [IdentityNumberValidator]
-    public string IdentityNumber { get; set; } = null!;
+    public string IdentityAndPassportNumber { get; set; } = null!;
 
-    [Required]
-    public string Nationality { get; set; } = null!;
-
-    [PassportNumberValidator]
-    public string? PassportNumber { get; set; } = null!;
+    public string? Nationality { get; set; }
 
     [Required]
     public DateTime BirthDate { get; set; }
 
     [EmailAddress]
     [StringLength(PatientConsts.EmailAddressMaxLength)]
-    public string EmailAddress { get; set; } = null!;
+    public string? EmailAddress { get; set; }
 
-    [Required]
     [UpdatePhoneNumberValidator]
-    public string MobilePhoneNumber { get; set; } = null!;
+    public string? MobilePhoneNumber { get; set; }
 
     [Range(PatientConsts.RelativeMinValue, PatientConsts.RelativeMaxValue)]
     public EnumRelative Relative { get; set; }
@@ -50,20 +44,11 @@ public class PatientUpdateDto : IHasConcurrencyStamp
     [UpdatePhoneNumberValidator]
     public string? RelativePhoneNumber { get; set; }
 
-    [Required]
     [Range(PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue)]
     public EnumPatientTypes PatientType { get; set; }
 
     [StringLength(PatientConsts.AddressMaxLength)]
     public string? Address { get; set; }
-
-    [Required]
-    [Range(PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue)]
-    public EnumInsuranceType InsuranceType { get; set; }
-
-    [Required]
-    [InsuranceNumberValidator]
-    public string InsuranceNo { get; set; } = null!;
 
     [Range(PatientConsts.DiscountGroupMinValue, PatientConsts.DiscountGroupMaxValue)]
     public EnumDiscountGroup DiscountGroup { get; set; }
