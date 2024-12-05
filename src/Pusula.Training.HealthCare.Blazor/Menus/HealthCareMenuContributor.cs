@@ -83,13 +83,13 @@ public class HealthCareMenuContributor : IMenuContributor
                         .AddItem(new ApplicationMenuItem(
                             name: HealthCareMenus.AppointmentTypes,
                             displayName: l["Menu:AppointmentTypes"],
-                            url: "/appointment-types",
+                            url: "appointments/definitions/types",
                             icon: "fa-solid fa-calendar-days")
                         )
                         .AddItem(new ApplicationMenuItem(
                             name: HealthCareMenus.MedicalServices,
                             displayName: l["Menu:MedicalServices"],
-                            url: "/medical-services",
+                            url: "appointments/definitions/medical-services",
                             icon: "fa-solid fa-notes-medical",
                             requiredPermissionName: HealthCarePermissions.MedicalServices.Default)
                         )
@@ -103,7 +103,7 @@ public class HealthCareMenuContributor : IMenuContributor
                         .AddItem(new ApplicationMenuItem(
                             name: HealthCareMenus.Appointments,
                             displayName: l["Menu:Appointments"],
-                            url: "/appointments",
+                            url: "/appointments/operations/create",
                             icon: "fa-solid fa-calendar-check")
                         )
                 )
@@ -111,18 +111,19 @@ public class HealthCareMenuContributor : IMenuContributor
                     new ApplicationMenuItem(
                             name: "Reports",
                             displayName: l["Menu:Reports"],
+                            url:"/appointments/reports",
                             icon: "fa-solid fa-chart-bar"
                         )
                         .AddItem(new ApplicationMenuItem(
                             name: HealthCareMenus.AppointmentList,
                             displayName: l["Menu:AppointmentList"],
-                            url: "/appointment-list",
+                            url: "appointments/reports/list",
                             icon: "fa-solid fa-list")
                         )
                         .AddItem(new ApplicationMenuItem(
                             name: HealthCareMenus.AppointmentsOverview,
                             displayName: l["Menu:AppointmentsOverview"],
-                            url: "/appointment-overview",
+                            url: "/appointments/reports/overview",
                             icon: "fa-solid fa-table")
                         )
                 )

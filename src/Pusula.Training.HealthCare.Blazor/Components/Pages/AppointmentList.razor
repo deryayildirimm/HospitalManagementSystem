@@ -1,38 +1,37 @@
-@page "/appointments/definitions/types"
+@page "/appointments/reports/list"
 
-@attribute [Authorize(HealthCarePermissions.AppointmentTypes.Default)]
-@using Microsoft.AspNetCore.Components
-@using Pusula.Training.HealthCare.AppointmentTypes
+@attribute [Authorize(HealthCarePermissions.Appointments.Default)]
+
+@using Pusula.Training.HealthCare.Appointments
 @using Pusula.Training.HealthCare.Blazor.Services
-@using Pusula.Training.HealthCare.Departments
+@inherits HealthCareComponentBase
 
 @using Pusula.Training.HealthCare.Localization
 @using Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.Protocols
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
-@inherits HealthCareComponentBase
-@inject IDepartmentsAppService DepartmentsAppService
-@inject IAppointmentTypesAppService AppointmentTypesAppService
 @inject IUiMessageService UiMessageService
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
-
 @using Volo.Abp.Http.Client
-@using SelectionType = Syncfusion.Blazor.Grids.SelectionType
 @using Syncfusion.Blazor.Buttons
-@inject AppointmentTypeAdaptor TypeAdaptor
 
+@using SelectionType = Syncfusion.Blazor.Grids.SelectionType
+@inject AppointmentAdaptor AppointmentAdaptor
+@inject IAppointmentAppService AppointmentAppService
+@inject IProtocolsAppService ProtocolsAppService
 
 <SfBreadcrumb>
     <BreadcrumbItems>
         <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home" />
-        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["AppointmentTypes"] />
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["AppointmentList"] />
     </BreadcrumbItems>
 </SfBreadcrumb>
 @* ************************* PAGE HEADER ************************* *@
-<PageHeader Title="@L["AppointmentTypes"]" Toolbar="Toolbar">
+<PageHeader Title="@L["AppointmentList"]" Toolbar="Toolbar">
 
 </PageHeader>
 
@@ -41,13 +40,13 @@
     <div class="col-12 border-1 bg-white rounded-1 p-4">
         <SfGrid
             @ref="Grid"
-            TValue="AppointmentTypeDto"
+            TValue="AppointmentDto"
             AllowPaging="true"
             AllowSorting="true"
             Toolbar="@(new List<string>() { "Search", "Delete"})"
             SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
-            <SfDataManager 
-                AdaptorInstance="@typeof(AppointmentTypeAdaptor)"
+            <SfDataManager
+                AdaptorInstance="@typeof(AppointmentAdaptor)"
                 Adaptor="Adaptors.CustomAdaptor">
             </SfDataManager>
             <GridEvents
@@ -55,21 +54,20 @@
                 RowSelected="RowSelectHandler"
                 OnToolbarClick="ToolbarClickHandler"
                 RowDeselected="RowDeselectHandler"
-                ExcelQueryCellInfoEvent="ExcelQueryCellInfoHandler"
-                TValue="AppointmentTypeDto">
+                TValue="AppointmentDto">
             </GridEvents>
             <GridPageSettings PageSize="@PageSize"></GridPageSettings>
             <GridColumns>
                 @if (CanDeleteType)
                 {
-                    <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+                <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
                 }
-                <GridColumn Field="@nameof(AppointmentTypeDto.Name)" HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                <GridColumn Field="@nameof(AppointmentDto.Patient.FirstName)" HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
                 <GridColumn HeaderText="@L["Actions"]" Width="150">
                     <Template Context="context">
-                        <SfButton IconCss="e-icons e-edit" CssClass="e-primary" OnClick="@(() => OpenEditDialog((AppointmentTypeDto)context))">
+                        <SfButton IconCss="e-icons e-edit" CssClass="e-primary" OnClick="@(() => OpenEditDialog((AppointmentDto)context))">
                         </SfButton>
-                        <SfButton IconCss="e-icons e-delete" CssClass="e-danger" OnClick="@(() => DeleteTypeAsync((AppointmentTypeDto)context))">
+                        <SfButton IconCss="e-icons e-delete" CssClass="e-danger" OnClick="@(() => DeleteTypeAsync((AppointmentDto)context))">
                         </SfButton>
                     </Template>
                 </GridColumn>

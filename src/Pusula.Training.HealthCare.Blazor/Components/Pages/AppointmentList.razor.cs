@@ -1,12 +1,16 @@
-using Blazorise;
-using Microsoft.AspNetCore.Authorization;
-using Pusula.Training.HealthCare.Permissions;
+using Microsoft.AspNetCore.Components;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.AspNetCore.Authorization;
+using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.AppointmentTypes;
+using Pusula.Training.HealthCare.Permissions;
+using Pusula.Training.HealthCare.Shared;
+using Syncfusion.Blazor.Buttons;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Popups;
 using Volo.Abp;
@@ -14,11 +18,12 @@ using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
-public partial class AppointmentTypes
+public partial class AppointmentList : HealthCareComponentBase
 {
     protected PageToolbar Toolbar { get; } = new PageToolbar();
-    private SfGrid<AppointmentTypeDto> Grid { get; set; }
+    private SfGrid<AppointmentDto> Grid { get; set; }
     private int PageSize { get; } = 20;
+    private int LookupPageSize { get; } = 100;
     private int CurrentPage { get; set; } = 1;
     private string CurrentSorting { get; set; } = string.Empty;
     private bool CanCreateType { get; set; }
@@ -33,9 +38,12 @@ public partial class AppointmentTypes
     private bool IsDeleteDialogVisible { get; set; }
     private SfDialog DeleteConfirmDialog { get; set; }
     private bool Flag { get; set; }
-
-    public AppointmentTypes()
+    private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
+    private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
+    
+    public AppointmentList()
     {
+        Filter = new GetAppointmentTypesInput();
         NewType = new AppointmentTypeCreateDto();
         Filter = new GetAppointmentTypesInput
         {
@@ -43,17 +51,20 @@ public partial class AppointmentTypes
             SkipCount = (CurrentPage - 1) * PageSize,
             Sorting = CurrentSorting
         };
-
+        
         EditingType = new AppointmentTypeUpdateDto();
         IsEditDialogVisible = false;
         IsCreateDialogVisible = false;
         IsDeleteDialogVisible = false;
         Flag = false;
+        AppointmentTypesCollection = [];
+        DepartmentsCollection = [];
     }
-
+    
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
+        //await SetLookupsAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -76,7 +87,7 @@ public partial class AppointmentTypes
     protected virtual ValueTask SetToolbarItemsAsync()
     {
         Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
-        Toolbar.AddButton(L["NewAppointmentType"], OpenCreateTypeModalAsync, IconName.Add,
+        Toolbar.AddButton(L["NewAppointmentType"], OpenCreateTypeModalAsync, IconName.Plus,
             requiredPolicyName: HealthCarePermissions.AppointmentTypes.Create);
 
         return ValueTask.CompletedTask;
@@ -91,8 +102,30 @@ public partial class AppointmentTypes
         CanDeleteType = await AuthorizationService
             .IsGrantedAsync(HealthCarePermissions.AppointmentTypes.Delete);
     }
-
-    public void OnActionBegin(ActionEventArgs<AppointmentTypeDto> args)
+    
+    private async Task SetLookupsAsync()
+    {
+        try
+        {
+            AppointmentTypesCollection =
+                (await AppointmentAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto
+                    {MaxResultCount = LookupPageSize }))
+                .Items;        
+        
+            DepartmentsCollection = 
+                (await ProtocolsAppService.GetDepartmentLookupAsync(new LookupRequestDto 
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+        }
+        catch (Exception e)
+        {
+            throw new UserFriendlyException(e.Message);
+        }
+        
+    }
+    
+    
+    public void OnActionBegin(ActionEventArgs<AppointmentDto> args)
     {
         if (args.RequestType.ToString() != "Delete" || !IsDeleteDialogVisible)
         {
@@ -109,7 +142,7 @@ public partial class AppointmentTypes
         Flag = true;
     }
 
-    public void RowSelectHandler(RowSelectEventArgs<AppointmentTypeDto> args)
+    public void RowSelectHandler(RowSelectEventArgs<AppointmentDto> args)
     {
         var selectedRecordCount = Grid.GetSelectedRecordsAsync().Result.Count;
         if (selectedRecordCount > 0)
@@ -118,7 +151,7 @@ public partial class AppointmentTypes
         }
     }
 
-    public void RowDeselectHandler(RowDeselectEventArgs<AppointmentTypeDto> args)
+    public void RowDeselectHandler(RowDeselectEventArgs<AppointmentDto> args)
     {
         var selectedRecordCount = Grid.GetSelectedRecordsAsync().Result.Count;
         if (selectedRecordCount == 0)
@@ -150,7 +183,7 @@ public partial class AppointmentTypes
                         return;
                     }
 
-                    await AppointmentTypesAppService.DeleteByIdsAsync(ids);
+                    await AppointmentAppService.DeleteByIdsAsync(ids);
                     break;
                 }
                 case "Excel Export":
@@ -184,9 +217,9 @@ public partial class AppointmentTypes
         DeleteConfirmDialog.HideAsync();
     }
 
-    private void OpenEditDialog(AppointmentTypeDto input)
+    private void OpenEditDialog(AppointmentDto input)
     {
-        EditingType = ObjectMapper.Map<AppointmentTypeDto, AppointmentTypeUpdateDto>(input);
+        //EditingType = ObjectMapper.Map<AppointmentDto, AppointmentUpdateDto>(input);
         EditingTypeId = input.Id;
         IsEditDialogVisible = true;
     }
@@ -200,7 +233,7 @@ public partial class AppointmentTypes
 
     private async Task DownloadAsExcelAsync()
     {
-        var token = (await AppointmentTypesAppService.GetDownloadTokenAsync()).Token;
+        var token = (await AppointmentAppService.GetDownloadTokenAsync()).Token;
         var remoteService =
             await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ??
             await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
@@ -212,7 +245,7 @@ public partial class AppointmentTypes
 
         await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
         NavigationManager.NavigateTo(
-            $"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/appointment-types/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Name={HttpUtility.UrlEncode(Filter.Name)}",
+            $"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/appointment/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Name={HttpUtility.UrlEncode(Filter.Name)}",
             forceLoad: true);
     }
     
@@ -228,7 +261,7 @@ public partial class AppointmentTypes
         IsCreateDialogVisible = false;
     }
 
-    private async Task DeleteTypeAsync(AppointmentTypeDto input)
+    private async Task DeleteTypeAsync(AppointmentDto input)
     {
         try
         {
@@ -238,7 +271,7 @@ public partial class AppointmentTypes
                 return;
             }
 
-            await AppointmentTypesAppService.DeleteAsync(input.Id);
+            await AppointmentAppService.DeleteAsync(input.Id);
         }
         catch (Exception e)
         {
@@ -254,7 +287,7 @@ public partial class AppointmentTypes
     {
         try
         {
-            await AppointmentTypesAppService.CreateAsync(NewType);
+            await AppointmentAppService.CreateAsync(new AppointmentCreateDto());
         }
         catch (Exception ex)
         {
@@ -271,7 +304,7 @@ public partial class AppointmentTypes
     {
         try
         {
-            await AppointmentTypesAppService.UpdateAsync(EditingTypeId, EditingType);
+            await AppointmentAppService.UpdateAsync(EditingTypeId, new AppointmentUpdateDto());
             CloseEditTypeModal();
         }
         catch (Exception ex)
@@ -288,13 +321,5 @@ public partial class AppointmentTypes
     private void Refresh()
     {
         Grid.Refresh();
-    }
-
-    public static void ExcelQueryCellInfoHandler(ExcelQueryCellInfoEventArgs<AppointmentTypeDto> args)
-    {
-        if (args.Column.Field == "Name")
-        {
-            args.Cell.Value = args.Data.Name;
-        }
     }
 }

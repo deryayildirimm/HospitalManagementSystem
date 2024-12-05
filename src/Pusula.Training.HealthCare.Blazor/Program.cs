@@ -59,6 +59,9 @@ public class Program
             builder.Services.AddSyncfusionBlazor();
 
             builder.Services.AddScoped<AppointmentTypeAdaptor>();
+            
+            builder.Services.AddScoped<AppointmentAdaptor>();
+
 
             // Serilog ve diğer ayarları ekleme
             builder.Host.AddAppSettingsSecretsJson()

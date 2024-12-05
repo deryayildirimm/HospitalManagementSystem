@@ -82,19 +82,22 @@ public partial class DoctorDashboard : ComponentBase
             var items = (await AppointmentAppService.GetListAsync(AppointmentsFilter))
                 .Items
                 .ToList();
-
-            if (items.Count > 0)
+            
+            if(items.Count == 0)
             {
-                DataSource = items.Select(x => new AppointmentData
-                {
-                    Id = x.Id,
-                    PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
-                    DoctorName = x.Doctor.FirstName + " " + x.Doctor.LastName,
-                    StartTime = x.StartTime,
-                    EndTime = x.EndTime,
-                    ServiceName = x.MedicalService.Name
-                }).ToList();
+                DataSource = [];
+                return;
             }
+
+            DataSource = items.Select(x => new AppointmentData
+            {
+                Id = x.Id,
+                PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
+                DoctorName = x.Doctor.FirstName + " " + x.Doctor.LastName,
+                StartTime = x.StartTime,
+                EndTime = x.EndTime,
+                ServiceName = x.MedicalService.Name
+            }).ToList();
         }
         catch (Exception e)
         {
