@@ -53,22 +53,35 @@ namespace Pusula.Training.HealthCare
         private async Task SetRoles()
         {
             await SeedCityRecords();
-            await SeedPatientRecords();
+           await SeedPatientRecords();
             await SeedRoleRecords();
-            await SeedDistrictRecords();
+           await SeedDistrictRecords();
             await SeedMedicalServiceRecords();
             await SeedDepartmentRecords();
-            await SeedMedicalServiceToDepartments();
+           await SeedMedicalServiceToDepartments();
             await SeedTitles();
             await SeedDoctorRecords();
             await SeedDoctorWorkingHours();
-            await SeedAppointments();
-            await SeedTestCategoryRecords();
-            await SeedTestRecords();
-            await SeedProtocolType();
-            await SeedProtocols(); 
+           await SeedAppointments();
+          await SeedTestCategoryRecords();
+          await SeedTestRecords(); await SeedProtocolType();
+            await SeedProtocols(); // Protokoller en son oluşturulacak.
+            
         }
 
+        private async Task SeedProtocolType()
+        {
+            var types = new List<ProtocolType>
+            {
+                new ProtocolType(guidGenerator.Create(), "Ayakta"),
+                new ProtocolType(guidGenerator.Create(), "Yatış"),
+                new ProtocolType(guidGenerator.Create(), "Kontrol"),
+            
+            };
+
+            await protocolTypeRepository.InsertManyAsync(types, autoSave: true);
+        }
+        
         private async Task SeedTitles()
         {
             var titles = new List<Title>
@@ -82,18 +95,7 @@ namespace Pusula.Training.HealthCare
             await titleRepository.InsertManyAsync(titles, autoSave: true);
         }
         
-        private async Task SeedProtocolType()
-        {
-            var types = new List<ProtocolType>
-            {
-                new ProtocolType(guidGenerator.Create(), "Ayakta."),
-                new ProtocolType(guidGenerator.Create(), "Yatış."),
-                new ProtocolType(guidGenerator.Create(), "Kontrol."),
-            
-            };
-
-            await protocolTypeRepository.InsertManyAsync(types, autoSave: true);
-        }
+    
         private async Task SeedMedicalServiceRecords()
         {
             if (await medicalServiceRepository.GetCountAsync() > 0)
@@ -191,7 +193,7 @@ namespace Pusula.Training.HealthCare
             var patient1 = new Patient(
                 Guid.NewGuid(),
                 1,
-                "Ali",
+                "Hasan",
                 "Yılmaz",
                 "Turkey",
                 new DateTime(1990, 1, 1),
@@ -214,7 +216,7 @@ namespace Pusula.Training.HealthCare
             var patient2 = new Patient(
                 Guid.NewGuid(),
                 2,
-                "Mehmet",
+                "Mert",
                 "Demir",
                 "ENGLISH",
                 new DateTime(1985, 5, 10),
@@ -237,8 +239,8 @@ namespace Pusula.Training.HealthCare
             var patient3 = new Patient(
                 Guid.NewGuid(),
                 4,
-                "Ayşe",
-                "Kaya",
+                "Leyla",
+                "Kara",
                 "German",
                 new DateTime(1992, 3, 15),
                 "+12312312345",
@@ -246,8 +248,8 @@ namespace Pusula.Training.HealthCare
                 EnumInsuranceType.SGK,
                 "C12312312",
                 EnumGender.FEMALE,
-                "Hatice",
-                "Ahmet",
+                "Huriye",
+                "Aslan",
                 "INS123123",
                 "C1231234",
                 "ayse.kaya@example.com",
@@ -304,46 +306,7 @@ namespace Pusula.Training.HealthCare
             };
             await testRepository.InsertManyAsync(testList);
         }
-
-        private async Task SeedProtocols()
-        {
-            if (await protocolRepository.GetCountAsync() > 0)
-            {
-                return;
-            }
-
-            var protocolTypes = await protocolTypeRepository.GetListAsync();
-            var patients = await patientRepository.GetListAsync();
-            var departments = await departmentRepository.GetListAsync();
-            var doctors = await doctorRepository.GetListAsync();
-
-            var random = new Random();
-
-            var protocols = new List<Protocol>();
-            foreach (var patient in patients)
-            {
-                var doctor = doctors[random.Next(doctors.Count)];
-                var department = departments[random.Next(departments.Count)];
-                var protocolType = protocolTypes[random.Next(protocolTypes.Count)];
-
-                var startTime = DateTime.Now.AddDays(random.Next(1, 10));
-                var endTime = startTime.AddHours(1);
-
-                protocols.Add(new Protocol(
-                    guidGenerator.Create(),
-                    patient.Id,
-                    department.Id,
-                    doctor.Id,
-                    protocolType.Id,
-                    startTime,
-                    "Routine checkup",
-                    endTime
-                    
-                ));
-            }
-
-            await protocolRepository.InsertManyAsync(protocols, autoSave: true);
-        }
+        
         private async Task SeedCityRecords()
         {
             if (await cityRepository.GetCountAsync() > 0)
@@ -367,7 +330,7 @@ namespace Pusula.Training.HealthCare
 
             var cityDistricts = new Dictionary<string, List<string>>
             {
-                { "Istanbul", ["Kadıköy", "Üsküdar", "Beşiktaş", "Bakırköy", "Sarıyer"] },
+                { "Istanbul", ["Kadıköy", "Üsküdar", "Pendik", "Bakırköy", "Sarıyer"] },
                 { "Ankara", ["Çankaya", "Keçiören", "Yenimahalle", "Mamak", "Altındağ"] },
                 { "Izmir", ["Konak", "Bornova", "Karşıyaka", "Buca", "Gaziemir"] },
                 { "Bursa", ["Nilüfer", "Osmangazi", "Yıldırım", "Gemlik", "İnegöl"] },
@@ -561,6 +524,51 @@ namespace Pusula.Training.HealthCare
             await doctorRepository.InsertAsync(d8, true);
             await doctorRepository.InsertAsync(d9, true);
         }
+        
+        
+        
+        private async Task SeedProtocols()
+        {
+            // Doktorlar, hastalar, protokol türleri ve departmanlar kontrol ediliyor
+            var doctors = await doctorRepository.GetListAsync();
+            var patients = await patientRepository.GetListAsync();
+            var protocolTypes = await protocolTypeRepository.GetListAsync();
+            var departments = await departmentRepository.GetListAsync();
+
+            if (!doctors.Any() || !patients.Any() || !protocolTypes.Any() || !departments.Any())
+            {
+                throw new Exception("Doctors, Patients, ProtocolTypes, or Departments are missing. Seed them first.");
+            }
+
+            // Protokoller
+            var random = new Random();
+            var protocols = new List<Protocol>();
+
+            foreach (var patient in patients)
+            {
+                // Her hasta için bir protokol oluşturuluyor
+                var doctor = doctors[random.Next(doctors.Count)];
+                var department = departments[random.Next(departments.Count)];
+                var protocolType = protocolTypes[random.Next(protocolTypes.Count)];
+
+                var startTime = DateTime.Now.AddDays(random.Next(1, 10));
+                var endTime = startTime.AddHours(1);
+
+                protocols.Add(new Protocol(
+                    id: Guid.NewGuid(),
+                    patientId: patient.Id,
+                    departmentId: department.Id,
+                    doctorId: doctor.Id,
+                    protocolTypeId: protocolType.Id,
+                    startTime: startTime,
+                    note: "Routine checkup",
+                    endTime: endTime
+                ));
+            }
+
+            await protocolRepository.InsertManyAsync(protocols, autoSave: true);
+        }
+        
         private async Task SeedRoleRecords()
         {
             var doctor = new IdentityRole(guidGenerator.Create(), "doctor", null)
