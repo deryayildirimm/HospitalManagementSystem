@@ -102,7 +102,7 @@ public class HealthCareDbContext :
     {
         base.OnConfiguring(optionsBuilder);
         // Lazy loading enable 
-        optionsBuilder.UseLazyLoadingProxies();
+      //  optionsBuilder.UseLazyLoadingProxies();
     }
     protected override void OnModelCreating(ModelBuilder builder)
     {

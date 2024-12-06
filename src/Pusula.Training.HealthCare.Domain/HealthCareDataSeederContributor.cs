@@ -13,6 +13,8 @@ using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
+using Pusula.Training.HealthCare.Protocols;
+using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Titles;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
@@ -39,6 +41,8 @@ namespace Pusula.Training.HealthCare
         IDistrictRepository districtRepository,
         IGuidGenerator guidGenerator,
         ITestCategoryRepository testCategoryRepository,
+        IProtocolTypeRepository protocolTypeRepository,
+        IProtocolRepository protocolRepository,
         IRepository<Test, Guid> testRepository) : IDataSeedContributor, ITransientDependency
     {
         public async Task SeedAsync(DataSeedContext context)
@@ -61,6 +65,8 @@ namespace Pusula.Training.HealthCare
             await SeedAppointments();
             await SeedTestCategoryRecords();
             await SeedTestRecords();
+            await SeedProtocolType();
+            await SeedProtocols(); 
         }
 
         private async Task SeedTitles()
@@ -74,6 +80,19 @@ namespace Pusula.Training.HealthCare
             };
 
             await titleRepository.InsertManyAsync(titles, autoSave: true);
+        }
+        
+        private async Task SeedProtocolType()
+        {
+            var types = new List<ProtocolType>
+            {
+                new ProtocolType(guidGenerator.Create(), "Ayakta."),
+                new ProtocolType(guidGenerator.Create(), "Yatış."),
+                new ProtocolType(guidGenerator.Create(), "Kontrol."),
+            
+            };
+
+            await protocolTypeRepository.InsertManyAsync(types, autoSave: true);
         }
         private async Task SeedMedicalServiceRecords()
         {
@@ -286,6 +305,45 @@ namespace Pusula.Training.HealthCare
             await testRepository.InsertManyAsync(testList);
         }
 
+        private async Task SeedProtocols()
+        {
+            if (await protocolRepository.GetCountAsync() > 0)
+            {
+                return;
+            }
+
+            var protocolTypes = await protocolTypeRepository.GetListAsync();
+            var patients = await patientRepository.GetListAsync();
+            var departments = await departmentRepository.GetListAsync();
+            var doctors = await doctorRepository.GetListAsync();
+
+            var random = new Random();
+
+            var protocols = new List<Protocol>();
+            foreach (var patient in patients)
+            {
+                var doctor = doctors[random.Next(doctors.Count)];
+                var department = departments[random.Next(departments.Count)];
+                var protocolType = protocolTypes[random.Next(protocolTypes.Count)];
+
+                var startTime = DateTime.Now.AddDays(random.Next(1, 10));
+                var endTime = startTime.AddHours(1);
+
+                protocols.Add(new Protocol(
+                    guidGenerator.Create(),
+                    patient.Id,
+                    department.Id,
+                    doctor.Id,
+                    protocolType.Id,
+                    startTime,
+                    "Routine checkup",
+                    endTime
+                    
+                ));
+            }
+
+            await protocolRepository.InsertManyAsync(protocols, autoSave: true);
+        }
         private async Task SeedCityRecords()
         {
             if (await cityRepository.GetCountAsync() > 0)

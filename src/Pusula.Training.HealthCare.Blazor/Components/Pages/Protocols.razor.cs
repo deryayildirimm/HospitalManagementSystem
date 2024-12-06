@@ -191,8 +191,8 @@ public partial class Protocols
         
         var protocol = await ProtocolsAppService.GetWithNavigationPropertiesAsync(input.Protocol.Id);
 
-        EditingProtocolId = protocol.Protocol.Id;
-        EditingProtocol = ObjectMapper.Map<ProtocolDto, ProtocolUpdateDto>(protocol.Protocol);
+        EditingProtocolId = protocol.Id;
+        EditingProtocol = ObjectMapper.Map<ProtocolDto, ProtocolUpdateDto>(protocol);
 
         await EditingProtocolValidations.ClearAll();
         await EditProtocolModal.Show();

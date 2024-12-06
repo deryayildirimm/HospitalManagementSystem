@@ -75,8 +75,4 @@ public interface IPatientRepository : IRepository<Patient, Guid>
         CancellationToken cancellationToken = default
     );
     
-    Task<Patient> GetPatientByInsuranceNumberAsync(
-        string insuranceNumber ,
-        CancellationToken cancellationToken = default
-    );
 }

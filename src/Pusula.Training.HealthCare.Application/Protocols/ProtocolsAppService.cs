@@ -41,15 +41,18 @@ namespace Pusula.Training.HealthCare.Protocols
             };
         }
 
-        public virtual async Task<ProtocolWithNavigationPropertiesDto> GetWithNavigationPropertiesAsync(Guid id)
+        public virtual async Task<ProtocolDto> GetWithNavigationPropertiesAsync(Guid id)
         {
-            return ObjectMapper.Map<ProtocolWithNavigationProperties, ProtocolWithNavigationPropertiesDto>
+            return ObjectMapper.Map<Protocol, ProtocolDto>
                 (await protocolRepository.GetWithNavigationPropertiesAsync(id));
         }
 
-        public virtual async Task<ProtocolDto> GetAsync(Guid id)
+        public virtual async Task<ProtocolDto> GetAsync(Guid id )
         {
-            return ObjectMapper.Map<Protocol, ProtocolDto>(await protocolRepository.GetAsync(id));
+
+            var protocol = await protocolRepository.GetAsync(id);
+            
+            return ObjectMapper.Map<Protocol, ProtocolDto>(protocol);
         }
 
         public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetPatientLookupAsync(LookupRequestDto input)
@@ -176,6 +179,7 @@ namespace Pusula.Training.HealthCare.Protocols
             return ObjectMapper.Map<Protocol, ProtocolDto>(protocol);
         }
 
+       
         [AllowAnonymous]
         public virtual async Task<IRemoteStreamContent> GetListAsExcelFileAsync(ProtocolExcelDownloadDto input)
         {
@@ -189,9 +193,9 @@ namespace Pusula.Training.HealthCare.Protocols
             var protocols = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin,input.EndTimeMax, input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId );
             var items = protocols.Select(item => new
             {
-                item.Protocol.Note,
-                item.Protocol.StartTime,
-                item.Protocol.EndTime,
+              //  item.Protocol.Note,
+            //    item.Protocol.StartTime,
+             //   item.Protocol.EndTime,
 
                 Patient = item.Patient?.FirstName,
                 Department = item.Department?.Name,

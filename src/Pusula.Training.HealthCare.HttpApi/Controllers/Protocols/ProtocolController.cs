@@ -24,7 +24,7 @@ public class ProtocolController(IProtocolsAppService _protocolsAppService) : Hea
 
     [HttpGet]
     [Route("with-navigation-properties/{id}")]
-    public virtual Task<ProtocolWithNavigationPropertiesDto> GetWithNavigationPropertiesAsync(Guid id) => _protocolsAppService.GetWithNavigationPropertiesAsync(id);
+    public virtual Task<ProtocolDto> GetWithNavigationPropertiesAsync(Guid id) => _protocolsAppService.GetWithNavigationPropertiesAsync(id);
     
 
     [HttpGet]

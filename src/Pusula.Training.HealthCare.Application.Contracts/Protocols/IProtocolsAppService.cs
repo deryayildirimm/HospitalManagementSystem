@@ -12,7 +12,7 @@ public interface IProtocolsAppService : IApplicationService
 {
     Task<PagedResultDto<ProtocolWithNavigationPropertiesDto>> GetListAsync(GetProtocolsInput input);
 
-    Task<ProtocolWithNavigationPropertiesDto> GetWithNavigationPropertiesAsync(Guid id);
+    Task<ProtocolDto> GetWithNavigationPropertiesAsync(Guid id);
 
     Task<ProtocolDto> GetAsync(Guid id);
 
