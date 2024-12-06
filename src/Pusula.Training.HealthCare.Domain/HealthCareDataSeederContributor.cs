@@ -94,8 +94,6 @@ namespace Pusula.Training.HealthCare
 
             await titleRepository.InsertManyAsync(titles, autoSave: true);
         }
-        
-    
         private async Task SeedMedicalServiceRecords()
         {
             if (await medicalServiceRepository.GetCountAsync() > 0)
@@ -194,18 +192,15 @@ namespace Pusula.Training.HealthCare
                 Guid.NewGuid(),
                 1,
                 "Hasan",
-                "Yılmaz",
-                "Turkey",
+                "Kuru",
+                EnumGender.MALE,
                 new DateTime(1990, 1, 1),
+                "A12345678",
+                "Turkey",
                 "+12345678901",
                 EnumPatientTypes.VIP,
-                EnumInsuranceType.SGK,
-                "A12345678",
-                EnumGender.MALE,
                 "Fatma",
                 "Aykut",
-                "INS123456",
-                "A1234567",
                 "ali.yilmaz@example.com",
                 EnumRelative.FATHER,
                 "+12344678901",
@@ -218,17 +213,14 @@ namespace Pusula.Training.HealthCare
                 2,
                 "Mert",
                 "Demir",
-                "ENGLISH",
+                EnumGender.MALE,
                 new DateTime(1985, 5, 10),
+                "B98765432",
+                "Ireland",
                 "+98765432109",
                 EnumPatientTypes.NORMAL,
-                EnumInsuranceType.PRIVATE,
-                "B98765432",
-                EnumGender.MALE,
                 "Emine",
                 "Suat",
-                "INS987654",
-                "B7654321",
                 "mehmet.demir@example.com",
                 EnumRelative.MOTHER,
                 "+09876543210",
@@ -238,20 +230,17 @@ namespace Pusula.Training.HealthCare
 
             var patient3 = new Patient(
                 Guid.NewGuid(),
-                4,
+                3,
                 "Leyla",
-                "Kara",
-                "German",
+                "Kaya",
+                EnumGender.FEMALE,
                 new DateTime(1992, 3, 15),
+                "C12312312",
+                "Germany",
                 "+12312312345",
                 EnumPatientTypes.VIP,
-                EnumInsuranceType.SGK,
-                "C12312312",
-                EnumGender.FEMALE,
                 "Huriye",
                 "Aslan",
-                "INS123123",
-                "C1231234",
                 "ayse.kaya@example.com",
                 EnumRelative.FATHER,
                 "+11223344556",
@@ -259,7 +248,9 @@ namespace Pusula.Training.HealthCare
                 EnumDiscountGroup.CONTRACTED
             );
 
-            await patientRepository.InsertManyAsync([patient1, patient2, patient3], true);
+            await patientRepository.InsertAsync(patient1,true);
+            await patientRepository.InsertAsync(patient2,true);
+            await patientRepository.InsertAsync(patient3,true);
         }
 
         private async Task SeedTestCategoryRecords()
@@ -306,7 +297,7 @@ namespace Pusula.Training.HealthCare
             };
             await testRepository.InsertManyAsync(testList);
         }
-        
+
         private async Task SeedCityRecords()
         {
             if (await cityRepository.GetCountAsync() > 0)
