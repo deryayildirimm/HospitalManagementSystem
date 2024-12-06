@@ -16,14 +16,7 @@ public class CreatePhoneNumberValidator : ValidationAttribute
 
         if (string.IsNullOrEmpty(stringValue))
         {
-            if (displayName == "RelativePhoneNumber")
-            {
-                return ValidationResult.Success!;
-            }
-            else if (displayName == "MobilePhoneNumber")
-            {
-                return new ValidationResult("Mobile phone number cannot be empty.");
-            }
+            return ValidationResult.Success!;
         }
 
         var regex = new Regex(PhoneNumberPattern);

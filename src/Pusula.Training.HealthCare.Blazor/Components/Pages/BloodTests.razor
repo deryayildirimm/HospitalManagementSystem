@@ -59,14 +59,8 @@
                                     </tr>
                                     <tr>
                                         <td class="label">TC/Passport No:</td>
-                                        @if (card.Patient.Nationality == CountryConsts.CurrentCountry)
-                                        {
-                                            <td>@card.Patient.IdentityNumber</td>
-                                        }
-                                        else
-                                        {
-                                            <td>@card.Patient.PassportNumber</td>
-                                        }
+                                        <td>@card.Patient.IdentityAndPassportNumber</td>
+                                        
                                         <td class="label">Gender:</td>
                                         <td>@card.Patient.Gender</td>
                                     </tr>

@@ -7,7 +7,7 @@ namespace Pusula.Training.HealthCare.Validators;
 
 public class UpdatePhoneNumberValidator : ValidationAttribute
 {
-    private const string PhoneNumberPattern = @"^\+\d{8,15}$";
+    private const string PhoneNumberPattern = @"^\+\d{7,15}$";
 
     protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
     {
@@ -16,14 +16,7 @@ public class UpdatePhoneNumberValidator : ValidationAttribute
 
         if (string.IsNullOrEmpty(stringValue))
         {
-            if (displayName == "RelativePhoneNumber")
-            {
-                return ValidationResult.Success!;
-            }
-            else if (displayName == "MobilePhoneNumber")
-            {
-                return new ValidationResult("Mobile phone number cannot be empty.");
-            }
+            return ValidationResult.Success!;
         }
         if (!stringValue!.StartsWith("+"))
         {

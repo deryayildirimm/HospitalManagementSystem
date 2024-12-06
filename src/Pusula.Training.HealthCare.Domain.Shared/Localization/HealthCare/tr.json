@@ -31,21 +31,18 @@
     "Submit": "Onayla",
     "ChooseNationality": "Uyruk Seç",
     "UpdatePatient": "Hasta Güncelle",
-    "Doctor" : "Doktor",
-    "Leave" : "İzin",
-    "UpdatePatient": "Hasta Güncelle",
+    "Doctor": "Doktor",
+    "Leave": "İzin",
     "ChooseBloodTests": "Kan Testi Seç",
     "Biochemical Tests": "Biyokimyasal Testler",
     "Hematological Tests": "Hematolojik Testler",
     "Hormonal Tests": "Hormonal Testler",
-    "MyPatients": "Hastalarım",
     "BloodTests": "Kan Testleri",
     "NewIcd": "Yeni Icd",
     "CodeNumber": "Kod",
     "EnterCodeNumber": "Kodu Giriniz",
     "EnterDetail": "Detayı Giriniz",
     "Menu:BloodTests": "Kan Tahlilleri",
-    "Menu:MyPatients": "Hastalarım",
     "Menu:Treatment":  "Tedavi",
     "Menu:Definitions":  "Tanımlar",
     "Menu:Icds":  "Icd",
@@ -56,6 +53,7 @@
     "Permission:ProtocolTypes" : "Protokol Tipleri",
     "InvalidDateRange" : "Başlangıç tarihi bitiş tarihinden büyük olamaz.",
     "Healthcare error occured!!" : "Bir hata oluştu!!",
-    "The provided download token is invalid." : "Token geçersiz"
+    "The provided download token is invalid." : "Token geçersiz",
+    "IdentityNumber/PassportNumber": "TC/Pasaport No"
   }
 }

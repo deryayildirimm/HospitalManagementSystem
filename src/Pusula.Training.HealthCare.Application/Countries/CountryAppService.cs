@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -27,7 +24,7 @@ namespace Pusula.Training.HealthCare.Countries
 
             var countryPhoneCodes = JsonSerializer.Deserialize<List<CountryPhoneCodeDto>>(jsonData, options);
 
-            return countryPhoneCodes;
+            return countryPhoneCodes!;
         }
     }
 }

@@ -125,6 +125,7 @@ public static class HealthCarePermissions
         public const string Create = Default + ".Create";
         public const string Delete = Default + ".Delete";
     }
+
     public static class BloodTestResults
     {
         public const string Default = GroupName + ".BloodTestResults";
@@ -136,6 +137,14 @@ public static class HealthCarePermissions
     public static class Icds
     {
         public const string Default = GroupName + ".Icds";
+        public const string Edit = Default + ".Edit";
+        public const string Create = Default + ".Create";
+        public const string Delete = Default + ".Delete";
+    }
+
+    public static class Insurances
+    {
+        public const string Default = GroupName + ".Insurances";
         public const string Edit = Default + ".Edit";
         public const string Create = Default + ".Create";
         public const string Delete = Default + ".Delete";
