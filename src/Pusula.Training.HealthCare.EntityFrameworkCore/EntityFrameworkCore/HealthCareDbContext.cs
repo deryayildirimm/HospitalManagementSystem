@@ -100,6 +100,12 @@ public class HealthCareDbContext :
     {
     }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        // Lazy loading enable 
+      //  optionsBuilder.UseLazyLoadingProxies();
+    }
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -161,7 +167,7 @@ public class HealthCareDbContext :
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "Protocols", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                b.Property(x => x.Notes).HasColumnName(nameof(Protocol.Notes))
+                b.Property(x => x.Note).HasColumnName(nameof(Protocol.Note))
                     .HasMaxLength(ProtocolConsts.MaxNotesLength);
                 b.Property(x => x.StartTime).HasColumnName(nameof(Protocol.StartTime)).IsRequired();
                 b.Property(x => x.EndTime).HasColumnName(nameof(Protocol.EndTime));

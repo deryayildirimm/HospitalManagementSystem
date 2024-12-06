@@ -27,14 +27,13 @@
 @* ************************* SEARCH ************************* *@
 <Card>
     <CardBody>
-        @*//<suite-custom-code-block-1>*@
-        @*//</suite-custom-code-block-1>*@
         <Form id="ProtocolSearchForm" class="mb-3">
             <Addons>
                 <Addon AddonType="AddonType.Body">
                     <TextEdit @bind-Text="@Filter.FilterText"
                               Autofocus="true"
-                              Placeholder="@L["Search"]">
+                              Placeholder="@L["Search"]"
+                              >
                     </TextEdit>
                 </Addon>
                 <Addon AddonType="AddonType.End">
@@ -53,14 +52,6 @@
 
         <div style="display: @(!ShowAdvancedFilters ? "none" : "block")">
             <Row>
-            <!--
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["Type"]</FieldLabel>
-                        <TextEdit Text="@Filter.Type" TextChanged="@OnTypeChangedAsync"/>
-                    </Field>
-                </Column>
-                -->
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["MinStartTime"]</FieldLabel>
@@ -81,18 +72,31 @@
                                     Placeholder="@string.Empty"/>
                     </Field>
                 </Column>
-            <!--
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
-                        <FieldLabel>@L["EndTime"]</FieldLabel>
-                        <TextEdit Text="@Filter." TextChanged="@OnEndTimeChangedAsync"/>
+                        <FieldLabel>@L["MinEndTime"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+                                    InputMode="DateInputMode.Date"
+                                    Date="@Filter.EndTimeMin"
+                                    DateChanged="@OnEndTimeMinChangedAsync"
+                                    Placeholder="@string.Empty"/>
                     </Field>
                 </Column>
-                -->
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["MaxEndTime"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+                                    InputMode="DateInputMode.Date"
+                                    Date="@Filter.EndTimeMax"
+                                    DateChanged="@OnEndTimeMaxChangedAsync"
+                                    Placeholder="@string.Empty"/>
+                    </Field>
+                </Column>
+           
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["Patient"]</FieldLabel>
-                        <Select TValue="Guid?"
+                        <Select TValue="Guid?" 
                                 SelectedValue="@Filter.PatientId"
                                 SelectedValueChanged="@OnPatientIdChangedAsync">
 
@@ -111,7 +115,7 @@
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["Department"]</FieldLabel>
-                        <Select TValue="Guid?"
+                        <Select TValue="Guid?" 
                                 SelectedValue="@Filter.DepartmentId"
                                 SelectedValueChanged="@OnDepartmentIdChangedAsync">
 
@@ -122,6 +126,43 @@
                                 <SelectItem TValue="Guid" Value="@item.Id">
                                     @item.DisplayName
                                 </SelectItem>
+                            }
+
+                        </Select>
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Doctor"]</FieldLabel>
+                        <Select TValue="Guid?"  
+                                SelectedValue="@Filter.DoctorId"
+                                SelectedValueChanged="@OnDoctorIdChangedAsync">
+
+                            <SelectItem></SelectItem>
+
+                            @foreach (var item in DoctorsCollection)
+                            {
+                                <SelectItem TValue="Guid" Value="@item.Id">
+                                    @item.DisplayName
+                                </SelectItem>
+                            }
+
+                        </Select>
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Protocol Type"]</FieldLabel>
+                        <Select TValue="Guid?" 
+                                SelectedValue="@Filter.ProtocolTypeId"
+                                SelectedValueChanged="@OnProtocolTypeIdChangedAsync">
+                            <SelectItem></SelectItem>
+
+                            @foreach (var item in ProtocolTypesCollection)
+                            {
+                            <SelectItem TValue="Guid" Value="@item.Id">
+                                @item.DisplayName
+                            </SelectItem>
                             }
 
                         </Select>
@@ -217,6 +258,53 @@
                     <DataGridMultiSelectColumn TItem="ProtocolWithNavigationPropertiesDto" DisplayOrder="-1" Width="30px"></DataGridMultiSelectColumn>
                 }
 
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Protocol.StartTime"
+                                Caption="@L["StartTime"]">
+                    <DisplayTemplate>
+                        @context.Protocol.StartTime.ToShortDateString()
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Patient.FirstName"
+                                Caption="@L["Patient"]">
+                    <DisplayTemplate>
+                        @($"{context.Patient?.FirstName} {context.Patient?.LastName}")
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Department.Name"
+                                Caption="@L["Department"]">
+                </DataGridColumn>
+
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Protocol.EndTime"
+                                Caption="@L["EndTime"]">
+                    <DisplayTemplate>
+                        @context.Protocol?.EndTime?.ToShortDateString()
+                    </DisplayTemplate>
+                </DataGridColumn>
+                
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Doctor.FirstName"
+                                Caption="@L["Doctor"]">
+                    <DisplayTemplate>
+                        @($"{context.Doctor?.FirstName} {context.Doctor?.LastName}")
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="ProtocolType.Name"
+                                Caption="@L["ProtocolType"]">
+                    <DisplayTemplate>
+                        @context.ProtocolType?.Name
+                    </DisplayTemplate>
+                </DataGridColumn>
+
                 <DataGridEntityActionsColumn TItem="ProtocolWithNavigationPropertiesDto" @ref="@EntityActionsColumn">
                     <DisplayTemplate>
                         <EntityActions TItem="ProtocolWithNavigationPropertiesDto" EntityActionsColumn="@EntityActionsColumn">
@@ -231,39 +319,9 @@
                                           ConfirmationMessage="@(() => L["DeleteConfirmationMessage"])"
                                           Text="@L["Delete"]">
                             </EntityAction>
-                            @*//<suite-custom-code-block-4>*@
-                            @*//</suite-custom-code-block-4>*@
                         </EntityActions>
                     </DisplayTemplate>
                 </DataGridEntityActionsColumn>
-
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Protocol.Type"
-                                Caption="@L["Type"]">
-                </DataGridColumn>
-
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Protocol.StartTime"
-                                Caption="@L["StartTime"]">
-                    <DisplayTemplate>
-                        @context.Protocol.StartTime.ToShortDateString()
-                    </DisplayTemplate>
-                </DataGridColumn>
-
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Protocol.EndTime"
-                                Caption="@L["EndTime"]">
-                </DataGridColumn>
-
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Patient.FirstName"
-                                Caption="@L["Patient"]">
-                </DataGridColumn>
-
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Department.Name"
-                                Caption="@L["Department"]">
-                </DataGridColumn>
 
             </DataGridColumns>
 
@@ -288,11 +346,11 @@
                              Model="@NewProtocol"
                              ValidateOnLoad="false">
 
-<!--
+
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
-                            <FieldLabel>@L["Type"] *</FieldLabel>
-                            <TextEdit @bind-Text="@NewProtocol.Type" MaxLength="ProtocolConsts.TypeMaxLength">
+                            <FieldLabel>@L["Notes"] *</FieldLabel>
+                            <TextEdit @bind-Text="@NewProtocol.Notes" MaxLength="ProtocolConsts.MaxNotesLength" Plaintext >
                                 <Feedback>
                                     <ValidationError/>
                                 </Feedback>
@@ -300,7 +358,7 @@
                         </Field>
                     </Validation>
 
--->
+
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["StartTime"]</FieldLabel>
@@ -312,24 +370,22 @@
                         </Field>
                     </Validation>
 
-<!--
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["EndTime"]</FieldLabel>
-                            <TextEdit @bind-Text="@NewProtocol.EndTime">
+                            <DateEdit TValue="DateTime?" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.EndTime">
                                 <Feedback>
                                     <ValidationError/>
                                 </Feedback>
-                            </TextEdit>
+                            </DateEdit>
                         </Field>
                     </Validation>
--->
 
                     <Field>
                         <FieldLabel>@L["Patient"] *</FieldLabel>
                         <Autocomplete Data="@PatientsCollection"
                                       TItem="LookupDto<Guid>"
-                                      TValue="Guid"
+                                      TValue="Guid" 
                                       TextField="@((item) => item?.DisplayName)"
                                       ValueField="@((item) => item?.Id ?? default)"
                                       SearchChanged="@GetPatientCollectionLookupAsync"
@@ -339,11 +395,44 @@
 
                     <Field>
                         <FieldLabel>@L["Department"]</FieldLabel>
-                        <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DepartmentId">
+                        <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DepartmentId" >
+
+                            <SelectItem></SelectItem>
+                            
                             @foreach (var department in DepartmentsCollection)
                             {
                                 <SelectItem TValue="Guid" Value="@(department.Id)">
                                     @(department.DisplayName)
+                                </SelectItem>
+                            }
+                        </Select>
+                    </Field>
+
+                    <Field>
+                        <FieldLabel>@L["Doctor"]</FieldLabel>
+                        <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DoctorId"   >
+
+                            <SelectItem></SelectItem>
+                            
+                            @foreach (var doctor in DoctorsCollection)
+                            {
+                                <SelectItem TValue="Guid" Value="@(doctor.Id)">
+                                    @(doctor.DisplayName)
+                                </SelectItem>
+                            }
+                        </Select>
+                    </Field>
+
+                    <Field>
+                        <FieldLabel>@L["Protocol Type"]</FieldLabel>
+                        <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.ProtocolTypeId" >
+
+                            <SelectItem></SelectItem>
+                            
+                            @foreach (var type in ProtocolTypesCollection)
+                            {
+                                <SelectItem TValue="Guid" Value="@(type.Id)">
+                                    @(type.DisplayName)
                                 </SelectItem>
                             }
                         </Select>
@@ -382,20 +471,7 @@
                              Mode="ValidationMode.Auto"
                              Model="@EditingProtocol"
                              ValidateOnLoad="false">
-
-<!--
-                    <Validation MessageLocalizer="@LH.Localize">
-                        <Field>
-                            <FieldLabel>@L["Type"] *</FieldLabel>
-                            <TextEdit @bind-Text="@EditingProtocol.Type" MaxLength="ProtocolConsts.TypeMaxLength">
-                                <Feedback>
-                                    <ValidationError/>
-                                </Feedback>
-                            </TextEdit>
-                        </Field>
-                    </Validation>
-
--->
+                    
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["StartTime"]</FieldLabel>
@@ -406,20 +482,7 @@
                             </DateEdit>
                         </Field>
                     </Validation>
-
-<!--
-                    <Validation MessageLocalizer="@LH.Localize">
-                        <Field>
-                            <FieldLabel>@L["EndTime"]</FieldLabel>
-                            <TextEdit @bind-Text="@EditingProtocol.EndTime">
-                                <Feedback>
-                                    <ValidationError/>
-                                </Feedback>
-                            </TextEdit>
-                        </Field>
-                    </Validation>
--->
-
+                    
                     <Field>
                         <FieldLabel>@L["Patient"] *</FieldLabel>
                         <Autocomplete Data="@PatientsCollection"
@@ -444,6 +507,31 @@
                             }
                         </Select>
                     </Field>
+
+                    <Field>
+                        <FieldLabel>@L["Doctor"]</FieldLabel>
+                        <Select TValue="Guid" @bind-SelectedValue="@EditingProtocol.DoctorId">
+                            @foreach (var doctor in DoctorsCollection)
+                            {
+                                <SelectItem TValue="Guid" Value="@(doctor.Id)">
+                                    @(doctor.DisplayName)
+                                </SelectItem>
+                            }
+                        </Select>
+                    </Field>
+
+                    <Field>
+                        <FieldLabel>@L["ProtocolType"]</FieldLabel>
+                        <Select TValue="Guid" @bind-SelectedValue="@EditingProtocol.ProtocolTypeId">
+                            @foreach (var type in ProtocolTypesCollection)
+                            {
+                                <SelectItem TValue="Guid" Value="@(type.Id)">
+                                    @(type.DisplayName)
+                                </SelectItem>
+                            }
+                        </Select>
+                    </Field>
+                    
 
 
                 </Validations>

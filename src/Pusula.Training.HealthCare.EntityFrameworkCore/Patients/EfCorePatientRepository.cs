@@ -80,6 +80,8 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
                    .FirstOrDefaultAsync(cancellationToken)
                ?? throw new EntityNotFoundException(typeof(Patient), patientNumber);
     }
+    
+
 
     public virtual async Task<long> GetCountAsync(
         string? filterText = null,

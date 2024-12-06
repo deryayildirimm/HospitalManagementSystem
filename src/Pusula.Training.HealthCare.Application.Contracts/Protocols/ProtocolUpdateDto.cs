@@ -14,7 +14,6 @@ namespace Pusula.Training.HealthCare.Protocols
         public Guid PatientId { get; set; }
         public Guid DepartmentId { get; set; }
         public Guid ProtocolTypeId { get; set; }
-        
         public Guid DoctorId { get; set; }
         public string ConcurrencyStamp { get; set; } = null!;
     }

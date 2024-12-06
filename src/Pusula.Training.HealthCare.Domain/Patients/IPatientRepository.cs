@@ -65,4 +65,5 @@ public interface IPatientRepository : IRepository<Patient, Guid>
         int patientNumber ,
         CancellationToken cancellationToken = default
     );
+    
 }

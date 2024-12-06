@@ -20,10 +20,16 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
         Guid? protocolTypeId = null,
         Guid? doctorId = null,
         CancellationToken cancellationToken = default);
-    Task<ProtocolWithNavigationProperties> GetWithNavigationPropertiesAsync(
+    Task<Protocol> GetWithNavigationPropertiesAsync(
         Guid id,
         CancellationToken cancellationToken = default
     );
+    
+    Task<Protocol> GetAsync(
+        Guid id,
+        CancellationToken cancellationToken = default
+    );
+
 
     Task<List<ProtocolWithNavigationProperties>> GetListWithNavigationPropertiesAsync(
         string? filterText = null,

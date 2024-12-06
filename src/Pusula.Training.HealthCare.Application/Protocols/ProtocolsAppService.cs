@@ -9,9 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
-using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.GlobalExceptions;
-using Pusula.Training.HealthCare.ProtocolTypes;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Caching;
@@ -24,12 +22,12 @@ namespace Pusula.Training.HealthCare.Protocols
     [Authorize(HealthCarePermissions.Protocols.Default)]
     public class ProtocolsAppService(
         IProtocolRepository protocolRepository, 
-        IProtocolTypeRepository protocolTypeRepository,
-        IDoctorRepository doctorRepository,
         ProtocolManager protocolManager, 
         IDistributedCache<ProtocolDownloadTokenCacheItem, string> downloadTokenCache, 
         IRepository<Patients.Patient, Guid> patientRepository, 
-        IRepository<Departments.Department, Guid> departmentRepository) : HealthCareAppService, IProtocolsAppService
+        IRepository<Departments.Department, Guid> departmentRepository,
+        IRepository<Doctors.Doctor, Guid> doctorRepository,
+        IRepository<ProtocolTypes.ProtocolType, Guid> protocolTypeRepository) : HealthCareAppService, IProtocolsAppService
     {
         public virtual async Task<PagedResultDto<ProtocolWithNavigationPropertiesDto>> GetListAsync(GetProtocolsInput input)
         {
@@ -43,15 +41,18 @@ namespace Pusula.Training.HealthCare.Protocols
             };
         }
 
-        public virtual async Task<ProtocolWithNavigationPropertiesDto> GetWithNavigationPropertiesAsync(Guid id)
+        public virtual async Task<ProtocolDto> GetWithNavigationPropertiesAsync(Guid id)
         {
-            return ObjectMapper.Map<ProtocolWithNavigationProperties, ProtocolWithNavigationPropertiesDto>
+            return ObjectMapper.Map<Protocol, ProtocolDto>
                 (await protocolRepository.GetWithNavigationPropertiesAsync(id));
         }
 
-        public virtual async Task<ProtocolDto> GetAsync(Guid id)
+        public virtual async Task<ProtocolDto> GetAsync(Guid id )
         {
-            return ObjectMapper.Map<Protocol, ProtocolDto>(await protocolRepository.GetAsync(id));
+
+            var protocol = await protocolRepository.GetAsync(id);
+            
+            return ObjectMapper.Map<Protocol, ProtocolDto>(protocol);
         }
 
         public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetPatientLookupAsync(LookupRequestDto input)
@@ -68,15 +69,16 @@ namespace Pusula.Training.HealthCare.Protocols
                 Items = ObjectMapper.Map<List<Patients.Patient>, List<LookupDto<Guid>>>(lookupData)
             };
         }
-        
-        public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookupAsync(LookupRequestDto input)
+
+
+        public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookUpAsync(LookupRequestDto input)
         {
             var query = (await protocolTypeRepository.GetQueryableAsync())
                 .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                    x => x.Name != null && x.Name.Contains(input.Filter!));
-
+                    x => x.Name.Contains(input.Filter));
             var lookupData = await query.PageBy(input.SkipCount, input.MaxResultCount).ToDynamicListAsync<ProtocolTypes.ProtocolType>();
             var totalCount = query.Count();
+
             return new PagedResultDto<LookupDto<Guid>>
             {
                 TotalCount = totalCount,
@@ -177,6 +179,7 @@ namespace Pusula.Training.HealthCare.Protocols
             return ObjectMapper.Map<Protocol, ProtocolDto>(protocol);
         }
 
+       
         [AllowAnonymous]
         public virtual async Task<IRemoteStreamContent> GetListAsExcelFileAsync(ProtocolExcelDownloadDto input)
         {
@@ -190,9 +193,9 @@ namespace Pusula.Training.HealthCare.Protocols
             var protocols = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin,input.EndTimeMax, input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId );
             var items = protocols.Select(item => new
             {
-                item.Protocol.Notes,
-                item.Protocol.StartTime,
-                item.Protocol.EndTime,
+              //  item.Protocol.Note,
+            //    item.Protocol.StartTime,
+             //   item.Protocol.EndTime,
 
                 Patient = item.Patient?.FirstName,
                 Department = item.Department?.Name,
