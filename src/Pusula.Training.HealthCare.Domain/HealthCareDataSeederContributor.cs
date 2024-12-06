@@ -13,7 +13,11 @@ using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
+using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Titles;
+using Pusula.Training.HealthCare.Treatment.Examinations;
+using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
+using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
@@ -39,7 +43,11 @@ namespace Pusula.Training.HealthCare
         IDistrictRepository districtRepository,
         IGuidGenerator guidGenerator,
         ITestCategoryRepository testCategoryRepository,
-        IRepository<Test, Guid> testRepository) : IDataSeedContributor, ITransientDependency
+        IRepository<Test, Guid> testRepository,
+        IProtocolRepository protocolRepository,
+        IExaminationRepository examinationRepository,
+        IFamilyHistoryRepository familyHistoryRepository,
+        IBackgroundRepository backgroundRepository) : IDataSeedContributor, ITransientDependency
     {
         public async Task SeedAsync(DataSeedContext context)
         {
@@ -61,6 +69,10 @@ namespace Pusula.Training.HealthCare
             await SeedAppointments();
             await SeedTestCategoryRecords();
             await SeedTestRecords();
+            await SeedProtocols();
+            await SeedExaminations();
+            await SeedFamilyHistory();
+            await SeedBackground();
         }
 
         private async Task SeedTitles()
@@ -662,6 +674,151 @@ namespace Pusula.Training.HealthCare
                     await doctorWorkingHourRepository.InsertAsync(doctorWorkingHour);
                 }
             }
+        }
+
+        private async Task SeedProtocols()
+        {
+            var departments = await departmentRepository.GetListAsync();
+            var patients = await patientRepository.GetListAsync();
+
+            var protocol1 = new Protocol(
+                id: Guid.NewGuid(),
+                patientId: patients[0].Id,
+                departmentId: departments[0].Id,
+                type: "aaa",
+                startTime: DateTime.Now,
+                endTime: "endd");
+            
+            var protocol2 = new Protocol(
+                id: Guid.NewGuid(),
+                patientId: patients[1].Id,
+                departmentId: departments[1].Id,
+                type: "bbb",
+                startTime: DateTime.Now,
+                endTime: "endd");
+            
+            var protocol3 = new Protocol(
+                id: Guid.NewGuid(),
+                patientId: patients[2].Id,
+                departmentId: departments[2].Id,
+                type: "cccc",
+                startTime: DateTime.Now,
+                endTime: "endd");
+            
+            await protocolRepository.InsertAsync(protocol1, true);
+            await protocolRepository.InsertAsync(protocol2, true);
+            await protocolRepository.InsertAsync(protocol3, true);
+        }
+
+        private async Task SeedExaminations()
+        {
+            if (await protocolRepository.GetCountAsync() == 0)
+                return;
+            
+            var protocols = await protocolRepository.GetListAsync();
+            
+            var examination1 = new Examination(
+                id: Guid.NewGuid(),
+                protocolId: protocols[0].Id,
+                date: DateTime.Now,
+                complaint: "complaint1",
+                startDate: DateTime.Now,
+                story: "story1");
+            
+            var examination2 = new Examination(
+                id: Guid.NewGuid(),
+                protocolId: protocols[1].Id,
+                date: DateTime.Now,
+                complaint: "complaint2",
+                startDate: DateTime.Now,
+                story: "story2");
+            
+            var examination3 = new Examination(
+                id: Guid.NewGuid(),
+                protocolId: protocols[2].Id,
+                date: DateTime.Now,
+                complaint: "complaint3",
+                startDate: DateTime.Now,
+                story: "story3");
+            
+            await examinationRepository.InsertAsync(examination1, true);
+            await examinationRepository.InsertAsync(examination2, true);
+            await examinationRepository.InsertAsync(examination3, true);
+        }
+        private async Task SeedFamilyHistory()
+        {
+            if (await examinationRepository.GetCountAsync() == 0)
+                return;
+            
+            var examinations = await examinationRepository.GetListAsync();
+            
+            var familyHistory1 = new FamilyHistory(
+                id: Guid.NewGuid(),
+                examinationId: examinations[0].Id,
+                areParentsRelated: false,
+                motherDisease: "Flu",
+                fatherDisease: "Diabetes",
+                sisterDisease: null,
+                brotherDisease: null
+            );
+            
+            var familyHistory2 = new FamilyHistory(
+                id: Guid.NewGuid(),
+                examinationId: examinations[1].Id,
+                areParentsRelated: false,
+                motherDisease: null,
+                fatherDisease: "Guatr",
+                sisterDisease: null,
+                brotherDisease: null
+            );
+            var familyHistory3 = new FamilyHistory(
+                id: Guid.NewGuid(),
+                examinationId: examinations[2].Id,
+                areParentsRelated: false,
+                motherDisease: null,
+                fatherDisease: null,
+                sisterDisease: null,
+                brotherDisease: null
+            );
+            
+            await familyHistoryRepository.InsertAsync(familyHistory1, true);
+            await familyHistoryRepository.InsertAsync(familyHistory2, true);
+            await familyHistoryRepository.InsertAsync(familyHistory3, true);
+        }
+        private async Task SeedBackground()
+        {
+            if (await examinationRepository.GetCountAsync() == 0)
+                return;
+            
+            var examinations = await examinationRepository.GetListAsync();
+            
+            var background1 = new Background(
+                id: Guid.NewGuid(),
+                examinationId: examinations[0].Id,
+                allergies: "allergy1",
+                medications: "medication1",
+                habits: "habit1"
+            );
+            
+            var background2 = new Background(
+                id: Guid.NewGuid(),
+                examinationId: examinations[1].Id,
+                allergies: "allergy2",
+                medications: "medication2",
+                habits: "habit2"
+            );
+            
+            var background3 = new Background(
+                id: Guid.NewGuid(),
+                examinationId: examinations[2].Id,
+                allergies: "allergy2",
+                medications: "medication2",
+                habits: "habit2"
+            );
+            
+            await backgroundRepository.InsertAsync(background1, true);
+            await backgroundRepository.InsertAsync(background2, true);
+            await backgroundRepository.InsertAsync(background3, true);
         }
     }
 }

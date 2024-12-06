@@ -42,7 +42,9 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), filterText, dateMin, dateMax, complaint, story, protocolId);
+        var query = ApplyFilter((await GetQueryableAsync()).Include(e => e.Background)
+            .Include(e => e.FamilyHistory)
+            .Include(e => e.Protocol), filterText, dateMin, dateMax, complaint, story, protocolId);
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 

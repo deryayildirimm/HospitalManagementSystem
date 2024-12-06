@@ -440,13 +440,15 @@ public class HealthCareDbContext :
                 b.Property(x => x.StartDate).HasColumnName(nameof(Examination.StartDate));
                 b.Property(x => x.Story).HasColumnName(nameof(Examination.Story))
                     .HasMaxLength(ExaminationConsts.StoryMaxLength);
-                b.HasOne(x => x.Background)
-                    .WithOne(x => x.Examination)
-                    .HasForeignKey<Background>(x => x.ExaminationId)
+                b.HasOne(d => d.Background)
+                    .WithOne(d => d.Examination)
+                    .IsRequired()
+                    .HasForeignKey<Background>(d => d.ExaminationId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(x => x.FamilyHistory)
-                    .WithOne(x => x.Examination)
-                    .HasForeignKey<FamilyHistory>(x => x.ExaminationId)
+                b.HasOne(d => d.FamilyHistory)
+                    .WithOne(d => d.Examination)
+                    .IsRequired()
+                    .HasForeignKey<FamilyHistory>(d => d.ExaminationId)
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(d => d.Protocol)
                     .WithOne()
@@ -484,11 +486,6 @@ public class HealthCareDbContext :
                 b.Property(x => x.BrotherDisease).HasColumnName(nameof(FamilyHistory.BrotherDisease))
                     .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
                 b.Property(x => x.AreParentsRelated).IsRequired();
-                b.HasOne(x => x.Examination)
-                    .WithOne(x => x.FamilyHistory)
-                    .HasForeignKey<FamilyHistory>(x => x.ExaminationId)
-                    .OnDelete(DeleteBehavior.NoAction)
-                    .IsRequired();
             });
 
             builder.Entity<Background>(b =>
@@ -501,11 +498,6 @@ public class HealthCareDbContext :
                     .HasMaxLength(BackgroundConsts.MedicationsMaxLength);
                 b.Property(x => x.Habits).HasColumnName(nameof(Background.Habits))
                     .HasMaxLength(BackgroundConsts.HabitsMaxLength);
-                b.HasOne(x => x.Examination)
-                    .WithOne(x => x.Background)
-                    .HasForeignKey<Background>(x => x.ExaminationId)
-                    .OnDelete(DeleteBehavior.NoAction)
-                    .IsRequired();
             });
         }
     }

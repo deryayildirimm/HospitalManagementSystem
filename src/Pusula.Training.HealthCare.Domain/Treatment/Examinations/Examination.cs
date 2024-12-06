@@ -16,7 +16,7 @@ public class Examination : FullAuditedAggregateRoot<Guid>
     public string? Story { get; protected set; }
     public Background? Background { get; protected set; }
     public FamilyHistory? FamilyHistory { get; protected set; }
-    public ICollection<ExaminationIcd>? ExaminationIcd { get; protected set; }
+    public ICollection<ExaminationIcd> ExaminationIcd { get; protected set; }
     public Guid ProtocolId { get; protected set; }
     public Protocol Protocol { get; protected set; }
 
@@ -24,10 +24,10 @@ public class Examination : FullAuditedAggregateRoot<Guid>
     {
         Date = DateTime.Now;
         Complaint = string.Empty;
+        ExaminationIcd = [];
     }
 
-    public Examination(Guid id, Guid protocolId, DateTime date, string complaint, DateTime? startDate, string? story, 
-        ICollection<ExaminationIcd>? examinationIcd)
+    public Examination(Guid id, Guid protocolId, DateTime date, string complaint, DateTime? startDate, string? story)
     {
         Id = id;
         SetProtocolId(protocolId);
@@ -35,7 +35,6 @@ public class Examination : FullAuditedAggregateRoot<Guid>
         SetComplaint(complaint);
         SetStartDate(startDate);
         SetStory(story);
-        SetExaminationIcd(examinationIcd);
     }
 
     public void SetDate(DateTime date) => Date = date;

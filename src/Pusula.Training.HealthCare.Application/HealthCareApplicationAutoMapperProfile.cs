@@ -16,6 +16,9 @@ using Pusula.Training.HealthCare.BloodTests;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Category;
 using Pusula.Training.HealthCare.BloodTests.Tests;
+using Pusula.Training.HealthCare.Treatment.Examinations;
+using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
+using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
 using Pusula.Training.HealthCare.Treatment.Icds;
 
 namespace Pusula.Training.HealthCare;
@@ -87,7 +90,21 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<IcdDto, IcdExcelDto>();
         CreateMap<IcdDto, IcdUpdateDto>();
         CreateMap<Icd, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
+        
+        CreateMap<FamilyHistory, FamilyHistoryDto>();
+        CreateMap<FamilyHistoryDto, FamilyHistoryUpdateDto>();
+        CreateMap<FamilyHistory, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
 
+        CreateMap<Background, BackgroundDto>();
+        CreateMap<BackgroundDto, BackgroundUpdateDto>();
+        CreateMap<Background, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
+
+        CreateMap<Examination, ExaminationDto>();
+        CreateMap<ExaminationDto, ExaminationUpdateDto>();
+        CreateMap<Examination, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
+
+        CreateMap<ExaminationIcd, ExaminationIcdDto>();
+        
         CreateMap<Appointment, AppointmentDto>();
         CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();
         

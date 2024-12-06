@@ -44,7 +44,8 @@ public class EfCoreFamilyHistoryRepository(IDbContextProvider<HealthCareDbContex
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), filterText, motherDisease, fatherDisease, sisterDisease, brotherDisease, areParentsRelated, examinationId);
+        var query = ApplyFilter((await GetQueryableAsync()).Include(e => e.Examination), 
+            filterText, motherDisease, fatherDisease, sisterDisease, brotherDisease, areParentsRelated, examinationId);
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 

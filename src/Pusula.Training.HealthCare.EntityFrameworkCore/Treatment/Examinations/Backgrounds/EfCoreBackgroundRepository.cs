@@ -55,7 +55,8 @@ public class EfCoreBackgroundRepository(IDbContextProvider<HealthCareDbContext> 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetDbSetAsync()), filterText, allergies, medications, habits, examinationId);
+        var query = ApplyFilter((await GetDbSetAsync()).Include(e => e.Examination),
+            filterText, allergies, medications, habits, examinationId);
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
 
