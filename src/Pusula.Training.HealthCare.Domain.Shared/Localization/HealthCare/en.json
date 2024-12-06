@@ -182,8 +182,21 @@
     "ChooseBloodTests": "Choose Blood Tests",
     "MyPatients": "My Patients",
     "BloodTests": "Blood Tests",
+    "NewIcd": "New Icd",
+    "CodeNumber": "Code Number",
+    "EnterCodeNumber": "Enter Code Number",
+    "EnterDetail": "Enter Detail",
     "Menu:BloodTests": "Blood Tests",
     "Menu:MyPatients": "My Patients",
-    "IdentityNumber/PassportNumber": "Id/Passport Number"
+    "Menu:Treatment":  "Treatment",
+    "Menu:Definitions":  "Definitions",
+    "Menu:Icds":  "Icds",
+    "Menu:Operations":  "Operations",
+    "Menu:Reports":  "Reports",
+    "Menu:IcdReport":  "IcdReport",
+    "Permission:ProtocolTypes" : "Protocol Types",
+    "InvalidDateRange" : "The start date cannot be greater than the end date.",
+    "Healthcare error occured!!" : "Healthcare error occured!!",
+    "The provided download token is invalid." : "The provided download token is invalid."
   }
 }

@@ -255,7 +255,8 @@
                 <!-- Detail Page Column -->
                 <DataGridColumn TItem="PatientDto">
                     <DisplayTemplate>
-                        <Button Color="Color.Primary" @onclick="() => NavigateToDetail(context)">
+                        <Button Color="Color.Primary" @onclick="() => NavigateToDetail(context)"
+                                Disabled="context.IsDeleted">
                             <Icon Name="@IconName.ExternalLinkSquareAlt" />
                         </Button>
                     </DisplayTemplate>
@@ -273,6 +274,7 @@
                 </DataGridColumn>
 
                 <!-- Revert Button Column -->
+                <!--
                 <DataGridColumn TItem="PatientDto">
                     <DisplayTemplate>
                         <Button Color="Color.Secondary" Clicked="  () => RevertPatientAsync (context)" Disabled="!context.IsDeleted">
@@ -280,6 +282,7 @@
                         </Button>
                     </DisplayTemplate>
                 </DataGridColumn>
+                -->
 
             </DataGridColumns>
 

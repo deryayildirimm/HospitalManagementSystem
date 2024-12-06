@@ -53,12 +53,14 @@
 
         <div style="display: @(!ShowAdvancedFilters ? "none" : "block")">
             <Row>
+            <!--
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["Type"]</FieldLabel>
                         <TextEdit Text="@Filter.Type" TextChanged="@OnTypeChangedAsync"/>
                     </Field>
                 </Column>
+                -->
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["MinStartTime"]</FieldLabel>
@@ -79,12 +81,14 @@
                                     Placeholder="@string.Empty"/>
                     </Field>
                 </Column>
+            <!--
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["EndTime"]</FieldLabel>
-                        <TextEdit Text="@Filter.EndTime" TextChanged="@OnEndTimeChangedAsync"/>
+                        <TextEdit Text="@Filter." TextChanged="@OnEndTimeChangedAsync"/>
                     </Field>
                 </Column>
+                -->
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["Patient"]</FieldLabel>
@@ -284,7 +288,7 @@
                              Model="@NewProtocol"
                              ValidateOnLoad="false">
 
-
+<!--
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["Type"] *</FieldLabel>
@@ -296,7 +300,7 @@
                         </Field>
                     </Validation>
 
-
+-->
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["StartTime"]</FieldLabel>
@@ -308,7 +312,7 @@
                         </Field>
                     </Validation>
 
-
+<!--
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["EndTime"]</FieldLabel>
@@ -319,7 +323,7 @@
                             </TextEdit>
                         </Field>
                     </Validation>
-
+-->
 
                     <Field>
                         <FieldLabel>@L["Patient"] *</FieldLabel>
@@ -379,7 +383,7 @@
                              Model="@EditingProtocol"
                              ValidateOnLoad="false">
 
-
+<!--
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["Type"] *</FieldLabel>
@@ -391,7 +395,7 @@
                         </Field>
                     </Validation>
 
-
+-->
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["StartTime"]</FieldLabel>
@@ -403,7 +407,7 @@
                         </Field>
                     </Validation>
 
-
+<!--
                     <Validation MessageLocalizer="@LH.Localize">
                         <Field>
                             <FieldLabel>@L["EndTime"]</FieldLabel>
@@ -414,7 +418,7 @@
                             </TextEdit>
                         </Field>
                     </Validation>
-
+-->
 
                     <Field>
                         <FieldLabel>@L["Patient"] *</FieldLabel>

@@ -13,8 +13,8 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Pusula.Training.HealthCare.Migrations
 {
     [DbContext(typeof(HealthCareDbContext))]
-    [Migration("20241126103344_Initial")]
-    partial class Initial
+    [Migration("20241201182911_modify_icd")]
+    partial class modify_icd
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1283,6 +1283,70 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("AppTitles", (string)null);
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.Treatment.Icds.Icd", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CodeNumber")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("CodeNumber");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<string>("Detail")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("Detail");
+
+                    b.Property<string>("ExtraProperties")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("LastModifierId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AppIcds", (string)null);
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>
@@ -3189,50 +3253,64 @@ namespace Pusula.Training.HealthCare.Migrations
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Doctors.Doctor", b =>
                 {
-                    b.HasOne("Pusula.Training.HealthCare.Cities.City", null)
+                    b.HasOne("Pusula.Training.HealthCare.Cities.City", "City")
                         .WithMany()
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Pusula.Training.HealthCare.Departments.Department", null)
+                    b.HasOne("Pusula.Training.HealthCare.Departments.Department", "Department")
                         .WithMany()
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Pusula.Training.HealthCare.Districts.District", null)
+                    b.HasOne("Pusula.Training.HealthCare.Districts.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Pusula.Training.HealthCare.Titles.Title", null)
+                    b.HasOne("Pusula.Training.HealthCare.Titles.Title", "Title")
                         .WithMany()
                         .HasForeignKey("TitleId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("City");
+
+                    b.Navigation("Department");
+
+                    b.Navigation("District");
+
+                    b.Navigation("Title");
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.MedicalPersonnel.MedicalStaff", b =>
                 {
-                    b.HasOne("Pusula.Training.HealthCare.Cities.City", null)
+                    b.HasOne("Pusula.Training.HealthCare.Cities.City", "City")
                         .WithMany()
                         .HasForeignKey("CityId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Pusula.Training.HealthCare.Departments.Department", null)
+                    b.HasOne("Pusula.Training.HealthCare.Departments.Department", "Department")
                         .WithMany()
                         .HasForeignKey("DepartmentId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Pusula.Training.HealthCare.Districts.District", null)
+                    b.HasOne("Pusula.Training.HealthCare.Districts.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("City");
+
+                    b.Navigation("Department");
+
+                    b.Navigation("District");
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Protocols.Protocol", b =>

@@ -7,7 +7,7 @@ namespace Pusula.Training.HealthCare.Protocols
 {
     public class ProtocolDto : FullAuditedEntityDto<Guid>, IHasConcurrencyStamp
     {
-        public string Type { get; set; } = null!;
+        public string? Notes { get; set; } 
         public DateTime StartTime { get; set; }
         public string? EndTime { get; set; }
         public Guid PatientId { get; set; }

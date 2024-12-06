@@ -10,11 +10,11 @@ public class PatientUpdateDto : IHasConcurrencyStamp
 {
 
     [Required]
-    [StringLength(PatientConsts.NameMaxLength)]
+    [StringLength(PatientConsts.NameMaxLength, MinimumLength = PatientConsts.NameMinLength)]
     public string FirstName { get; set; } = null!;
 
     [Required]
-    [StringLength(PatientConsts.LastNameMaxLength)]
+    [StringLength(PatientConsts.LastNameMaxLength, MinimumLength = PatientConsts.LastNameMinLength)]
     public string LastName { get; set; } = null!;
 
     [StringLength(PatientConsts.NameMaxLength)]

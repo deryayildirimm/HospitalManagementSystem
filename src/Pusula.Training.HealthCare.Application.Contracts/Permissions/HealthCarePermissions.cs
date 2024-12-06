@@ -29,6 +29,14 @@ public static class HealthCarePermissions
         public const string Create = Default + ".Create";
         public const string Delete = Default + ".Delete";
     }
+    
+    public static class ProtocolTypes
+    {
+        public const string Default = GroupName + ".ProtocolTypes";
+        public const string Edit = Default + ".Edit";
+        public const string Create = Default + ".Create";
+        public const string Delete = Default + ".Delete";
+    }
 
     public static class Departments
     {
@@ -121,6 +129,14 @@ public static class HealthCarePermissions
     public static class BloodTestResults
     {
         public const string Default = GroupName + ".BloodTestResults";
+        public const string Edit = Default + ".Edit";
+        public const string Create = Default + ".Create";
+        public const string Delete = Default + ".Delete";
+    }
+
+    public static class Icds
+    {
+        public const string Default = GroupName + ".Icds";
         public const string Edit = Default + ".Edit";
         public const string Create = Default + ".Create";
         public const string Delete = Default + ".Delete";

@@ -16,6 +16,8 @@ using Pusula.Training.HealthCare.BloodTests;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Category;
 using Pusula.Training.HealthCare.BloodTests.Tests;
+using Pusula.Training.HealthCare.Treatment.Icds;
+using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Insurances;
 
 namespace Pusula.Training.HealthCare;
@@ -38,7 +40,12 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Protocol, ProtocolExcelDto>();
         CreateMap<ProtocolDto, ProtocolUpdateDto>();
         CreateMap<ProtocolWithNavigationProperties, ProtocolWithNavigationPropertiesDto>();
-
+        
+        CreateMap<ProtocolType, ProtocolTypeDto>();
+        CreateMap<ProtocolTypeDto, ProtocolTypeUpdateDto>();
+        CreateMap<ProtocolType, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
+        
         CreateMap<Department, DepartmentDto>();
         CreateMap<Department, DepartmentExcelDto>();
         CreateMap<DepartmentDto, DepartmentUpdateDto>();
@@ -60,6 +67,8 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<DoctorDto, DoctorUpdateDto>();
         CreateMap<DoctorWithNavigationPropertiesDto, DoctorUpdateDto>();
         CreateMap<DoctorWithNavigationProperties, DoctorWithNavigationPropertiesDto>();
+        CreateMap<Doctor, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.FirstName));
         
         CreateMap<DoctorLeave, DoctorLeaveDto>();
         CreateMap<DoctorLeave, DoctorLeaveExcelDto>();
@@ -82,6 +91,12 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<District, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
         
+        CreateMap<Icd, IcdDto>();
+        CreateMap<Icd, IcdExcelDto>();
+        CreateMap<IcdDto, IcdExcelDto>();
+        CreateMap<IcdDto, IcdUpdateDto>();
+        CreateMap<Icd, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
+
         CreateMap<Appointment, AppointmentDto>();
         CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();
         
@@ -102,7 +117,6 @@ public class HealthCareApplicationAutoMapperProfile : Profile
 
         CreateMap<BloodTestResult, BloodTestResultDto>();
         CreateMap<BloodTestResultWithNavigationProperties, BloodTestResultWithNavigationPropertiesDto>();
-
 
         CreateMap<Test, TestDto>();
         CreateMap<TestWithNavigationProperties, TestWithNavigationPropertiesDto>();

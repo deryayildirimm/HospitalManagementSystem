@@ -10,12 +10,15 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
 {
     Task DeleteAllAsync(
         string? filterText = null,
-        string? type = null,
+        string? note = null,
         DateTime? startTimeMin = null,
         DateTime? startTimeMax = null,
-        string? endTime = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
         Guid? patientId = null,
         Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
         CancellationToken cancellationToken = default);
     Task<ProtocolWithNavigationProperties> GetWithNavigationPropertiesAsync(
         Guid id,
@@ -24,12 +27,15 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
 
     Task<List<ProtocolWithNavigationProperties>> GetListWithNavigationPropertiesAsync(
         string? filterText = null,
-        string? type = null,
+        string? note = null,
         DateTime? startTimeMin = null,
         DateTime? startTimeMax = null,
-        string? endTime = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
         Guid? patientId = null,
         Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
@@ -38,10 +44,11 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
 
     Task<List<Protocol>> GetListAsync(
                 string? filterText = null,
-                string? type = null,
+                string? note = null,
                 DateTime? startTimeMin = null,
                 DateTime? startTimeMax = null,
-                string? endTime = null,
+                DateTime? endTimeMin = null,
+                DateTime? endTimeMax = null,
                 string? sorting = null,
                 int maxResultCount = int.MaxValue,
                 int skipCount = 0,
@@ -50,11 +57,14 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
 
     Task<long> GetCountAsync(
         string? filterText = null,
-        string? type = null,
+        string? note = null,
         DateTime? startTimeMin = null,
         DateTime? startTimeMax = null,
-        string? endTime = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
         Guid? patientId = null,
         Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
         CancellationToken cancellationToken = default);
 }

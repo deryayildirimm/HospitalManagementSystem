@@ -6,7 +6,7 @@ using Volo.Abp.Domain.Services;
 
 namespace Pusula.Training.HealthCare.Patients;
 
-public class PatientManager(IPatientRepository patientRepository, IDataFilter _dataFilter) : DomainService, IPatientManager
+public class PatientManager(IPatientRepository patientRepository ) : DomainService
 {
     public virtual async Task<Patient> CreateAsync(int patientNumber, string firstName, string lastName, DateTime birthDate, EnumGender gender, string identityAndPassportNumber, 
         string? nationality = null, string? mobilePhoneNumber = null, EnumPatientTypes? patientType = null, string? mothersName = null, string? fathersName = null, 
@@ -34,9 +34,7 @@ public class PatientManager(IPatientRepository patientRepository, IDataFilter _d
         Check.NotNullOrWhiteSpace(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, PatientConsts.LastNameMinLength);
         Check.NotNull(identityAndPassportNumber, nameof(identityAndPassportNumber));
         Check.NotNull(isDeleted, nameof(isDeleted));
-        // silinmiş veriler uzerınde de işlem yapabilmek için eklendi
-        using (_dataFilter.Disable<ISoftDelete>())
-        {
+       
             var patient = await patientRepository.GetAsync(id);
 
             patient.SetFirstName(firstName);
@@ -58,6 +56,6 @@ public class PatientManager(IPatientRepository patientRepository, IDataFilter _d
             
             patient.SetConcurrencyStampIfNotNull(concurrencyStamp);
             return await patientRepository.UpdateAsync(patient);
-        }
+        
     }
 }

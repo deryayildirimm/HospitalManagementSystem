@@ -6,14 +6,16 @@ namespace Pusula.Training.HealthCare.Protocols
 {
     public class ProtocolUpdateDto : IHasConcurrencyStamp
     {
-        [Required]
-        [StringLength(ProtocolConsts.TypeMaxLength, MinimumLength = ProtocolConsts.TypeMinLength)]
-        public string Type { get; set; } = null!;
-        public DateTime StartTime { get; set; }
-        public string? EndTime { get; set; }
+       
+       
+        public string? Notes { get; set; } 
+        [Required] public DateTime StartTime { get; set; }
+        public DateTime? EndTime { get; set; }
         public Guid PatientId { get; set; }
         public Guid DepartmentId { get; set; }
-
+        public Guid ProtocolTypeId { get; set; }
+        
+        public Guid DoctorId { get; set; }
         public string ConcurrencyStamp { get; set; } = null!;
     }
 }

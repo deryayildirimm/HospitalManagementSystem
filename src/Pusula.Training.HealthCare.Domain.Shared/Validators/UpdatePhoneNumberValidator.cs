@@ -7,7 +7,7 @@ namespace Pusula.Training.HealthCare.Validators;
 
 public class UpdatePhoneNumberValidator : ValidationAttribute
 {
-    private const string PhoneNumberPattern = @"^\+\d{8,15}$";
+    private const string PhoneNumberPattern = @"^\+\d{7,15}$";
 
     protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
     {

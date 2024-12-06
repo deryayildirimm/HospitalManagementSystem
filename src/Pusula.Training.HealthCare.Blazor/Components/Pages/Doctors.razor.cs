@@ -167,7 +167,7 @@ public partial class Doctors
         NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/patients/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&FirstName={HttpUtility.UrlEncode(Filter.FirstName)}&LastName={HttpUtility.UrlEncode(Filter.LastName)}&BirthDateMin={Filter.BirthDateMin?.ToString("O")}&BirthDateMax={Filter.BirthDateMax?.ToString("O")}&IdentityNumber={HttpUtility.UrlEncode(Filter.IdentityNumber)}&Email={HttpUtility.UrlEncode(Filter.Email)}&PhoneNumber={HttpUtility.UrlEncode(Filter.PhoneNumber)}&Gender={Filter.Gender}", forceLoad: true);
     }
 
-    private void EditModal(DoctorWithNavigationPropertiesDto doctor)
+    private void OpenEditModal(DoctorWithNavigationPropertiesDto doctor)
     {
         EditingDoctorId = doctor.Doctor.Id;
         EditingDoctor = new DoctorUpdateDto {
@@ -185,7 +185,7 @@ public partial class Doctors
             PhoneNumber = doctor.Doctor.PhoneNumber,
             StartDate = doctor.Doctor.StartDate
         };
-        IsVisibleEdit = !IsVisibleEdit;
+        IsVisibleEdit = true;
     }
 
     private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<DoctorWithNavigationPropertiesDto> e)
@@ -235,16 +235,6 @@ public partial class Doctors
         await GetGendersListAsync();
         NewDoctor = new DoctorCreateDto();
     }
-
-
-    private async Task OpenEditDoctorModalAsync(DoctorWithNavigationPropertiesDto input)
-    {
-        EditingDoctorId = input.Doctor.Id;
-        EditingDoctor = ObjectMapper.Map<DoctorWithNavigationPropertiesDto, DoctorUpdateDto>(input);
-        await GetGendersListAsync();
-        await EditDoctorModal.ShowAsync();
-    }
-    
     
     private async Task DeleteDoctorAsync(DoctorWithNavigationPropertiesDto input)
     {
@@ -262,7 +252,7 @@ public partial class Doctors
             NewDoctor.PhoneNumber = $"{PhoneNumber}";
             await DoctorsAppService.CreateAsync(NewDoctor);
             await GetDoctorsAsync();
-            CloseCreateDoctorModalAsync();
+            CloseCreateDoctorModal();
         }
         catch (Exception ex)
         {
@@ -277,7 +267,7 @@ public partial class Doctors
 
             await DoctorsAppService.UpdateAsync(EditingDoctor);
             await GetDoctorsAsync();
-            CloseEditDoctorModalAsync();
+            CloseEditDoctorModal();
         }
         catch (Exception ex)
         {
@@ -341,12 +331,12 @@ public partial class Doctors
         await GetDoctorsAsync();
     }
 
-    private void CloseCreateDoctorModalAsync()
+    private void CloseCreateDoctorModal()
     {
         IsVisibleCreate = false;
     }
 
-    private void CloseEditDoctorModalAsync()
+    private void CloseEditDoctorModal()
     {
         IsVisibleEdit = false;
     }

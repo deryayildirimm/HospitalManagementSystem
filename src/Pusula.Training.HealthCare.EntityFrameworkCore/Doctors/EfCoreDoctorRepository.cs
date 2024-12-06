@@ -52,10 +52,10 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
             .Select(doctor => new DoctorWithNavigationProperties
             {
                 Doctor = doctor,
-                City = dbContext.Set<City>().FirstOrDefault(c => c.Id == doctor.CityId)!,
-                District = dbContext.Set<District>().FirstOrDefault(c => c.Id == doctor.DistrictId)!,
-                Title = dbContext.Set<Title>().FirstOrDefault(c => c.Id == doctor.TitleId)!,
-                Department = dbContext.Set<Department>().FirstOrDefault(c => c.Id == doctor.DepartmentId)!
+                City = doctor.City,
+                District = doctor.District,
+                Title = doctor.Title,
+                Department = doctor.Department,
             })
             .FirstOrDefault()!;
     }
@@ -251,8 +251,8 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
                     .WhereIf(!string.IsNullOrWhiteSpace(email), e => e.Doctor.Email!.Contains(email!))
                     .WhereIf(!string.IsNullOrWhiteSpace(phoneNumber), e => e.Doctor.PhoneNumber!.Contains(phoneNumber!))
                     .WhereIf(yearOfExperienceMin.HasValue, e => e.Doctor.StartDate <= DateTime.Now.AddYears(-yearOfExperienceMin!.Value))
-                    .WhereIf(cityId.HasValue, e => e.City.Id == cityId)
-                    .WhereIf(districtId.HasValue, e => e.District.Id == districtId)
+                    .WhereIf(cityId.HasValue, e => e.Doctor.CityId == cityId)
+                    .WhereIf(districtId.HasValue, e => e.Doctor.DistrictId == districtId)
                     .WhereIf(titleId.HasValue, e => e.Title.Id == titleId)
                     .WhereIf(departmentId.HasValue, e => e.Department.Id == departmentId)
                     .WhereIf(departmentIds != null && departmentIds.Any(), e => departmentIds!.Contains(e.Doctor.DepartmentId));

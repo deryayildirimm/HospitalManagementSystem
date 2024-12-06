@@ -1,21 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using MiniExcelLibs;
-using Pusula.Training.HealthCare.Doctors;
-using Pusula.Training.HealthCare.Exceptions;
-using Pusula.Training.HealthCare.Patients;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.Permissions;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
-using Volo.Abp.Authorization;
 using Volo.Abp.Caching;
 using Volo.Abp.Content;
-using Volo.Abp.Data;
 using Volo.Abp.EventBus.Distributed;
 using DistributedCacheEntryOptions = Microsoft.Extensions.Caching.Distributed.DistributedCacheEntryOptions;
 
@@ -23,15 +17,15 @@ namespace Pusula.Training.HealthCare.DoctorLeaves;
 
 [RemoteService(IsEnabled = false)]
 [Authorize(HealthCarePermissions.DoctorLeaves.Default)]
-public class DoctorLeaveAppService(IDoctorLeaveRepository repo, DoctorLeaveManager manager,
+public class DoctorLeaveAppService(IDoctorLeaveRepository doctorLeaveRepository, DoctorLeaveManager doctorLeaveManager,
     IDistributedCache<DoctorLeaveDownloadTokenCacheItem, string> downloadTokenCache,
-    IDistributedEventBus distributedEventBus,
-    IDataFilter filter) : HealthCareAppService, IDoctorLeaveAppService
+    IDistributedEventBus distributedEventBus) : HealthCareAppService, IDoctorLeaveAppService
 {
        public virtual async Task<PagedResultDto<DoctorLeaveDto>> GetListAsync(GetDoctorLeaveInput input)
         {
-                var totalCount = await repo.GetCountAsync(input.FilterText, input.DoctorId, input.StartDateMin, input.StartDateMax, input.EndDateMin, input.EndDateMax, input.Reason);
-                var items = await repo.GetListAsync(input.FilterText, input.DoctorId, input.StartDateMin, input.StartDateMax, input.EndDateMin, input.EndDateMax, input.Reason, input.Sorting, input.MaxResultCount, input.SkipCount );
+            
+                var totalCount = await doctorLeaveRepository.GetCountAsync(input.FilterText, input.DoctorId, input.StartDateMin, input.StartDateMax, input.EndDateMin, input.EndDateMax, input.Reason);
+                var items = await doctorLeaveRepository.GetListAsync(input.FilterText, input.DoctorId, input.StartDateMin, input.StartDateMax, input.EndDateMin, input.EndDateMax, input.Reason, input.Sorting, input.MaxResultCount, input.SkipCount );
                 
                 return new PagedResultDto<DoctorLeaveDto>
                 {
@@ -47,7 +41,7 @@ public class DoctorLeaveAppService(IDoctorLeaveRepository repo, DoctorLeaveManag
                 await distributedEventBus.PublishAsync(new DoctorLeaveViewedEto() { Id = id, ViewedAt = Clock.Now },
                     onUnitOfWorkComplete: false);
 
-                var leave = await repo.GetAsync(id);
+                var leave = await doctorLeaveRepository.GetAsync(id);
                 return ObjectMapper.Map<DoctorLeave, DoctorLeaveDto>(leave);
             
         }
@@ -56,14 +50,14 @@ public class DoctorLeaveAppService(IDoctorLeaveRepository repo, DoctorLeaveManag
         [Authorize(HealthCarePermissions.DoctorLeaves.Delete)]
         public virtual async Task DeleteAsync(Guid id)
         {
-            await repo.DeleteAsync(id);
+            await doctorLeaveRepository.DeleteAsync(id);
         }
 
         [Authorize(HealthCarePermissions.DoctorLeaves.Create)]
         public virtual async Task<DoctorLeaveDto> CreateAsync(DoctorLeaveCreateDto input)
         {
             
-                var leave = await manager.CreateAsync(input.DoctorId, input.StartDate, input.EndDate, input.Reason);
+                var leave = await doctorLeaveManager.CreateAsync(input.DoctorId, input.StartDate, input.EndDate, input.Reason);
                 return ObjectMapper.Map<DoctorLeave, DoctorLeaveDto>(leave);
          
         }
@@ -72,7 +66,7 @@ public class DoctorLeaveAppService(IDoctorLeaveRepository repo, DoctorLeaveManag
         public virtual async Task<DoctorLeaveDto> UpdateAsync(Guid id, DoctorLeaveUpdateDto input)
         {
             
-                var leave = await manager.UpdateAsync(id, input.DoctorId, input.StartDate, input.EndDate, input.Reason, input.ConcurrencyStamp);
+                var leave = await doctorLeaveManager.UpdateAsync(id, input.DoctorId, input.StartDate, input.EndDate, input.Reason, input.ConcurrencyStamp);
                    
                 return ObjectMapper.Map<DoctorLeave, DoctorLeaveDto>(leave);
           
@@ -82,12 +76,12 @@ public class DoctorLeaveAppService(IDoctorLeaveRepository repo, DoctorLeaveManag
         public virtual async Task<IRemoteStreamContent> GetListAsExcelFileAsync(DoctorLeaveExcelDownloadDto input)
         {
             var downloadToken = await downloadTokenCache.GetAsync(input.DownloadToken);
-            if (downloadToken == null || input.DownloadToken != downloadToken.Token)
-            {
-                throw new AbpAuthorizationException("Invalid download token: " + input.DownloadToken);
-            }
-
-            var items = await repo.GetListAsync(input.FilterText, input.DoctorId, input.StartDateMin, input.StartDateMax, input.EndDateMin, input.EndDateMax, input.Reason);
+            
+            HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidDownloadToken_MESSAGE, 
+                HealthCareDomainErrorCodes.InvalidDownloadToken_CODE, 
+                downloadToken == null || input.DownloadToken != downloadToken.Token);
+            
+            var items = await doctorLeaveRepository.GetListAsync(input.FilterText, input.DoctorId, input.StartDateMin, input.StartDateMax, input.EndDateMin, input.EndDateMax, input.Reason);
 
             var memoryStream = new MemoryStream();
             await memoryStream.SaveAsAsync(ObjectMapper.Map<List<DoctorLeave>, List<DoctorLeaveExcelDto>>(items));
@@ -99,13 +93,13 @@ public class DoctorLeaveAppService(IDoctorLeaveRepository repo, DoctorLeaveManag
         [Authorize(HealthCarePermissions.DoctorLeaves.Delete)]
         public virtual async Task DeleteByIdsAsync(List<Guid> leaveIds)
         {
-            await repo.DeleteManyAsync(leaveIds);
+            await doctorLeaveRepository.DeleteManyAsync(leaveIds);
         }
 
         [Authorize(HealthCarePermissions.DoctorLeaves.Delete)]
         public virtual async Task DeleteAllAsync(GetDoctorLeaveInput input)
         {
-            await repo.DeleteAllAsync(input.FilterText, input.DoctorId, input.StartDateMin, input.StartDateMax, input.EndDateMin, input.EndDateMax,
+            await doctorLeaveRepository.DeleteAllAsync(input.FilterText, input.DoctorId, input.StartDateMin, input.StartDateMax, input.EndDateMin, input.EndDateMax,
                 input.Reason);
         }
 

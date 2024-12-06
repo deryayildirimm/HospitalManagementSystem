@@ -120,6 +120,9 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         EnumGender? gender = null, 
         bool? isDeleted = null)
     {
+        // sadece isDeleted true ise silinen verileri de göster 
+        query = isDeleted == true ? query.IgnoreQueryFilters() : query;
+        
         return query
             .WhereIf(!string.IsNullOrWhiteSpace(filterText),
                 e => e.FirstName!.Contains(filterText!) || e.LastName!.Contains(filterText!) ||
@@ -135,7 +138,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
             .WhereIf(patientType.HasValue, e => e.PatientType == patientType)
             .WhereIf(discountGroup.HasValue, e => e.DiscountGroup != null && e.DiscountGroup == discountGroup)
             .WhereIf(gender.HasValue, e => e.Gender == gender)
-            .WhereIf(isDeleted == true, e => e.IsDeleted)// Sadece isDeleted true ise filtre uygula
-            .WhereIf(patientNumber.HasValue, e => e.PatientNumber == patientNumber); 
+            .WhereIf(isDeleted == true, e => e.IsDeleted) // Sadece isDeleted true ise filtre uygula
+            .WhereIf(patientNumber.HasValue, e => e.PatientNumber == patientNumber);
     }
 }

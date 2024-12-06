@@ -243,6 +243,17 @@
                     </Template>
                 </GridColumn>
 
+                <GridColumn HeaderText="@L["Location"]">
+                    <Template>
+                        @{
+                        var doctor = (context as DoctorWithNavigationPropertiesDto);
+                        var city = doctor?.Doctor.City?.Name ?? "";
+                        var district = doctor?.District?.Name ?? "";
+                        }
+                        @city - @district
+                    </Template>
+                </GridColumn>
+
                 <GridColumn HeaderText="@L["Department"]">
                     <Template>
                         @{
@@ -253,7 +264,7 @@
                     </Template>
                 </GridColumn>
 
-                <GridColumn HeaderText="@L["Email"]" width="200px">
+                <GridColumn HeaderText="@L["Email"]">
                     <Template>
                         @{
                         var doctor = (context as DoctorWithNavigationPropertiesDto);
@@ -295,7 +306,7 @@
                         var doctor = (context as DoctorWithNavigationPropertiesDto);
                         }
                         <div class="d-flex justify-content-around">
-                            <SfButton CssClass="e-primary" OnClick="@(args => EditModal(doctor))">
+                            <SfButton CssClass="e-primary" OnClick="@(args => OpenEditModal(doctor))">
                                 <span class="e-icons e-edit white-icon"></span>
                             </SfButton>
                             <SfButton CssClass="e-danger" OnClick="@(args => DeleteDoctorAsync(doctor))">
@@ -312,7 +323,8 @@
 
 @* ************************* CREATE MODAL ************************* *@
 <SfDialog Width="800px" IsModal="true" Header="@L["CreateDoctor"]"
-          ShowCloseIcon="true" @bind-Visible="@IsVisibleCreate" Close="CloseCreateDoctorModalAsync">
+          ShowCloseIcon="true" @bind-Visible="@IsVisibleCreate">
+    <DialogEvents Closed="@CloseCreateDoctorModal" ></DialogEvents>
     <DialogTemplates>
         <Header>
             <div style="display: inline-flex; align-items: center;">
@@ -421,7 +433,7 @@
     </EditForm>
 
     <DialogFooter>
-        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseCreateDoctorModalAsync" />
+        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseCreateDoctorModal" />
         <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="CreateDoctorAsync" />
     </DialogFooter>
 </SfDialog>
@@ -429,7 +441,8 @@
 @* ************************* EDIT MODAL ************************* *@
 
 <SfDialog Width="800px" IsModal="true" Header="@L["UpdateDoctor"]"
-          ShowCloseIcon="true" Visible="@IsVisibleEdit" Close="CloseEditDoctorModalAsync">
+          ShowCloseIcon="true" Visible="@IsVisibleEdit">
+    <DialogEvents Closed="@CloseEditDoctorModal" ></DialogEvents>
     <DialogTemplates>
         <Header>
             <div style="display: inline-flex; align-items: center;">
@@ -536,7 +549,7 @@
     </EditForm>
 
     <DialogFooter>
-        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseEditDoctorModalAsync" />
+        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseEditDoctorModal" />
         <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="UpdateDoctorAsync" />
     </DialogFooter>
 </SfDialog>
