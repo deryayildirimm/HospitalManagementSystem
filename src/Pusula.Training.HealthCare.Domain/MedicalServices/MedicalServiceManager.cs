@@ -62,13 +62,13 @@ public class MedicalServiceManager(
 
         var service = await medicalServiceRepository.FirstOrDefaultAsync(x => x.Id == id);
 
-        HealthcareGlobalException.ThrowIf("MedicalService not found.",HealthCareDomainErrorCodes.MedicalServiceNotFound, service is null);
-        
-        service.SetName(name);
-        service.SetCost(cost);
-        service.SetDuration(duration);
-        service.SetServiceCreatedAt(serviceCreatedAt);
-        service.SetConcurrencyStampIfNotNull(concurrencyStamp);
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.MedicalServiceNotFound, service is null);
+
+        service!.SetName(name);
+        service!.SetCost(cost);
+        service!.SetDuration(duration);
+        service!.SetServiceCreatedAt(serviceCreatedAt);
+        service!.SetConcurrencyStampIfNotNull(concurrencyStamp);
 
         await SetDepartmentsAsync(service: service, departmentNames: departmentNames);
         return await medicalServiceRepository.UpdateAsync(service);
@@ -84,8 +84,9 @@ public class MedicalServiceManager(
         var departmentIds = (await departmentRepository.GetListByNamesAsync(departmentNames.ToArray()))
             .Select(x => x.Id)
             .ToList();
-        
-        HealthcareGlobalException.ThrowIf("Departments not found.",HealthCareDomainErrorCodes.DepartmentsNotFound, departmentIds.Count == 0);
+
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DepartmentNotFound,
+            departmentIds.Count == 0);
 
         foreach (var id in departmentIds)
         {

@@ -1,6 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Appointments;
-using Pusula.Training.HealthCare.AppointmentTypes;
 using Syncfusion.Blazor;
 using Syncfusion.Blazor.Data;
 
@@ -12,20 +13,9 @@ public class AppointmentAdaptor(IAppointmentAppService appointmentAppService) : 
         DataManagerRequest dataManagerRequest,
         string? additionalParam = null)
     {
-        var filter = new GetAppointmentsInput()
-        {
-            MaxResultCount = dataManagerRequest.Take,
-            SkipCount = dataManagerRequest.Skip,
-            Sorting = dataManagerRequest.Sorted is { Count: > 0 }
-                ? dataManagerRequest.Sorted[0].Name + " " + dataManagerRequest.Sorted[0].Direction
-                : "AppointmentDate ASC"
-        };
+        var filter = dataManagerRequest?.Params?["Filter"] as GetAppointmentsInput
+                     ?? new GetAppointmentsInput { MaxResultCount = dataManagerRequest!.Take };
 
-        if (dataManagerRequest.Search != null && dataManagerRequest.Search.Count > 0)
-        {
-           // filter.FilterText = dataManagerRequest.Search[0].Key;
-        }
-        
         var result = await appointmentAppService.GetListAsync(filter);
 
         var dataResult = new DataResult()

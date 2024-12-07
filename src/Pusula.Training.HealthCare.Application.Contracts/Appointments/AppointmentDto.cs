@@ -14,14 +14,11 @@ public class AppointmentDto : FullAuditedEntityDto<Guid>
     public PatientDto Patient { get; set; }
     public MedicalServiceDto MedicalService { get; set; }
     public AppointmentTypeDto AppointmentType { get; set; }
-
     public DateTime AppointmentDate { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
-
     public EnumAppointmentStatus Status { get; set; }
     public string? Notes { get; set; }
-
     public bool ReminderSent { get; set; }
     public double Amount { get; set; }
     

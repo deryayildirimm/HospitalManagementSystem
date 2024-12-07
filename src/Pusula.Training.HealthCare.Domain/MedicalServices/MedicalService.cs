@@ -31,19 +31,13 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
 
     public MedicalService(Guid id, string name, double cost, int duration, DateTime serviceCreatedAt)
     {
-        SetId(id);
+        Id = id;
         SetName(name);
         SetCost(cost);
         SetServiceCreatedAt(serviceCreatedAt);
         SetDuration(duration);
     }
-
-    private void SetId(Guid id)
-    {
-        Check.NotNull(id, nameof(id));
-        Id = id;
-    }
-
+    
     public void SetName(string name)
     {
         Check.NotNullOrWhiteSpace(name, nameof(name));

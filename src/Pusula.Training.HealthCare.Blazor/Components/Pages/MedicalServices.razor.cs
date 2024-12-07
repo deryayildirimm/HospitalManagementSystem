@@ -313,7 +313,7 @@ public partial class MedicalServices
     private async Task GetDepartmentCollectionLookupAsync(string? newValue = null)
     {
         DepartmentsCollection =
-            (await MedicalServicesAppService.GetDepartmentLookupAsync(new LookupRequestDto { Filter = newValue }))
+            (await LookupAppService.GetDepartmentLookupAsync(new LookupRequestDto { Filter = newValue }))
             .Items;
 
         DepartmentsCreateSelectionItems = DepartmentsCollection.Select(department => new SelectionItem

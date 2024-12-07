@@ -290,7 +290,7 @@ public partial class Appointments
         {
             IsServiceListLoading = true;
             AppointmentTypesCollection =
-                (await AppointmentAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto
+                (await LookupAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto
                     { Filter = newValue, MaxResultCount = TypePageSize }))
                 .Items;
 

@@ -52,7 +52,8 @@ public class AppointmentTypesAppService(
     [Authorize(HealthCarePermissions.AppointmentTypes.Create)]
     public virtual async Task<AppointmentTypeDto> CreateAsync(AppointmentTypeCreateDto input)
     {
-        HealthcareGlobalException.ThrowIf("You have already a record with this name.",HealthCareDomainErrorCodes.NameExists, await appointmentTypeRepository.FirstOrDefaultAsync(x => x.Name == input.Name) is not null);
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.NameAlreadyExists,
+            await appointmentTypeRepository.FirstOrDefaultAsync(x => x.Name == input.Name) is not null);
 
         var department = await appointmentTypeManager.CreateAsync(
             input.Name
@@ -64,7 +65,8 @@ public class AppointmentTypesAppService(
     [Authorize(HealthCarePermissions.AppointmentTypes.Edit)]
     public virtual async Task<AppointmentTypeDto> UpdateAsync(Guid id, AppointmentTypeUpdateDto input)
     {
-        HealthcareGlobalException.ThrowIf("You have already a record with this name.",HealthCareDomainErrorCodes.NameExists, await appointmentTypeRepository.FirstOrDefaultAsync(x => x.Name == input.Name && x.Id != id) is not null);
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.NameAlreadyExists,
+            await appointmentTypeRepository.FirstOrDefaultAsync(x => x.Name == input.Name && x.Id != id) is not null);
 
         var department = await appointmentTypeManager.UpdateAsync(
             id,

@@ -52,20 +52,15 @@ public class AppointmentManager(
     public virtual async Task<List<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(Guid doctorId,
         Guid medicalServiceId, DateTime startDate, int offset)
     {
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DateNotValid,
+            startDate < DateTime.Now.Date);
 
-        if (startDate < DateTime.Now.Date)
-        {
-            throw new DateNotInPastException();
-        }
-        
         //Check if medical service exist
         var medicalService = await medicalServiceRepository
             .FirstOrDefaultAsync(x => x.Id == medicalServiceId);
 
-        if (medicalService == null)
-        {
-            throw new MedicalServiceNotFoundException();
-        }
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.MedicalServiceNotFound,
+            medicalService is null);
 
         var doctorAppointments = await appointmentRepository
             .GetListAsync(x => x.DoctorId == doctorId
@@ -94,7 +89,6 @@ public class AppointmentManager(
             var workingHour = workingHours.FirstOrDefault(x => x.DayOfWeek == dayOfWeek);
             if (workingHour == null)
             {
-
                 availableDays.Add(new AppointmentDayLookupDto
                 {
                     Date = currentDate,
@@ -112,20 +106,22 @@ public class AppointmentManager(
             var availableSlotCount = 0;
 
             //Generate slots for a specific doctor
-            for (var appointmentTime = startTime; appointmentTime + serviceDuration <= endTime; appointmentTime += serviceDuration)
+            for (var appointmentTime = startTime;
+                 appointmentTime + serviceDuration <= endTime;
+                 appointmentTime += serviceDuration)
             {
-                
                 if (currentDate.Date == DateTime.Now.Date && appointmentTime < DateTime.Now.TimeOfDay)
                 {
                     continue;
                 }
 
-                if (appointmentsForTheDay == null || !appointmentsForTheDay.Any(a => appointmentTime >= a.StartTime.TimeOfDay && appointmentTime < a.EndTime.TimeOfDay))
+                if (appointmentsForTheDay == null || !appointmentsForTheDay.Any(a =>
+                        appointmentTime >= a.StartTime.TimeOfDay && appointmentTime < a.EndTime.TimeOfDay))
                 {
                     availableSlotCount++;
                 }
             }
-            
+
             availableDays.Add(new AppointmentDayLookupDto
             {
                 Date = currentDate.Date,
@@ -140,8 +136,8 @@ public class AppointmentManager(
     }
 
     public virtual async Task<Appointment> CreateAsync(
-        Guid doctorId, 
-        Guid patientId, 
+        Guid doctorId,
+        Guid patientId,
         Guid medicalServiceId,
         Guid appointmentTypeId,
         DateTime appointmentDate, DateTime startTime,
@@ -159,14 +155,15 @@ public class AppointmentManager(
         Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
 
         var appointmentDateIsValid = startTime < DateTime.Now || endTime < DateTime.Now || startTime >= endTime;
-        HealthcareGlobalException.ThrowIf("Not valid date.",HealthCareDomainErrorCodes.AppointmentDateNotValid, appointmentDateIsValid);
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DateNotValid, appointmentDateIsValid);
 
         var isAppointmentTaken = await appointmentRepository
             .FirstOrDefaultAsync(x => x.DoctorId == doctorId
                                       && x.AppointmentDate.Date == appointmentDate.Date
                                       && x.StartTime == startTime);
 
-        HealthcareGlobalException.ThrowIf("Selected appointment already taken.",HealthCareDomainErrorCodes.AppointmentAlreadyTaken, isAppointmentTaken is not null);
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.AppointmentAlreadyTaken,
+            isAppointmentTaken is not null);
 
         var appointment = new Appointment(
             id: GuidGenerator.Create(),
@@ -187,11 +184,11 @@ public class AppointmentManager(
     }
 
     public virtual async Task<Appointment> UpdateAsync(
-        Guid id, 
-        DateTime appointmentDate, 
+        Guid id,
+        DateTime appointmentDate,
         DateTime startTime,
-        DateTime endTime, 
-        EnumAppointmentStatus status, 
+        DateTime endTime,
+        EnumAppointmentStatus status,
         bool reminderSent, double amount,
         [CanBeNull] string? notes = null)
     {
@@ -221,7 +218,8 @@ public class AppointmentManager(
         var workingHour = await doctorWorkingHourRepository
             .FirstOrDefaultAsync(x => x.DoctorId == doctorId && date.DayOfWeek == x.DayOfWeek);
 
-        HealthcareGlobalException.ThrowIf("Doctor doesnt work at these dates.",HealthCareDomainErrorCodes.DoctorWorkingHourNotFound, workingHour is null);
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorWorkingHourNotFound,
+            workingHour is null);
 
         return workingHour;
     }
@@ -231,7 +229,8 @@ public class AppointmentManager(
         var medicalService = await medicalServiceRepository
             .FirstOrDefaultAsync(x => x.Id == medicalServiceId);
 
-        HealthcareGlobalException.ThrowIf("MedicalService Not Found.",HealthCareDomainErrorCodes.MedicalServiceNotFound, medicalService is null);
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.MedicalServiceNotFound,
+            medicalService is null);
 
         return medicalService;
     }
@@ -244,7 +243,7 @@ public class AppointmentManager(
             .Select(x => (StartTime: x.StartTime.TimeOfDay, EndTime: x.EndTime.TimeOfDay))
             .ToList();
     }
-    
+
     private async Task<List<Appointment>> GetAppointments(Guid doctorId, DateTime startDate, int offset)
     {
         return await appointmentRepository

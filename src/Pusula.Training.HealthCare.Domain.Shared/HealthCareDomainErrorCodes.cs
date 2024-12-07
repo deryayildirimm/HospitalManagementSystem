@@ -6,7 +6,7 @@ public static class HealthCareDomainErrorCodes
     
     public const string DoctorNotFound = "HealthCareError:DoctorNotFound";
     public const string DoctorWorkingHourNotFound = "HealthCareError:DoctorWorkingHourNotFound";
-    
+    public const string DoctorNotWorking = "HealthCareError:DoctorNotWorking";
     public const string MedicalServiceNotFound = "HealthCareError:MedicalServiceNotFound";
     
     public const string NameExists = "HealthCareError:NameAlreadyExist";
@@ -18,6 +18,5 @@ public static class HealthCareDomainErrorCodes
     public const string DepartmentsNotFound = "HealthCareError:DepartmentsNotFound";
 
     public const string DateNotInPastException = "HealthCareError:DateNotInPast";
-
     
 }

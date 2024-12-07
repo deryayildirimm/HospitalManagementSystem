@@ -65,6 +65,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         DateTime? startTime = null,
         DateTime? endTime = null,
         EnumAppointmentStatus? status = null,
+        EnumPatientTypes? patientType = null,
         bool? reminderSent = null,
         double? minAmount = null,
         double? maxAmount = null,
@@ -76,7 +77,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         var query = ApplyFilter(
             (await GetQueryForNavigationPropertiesAsync()),
             doctorId, patientId, medicalServiceId, appointmentTypeId, patientName, doctorName, serviceName,
-            patientNumber, appointmentMinDate, appointmentMaxDate, startTime, endTime, status,
+            patientNumber, appointmentMinDate, appointmentMaxDate, startTime, endTime, status, patientType,
             reminderSent,
             minAmount, maxAmount);
 
@@ -86,16 +87,11 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 
-
     public virtual async Task<long> GetCountAsync(
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
         Guid? appointmentTypeId = null,
-        string? patientName = null,
-        string? doctorName = null,
-        string? serviceName = null,
-        int? patientNumber = null,
         DateTime? appointmentMinDate = null,
         DateTime? appointmentMaxDate = null,
         DateTime? startTime = null,
@@ -113,19 +109,21 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         return await query.LongCountAsync(cancellationToken);
     }
 
+
     #region NavigationQueryCreator
 
     protected virtual async Task<IQueryable<Appointment>> GetQueryForNavigationPropertiesAsync()
         =>
-        (await GetDbContextAsync()).Set<Appointment>()
+            (await GetQueryableAsync())
             .Include(appointment => appointment.AppointmentType)
             .Include(appointment => appointment.Doctor)
             .Include(appointment => appointment.Patient)
             .Include(appointment => appointment.MedicalService);
-    
+
     #endregion
 
     #region ApplyFilter
+
     protected virtual IQueryable<Appointment> ApplyFilter(
         IQueryable<Appointment> query,
         Guid? doctorId = null,
@@ -155,7 +153,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
                 e => e.Amount >= minAmount!.Value)
             .WhereIf(maxAmount.HasValue,
                 e => e.Amount <= maxAmount!.Value);
-    
+
     protected virtual IQueryable<Appointment> ApplyFilter(
         IQueryable<Appointment> query,
         Guid? doctorId = null,
@@ -171,6 +169,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         DateTime? startTime = null,
         DateTime? endTime = null,
         EnumAppointmentStatus? status = null,
+        EnumPatientTypes? patientType = null,
         bool? reminderSent = null,
         double? minAmount = null,
         double? maxAmount = null) =>
@@ -180,14 +179,16 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             .WhereIf(medicalServiceId.HasValue, x => x.MedicalServiceId == medicalServiceId)
             .WhereIf(appointmentTypeId.HasValue, e => e.AppointmentTypeId == appointmentTypeId)
             .WhereIf(!string.IsNullOrWhiteSpace(patientName), x =>
-                x.Patient.FirstName!.ToLower().Contains(patientName!.ToLower()) ||
-                x.Patient.LastName!.ToLower().Contains(patientName!.ToLower()))
+                x.Patient.FirstName.ToLower().Contains(patientName!.ToLower()) ||
+                x.Patient.LastName.ToLower().Contains(patientName!.ToLower()))
             .WhereIf(!string.IsNullOrWhiteSpace(doctorName), x =>
-                x.Doctor.FirstName!.ToLower().Contains(doctorName!.ToLower()) ||
-                x.Doctor.LastName!.ToLower().Contains(doctorName!.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(serviceName),
-                x => x.MedicalService.Name!.ToLower().Contains(serviceName!.ToLower()))
+                x.Doctor.FirstName.ToLower().Contains(doctorName!.ToLower()) ||
+                x.Doctor.LastName.ToLower().Contains(doctorName!.ToLower()))
+            .WhereIf(!string.IsNullOrWhiteSpace(serviceName), x =>
+                x.MedicalService.Name.ToLower().Contains(serviceName!.ToLower()) ||
+                x.MedicalService.Name.ToLower().Contains(serviceName!.ToLower()))
             .WhereIf(patientNumber.HasValue, x => x.Patient.PatientNumber == patientNumber)
+            .WhereIf(patientType.HasValue, x => x.Patient.PatientType == patientType)
             .WhereIf(appointmentMinDate.HasValue,
                 e => e.AppointmentDate.Date >= appointmentMinDate!.Value.Date)
             .WhereIf(appointmentMaxDate.HasValue,

@@ -65,23 +65,6 @@ public class MedicalServicesAppService(
         };
     }
 
-    public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetDepartmentLookupAsync(LookupRequestDto input)
-    {
-        var query = (await departmentRepository.GetQueryableAsync())
-            .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                x => x.Name != null && x.Name.Contains(input.Filter!));
-
-        var lookupData = await query.PageBy(input.SkipCount, input.MaxResultCount)
-            .ToDynamicListAsync<Department>();
-        var totalCount = query.Count();
-
-        return new PagedResultDto<LookupDto<Guid>>
-        {
-            TotalCount = totalCount,
-            Items = ObjectMapper.Map<List<Department>, List<LookupDto<Guid>>>(lookupData)
-        };
-    }
-
     public virtual async Task<MedicalServiceDto> GetAsync(Guid id)
     {
         return ObjectMapper.Map<MedicalService, MedicalServiceDto>(await medicalServiceRepository.GetAsync(id));
@@ -96,9 +79,9 @@ public class MedicalServicesAppService(
     [Authorize(HealthCarePermissions.MedicalServices.Create)]
     public virtual async Task<MedicalServiceDto> CreateAsync(MedicalServiceCreateDto input)
     {
-        
-        HealthcareGlobalException.ThrowIf("You have already a record with this name.",HealthCareDomainErrorCodes.NameExists, await medicalServiceRepository.FirstOrDefaultAsync(x => x.Name == input.Name) is not null);
-        
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.NameAlreadyExists,
+            await medicalServiceRepository.FirstOrDefaultAsync(x => x.Name == input.Name) is not null);
+
         var medicalService = await medicalServiceManager.CreateAsync(
             input.Name,
             input.ServiceCreatedAt,
@@ -114,8 +97,8 @@ public class MedicalServicesAppService(
     [Authorize(HealthCarePermissions.MedicalServices.Edit)]
     public virtual async Task<MedicalServiceDto> UpdateAsync(Guid id, MedicalServiceUpdateDto input)
     {
-        
-        HealthcareGlobalException.ThrowIf("You have already a record with this name.",HealthCareDomainErrorCodes.NameExists, await medicalServiceRepository.FirstOrDefaultAsync(x => x.Name == input.Name && x.Id != id) is not null);
+        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorNotWorking,
+            await medicalServiceRepository.FirstOrDefaultAsync(x => x.Name == input.Name && x.Id != id) is not null);
 
         var medicalService = await medicalServiceManager.UpdateAsync(
             id,

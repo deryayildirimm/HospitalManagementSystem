@@ -13,13 +13,13 @@ namespace Pusula.Training.HealthCare.Workers;
 public class PeriodicPatientViewerWorker : AsyncPeriodicBackgroundWorkerBase
 {
     public PeriodicPatientViewerWorker(AbpAsyncTimer timer, IServiceScopeFactory serviceScopeFactory) 
-        : base( timer, serviceScopeFactory)
+        : base(timer, serviceScopeFactory)
     {
         Timer.Period = 10000;
     }
 
     [UnitOfWork]
-    protected async override Task DoWorkAsync(
+    protected override async Task DoWorkAsync(
         PeriodicBackgroundWorkerContext workerContext)
     {
         Logger.LogInformation("Starting: PeriodicPatientViewerWorker...");

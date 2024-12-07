@@ -48,8 +48,8 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<MedicalService, MedicalServiceDto>();
         CreateMap<MedicalService, MedicalServiceExcelDto>();
         CreateMap<MedicalServiceDto, MedicalServiceUpdateDto>();
-        CreateMap<Department, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
         CreateMap<MedicalServiceWithDepartments, MedicalServiceWithDepartmentsDto>();
+        CreateMap<MedicalService, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
         
         CreateMap<Title, TitleDto>();
         CreateMap<TitleDto, TitleUpdateDto>();

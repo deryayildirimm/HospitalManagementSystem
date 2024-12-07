@@ -14,9 +14,7 @@ public interface IMedicalServicesAppService : IApplicationService
 
     Task<PagedResultDto<MedicalServiceWithDepartmentsDto>> GetMedicalServiceWithDepartmentsAsync(
         GetMedicalServiceInput input);
-
-    Task<PagedResultDto<LookupDto<Guid>>> GetDepartmentLookupAsync(LookupRequestDto input);
-
+    
     Task<MedicalServiceDto> GetAsync(Guid id);
 
     Task DeleteAsync(Guid id);

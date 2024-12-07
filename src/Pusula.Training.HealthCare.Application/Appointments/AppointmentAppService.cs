@@ -9,6 +9,8 @@ using Microsoft.Extensions.Caching.Distributed;
 using MiniExcelLibs;
 using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Exceptions;
+using Pusula.Training.HealthCare.MedicalServices;
+using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Shared;
 using Volo.Abp;
@@ -16,6 +18,7 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Authorization;
 using Volo.Abp.Caching;
 using Volo.Abp.Content;
+using Volo.Abp.EventBus.Distributed;
 
 namespace Pusula.Training.HealthCare.Appointments;
 
@@ -24,8 +27,8 @@ namespace Pusula.Training.HealthCare.Appointments;
 public class AppointmentAppService(
     IAppointmentRepository appointmentRepository,
     IAppointmentManager appointmentManager,
-    IAppointmentTypeRepository appointmentTypeRepository,
-    IDistributedCache<AppointmentDownloadTokenCacheItem, string> downloadTokenCache
+    IDistributedCache<AppointmentDownloadTokenCacheItem, string> downloadTokenCache,
+    IDistributedEventBus distributedEventBus
 ) : HealthCareAppService, IAppointmentAppService
 {
     public virtual async Task<PagedResultDto<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(
@@ -58,10 +61,6 @@ public class AppointmentAppService(
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
             appointmentTypeId: input.AppointmentTypeId,
-            patientName: input.PatientName,
-            doctorName: input.DoctorName,
-            serviceName: input.ServiceName,
-            patientNumber: input.PatientNumber,
             input.AppointmentMinDate,
             input.AppointmentMaxDate,
             startTime: input.StartTime,
@@ -80,14 +79,18 @@ public class AppointmentAppService(
             doctorName: input.DoctorName,
             serviceName: input.ServiceName,
             patientNumber: input.PatientNumber,
-            input.AppointmentMinDate,
-            input.AppointmentMaxDate,
+            appointmentMinDate: input.AppointmentMinDate,
+            appointmentMaxDate: input.AppointmentMaxDate,
             startTime: input.StartTime,
             endTime: input.EndTime,
             status: input.Status,
+            patientType: input.PatientType,
             reminderSent: input.ReminderSent,
             minAmount: input.MinAmount,
-            maxAmount: input.MaxAmount, input.Sorting, input.MaxResultCount, input.SkipCount);
+            maxAmount: input.MaxAmount,
+            input.Sorting,
+            input.MaxResultCount,
+            input.SkipCount);
 
         return new PagedResultDto<AppointmentDto>
         {
@@ -97,11 +100,21 @@ public class AppointmentAppService(
     }
 
     public virtual async Task<AppointmentDto> GetAsync(Guid id)
-        => ObjectMapper.Map<Appointment, AppointmentDto>(await appointmentRepository.GetAsync(id));
+    {
+        await distributedEventBus.PublishAsync(new AppointmentsViewedEto { Id = id, ViewedAt = Clock.Now },
+            onUnitOfWorkComplete: false);
+
+        return ObjectMapper.Map<Appointment, AppointmentDto>(await appointmentRepository.GetAsync(id));
+    }
 
     [Authorize(HealthCarePermissions.Appointments.Delete)]
     public virtual async Task DeleteAsync(Guid id)
-        => await appointmentRepository.DeleteAsync(id);
+    {
+        await distributedEventBus.PublishAsync(new AppointmentDeletedEto { Id = id, ViewedAt = Clock.Now },
+            onUnitOfWorkComplete: false);
+
+        await appointmentRepository.DeleteAsync(id);
+    }
 
     public virtual async Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
     {
@@ -117,6 +130,9 @@ public class AppointmentAppService(
             input.Amount,
             input.Notes
         );
+
+        await distributedEventBus.PublishAsync(new AppointmentCreatedEto { Id = appointment.Id, CreatedAt = Clock.Now },
+            onUnitOfWorkComplete: false);
 
         return ObjectMapper.Map<Appointment, AppointmentDto>(appointment);
     }
@@ -135,24 +151,10 @@ public class AppointmentAppService(
             input.Notes
         );
 
+        await distributedEventBus.PublishAsync(new ApointmentUpdatedEto { Id = appointment.Id, UpdatedAt = Clock.Now },
+            onUnitOfWorkComplete: false);
+
         return ObjectMapper.Map<Appointment, AppointmentDto>(appointment);
-    }
-
-
-    public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetAppointmentTypeLookupAsync(LookupRequestDto input)
-    {
-        var query = (await appointmentTypeRepository.GetQueryableAsync())
-            .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                x => x.Name.Contains(input.Filter!));
-
-        var lookupData =
-            await query.PageBy(input.SkipCount, input.MaxResultCount).ToDynamicListAsync<AppointmentType>();
-        var totalCount = query.Count();
-        return new PagedResultDto<LookupDto<Guid>>
-        {
-            TotalCount = totalCount,
-            Items = ObjectMapper.Map<List<AppointmentType>, List<LookupDto<Guid>>>(lookupData)
-        };
     }
 
     [AllowAnonymous]

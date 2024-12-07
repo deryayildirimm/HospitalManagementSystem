@@ -8,9 +8,12 @@ using System.Web;
 using Microsoft.AspNetCore.Authorization;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.AppointmentTypes;
+using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Shared;
+using Syncfusion.Blazor;
 using Syncfusion.Blazor.Buttons;
+using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Popups;
 using Volo.Abp;
@@ -31,7 +34,7 @@ public partial class AppointmentList : HealthCareComponentBase
     private bool CanDeleteType { get; set; }
     private bool IsEditDialogVisible { get; set; }
     private bool IsCreateDialogVisible { get; set; }
-    private GetAppointmentTypesInput Filter { get; set; }
+    private GetAppointmentsInput Filter { get; set; }
     private AppointmentTypeUpdateDto EditingType { get; set; }
     private Guid EditingTypeId { get; set; } = default;
     private AppointmentTypeCreateDto NewType { get; set; }
@@ -40,18 +43,19 @@ public partial class AppointmentList : HealthCareComponentBase
     private bool Flag { get; set; }
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
-    
+
+    private IReadOnlyList<LookupDto<Guid>> MedicalServiceCollection { get; set; }
+    private IReadOnlyList<AppointmentDto> AppointmentCollection { get; set; }
+    private List<KeyValuePair<string, EnumPatientTypes>> PatientTypeCollection { get; set; }
+
     public AppointmentList()
     {
-        Filter = new GetAppointmentTypesInput();
         NewType = new AppointmentTypeCreateDto();
-        Filter = new GetAppointmentTypesInput
+        Filter = new GetAppointmentsInput
         {
             MaxResultCount = PageSize,
-            SkipCount = (CurrentPage - 1) * PageSize,
-            Sorting = CurrentSorting
+            SkipCount = 0
         };
-        
         EditingType = new AppointmentTypeUpdateDto();
         IsEditDialogVisible = false;
         IsCreateDialogVisible = false;
@@ -59,12 +63,14 @@ public partial class AppointmentList : HealthCareComponentBase
         Flag = false;
         AppointmentTypesCollection = [];
         DepartmentsCollection = [];
+        PatientTypeCollection = [];
     }
-    
+
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
-        //await SetLookupsAsync();
+        await SetLookupsAsync();
+        SetPatientTypes();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -87,9 +93,6 @@ public partial class AppointmentList : HealthCareComponentBase
     protected virtual ValueTask SetToolbarItemsAsync()
     {
         Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
-        Toolbar.AddButton(L["NewAppointmentType"], OpenCreateTypeModalAsync, IconName.Plus,
-            requiredPolicyName: HealthCarePermissions.AppointmentTypes.Create);
-
         return ValueTask.CompletedTask;
     }
 
@@ -102,18 +105,22 @@ public partial class AppointmentList : HealthCareComponentBase
         CanDeleteType = await AuthorizationService
             .IsGrantedAsync(HealthCarePermissions.AppointmentTypes.Delete);
     }
-    
+
     private async Task SetLookupsAsync()
     {
         try
         {
             AppointmentTypesCollection =
-                (await AppointmentAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto
-                    {MaxResultCount = LookupPageSize }))
-                .Items;        
-        
-            DepartmentsCollection = 
-                (await ProtocolsAppService.GetDepartmentLookupAsync(new LookupRequestDto 
+                (await LookupAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+
+            DepartmentsCollection =
+                (await LookupAppService.GetDepartmentLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+
+            MedicalServiceCollection = (await LookupAppService.GetMedicalServiceLookupAsync(new LookupRequestDto
                     { MaxResultCount = LookupPageSize }))
                 .Items;
         }
@@ -121,10 +128,40 @@ public partial class AppointmentList : HealthCareComponentBase
         {
             throw new UserFriendlyException(e.Message);
         }
-        
     }
-    
-    
+
+    private async Task GetAppointmentsAsync()
+    {
+        Filter.MaxResultCount = PageSize;
+        Filter.SkipCount = (CurrentPage - 1) * PageSize;
+        Filter.Sorting = CurrentSorting;
+
+        var req = new DataManagerRequest
+        {
+            Params = new Dictionary<string, object>
+            {
+                { "Filter", Filter },
+            },
+        };
+
+        var result = await AppointmentAdaptor.ReadAsync(req);
+
+        if (result is DataResult dataResult)
+        {
+            AppointmentCollection = dataResult.Result as List<AppointmentDto> ?? [];
+        }
+
+        await Grid.Refresh();
+    }
+
+    private void SetPatientTypes()
+    {
+        PatientTypeCollection = Enum.GetValues(typeof(EnumPatientTypes))
+            .Cast<EnumPatientTypes>()
+            .Select(e => new KeyValuePair<string, EnumPatientTypes>(e.ToString(), e))
+            .ToList();
+    }
+
     public void OnActionBegin(ActionEventArgs<AppointmentDto> args)
     {
         if (args.RequestType.ToString() != "Delete" || !IsDeleteDialogVisible)
@@ -245,10 +282,10 @@ public partial class AppointmentList : HealthCareComponentBase
 
         await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
         NavigationManager.NavigateTo(
-            $"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/appointment/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Name={HttpUtility.UrlEncode(Filter.Name)}",
+            $"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/appointment/as-excel-file?DownloadToken={token}&FilterText={culture}&Name=",
             forceLoad: true);
     }
-    
+
     private Task OpenCreateTypeModalAsync()
     {
         IsCreateDialogVisible = true;

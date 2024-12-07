@@ -126,6 +126,12 @@ public class HealthCareMenuContributor : IMenuContributor
                             url: "/appointments/reports/overview",
                             icon: "fa-solid fa-table")
                         )
+                        .AddItem(new ApplicationMenuItem(
+                            name: HealthCareMenus.AppointmentsOverview,
+                            displayName: l["Menu:DoctorAppointmentsOverview"],
+                            url: "/appointments/reports/doctor-appointments",
+                            icon: "fa-solid fa-table")
+                        )
                 )
         );
 

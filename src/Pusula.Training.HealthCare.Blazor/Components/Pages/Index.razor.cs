@@ -5,7 +5,7 @@ public partial class Index
     
     private void NavigateToDoctor()
     {
-        NavigationManager.NavigateTo("/doctor-dashboard");
+        NavigationManager.NavigateTo("/appointments/reports/doctor-appointments");
     }
 
 }

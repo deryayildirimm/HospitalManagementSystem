@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using JetBrains.Annotations;
+using Pusula.Training.HealthCare.Patients;
 using Volo.Abp.Application.Dtos;
 
 namespace Pusula.Training.HealthCare.Appointments;
@@ -19,8 +20,11 @@ public class GetAppointmentsInput : PagedAndSortedResultRequestDto
     public DateTime? AppointmentMaxDate { get; set; }
     public DateTime? StartTime { get; set; }
     public DateTime? EndTime { get; set; }
+    public EnumPatientTypes? PatientType { get; set; }
     public EnumAppointmentStatus? Status { get; set; }
     public bool? ReminderSent { get; set; }
     public double? MinAmount { get; set; }
     public double? MaxAmount { get; set; }
+
+    public bool Condition { get; set; } = true;
 }

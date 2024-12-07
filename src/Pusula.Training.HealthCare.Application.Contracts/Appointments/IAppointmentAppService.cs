@@ -30,5 +30,5 @@ public interface IAppointmentAppService : IApplicationService
 
     Task DeleteAllAsync(GetAppointmentsInput input);
     Task<Shared.DownloadTokenResultDto> GetDownloadTokenAsync();
-    Task<PagedResultDto<LookupDto<Guid>>> GetAppointmentTypeLookupAsync(LookupRequestDto input);
+    
 }
