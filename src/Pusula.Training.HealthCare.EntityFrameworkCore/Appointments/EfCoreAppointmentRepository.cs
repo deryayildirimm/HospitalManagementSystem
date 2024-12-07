@@ -23,6 +23,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         Guid? patientId = null,
         Guid? medicalServiceId = null,
         Guid? appointmentTypeId = null,
+        Guid? departmentId = null,
         DateTime? appointmentMinDate = null,
         DateTime? appointmentMaxDate = null,
         DateTime? startTime = null,
@@ -38,6 +39,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             patientId,
             medicalServiceId,
             appointmentTypeId,
+            departmentId,
             appointmentMinDate,
             appointmentMaxDate,
             startTime,
@@ -56,6 +58,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         Guid? patientId = null,
         Guid? medicalServiceId = null,
         Guid? appointmentTypeId = null,
+        Guid? departmentId = null,
         string? patientName = null,
         string? doctorName = null,
         string? serviceName = null,
@@ -76,7 +79,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
     {
         var query = ApplyFilter(
             (await GetQueryForNavigationPropertiesAsync()),
-            doctorId, patientId, medicalServiceId, appointmentTypeId, patientName, doctorName, serviceName,
+            doctorId, patientId, medicalServiceId, appointmentTypeId, departmentId, patientName, doctorName,
+            serviceName,
             patientNumber, appointmentMinDate, appointmentMaxDate, startTime, endTime, status, patientType,
             reminderSent,
             minAmount, maxAmount);
@@ -92,6 +96,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         Guid? patientId = null,
         Guid? medicalServiceId = null,
         Guid? appointmentTypeId = null,
+        Guid? departmentId = null,
         DateTime? appointmentMinDate = null,
         DateTime? appointmentMaxDate = null,
         DateTime? startTime = null,
@@ -103,7 +108,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetQueryForNavigationPropertiesAsync()),
-            doctorId, patientId, medicalServiceId, appointmentTypeId, appointmentMinDate, appointmentMaxDate, startTime,
+            doctorId, patientId, medicalServiceId, appointmentTypeId, departmentId, appointmentMinDate,
+            appointmentMaxDate, startTime,
             endTime, status, reminderSent, minAmount, maxAmount);
 
         return await query.LongCountAsync(cancellationToken);
@@ -130,6 +136,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         Guid? patientId = null,
         Guid? medicalServiceId = null,
         Guid? appointmentTypeId = null,
+        Guid? departmentId = null,
         DateTime? appointmentMinDate = null,
         DateTime? appointmentMaxDate = null,
         DateTime? startTime = null,
@@ -160,6 +167,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         Guid? patientId = null,
         Guid? medicalServiceId = null,
         Guid? appointmentTypeId = null,
+        Guid? departmentId = null,
         string? patientName = null,
         string? doctorName = null,
         string? serviceName = null,
@@ -178,6 +186,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             .WhereIf(patientId.HasValue, x => x.PatientId == patientId)
             .WhereIf(medicalServiceId.HasValue, x => x.MedicalServiceId == medicalServiceId)
             .WhereIf(appointmentTypeId.HasValue, e => e.AppointmentTypeId == appointmentTypeId)
+            .WhereIf(departmentId.HasValue, e => e.Doctor.DepartmentId == departmentId)
             .WhereIf(!string.IsNullOrWhiteSpace(patientName), x =>
                 x.Patient.FirstName.ToLower().Contains(patientName!.ToLower()) ||
                 x.Patient.LastName.ToLower().Contains(patientName!.ToLower()))

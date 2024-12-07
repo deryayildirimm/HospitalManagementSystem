@@ -81,6 +81,16 @@
             </div>
             <div class="col-3 my-1">
                 <Field>
+                    <FieldLabel>@L["Departments"]</FieldLabel>
+                    <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                    @bind-Value="Filter.DepartmentId"
+                                    DataSource="@DepartmentsCollection">
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </Field>
+            </div>
+            <div class="col-3 my-1">
+                <Field>
                     <FieldLabel>@L["MedicalService"]</FieldLabel>
                     <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
                                     @bind-Value="Filter.MedicalServiceId"

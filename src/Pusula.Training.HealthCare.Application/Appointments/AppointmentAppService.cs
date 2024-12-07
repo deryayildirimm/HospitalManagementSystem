@@ -61,8 +61,9 @@ public class AppointmentAppService(
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
             appointmentTypeId: input.AppointmentTypeId,
-            input.AppointmentMinDate,
-            input.AppointmentMaxDate,
+            departmentId: input.DepartmentId,
+            appointmentMinDate: input.AppointmentMinDate,
+            appointmentMaxDate: input.AppointmentMaxDate,
             startTime: input.StartTime,
             endTime: input.EndTime,
             status: input.Status,
@@ -75,6 +76,7 @@ public class AppointmentAppService(
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
             appointmentTypeId: input.AppointmentTypeId,
+            departmentId: input.DepartmentId,
             patientName: input.PatientName,
             doctorName: input.DoctorName,
             serviceName: input.ServiceName,
@@ -171,6 +173,7 @@ public class AppointmentAppService(
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
             appointmentTypeId: input.AppointmentTypeId,
+            departmentId: input.DepartmentId,
             patientName: input.PatientName,
             doctorName: input.DoctorName,
             serviceName: input.ServiceName,
@@ -207,7 +210,8 @@ public class AppointmentAppService(
     {
         await appointmentRepository.DeleteAllAsync(
             input.DoctorId, input.PatientId, input.MedicalServiceId,
-            input.AppointmentTypeId, input.AppointmentMinDate, input.AppointmentMaxDate, input.StartTime, input.EndTime,
+            input.AppointmentTypeId, input.DepartmentId, input.AppointmentMinDate, input.AppointmentMaxDate,
+            input.StartTime, input.EndTime,
             input.Status, input.ReminderSent, input.MinAmount,
             input.MaxAmount);
     }

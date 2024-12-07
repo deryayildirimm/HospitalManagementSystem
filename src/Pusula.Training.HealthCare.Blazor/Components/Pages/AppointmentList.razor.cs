@@ -43,7 +43,6 @@ public partial class AppointmentList : HealthCareComponentBase
     private bool Flag { get; set; }
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
-
     private IReadOnlyList<LookupDto<Guid>> MedicalServiceCollection { get; set; }
     private IReadOnlyList<AppointmentDto> AppointmentCollection { get; set; }
     private List<KeyValuePair<string, EnumPatientTypes>> PatientTypeCollection { get; set; }
