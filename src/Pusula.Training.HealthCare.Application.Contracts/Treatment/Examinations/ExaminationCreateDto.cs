@@ -19,4 +19,8 @@ public class ExaminationCreateDto
     public string? Story { get; set; }
     [Required]
     public Guid ProtocolId { get; set; }
+    [Required]
+    public FamilyHistoryCreateInExaminationDto FamilyHistory { get; set; } = null!;
+    [Required]
+    public BackgroundCreateInExaminationDto Background { get; set; } = null!;
 }

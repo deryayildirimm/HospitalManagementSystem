@@ -19,8 +19,9 @@ public class ExaminationUpdateDto
     public DateTime? StartDate { get; set; }
     [StringLength(ExaminationConsts.StoryMaxLength)]
     public string? Story { get; set; }
-    public BackgroundDto? Background { get; set; }
-    public FamilyHistoryDto? FamilyHistory { get; set; }
+
+    public BackgroundDto Background { get; set; } = null!;
+    public FamilyHistoryDto FamilyHistory { get; set; } = null!;
     public ICollection<ExaminationIcdDto>? ExaminationIcd { get; set; }
     [Required]
     public Guid ProtocolId { get; set; }

@@ -30,8 +30,10 @@ public class ExaminationController(IExaminationsAppService examinationsAppServic
     public void DeleteAsync(Guid id) => examinationsAppService.DeleteAsync(id);
     [HttpDelete]
     [Route("all")]
-    public Task DeleteAllAsync(GetExaminationsInput input) => examinationsAppService.DeleteAllAsync(input);
+    public Task DeleteAllAsync(GetExaminationsInput examinationInput) => 
+        examinationsAppService.DeleteAllAsync(examinationInput);
     [HttpDelete]
     [Route("")]
-    public Task DeleteByIdsAsync(List<Guid> examinationIds) => examinationsAppService.DeleteByIdsAsync(examinationIds);
+    public Task DeleteByIdsAsync(List<Guid> examinationIds) => 
+        examinationsAppService.DeleteByIdsAsync(examinationIds);
 }

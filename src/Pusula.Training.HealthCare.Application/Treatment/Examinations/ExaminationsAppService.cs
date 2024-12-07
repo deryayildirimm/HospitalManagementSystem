@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Pusula.Training.HealthCare.Permissions;
+using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
+using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 
@@ -15,10 +17,11 @@ public class ExaminationsAppService(IExaminationRepository examinationRepository
 {
     public virtual async Task<PagedResultDto<ExaminationDto>> GetListAsync(GetExaminationsInput input)
     {
-        var totalCount = await examinationRepository.GetCountAsync(input.FilterText, input.DateMin, input.DateMax,
-            input.Complaint, input.Story, input.ProtocolId);
-        var items = await examinationRepository.GetListAsync(input.FilterText, input.DateMin, input.DateMax,
-            input.Complaint, input.Story, input.ProtocolId, input.Sorting, input.MaxResultCount, input.SkipCount);
+        var totalCount = await examinationRepository.GetCountAsync(input.FilterText, input.DateMin, 
+            input.DateMax, input.Complaint, input.Story, input.ProtocolId);
+        var items = await examinationRepository.GetListAsync(input.FilterText, input.DateMin, 
+            input.DateMax, input.Complaint, input.Story, input.ProtocolId, 
+            input.Sorting, input.MaxResultCount, input.SkipCount);
         return new PagedResultDto<ExaminationDto>
         {
             TotalCount = totalCount,
@@ -43,7 +46,10 @@ public class ExaminationsAppService(IExaminationRepository examinationRepository
     public virtual async Task<ExaminationDto> CreateAsync(ExaminationCreateDto input)
     {
         var examination = await examinationManager.CreateAsync(input.ProtocolId,input.Date,
-            input.Complaint, input.StartDate, input.Story);
+            input.Complaint, input.FamilyHistory.AreParentsRelated, input.FamilyHistory.MotherDisease,
+            input.FamilyHistory.FatherDisease, input.FamilyHistory.SisterDisease, input.FamilyHistory.BrotherDisease,
+            input.Background.Allergies, input.Background.Medications, input.Background.Habits, input.StartDate, 
+            input.Story);
         
         return ObjectMapper.Map<Examination, ExaminationDto>(examination);
     }
@@ -51,8 +57,11 @@ public class ExaminationsAppService(IExaminationRepository examinationRepository
     [Authorize(HealthCarePermissions.Examinations.Edit)]
     public virtual async Task<ExaminationDto> UpdateAsync(ExaminationUpdateDto input)
     {
-        var examination = await examinationManager.UpdateAsync(input.Id, input.ProtocolId,input.Date,
-            input.Complaint, input.StartDate, input.Story);
+        var examination = await examinationManager.UpdateAsync(input.Id, input.ProtocolId,
+            input.Date, input.Complaint, input.FamilyHistory.AreParentsRelated, 
+            input.FamilyHistory.MotherDisease, input.FamilyHistory.FatherDisease, input.FamilyHistory.SisterDisease, 
+            input.FamilyHistory.BrotherDisease, input.Background.Allergies, input.Background.Medications, 
+            input.Background.Habits, input.StartDate, input.Story);
         
         return ObjectMapper.Map<Examination, ExaminationDto>(examination);
     }
