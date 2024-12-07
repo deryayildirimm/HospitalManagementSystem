@@ -1,20 +1,26 @@
-@page "/appointments/create"
+@page "/appointments/operations/create"
 @using Pusula.Training.HealthCare.Permissions
 @attribute [Authorize(HealthCarePermissions.Appointments.Default)]
 
-@using Pusula.Training.HealthCare.Permissions
 @using Pusula.Training.HealthCare.Appointments
+@using Pusula.Training.HealthCare.Blazor.Services
 @using Pusula.Training.HealthCare.Doctors
+@using Pusula.Training.HealthCare.MedicalServices
+@using Pusula.Training.HealthCare.Patients
 @using Pusula.Training.HealthCare.Shared
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
 @inherits HealthCareComponentBase
 
+@inject PatientAdaptor PatientAdaptor
 @inject IAppointmentAppService AppointmentAppService
 @inject IDoctorsAppService DoctorsAppService
 @inject IUiMessageService UiMessageService
-@inject NavigationManager NavigationManager
 @inject ILookupAppService LookupAppService
+@inject IMedicalServicesAppService MedicalServicesAppService
+@inject IPatientsAppService PatientsAppService
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["NewAppointment"]">
@@ -22,39 +28,293 @@
 </PageHeader>
 
 <div class="row py-3">
-    <div class="col-sm-12 col-md-4 p-2">
+    <div class="col-sm-12 col-md-3 p-2">
         <div class="card border-1 border-black py-4 px-3 d-flex flex-column gap-1">
-            <div class="flex flex-column">
-                <div>
-                    <Label Class="form-label">@L["AppointmentType"]</Label>
+            <div>
+                <div class="d-flex justify-content-between align-items-end mb-3">
+                    <h5 class="m-0">@L["Patient"]</h5>
+                    <div>
+                        <SfButton CssClass="e-primary" OnClick="OpenPatientSearchModal">
+                            <SfIcon IconCss="e-icons e-search"></SfIcon> @L["SearchPatients"]
+                        </SfButton>
+                    </div>
                 </div>
-                <SfDropDownList
-                    TValue="Guid"
-                    TItem="LookupDto<Guid>"
-                    Placeholder="@L["Select"]"
-                    AllowFiltering="true"
-                    DataSource="@AppointmentTypesCollection"
-                    Width="300px">
-                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
-                </SfDropDownList>
+
+                @if (SelectedPatient != null)
+                {
+                    <hr class="my-1"/>
+                    <div class="d-flex flex-column gap-1 my-1">
+                        <h6 class="m-0">@L["PatientNumber"]: @(SelectedPatient.PatientNumber)</h6>
+                        <hr class="m-0"/>
+                        <h6 class="m-0">@L["FirstName"] : @(SelectedPatient.FirstName)</h6>
+                        <hr class="m-0"/>
+                        <h6 class="m-0">@L["LastName"] : @(SelectedPatient.LastName)</h6>
+                        <hr class="m-0"/>
+                        <h6 class="m-0">@L["Gender"]: @(SelectedPatient.Gender)</h6>
+                        <hr class="m-0"/>
+                        <h6 class="m-0">@L["Birthdate"]: @(SelectedPatient.BirthDate.ToString("yyyy/MM/dd"))</h6>
+                        <hr class="m-0"/>
+                        <h6 class="m-0">@L["PatientType"]: @(SelectedPatient.PatientType)</h6>
+                    </div>
+                }
             </div>
-            <div class="flex flex-column">
+
+            <hr class="my-1"/>
+            <div class="d-flex flex-column gap-2 mt-2">
+                <h5>@L["Summary"]</h5>
                 <div>
-                    <Label Class="form-label">@L["Doctors"]</Label>
+                    <h6>@L["AppointmentType"]</h6>
+                    <SfDropDownList
+                        TValue="Guid"
+                        TItem="LookupDto<Guid>"
+                        Placeholder="@L["Select"]"
+                        AllowFiltering="true"
+                        DataSource="@AppointmentTypesCollection"
+                        Width="100%">
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
                 </div>
-                <SfDropDownList
-                    TValue="Guid"
-                    TItem="LookupDto<Guid>"
-                    Placeholder="@L["Select"]"
-                    AllowFiltering="true"
-                    DataSource="@AppointmentTypesCollection"
-                    Width="300px">
-                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
-                </SfDropDownList>
+                <div>
+                    <h6>@L["MedicalService"]</h6>
+                    <SfDropDownList
+                        TValue="Guid"
+                        TItem="LookupDto<Guid>"
+                        Placeholder="@L["Select"]"
+                        AllowFiltering="true"
+                        DataSource="@MedicalServiceCollection"
+                        Width="100%">
+                        <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@OnMedicalServiceChange"></DropDownListEvents>
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+                <div>
+                    <h6>@L["Doctors"]</h6>
+                    <SfDropDownList
+                        Readonly="@(!IsDoctorsEnabled)"
+                        TValue="Guid"
+                        TItem="LookupDto<Guid>"
+                        Placeholder="@L["Select"]"
+                        AllowFiltering="true"
+                        DataSource="@DoctorsCollection"
+                        Width="100%">
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                        <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@OnDoctorChange"></DropDownListEvents>
+                    </SfDropDownList>
+                </div>
+                <div>
+                    <h6>@L["AppointmentDate"]</h6>
+                    <SfDatePicker TValue="DateTime" @bind-Value="@GetAppointmentSlotFilter.Date" Placeholder="@L["AppointmentMaxDate"]"></SfDatePicker>
+                </div>
+                <div>
+                    <SfButton Disabled="@(!IsSlotSearchAvailable)" CssClass="e-primary" OnClick="GetAppointmentSlots">
+                        <SfIcon IconCss="e-icons e-search"></SfIcon> @L["GetAppointmentSlots"]
+                    </SfButton>
+                </div>
             </div>
         </div>
     </div>
-    <div class="col-sm-12 col-md-8 p-2">
-        
+    <div class="col-sm-12 col-md-9 p-2">
+        <div class="card border-1 border-black p-4">
+            <h5>@L["AppointmentSchedule"]</h5>
+            <div class="d-flex justify-content-between my-1">
+                <div>
+                    <h6 class="fw-bold"> @L["ActiveAppointments"]</h6>
+                    <h6 class="fw-normal"> (@DoctorsAppointments.Count)</h6>
+                </div>
+            </div>
+
+            <SfSchedule @ref="ScheduleObj" TValue="AppointmentCustomData" Height="650px" @bind-SelectedDate="@CurrentDate">
+                <ScheduleEvents TValue="AppointmentCustomData" OnPopupOpen="@OnPopupOpen"></ScheduleEvents>
+
+                <ScheduleQuickInfoTemplates>
+                    <HeaderTemplate>
+                        <div class="quick-info-header">
+                            <div class="quick-info-header-content" style="align-items: center; color: black;">
+                                <div class="quick-info-title">
+                                    @L["NewAppointment"]
+                                </div>
+                                <div class="duration-text">
+                                    @(GetEventDetails((context as AppointmentCustomData)))
+                                </div>
+                            </div>
+                        </div>
+                    </HeaderTemplate>
+                    <ContentTemplate>
+                        <div class="e-cell-content">
+                            <div class="content-area">
+                                @L["AppointmentDate"]: @(((context as AppointmentCustomData)!).DateOnly.Date.ToString("yyyy/MM/dd"))
+                            </div>
+                            <div class="content-area">
+                                @L["From"]: @(((context as AppointmentCustomData)!).StartTime)
+                            </div>
+                            <div class="content-area">
+                                @L["End"]: @(((context as AppointmentCustomData)!).EndTime)
+                            </div>
+                            <div class="content-area">
+                                @L["Available"]: @(((context as AppointmentCustomData)!).IsReadOnly ? (@L["Yes"] + " ✔️") : (@L["No"] + " ❌"))
+                            </div>
+                        </div>
+                    </ContentTemplate>
+                    <FooterTemplate>
+                        <div class="cell-footer">
+                            <SfButton Content="@L["GoDetails"]" OnClick="@(e => OnMoreDetailsClick(e, (context as AppointmentCustomData)!))"></SfButton>
+                        </div>
+                    </FooterTemplate>
+                </ScheduleQuickInfoTemplates>
+
+                <ScheduleEventSettings EnableTooltip="true" DataSource="@SlotItems">
+                    <Template>
+                        <div class="@(((context as AppointmentCustomData)?.IsReadOnly ?? false) ? "light-green" : "readonly-event")">
+                            <div>@L["Time Period"]: @((context as AppointmentCustomData)?.StartTime.ToString("hh:mm")) - @((context as AppointmentCustomData)?.EndTime.ToString("hh:mm"))</div>
+                            <div>Availability: @((context as AppointmentCustomData)?.IsReadOnly)</div>
+                        </div>
+                    </Template>
+                    <TooltipTemplate>
+                        <div class="tooltip-wrap">
+                            <div>
+                                <strong>@L["Available"]: </strong> @(((context as AppointmentCustomData)!).IsReadOnly ? @L["Available"] : @L["NotAvailable"])
+                            </div>
+                            <div>
+                                <strong>@L["From"]: </strong> @(((context as AppointmentCustomData)!).StartTime)
+                            </div>
+                            <div>
+                                <strong>@L["To"]: </strong>@(((context as AppointmentCustomData)!).EndTime)
+                            </div>
+                        </div>
+                    </TooltipTemplate>
+                </ScheduleEventSettings>
+
+                <ScheduleViews>
+                    <ScheduleView Option="View.Day"></ScheduleView>
+                    <ScheduleView Option="View.WorkWeek"></ScheduleView>
+                </ScheduleViews>
+            </SfSchedule>
+
+        </div>
     </div>
 </div>
+
+<SfDialog CssClass="p-2" MinHeight="50vh" Width="60%" IsModal="true" Header="@L["ManagePatients"]"
+          ShowCloseIcon="true" Visible="@IsVisibleSearchPatient">
+    <DialogEvents Closed="@ClosePatientSearchModal"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            @L["ManagePatients"]
+        </Header>
+        <Content>
+            <SfTab>
+                <TabItems>
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader IconCss="e-search" Text="@L["SearchPatients"]"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="row d-flex gap-2 align-bottom align-items-end mt-3">
+                                <div class="col-4">
+                                    <h6 class="text-black">@L["FirstName"]</h6>
+                                    <SfTextBox @bind-Value="@GetPatientsInput.FirstName" Placeholder="@L["FirstName"]"></SfTextBox>
+                                </div>
+                                <div class="col-4">
+                                    <h6 class="text-black">@L["LastName"]</h6>
+                                    <SfTextBox @bind-Value="@GetPatientsInput.LastName" Placeholder="@L["LastName"]"></SfTextBox>
+                                </div>
+                                <div class="col-2">
+                                    <SfButton CssClass="e-primary" OnClick="GetPatients">
+                                        <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
+                                    </SfButton>
+                                </div>
+                            </div>
+
+                            <div class="my-3">
+                                <SfGrid
+                                    @ref="PatientGrid"
+                                    DataSource="@PatientCollection"
+                                    TValue="PatientDto"
+                                    AllowPaging="true"
+                                    AllowSorting="true">
+                                    <SfDataManager
+                                        AdaptorInstance="@typeof(PatientAdaptor)"
+                                        Adaptor="Adaptors.CustomAdaptor">
+                                    </SfDataManager>
+                                    <GridPageSettings PageSize="8"></GridPageSettings>
+                                    <GridColumns>
+                                        <GridColumn HeaderText="@L["Number"]" Width="auto">
+                                            <Template Context="context">
+                                                @($"{((PatientDto)context).PatientNumber}")
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="@L["Name"]" Width="auto">
+                                            <Template Context="context">
+                                                @($"{((PatientDto)context).FirstName} {((PatientDto)context).LastName}")
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="@L["Gender"]" Width="auto">
+                                            <Template Context="context">
+                                                @($"{((PatientDto)context).Gender}")
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="@L["Birthdate"]" Width="auto">
+                                            <Template Context="context">
+                                                @($"{((PatientDto)context).BirthDate:yyyy/MM/dd}")
+                                            </Template>
+                                        </GridColumn>
+
+                                        <GridColumn HeaderText="@L["Actions"]" Width="150">
+                                            <Template Context="context">
+                                                <SfButton CssClass="e-success" OnClick="@(() => SelectPatient((PatientDto)context))">
+                                                    @L["Select"]
+                                                </SfButton>
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+
+                    <TabItem>
+                        <ChildContent>
+                            <TabHeader IconCss="e-plus" Text="@L["RegisterPatient"]"></TabHeader>
+                        </ChildContent>
+                        <ContentTemplate>
+                            <div class="row mt-3">
+                                <EditForm Model="@NewPatient" OnValidSubmit="RegisterPatient">
+                                    <DataAnnotationsValidator/>
+                                    <div class="form-row">
+                                        <div class="form-group col-6">
+                                            <h6 class="text-black">@L["FirstName"]</h6>
+                                            <SfTextBox @bind-Value="@NewPatient.FirstName" Placeholder="@L["FirstName"]"></SfTextBox>
+                                            <ValidationMessage For="@(() => NewPatient.FirstName)"></ValidationMessage>
+                                        </div>
+                                        <div class="form-group col-6">
+                                            <h6 class="text-black">@L["LastName"]</h6>
+                                            <SfTextBox @bind-Value="@NewPatient.LastName" Placeholder="@L["LastName"]"></SfTextBox>
+                                            <ValidationMessage For="@(() => NewPatient.LastName)"></ValidationMessage>
+                                        </div>
+                                        <div class="form-group col-6">
+                                            <h6 class="text-black">@L["Gender"]</h6>
+                                            <SfDropDownList DataSource="@GendersCollection" @bind-Value="@NewPatient.Gender" TItem="KeyValuePair<string, EnumGender>" TValue="EnumGender">
+                                                <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+                                            </SfDropDownList>
+                                            <ValidationMessage For="@(() => NewPatient.Gender)"></ValidationMessage>
+                                        </div>
+                                        <div class="form-group col-6">
+                                            <h6 class="text-black">@L["Birthdate"]</h6>
+                                            <SfDatePicker TValue="DateTime" @bind-Value="@NewPatient.BirthDate"></SfDatePicker>
+                                            <ValidationMessage For="@(() => NewPatient.BirthDate)"></ValidationMessage>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <SfButton Type="submit" CssClass="e-success e-outline" IsPrimary="true" OnClick="RegisterPatient">
+                                            @L["Register"]
+                                        </SfButton>
+                                    </div>
+                                </EditForm>
+                            </div>
+                        </ContentTemplate>
+                    </TabItem>
+                </TabItems>
+            </SfTab>
+        </Content>
+    </DialogTemplates>
+</SfDialog>

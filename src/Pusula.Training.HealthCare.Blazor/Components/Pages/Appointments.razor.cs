@@ -344,11 +344,7 @@ public partial class Appointments
         try
         {
             IsDoctorListLoading = true;
-            var deptIds = MedicalServiceWithDepartmentsList
-                .Where(x => x.MedicalService.Id == StepperModel.MedicalServiceId)
-                .SelectMany(x => x.Departments)
-                .Select(dept => dept.Id)
-                .ToList();
+            var deptIds = GetRelevantDepartmentIds(StepperModel.MedicalServiceId);
 
             DoctorsWithDepartmentIdsInput.DepartmentIds = deptIds;
             var doctors = (await DoctorsAppService.GetByDepartmentIdsAsync(DoctorsWithDepartmentIdsInput)).Items;
@@ -382,6 +378,13 @@ public partial class Appointments
             IsDoctorListLoading = false;
         }
     }
+
+    private List<Guid> GetRelevantDepartmentIds(Guid? medicalServiceId) =>
+        MedicalServiceWithDepartmentsList
+            .Where(x => x.MedicalService.Id == medicalServiceId)
+            .SelectMany(x => x.Departments)
+            .Select(dept => dept.Id)
+            .ToList();
 
     private async Task GetAvailableSlots()
     {

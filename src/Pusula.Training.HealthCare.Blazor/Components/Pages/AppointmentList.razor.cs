@@ -79,7 +79,7 @@ public partial class AppointmentList : HealthCareComponentBase
             await SetBreadcrumbItemsAsync();
             await SetToolbarItemsAsync();
             await Grid.EnableToolbarItemsAsync(["Delete"], false);
-            await Grid.Refresh();
+            await Refresh();
             await InvokeAsync(StateHasChanged);
         }
     }
@@ -150,7 +150,7 @@ public partial class AppointmentList : HealthCareComponentBase
             AppointmentCollection = dataResult.Result as List<AppointmentDto> ?? [];
         }
 
-        await Grid.Refresh();
+        await Refresh();
     }
 
     private void SetPatientTypes()
@@ -159,6 +159,19 @@ public partial class AppointmentList : HealthCareComponentBase
             .Cast<EnumPatientTypes>()
             .Select(e => new KeyValuePair<string, EnumPatientTypes>(e.ToString(), e))
             .ToList();
+    }
+
+    private async Task ClearFilters()
+    {
+        Filter = new GetAppointmentsInput
+        {
+            MaxResultCount = PageSize,
+            SkipCount = (CurrentPage - 1) * PageSize,
+            Sorting = CurrentSorting,
+        };
+
+        StateHasChanged();
+        await GetAppointmentsAsync();
     }
 
     public void OnActionBegin(ActionEventArgs<AppointmentDto> args)
@@ -239,7 +252,7 @@ public partial class AppointmentList : HealthCareComponentBase
         }
         finally
         {
-            Refresh();
+            await Refresh();
         }
     }
 
@@ -251,20 +264,6 @@ public partial class AppointmentList : HealthCareComponentBase
     private void CancelClick()
     {
         DeleteConfirmDialog.HideAsync();
-    }
-
-    private void OpenEditDialog(AppointmentDto input)
-    {
-        //EditingType = ObjectMapper.Map<AppointmentDto, AppointmentUpdateDto>(input);
-        EditingTypeId = input.Id;
-        IsEditDialogVisible = true;
-    }
-
-    private void CloseEditTypeModal()
-    {
-        EditingType = new AppointmentTypeUpdateDto();
-        EditingTypeId = Guid.Empty;
-        IsEditDialogVisible = false;
     }
 
     private async Task DownloadAsExcelAsync()
@@ -285,19 +284,7 @@ public partial class AppointmentList : HealthCareComponentBase
             forceLoad: true);
     }
 
-    private Task OpenCreateTypeModalAsync()
-    {
-        IsCreateDialogVisible = true;
-        return Task.CompletedTask;
-    }
-
-    private void CloseCreateTypeModal()
-    {
-        NewType = new AppointmentTypeCreateDto();
-        IsCreateDialogVisible = false;
-    }
-
-    private async Task DeleteTypeAsync(AppointmentDto input)
+    private async Task DeleteAppointmentAsync(AppointmentDto input)
     {
         try
         {
@@ -315,47 +302,12 @@ public partial class AppointmentList : HealthCareComponentBase
         }
         finally
         {
-            Refresh();
+            await Refresh();
         }
     }
 
-    private async Task CreateTypeAsync()
+    private async Task Refresh()
     {
-        try
-        {
-            await AppointmentAppService.CreateAsync(new AppointmentCreateDto());
-        }
-        catch (Exception ex)
-        {
-            await HandleErrorAsync(ex);
-        }
-        finally
-        {
-            CloseCreateTypeModal();
-            Refresh();
-        }
-    }
-
-    private async Task UpdateTypeAsync()
-    {
-        try
-        {
-            await AppointmentAppService.UpdateAsync(EditingTypeId, new AppointmentUpdateDto());
-            CloseEditTypeModal();
-        }
-        catch (Exception ex)
-        {
-            await HandleErrorAsync(ex);
-        }
-        finally
-        {
-            CloseEditTypeModal();
-            Refresh();
-        }
-    }
-
-    private void Refresh()
-    {
-        Grid.Refresh();
+        await Grid.Refresh();
     }
 }

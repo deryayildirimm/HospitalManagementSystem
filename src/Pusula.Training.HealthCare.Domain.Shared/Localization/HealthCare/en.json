@@ -219,17 +219,20 @@
     "HealthCareError:AppointmentDateNotValid": "Appointment date must be greater than now.",
     "HealthCareError:DateNotInPast": "Date must be in the future",
     "HealthCareError:InvalidDepartments" : "Some of these departments already connected with the selected medical service.",
-    "HealthCareError:NameAlreadyExist": "You have already a record with this name."
-    "Menu:MyPatients": "My Patients",
+    "HealthCareError:NameAlreadyExist": "You have already a record with this name.",
     "Menu:Treatment":  "Treatment",
-    "Menu:Definitions":  "Definitions",
     "Menu:Icds":  "Icds",
-    "Menu:Operations":  "Operations",
-    "Menu:Reports":  "Reports",
     "Menu:IcdReport":  "IcdReport",
     "Permission:ProtocolTypes" : "Protocol Types",
     "InvalidDateRange" : "The start date cannot be greater than the end date.",
     "Healthcare error occured!!" : "Healthcare error occured!!",
-    "The provided download token is invalid." : "The provided download token is invalid."
+    "The provided download token is invalid." : "The provided download token is invalid.",
+    "ClearFilters": "Clear Filters",
+    "GetAppointmentSlots": "Get Appointment Slots",
+    "AppointmentDate": "Appointment Date",
+    "GoDetails": "Go Details",
+    "SearchPatients": "Search Patients",
+    "PatientNumber": "Patient Number",
+    "RegisterPatient": "Register Patient"
   }
 }

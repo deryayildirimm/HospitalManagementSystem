@@ -101,8 +101,11 @@
             </div>
         </div>
         <div>
-            <SfButton CssClass="e-custom" OnClick="GetAppointmentsAsync">
+            <SfButton CssClass="e-primary" OnClick="GetAppointmentsAsync">
                 <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
+            </SfButton>
+            <SfButton CssClass="e-danger" OnClick="ClearFilters">
+                <SfIcon IconCss="e-icons e-filter-clear"></SfIcon> @L["ClearFilters"]
             </SfButton>
         </div>
 
@@ -163,9 +166,7 @@
 
                 <GridColumn HeaderText="@L["Actions"]" Width="150">
                     <Template Context="context">
-                        <SfButton IconCss="e-icons e-edit" CssClass="e-primary" OnClick="@(() => OpenEditDialog((AppointmentDto)context))">
-                        </SfButton>
-                        <SfButton IconCss="e-icons e-delete" CssClass="e-danger" OnClick="@(() => DeleteTypeAsync((AppointmentDto)context))">
+                        <SfButton IconCss="e-icons e-delete" CssClass="e-danger" OnClick="@(() => DeleteAppointmentAsync((AppointmentDto)context))">
                         </SfButton>
                     </Template>
                 </GridColumn>
@@ -173,46 +174,6 @@
         </SfGrid>
     </div>
 </div>
-
-@* Create Modal *@
-<SfDialog Width="450px" IsModal="true" Header="@L["NewAppointmentType"]"
-          ShowCloseIcon="true" Visible="@IsCreateDialogVisible">
-
-    <EditForm Model="@NewType" OnValidSubmit="CreateTypeAsync">
-        <DataAnnotationsValidator/>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label class="col-form-label">@L["Name"]</label>
-                <SfTextBox @bind-Value="@NewType.Name"></SfTextBox>
-                <ValidationMessage For="@(() => NewType.Name)"></ValidationMessage>
-            </div>
-        </div>
-        <div class="form-group">
-            <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="true" @onclick="CloseCreateTypeModal"/>
-            <SfButton Type="submit" CssClass="e-success e-outline" Content="@L["Save"]" IsPrimary="true"/>
-        </div>
-    </EditForm>
-</SfDialog>
-
-@* Edit Modal *@
-<SfDialog Width="450px" IsModal="true" Header="@L["UpdateAppointmentType"]"
-          ShowCloseIcon="true" Visible="@IsEditDialogVisible">
-
-    <EditForm Model="@EditingType" OnValidSubmit="UpdateTypeAsync">
-        <DataAnnotationsValidator/>
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label class="col-form-label">@L["Name"]</label>
-                <SfTextBox @bind-Value="@EditingType.Name"></SfTextBox>
-                <ValidationMessage For="@(() => EditingType.Name)"></ValidationMessage>
-            </div>
-        </div>
-        <div class="form-group">
-            <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="true" @onclick="CloseEditTypeModal"/>
-            <SfButton Type="submit" CssClass="e-success e-outline" Content="@L["Save"]" IsPrimary="true"/>
-        </div>
-    </EditForm>
-</SfDialog>
 
 @* ************************* CONFIRM MODAL ************************* *@
 <SfDialog @ref="DeleteConfirmDialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">

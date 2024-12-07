@@ -20,8 +20,8 @@ public class HealthCareGlobalException :IHealthCareGlobalException
         if (condition)
             ThrowException(message, code);
     }
-    
-    public static void ThrowException(string message, string code) => new UserFriendlyException(message ?? HealthCareDomainErrorCodes.HealthcareError_MESSAGE , code ?? HealthCareDomainErrorCodes.HealthcareError_CODE);
+
+    private static void ThrowException(string message, string code) => throw new UserFriendlyException(message ?? HealthCareDomainErrorCodes.HealthcareError_MESSAGE , code ?? HealthCareDomainErrorCodes.HealthcareError_CODE);
     
     
 }

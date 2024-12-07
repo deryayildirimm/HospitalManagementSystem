@@ -10,11 +10,13 @@
 @using IconName = Syncfusion.Blazor.Buttons.IconName
 @using IconSize = Syncfusion.Blazor.Buttons.IconSize
 @using Syncfusion.Blazor.Buttons
+@using Volo.Abp.AspNetCore.Components.Messages
 @using Syncfusion.Blazor.Schedule
 
 @inject AppointmentAppService AppointmentAppService
 @inject DoctorsAppService DoctorAppService
 @inject IStringLocalizer<HealthCareResource> L
+@inject IUiMessageService UiMessageService
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title=@L["AppointmentOverview"]>
@@ -69,29 +71,29 @@
 
             </div>
 
-            <SfSchedule TValue="AppointmentData" Height="650px" @bind-SelectedDate="@CurrentDate">
+            <SfSchedule TValue="AppointmentCustomData" Height="650px" @bind-SelectedDate="@CurrentDate">
                 <ScheduleEventSettings EnableTooltip="true" DataSource="@DataSource">
 
                     <Template>
-                        <div>@(((context as AppointmentData)!).DoctorName) - @(((context as AppointmentData)!).PatientName) (@(((context as AppointmentData)!).StartTime) - @(((context as AppointmentData)!).EndTime))</div>
+                        <div>@(((context as AppointmentCustomData)!).DoctorName) - @(((context as AppointmentCustomData)!).PatientName) (@(((context as AppointmentCustomData)!).StartTime) - @(((context as AppointmentCustomData)!).EndTime))</div>
                         <div></div>
                     </Template>
                     <TooltipTemplate>
                         <div class="tooltip-wrap">
                             <div>
-                                <strong>Doctor: </strong> @(((context as AppointmentData)!).DoctorName)
+                                <strong>Doctor: </strong> @(((context as AppointmentCustomData)!).DoctorName)
                             </div>
                             <div>
-                                <strong>Patient: </strong> @(((context as AppointmentData)!).PatientName)
+                                <strong>Patient: </strong> @(((context as AppointmentCustomData)!).PatientName)
                             </div>
                             <div>
-                                <strong>Service: </strong> @(((context as AppointmentData)!).ServiceName)
+                                <strong>Service: </strong> @(((context as AppointmentCustomData)!).ServiceName)
                             </div>
                             <div>
-                                <strong>From: </strong> @(((context as AppointmentData)!).StartTime)
+                                <strong>From: </strong> @(((context as AppointmentCustomData)!).StartTime)
                             </div>
                             <div>
-                                <strong>To: </strong>@(((context as AppointmentData)!).EndTime)
+                                <strong>To: </strong>@(((context as AppointmentCustomData)!).EndTime)
                             </div>
                         </div>
                     </TooltipTemplate>

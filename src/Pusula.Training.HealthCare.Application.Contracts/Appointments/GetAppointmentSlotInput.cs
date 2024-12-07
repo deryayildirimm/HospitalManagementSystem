@@ -12,7 +12,7 @@ public class GetAppointmentSlotInput
     public Guid MedicalServiceId { get; set; }
     
     [Required]
-    public DateTime Date { get; set; }
+    public DateTime Date { get; set; } = DateTime.Today;
     
     public GetAppointmentSlotInput()
     {
