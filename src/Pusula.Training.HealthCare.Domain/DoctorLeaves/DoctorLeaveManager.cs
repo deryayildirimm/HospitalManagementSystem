@@ -2,13 +2,14 @@
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Volo.Abp;
 using Volo.Abp.Data;
 using Volo.Abp.Domain.Services;
 
 namespace Pusula.Training.HealthCare.DoctorLeaves;
 
-public class DoctorLeaveManager(IDoctorLeaveRepository repo) : DomainService, IDoctorLeaveManager
+public class DoctorLeaveManager(IDoctorLeaveRepository doctorLeaveRepository) : DomainService, IDoctorLeaveManager
 {
      public virtual async Task<DoctorLeave> CreateAsync( Guid doctorId, DateTime startDate, DateTime endDate, string? reason=null )
     {
@@ -16,15 +17,14 @@ public class DoctorLeaveManager(IDoctorLeaveRepository repo) : DomainService, ID
             Check.NotNull(startDate, nameof(startDate));
             Check.NotNull(endDate, nameof(endDate));
 
-            if (startDate > endDate)
-                throw new BusinessException("InvalidDateRange",
-                        "The start date cannot be greater than the end date.").WithData("StartDate", startDate)
-                    .WithData("EndDate", endDate);
-
+            HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidDateRange_MESSAGE, 
+                HealthCareDomainErrorCodes.InvalidDateRange_CODE, 
+                startDate > endDate);
+            
             var leaves = new DoctorLeave(
                 GuidGenerator.Create(), doctorId, startDate, endDate, reason);
 
-            return await repo.InsertAsync(leaves);
+            return await doctorLeaveRepository.InsertAsync(leaves);
     
    
     }
@@ -32,20 +32,16 @@ public class DoctorLeaveManager(IDoctorLeaveRepository repo) : DomainService, ID
     public virtual async Task<DoctorLeave> UpdateAsync( Guid id, Guid doctorId,
         DateTime startDate, DateTime endDate, string? reason = null,  [CanBeNull] string? concurrencyStamp = null)
     {
-        
-        try
-        {
-            Check.NotNull(doctorId, nameof(doctorId));
+       
+             Check.NotNull(doctorId, nameof(doctorId));
              Check.NotNull(startDate, nameof(startDate));
              Check.NotNull(endDate, nameof(endDate));
+             
+             HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidDateRange_MESSAGE, 
+                 HealthCareDomainErrorCodes.InvalidDateRange_CODE, 
+                 startDate > endDate);
         
-             if (startDate > endDate)
-                   throw new BusinessException("InvalidDateRange",
-                     "The start date cannot be greater than the end date.").WithData("StartDate", startDate)
-                    .WithData("EndDate", endDate)
-                    .GetBaseException();
-        
-             var leaves = await repo.GetAsync(id);
+             var leaves = await doctorLeaveRepository.GetAsync(id);
         
              leaves.SetDoctorId(doctorId);
              leaves.SetStartDate(startDate);
@@ -53,13 +49,8 @@ public class DoctorLeaveManager(IDoctorLeaveRepository repo) : DomainService, ID
              leaves.SetReason(reason);
         
              leaves.SetConcurrencyStampIfNotNull(concurrencyStamp);
-             return await repo.UpdateAsync(leaves);
-        }
-        catch (Exception e)
-        {
-            throw new UserFriendlyException($"An unexpected error occurred during update leave : {e.Message}" );
-        
-        }
+             return await doctorLeaveRepository.UpdateAsync(leaves);
+    
        
     }
         

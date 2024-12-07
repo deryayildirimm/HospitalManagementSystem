@@ -8,13 +8,13 @@ namespace Pusula.Training.HealthCare.DoctorLeaves;
 public class DoctorLeave : FullAuditedAggregateRoot<Guid>
 {
     [NotNull]
-    public virtual Guid DoctorId { get; protected set; }
+    public virtual Guid DoctorId { get; private set; }
     [NotNull]
-    public virtual DateTime StartDate { get; protected set; }
+    public virtual DateTime StartDate { get; private set; }
     [NotNull]
-    public virtual DateTime EndDate { get; protected set; }
+    public virtual DateTime EndDate { get; private set; }
 
-    [CanBeNull] public virtual string? Reason { get; set; } = string.Empty;
+    [CanBeNull] public virtual string? Reason { get; private set; } = string.Empty;
 
 
     protected DoctorLeave()
@@ -41,7 +41,7 @@ public class DoctorLeave : FullAuditedAggregateRoot<Guid>
         Id = id;
     }
 
-    public void SetId(Guid id)
+    private void SetId(Guid id)
     {
         Check.NotNull(id, nameof(id));
         Id = id;

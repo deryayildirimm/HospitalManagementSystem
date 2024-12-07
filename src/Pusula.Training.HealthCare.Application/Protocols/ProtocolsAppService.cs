@@ -9,9 +9,9 @@ using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
-using Volo.Abp.Authorization;
 using Volo.Abp.Caching;
 using Volo.Abp.Content;
 using Volo.Abp.Domain.Repositories;
@@ -25,12 +25,14 @@ namespace Pusula.Training.HealthCare.Protocols
         ProtocolManager protocolManager, 
         IDistributedCache<ProtocolDownloadTokenCacheItem, string> downloadTokenCache, 
         IRepository<Patients.Patient, Guid> patientRepository, 
-        IRepository<Departments.Department, Guid> departmentRepository) : HealthCareAppService, IProtocolsAppService
+        IRepository<Departments.Department, Guid> departmentRepository,
+        IRepository<Doctors.Doctor, Guid> doctorRepository,
+        IRepository<ProtocolTypes.ProtocolType, Guid> protocolTypeRepository) : HealthCareAppService, IProtocolsAppService
     {
         public virtual async Task<PagedResultDto<ProtocolWithNavigationPropertiesDto>> GetListAsync(GetProtocolsInput input)
         {
-            var totalCount = await protocolRepository.GetCountAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTime, input.PatientId, input.DepartmentId);
-            var items = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTime, input.PatientId, input.DepartmentId, input.Sorting, input.MaxResultCount, input.SkipCount);
+            var totalCount = await protocolRepository.GetCountAsync(input.FilterText, input.Notes, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin,input.EndTimeMax, input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId);
+            var items = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Notes, input.StartTimeMin, input.StartTimeMax,  input.EndTimeMin,input.EndTimeMax,input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId,input.Sorting, input.MaxResultCount, input.SkipCount);
 
             return new PagedResultDto<ProtocolWithNavigationPropertiesDto>
             {
@@ -39,15 +41,18 @@ namespace Pusula.Training.HealthCare.Protocols
             };
         }
 
-        public virtual async Task<ProtocolWithNavigationPropertiesDto> GetWithNavigationPropertiesAsync(Guid id)
+        public virtual async Task<ProtocolDto> GetWithNavigationPropertiesAsync(Guid id)
         {
-            return ObjectMapper.Map<ProtocolWithNavigationProperties, ProtocolWithNavigationPropertiesDto>
+            return ObjectMapper.Map<Protocol, ProtocolDto>
                 (await protocolRepository.GetWithNavigationPropertiesAsync(id));
         }
 
-        public virtual async Task<ProtocolDto> GetAsync(Guid id)
+        public virtual async Task<ProtocolDto> GetAsync(Guid id )
         {
-            return ObjectMapper.Map<Protocol, ProtocolDto>(await protocolRepository.GetAsync(id));
+
+            var protocol = await protocolRepository.GetAsync(id);
+            
+            return ObjectMapper.Map<Protocol, ProtocolDto>(protocol);
         }
 
         public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetPatientLookupAsync(LookupRequestDto input)
@@ -62,6 +67,37 @@ namespace Pusula.Training.HealthCare.Protocols
             {
                 TotalCount = totalCount,
                 Items = ObjectMapper.Map<List<Patients.Patient>, List<LookupDto<Guid>>>(lookupData)
+            };
+        }
+
+
+        public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookUpAsync(LookupRequestDto input)
+        {
+            var query = (await protocolTypeRepository.GetQueryableAsync())
+                .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
+                    x => x.Name.Contains(input.Filter));
+            var lookupData = await query.PageBy(input.SkipCount, input.MaxResultCount).ToDynamicListAsync<ProtocolTypes.ProtocolType>();
+            var totalCount = query.Count();
+
+            return new PagedResultDto<LookupDto<Guid>>
+            {
+                TotalCount = totalCount,
+                Items = ObjectMapper.Map<List<ProtocolTypes.ProtocolType>, List<LookupDto<Guid>>>(lookupData)
+            };
+        }
+        
+        public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetDoctorLookUpAsync(LookupRequestDto input)
+        {
+            var query = (await doctorRepository.GetQueryableAsync())
+                .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
+                    x => x.FirstName != null && x.FirstName.Contains(input.Filter!));
+
+            var lookupData = await query.PageBy(input.SkipCount, input.MaxResultCount).ToDynamicListAsync<Doctors.Doctor>();
+            var totalCount = query.Count();
+            return new PagedResultDto<LookupDto<Guid>>
+            {
+                TotalCount = totalCount,
+                Items = ObjectMapper.Map<List<Doctors.Doctor>, List<LookupDto<Guid>>>(lookupData)
             };
         }
 
@@ -89,17 +125,25 @@ namespace Pusula.Training.HealthCare.Protocols
         [Authorize(HealthCarePermissions.Protocols.Create)]
         public virtual async Task<ProtocolDto> CreateAsync(ProtocolCreateDto input)
         {
-            if (input.PatientId == default)
-            {
-                throw new UserFriendlyException(L["The {0} field is required.", L["Patient"]]);
-            }
-            if (input.DepartmentId == default)
-            {
-                throw new UserFriendlyException(L["The {0} field is required.", L["Department"]]);
-            }
+            HealthCareGlobalException.ThrowIf(
+                L["The {0} field is required.", L["Patient"]],
+                input.PatientId == default
+            );
 
+            HealthCareGlobalException.ThrowIf(
+                L["The {0} field is required.", L["Department"]],
+                input.DepartmentId == default
+            );
+            HealthCareGlobalException.ThrowIf(
+                L["The {0} field is required.", L["Doctor"]],
+                input.DoctorId == default
+            );
+            HealthCareGlobalException.ThrowIf(
+                L["The {0} field is required.", L["ProtocolType"]],
+                input.ProtocolTypeId == default
+            );
             var protocol = await protocolManager.CreateAsync(
-            input.PatientId, input.DepartmentId, input.Type, input.StartTime, input.EndTime
+            input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId, input.StartTime, input.Notes, input.EndTime
             );
 
             return ObjectMapper.Map<Protocol, ProtocolDto>(protocol);
@@ -108,41 +152,56 @@ namespace Pusula.Training.HealthCare.Protocols
         [Authorize(HealthCarePermissions.Protocols.Edit)]
         public virtual async Task<ProtocolDto> UpdateAsync(Guid id, ProtocolUpdateDto input)
         {
-            if (input.PatientId == default)
-            {
-                throw new UserFriendlyException(L["The {0} field is required.", L["Patient"]]);
-            }
-            if (input.DepartmentId == default)
-            {
-                throw new UserFriendlyException(L["The {0} field is required.", L["Department"]]);
-            }
+            
+            HealthCareGlobalException.ThrowIf(
+                L["The {0} field is required.", L["Patient"]],
+                input.PatientId == default
+            );
 
+            HealthCareGlobalException.ThrowIf(
+                L["The {0} field is required.", L["Department"]],
+                input.DepartmentId == default
+            );
+            HealthCareGlobalException.ThrowIf(
+                L["The {0} field is required.", L["Doctor"]],
+                input.DoctorId == default
+            );
+            HealthCareGlobalException.ThrowIf(
+                L["The {0} field is required.", L["ProtocolType"]],
+                input.ProtocolTypeId == default
+            );
+            
             var protocol = await protocolManager.UpdateAsync(
             id,
-            input.PatientId, input.DepartmentId, input.Type, input.StartTime, input.EndTime, input.ConcurrencyStamp
+            input.PatientId, input.DepartmentId, input.ProtocolTypeId,  input.DoctorId,  input.StartTime, input.Notes, input.EndTime, input.ConcurrencyStamp
             );
 
             return ObjectMapper.Map<Protocol, ProtocolDto>(protocol);
         }
 
+       
         [AllowAnonymous]
         public virtual async Task<IRemoteStreamContent> GetListAsExcelFileAsync(ProtocolExcelDownloadDto input)
         {
             var downloadToken = await downloadTokenCache.GetAsync(input.DownloadToken);
-            if (downloadToken == null || input.DownloadToken != downloadToken.Token)
-            {
-                throw new AbpAuthorizationException("Invalid download token: " + input.DownloadToken);
-            }
+            
+            HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidDownloadToken_MESSAGE,
+                HealthCareDomainErrorCodes.InvalidDownloadToken_CODE,
+                (downloadToken == null || input.DownloadToken != downloadToken.Token));
+            
 
-            var protocols = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTime, input.PatientId, input.DepartmentId);
+            var protocols = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin,input.EndTimeMax, input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId );
             var items = protocols.Select(item => new
             {
-                item.Protocol.Type,
-                item.Protocol.StartTime,
-                item.Protocol.EndTime,
+              //  item.Protocol.Note,
+            //    item.Protocol.StartTime,
+             //   item.Protocol.EndTime,
 
                 Patient = item.Patient?.FirstName,
                 Department = item.Department?.Name,
+                Doctor = item.Doctor?.FirstName + " " + item.Doctor?.LastName,
+                ProtocolType = item.ProtocolType?.Name,
+                
 
             });
 
@@ -154,16 +213,14 @@ namespace Pusula.Training.HealthCare.Protocols
         }
 
         [Authorize(HealthCarePermissions.Protocols.Delete)]
-        public virtual async Task DeleteByIdsAsync(List<Guid> protocolIds)
-        {
-            await protocolRepository.DeleteManyAsync(protocolIds);
-        }
+        public virtual async Task DeleteByIdsAsync(List<Guid> protocolIds)  =>   await protocolRepository.DeleteManyAsync(protocolIds);
+     
 
         [Authorize(HealthCarePermissions.Protocols.Delete)]
-        public virtual async Task DeleteAllAsync(GetProtocolsInput input)
-        {
-            await protocolRepository.DeleteAllAsync(input.FilterText, input.Type, input.StartTimeMin, input.StartTimeMax, input.EndTime, input.PatientId, input.DepartmentId);
-        }
+        public virtual async Task DeleteAllAsync(GetProtocolsInput input) => 
+            await protocolRepository.DeleteAllAsync(input.FilterText, input.Notes, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin, input.EndTimeMax, input.PatientId, input.DepartmentId, input.DoctorId);
+        
+        
         public virtual async Task<Shared.DownloadTokenResultDto> GetDownloadTokenAsync()
         {
             var token = Guid.NewGuid().ToString("N");
