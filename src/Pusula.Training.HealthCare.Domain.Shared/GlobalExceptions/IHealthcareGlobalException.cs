@@ -2,7 +2,7 @@
 
 namespace Pusula.Training.HealthCare.GlobalExceptions;
 
-public class IHealthCareGlobalException :ISingletonDependency
+public interface IHealthCareGlobalException :ISingletonDependency
 {
     
 }
