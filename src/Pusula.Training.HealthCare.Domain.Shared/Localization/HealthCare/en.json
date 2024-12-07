@@ -233,6 +233,8 @@
     "GoDetails": "Go Details",
     "SearchPatients": "Search Patients",
     "PatientNumber": "Patient Number",
-    "RegisterPatient": "Register Patient"
+    "RegisterPatient": "Register Patient",
+    "PatientCreated": "Patient created successfully!",
+    "Information": "Information"
   }
 }

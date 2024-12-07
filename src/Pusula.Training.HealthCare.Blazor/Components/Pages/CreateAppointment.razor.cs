@@ -11,6 +11,7 @@ using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Schedule;
 using Volo.Abp;
 
@@ -56,6 +57,10 @@ public partial class CreateAppointment
     private List<KeyValuePair<string, EnumGender>> GendersCollection { get; set; }
     private SfSchedule<AppointmentCustomData> ScheduleObj { get; set; }
 
+    private SfToast ToastObj { get; set; }
+    private string ToastPosition { get; set; } = "";
+    private string ToastContent { get; set; } = "";
+
     private bool IsSlotSearchAvailable =>
         IsAppointmentTypeIdValid(NewAppointment.MedicalServiceId) &&
         IsAppointmentTypeIdValid(NewAppointment.DoctorId);
@@ -76,6 +81,7 @@ public partial class CreateAppointment
         IsDoctorsEnabled = false;
         IsVisibleSearchPatient = false;
         ScheduleObj = new SfSchedule<AppointmentCustomData>();
+        ToastObj = new SfToast();
         DoctorsWithDepartmentIdsInput = new GetDoctorsWithDepartmentIdsInput
         {
             Name = "",
@@ -370,13 +376,23 @@ public partial class CreateAppointment
     {
         try
         {
-            //if()
-            return;
-            var result = await PatientsAppService.CreateAsync(NewPatient);
+            await PatientsAppService.CreateAsync(NewPatient);
+            ToastContent = @L["PatientCreated"];
+            await ShowOnClick();
         }
         catch (Exception e)
         {
-            //await UiMessageService.Error(e.Message);
+            await UiMessageService.Error(e.Message);
         }
+    }
+
+    private async Task ShowOnClick()
+    {
+        await ToastObj.ShowAsync();
+    }
+
+    private async Task HideOnClick()
+    {
+        await ToastObj.HideAsync("All");
     }
 }

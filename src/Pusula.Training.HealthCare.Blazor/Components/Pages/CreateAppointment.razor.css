@@ -73,3 +73,13 @@
 .e-tab .e-tab-header .e-toolbar-item.e-active .e-tab-icon {
     font-weight: bold !important;
 }
+
+.e-toast-container .e-toast .e-toast-message .e-toast-content {
+    color: black;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.e-custom {
+    width: 200px;
+}

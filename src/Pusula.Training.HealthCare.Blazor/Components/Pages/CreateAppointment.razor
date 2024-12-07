@@ -12,6 +12,7 @@
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Notifications
 @inherits HealthCareComponentBase
 
 @inject PatientAdaptor PatientAdaptor
@@ -238,6 +239,11 @@
                                     </SfDataManager>
                                     <GridPageSettings PageSize="8"></GridPageSettings>
                                     <GridColumns>
+                                        <GridColumn HeaderText="@L["IdentityNumber"]" Width="auto">
+                                            <Template Context="context">
+                                                @($"{((PatientDto)context).IdentityAndPassportNumber}")
+                                            </Template>
+                                        </GridColumn>
                                         <GridColumn HeaderText="@L["Number"]" Width="auto">
                                             <Template Context="context">
                                                 @($"{((PatientDto)context).PatientNumber}")
@@ -282,6 +288,11 @@
                                     <DataAnnotationsValidator/>
                                     <div class="form-row">
                                         <div class="form-group col-6">
+                                            <h6 class="text-black">@L["IdentityNumber"]</h6>
+                                            <SfTextBox @bind-Value="@NewPatient.IdentityAndPassportNumber" Placeholder="@L["IdentityNumber"]"></SfTextBox>
+                                            <ValidationMessage For="@(() => NewPatient.IdentityAndPassportNumber)"></ValidationMessage>
+                                        </div>
+                                        <div class="form-group col-6">
                                             <h6 class="text-black">@L["FirstName"]</h6>
                                             <SfTextBox @bind-Value="@NewPatient.FirstName" Placeholder="@L["FirstName"]"></SfTextBox>
                                             <ValidationMessage For="@(() => NewPatient.FirstName)"></ValidationMessage>
@@ -305,7 +316,7 @@
                                         </div>
                                     </div>
                                     <div class="col-12">
-                                        <SfButton Type="submit" CssClass="e-success e-outline" IsPrimary="true" OnClick="RegisterPatient">
+                                        <SfButton Type="submit" CssClass="e-success e-outline e-custom" IsPrimary="true">
                                             @L["Register"]
                                         </SfButton>
                                     </div>
@@ -318,3 +329,16 @@
         </Content>
     </DialogTemplates>
 </SfDialog>
+
+
+<div class="col-lg-12 control-section toast-default-section">
+    <SfToast ID="toast_default" @ref="ToastObj" Title="@L["Information"]" Content="@ToastContent" Timeout="5000" Icon="e-meeting">
+        <ToastPosition X="Right" Y="Bottom"></ToastPosition>
+    </SfToast>
+    <div class="col-lg-12 col-sm-12 col-md-12 center">
+        <div id="toastBtnDefault" style="margin: auto;text-align: center">
+            <button class="e-btn" @onclick="@ShowOnClick">Show Toasts</button>
+            <button class="e-btn" @onclick="@HideOnClick">Hide All</button>
+        </div>
+    </div>
+</div>
