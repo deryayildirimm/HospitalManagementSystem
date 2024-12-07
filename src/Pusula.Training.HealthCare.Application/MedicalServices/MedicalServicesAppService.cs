@@ -79,7 +79,7 @@ public class MedicalServicesAppService(
     [Authorize(HealthCarePermissions.MedicalServices.Create)]
     public virtual async Task<MedicalServiceDto> CreateAsync(MedicalServiceCreateDto input)
     {
-        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.NameAlreadyExists,
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.NameAlreadyExists,
             await medicalServiceRepository.FirstOrDefaultAsync(x => x.Name == input.Name) is not null);
 
         var medicalService = await medicalServiceManager.CreateAsync(
@@ -97,7 +97,7 @@ public class MedicalServicesAppService(
     [Authorize(HealthCarePermissions.MedicalServices.Edit)]
     public virtual async Task<MedicalServiceDto> UpdateAsync(Guid id, MedicalServiceUpdateDto input)
     {
-        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorNotWorking,
+         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorNotWorking,
             await medicalServiceRepository.FirstOrDefaultAsync(x => x.Name == input.Name && x.Id != id) is not null);
 
         var medicalService = await medicalServiceManager.UpdateAsync(

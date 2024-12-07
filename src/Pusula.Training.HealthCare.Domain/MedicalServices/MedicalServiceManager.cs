@@ -62,7 +62,7 @@ public class MedicalServiceManager(
 
         var service = await medicalServiceRepository.FirstOrDefaultAsync(x => x.Id == id);
 
-        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.MedicalServiceNotFound, service is null);
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.MedicalServiceNotFound, service is null);
 
         service!.SetName(name);
         service!.SetCost(cost);
@@ -85,7 +85,7 @@ public class MedicalServiceManager(
             .Select(x => x.Id)
             .ToList();
 
-        HealthcareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DepartmentNotFound,
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DepartmentNotFound,
             departmentIds.Count == 0);
 
         foreach (var id in departmentIds)

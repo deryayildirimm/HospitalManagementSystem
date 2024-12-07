@@ -1,8 +1,8 @@
-using Volo.Abp.DependencyInjection;
+﻿using Volo.Abp.DependencyInjection;
 
 namespace Pusula.Training.HealthCare.GlobalExceptions;
 
-public interface IHealthcareGlobalException : ISingletonDependency
+public class IHealthCareGlobalException :ISingletonDependency
 {
     
 }
