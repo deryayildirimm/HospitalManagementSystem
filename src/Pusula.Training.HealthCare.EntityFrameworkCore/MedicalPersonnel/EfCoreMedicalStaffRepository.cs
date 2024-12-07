@@ -47,12 +47,12 @@ public class EfCoreMedicalStaffRepository(IDbContextProvider<HealthCareDbContext
         var dbContext = await GetDbContextAsync();
 
         return (await GetDbSetAsync()).Where(b => b.Id == id)
-            .Select(doctor => new MedicalStaffWithNavigationProperties
+            .Select(medicalStaff => new MedicalStaffWithNavigationProperties
             {
-                MedicalStaff = doctor,
-                City = dbContext.Set<City>().FirstOrDefault(c => c.Id == doctor.CityId)!,
-                District = dbContext.Set<District>().FirstOrDefault(c => c.Id == doctor.DistrictId)!,
-                Department = dbContext.Set<Department>().FirstOrDefault(c => c.Id == doctor.DepartmentId)!
+                MedicalStaff = medicalStaff,
+                City = medicalStaff.City,
+                District = medicalStaff.District,
+                Department = medicalStaff.Department,
             })
             .FirstOrDefault()!;
     }

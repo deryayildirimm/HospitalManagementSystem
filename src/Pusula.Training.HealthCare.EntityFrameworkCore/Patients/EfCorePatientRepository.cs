@@ -20,24 +20,21 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
-        string? identityNumber = null,
+        string? identityAndPassportNumber = null,
         string? nationality = null,
-        string? passportNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
         string? emailAddress = null,
         string? mobilePhoneNumber = null,
         EnumPatientTypes? patientType = null,
-        EnumInsuranceType? insuranceType = null,
-        string? insuranceNo = null,
         EnumDiscountGroup? discountGroup = null,
         EnumGender? gender = null,
         CancellationToken cancellationToken = default)
     {
         var query = await GetQueryableAsync();
 
-        query = ApplyFilter(query, filterText, patientNumber, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, birthDateMax, 
-            emailAddress, mobilePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender);
+        query = ApplyFilter(query, filterText, patientNumber, firstName, lastName, identityAndPassportNumber, nationality, birthDateMin, birthDateMax, 
+            emailAddress, mobilePhoneNumber, patientType, discountGroup, gender);
 
         var ids = query.Select(x => x.Id);
         await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
@@ -48,16 +45,13 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
-        string? identityNumber = null,
+        string? identityAndPassportNumber = null,
         string? nationality = null,
-        string? passportNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
         string? emailAddress = null,
         string? mobilePhoneNumber = null,
         EnumPatientTypes? patientType = null,
-        EnumInsuranceType? insuranceType = null,
-        string? insuranceNo = null,
         EnumDiscountGroup? discountGroup = null,
         EnumGender? gender = null,
         string? sorting = null,
@@ -66,8 +60,8 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), filterText, patientNumber, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, 
-            birthDateMax, emailAddress, mobilePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender, isDeleted);
+        var query = ApplyFilter((await GetQueryableAsync()), filterText, patientNumber, firstName, lastName, identityAndPassportNumber, nationality, birthDateMin, 
+            birthDateMax, emailAddress, mobilePhoneNumber, patientType, discountGroup, gender, isDeleted);
       //  query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? PatientConsts.GetDefaultSorting(false) : sorting);
       query = query.OrderBy(e => e.IsDeleted) // IsDeleted'e göre önce sıralama
           .ThenByDescending(e => e.CreationTime) // IsDeleted içindeki her grupta en son oluşturulan en başta görünsün
@@ -75,7 +69,6 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
     
-       
     public virtual async Task<Patient> GetPatientByNumberAsync(
         int patientNumber ,
         CancellationToken cancellationToken = default)
@@ -87,31 +80,28 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
                    .FirstOrDefaultAsync(cancellationToken)
                ?? throw new EntityNotFoundException(typeof(Patient), patientNumber);
     }
-
     
+
 
     public virtual async Task<long> GetCountAsync(
         string? filterText = null,
         int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
-        string? identityNumber = null,
+        string? identityAndPassportNumber = null,
         string? nationality = null,
-        string? passportNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
         string? emailAddress = null,
         string? mobilePhoneNumber = null,
         EnumPatientTypes? patientType = null,
-        EnumInsuranceType? insuranceType = null,
-        string? insuranceNo = null,
         EnumDiscountGroup? discountGroup = null,
         EnumGender? gender = null,
         bool? isDeleted = null,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetDbSetAsync()), filterText, patientNumber, firstName, lastName, identityNumber, nationality, passportNumber, birthDateMin, birthDateMax, 
-            emailAddress, mobilePhoneNumber, patientType, insuranceType, insuranceNo, discountGroup, gender, isDeleted);
+        var query = ApplyFilter((await GetDbSetAsync()), filterText, patientNumber, firstName, lastName, identityAndPassportNumber, nationality, birthDateMin, birthDateMax, 
+            emailAddress, mobilePhoneNumber, patientType, discountGroup, gender, isDeleted);
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
 
@@ -121,41 +111,36 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
-        string? identityNumber = null,
+        string? identityAndPassportNumber = null,
         string? nationality = null,
-        string? passportNumber = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
         string? emailAddress = null,
         string? mobilePhoneNumber = null,
         EnumPatientTypes? patientType = null,
-        EnumInsuranceType? insuranceType = null,
-        string? insuranceNo = null,
         EnumDiscountGroup? discountGroup = null,
         EnumGender? gender = null, 
         bool? isDeleted = null)
     {
+        // sadece isDeleted true ise silinen verileri de göster 
+        query = isDeleted == true ? query.IgnoreQueryFilters() : query;
+        
         return query
             .WhereIf(!string.IsNullOrWhiteSpace(filterText),
                 e => e.FirstName!.Contains(filterText!) || e.LastName!.Contains(filterText!) ||
-                     e.IdentityNumber!.Contains(filterText!) || e.EmailAddress!.Contains(filterText!) ||
+                     e.IdentityAndPassportNumber!.Contains(filterText!) || e.EmailAddress!.Contains(filterText!) ||
                      e.MobilePhoneNumber!.Contains(filterText!))
             .WhereIf(!string.IsNullOrWhiteSpace(firstName), e => e.FirstName.ToLower().Contains(firstName!.ToLower()))
             .WhereIf(!string.IsNullOrWhiteSpace(lastName), e => e.LastName.ToLower().Contains(lastName!.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(identityNumber), e => e.IdentityNumber!.Contains(identityNumber!))
-            .WhereIf(!string.IsNullOrWhiteSpace(passportNumber),
-                e => e.PassportNumber!.ToLower().Contains(passportNumber!.ToLower()))
+            .WhereIf(!string.IsNullOrWhiteSpace(identityAndPassportNumber), e => e.IdentityAndPassportNumber!.Contains(identityAndPassportNumber!))
             .WhereIf(birthDateMin.HasValue, e => e.BirthDate >= birthDateMin!.Value)
             .WhereIf(birthDateMax.HasValue, e => e.BirthDate <= birthDateMax!.Value)
             .WhereIf(!string.IsNullOrWhiteSpace(emailAddress), e => e.EmailAddress!.Contains(emailAddress!))
-            .WhereIf(!string.IsNullOrWhiteSpace(mobilePhoneNumber),
-                e => e.MobilePhoneNumber.Contains(mobilePhoneNumber!))
+            .WhereIf(!string.IsNullOrWhiteSpace(mobilePhoneNumber), e => e.MobilePhoneNumber!.Contains(mobilePhoneNumber!))
             .WhereIf(patientType.HasValue, e => e.PatientType == patientType)
-            .WhereIf(insuranceType.HasValue, e => e.InsuranceType == insuranceType)
-            .WhereIf(!string.IsNullOrWhiteSpace(insuranceNo), e => e.InsuranceNo!.Contains(insuranceNo!))
             .WhereIf(discountGroup.HasValue, e => e.DiscountGroup != null && e.DiscountGroup == discountGroup)
             .WhereIf(gender.HasValue, e => e.Gender == gender)
-            .WhereIf(isDeleted == true, e => e.IsDeleted)// Sadece isDeleted true ise filtre uygula
-            .WhereIf(patientNumber.HasValue, e => e.PatientNumber == patientNumber); 
+            .WhereIf(isDeleted == true, e => e.IsDeleted) // Sadece isDeleted true ise filtre uygula
+            .WhereIf(patientNumber.HasValue, e => e.PatientNumber == patientNumber);
     }
 }

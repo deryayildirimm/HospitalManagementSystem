@@ -7,92 +7,154 @@ namespace Pusula.Training.HealthCare.Patients
 {
     public class Patient : FullAuditedAggregateRoot<Guid>
     {
-        [NotNull] public virtual int PatientNumber { get; set; }
+        [NotNull] public virtual int PatientNumber { get; private set; }
 
-        [NotNull] public virtual string FirstName { get; set; }
+        [NotNull] public virtual string FirstName { get; private set; } = string.Empty;
 
-        [NotNull] public virtual string LastName { get; set; }
+        [NotNull] public virtual string LastName { get; private set; } = string.Empty;
 
-        [CanBeNull] public virtual string? MothersName { get; set; }
+        [CanBeNull] public virtual string? MothersName { get; private set; }
 
-        [CanBeNull] public virtual string? FathersName { get; set; }
+        [CanBeNull] public virtual string? FathersName { get; private set; }
 
-        [CanBeNull] public virtual string? IdentityNumber { get; set; }
+        [NotNull] public virtual string IdentityAndPassportNumber { get; private set; } = string.Empty;
 
-        [NotNull] public virtual string Nationality { get; set; }
+        [CanBeNull] public virtual string? Nationality { get; private set; }
 
-        [CanBeNull] public virtual string? PassportNumber { get; set; }
+        [NotNull] public virtual DateTime BirthDate { get; private set; }
 
-        [NotNull] public virtual DateTime BirthDate { get; set; }
+        [CanBeNull] public virtual string? EmailAddress { get; private set; }
 
-        [CanBeNull] public virtual string? EmailAddress { get; set; }
-
-        [NotNull] public virtual string MobilePhoneNumber { get; set; }
+        [CanBeNull] public virtual string? MobilePhoneNumber { get; private set; }
         
-        [CanBeNull] public virtual EnumRelative? Relative { get; set; }
+        [CanBeNull] public virtual EnumRelative? Relative { get; private set; }
 
-        [CanBeNull] public virtual string? RelativePhoneNumber { get; set; }
+        [CanBeNull] public virtual string? RelativePhoneNumber { get; private set; }
 
-        [NotNull] public virtual EnumPatientTypes PatientType { get; set; }
+        [CanBeNull] public virtual EnumPatientTypes? PatientType { get; private set; }
 
-        [CanBeNull] public virtual string? Address { get; set; }
+        [CanBeNull] public virtual string? Address { get; private set; }
 
-        [NotNull] public virtual EnumInsuranceType InsuranceType { get; set; }
+        [CanBeNull] public virtual EnumDiscountGroup? DiscountGroup { get; private set; }
 
-        [NotNull] public virtual string InsuranceNo { get; set; }
-
-        [CanBeNull] public virtual EnumDiscountGroup? DiscountGroup { get; set; }
-
-        [NotNull] public virtual EnumGender Gender { get; set; }
+        [NotNull] public virtual EnumGender Gender { get; private set; }
 
         // isAlive
 
         protected Patient()
         {
             PatientNumber = 0;
-            FirstName = string.Empty;
-            LastName = string.Empty;
-            Nationality = string.Empty;
             BirthDate = DateTime.Now;
-            MobilePhoneNumber = string.Empty;
-            PatientType = EnumPatientTypes.NORMAL;
-            InsuranceType = EnumInsuranceType.SGK;
-            InsuranceNo = string.Empty;
             Gender = EnumGender.FEMALE;
         }
 
-        public Patient(Guid id, int patientNumber, string firstName, string lastName, string nationality, DateTime birthDate, 
-            string mobilePhoneNumber, EnumPatientTypes patientType, EnumInsuranceType insuranceType, string insuranceNo, EnumGender gender, 
-            string? mothersName = null, string? fathersName = null, string? identityNumber = null, string? passportNumber = null, string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
+        public Patient(Guid id, int patientNumber, string firstName, string lastName, EnumGender gender, DateTime birthDate, string identityAndPassportNumber, 
+            string? nationality = null, string? mobilePhoneNumber = null, EnumPatientTypes? patientType = null, string? mothersName = null, string? fathersName = null, 
+            string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
+        {
+            SetId(id);
+            SetPatientNumber(patientNumber);
+            SetFirstName(firstName);
+            SetLastName(lastName);
+            SetMothersName(mothersName);
+            SetFathersName(fathersName);
+            SetIdentityAndPassportNumber(identityAndPassportNumber);
+            SetNationality(nationality);
+            SetBirthDate(birthDate);
+            SetEmailAddress(emailAddress);
+            SetMobilePhoneNumber(mobilePhoneNumber);
+            SetRelative(relative);
+            SetRelativePhoneNumber(relativePhoneNumber);
+            SetPatientType(patientType);
+            SetAddress(address);
+            SetDiscountGroup(discountGroup);
+            SetGender(gender);
+        }
+
+        public void SetId(Guid id)
+        {
+            Id = id;
+        }
+
+        public void SetPatientNumber(int patientNumber)
+        {
+            PatientNumber = patientNumber;
+        }
+
+        public void SetFirstName(string firstName)
         {
             Check.NotNullOrWhiteSpace(firstName, nameof(firstName), PatientConsts.NameMaxLength, PatientConsts.NameMinLength);
-            Check.NotNullOrWhiteSpace(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, PatientConsts.LastNameMinLength);
-            Check.NotNullOrWhiteSpace(nationality, nameof(nationality));
-            Check.NotNullOrWhiteSpace(mobilePhoneNumber, nameof(mobilePhoneNumber), PatientConsts.MobilePhoneNumberMaxLength, PatientConsts.MobilePhoneNumberMinLength);
-            Check.Range((int)patientType, nameof(patientType), PatientConsts.PatientTypeMinValue, PatientConsts.PatientTypeMaxValue);
-            Check.Range((int)insuranceType, nameof(insuranceType), PatientConsts.InsuranceMinValue, PatientConsts.InsuranceMaxValue);
-            Check.NotNullOrWhiteSpace(insuranceNo, nameof(insuranceNo), PatientConsts.InsuranceNumberMaxLength, PatientConsts.InsuranceNumberMinLength);
-
-            Id = id;
-            PatientNumber = patientNumber;
             FirstName = firstName;
+        }
+
+        public void SetLastName(string lastName)
+        {
+            Check.NotNullOrWhiteSpace(lastName, nameof(lastName), PatientConsts.LastNameMaxLength, PatientConsts.LastNameMinLength);
             LastName = lastName;
-            MothersName = mothersName;
-            FathersName = fathersName;
-            IdentityNumber = identityNumber;
-            Nationality = nationality;
-            PassportNumber = passportNumber;
+        }
+        public void SetBirthDate(DateTime birthDate)
+        {
             BirthDate = birthDate;
-            EmailAddress = emailAddress;
-            MobilePhoneNumber = mobilePhoneNumber;
-            Relative = relative;
-            RelativePhoneNumber = relativePhoneNumber;
-            PatientType = patientType;
-            Address = address;
-            InsuranceType = insuranceType;
-            InsuranceNo = insuranceNo;
-            DiscountGroup = discountGroup;
+        }
+
+        public void SetGender(EnumGender gender)
+        {
             Gender = gender;
+        }
+        public void SetIdentityAndPassportNumber(string identityAndPassportNumber)
+        {
+            Check.NotNullOrWhiteSpace(identityAndPassportNumber, nameof(identityAndPassportNumber));
+            IdentityAndPassportNumber = identityAndPassportNumber;
+        }
+
+        public void SetMothersName(string? mothersName)
+        {
+            MothersName = mothersName;
+        }
+
+        public void SetFathersName(string? fathersName)
+        {
+            FathersName = fathersName;
+        }
+
+        public void SetNationality(string? nationality)
+        {
+            Nationality = nationality;
+        }
+
+        public void SetEmailAddress(string? emailAddress)
+        {
+            EmailAddress = emailAddress;
+        }
+
+        public void SetMobilePhoneNumber(string? mobilePhoneNumber)
+        {
+            MobilePhoneNumber = mobilePhoneNumber;
+        }
+
+        public void SetRelative(EnumRelative? relative)
+        {
+            Relative = relative;
+        }
+
+        public void SetRelativePhoneNumber(string? relativePhoneNumber)
+        {
+            RelativePhoneNumber = relativePhoneNumber;
+        }
+
+        public void SetPatientType(EnumPatientTypes? patientType)
+        {
+            PatientType = patientType;
+        }
+
+        public void SetAddress(string? address)
+        {
+            Address = address;
+        }
+
+        public void SetDiscountGroup(EnumDiscountGroup? discountGroup)
+        {
+            DiscountGroup = discountGroup;
         }
     }
 }

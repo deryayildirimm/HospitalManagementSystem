@@ -26,6 +26,11 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         protocolPermission.AddChild(HealthCarePermissions.Protocols.Create, L("Permission:Create"));
         protocolPermission.AddChild(HealthCarePermissions.Protocols.Edit, L("Permission:Edit"));
         protocolPermission.AddChild(HealthCarePermissions.Protocols.Delete, L("Permission:Delete"));
+        
+        var protocolTypePermission = myGroup.AddPermission(HealthCarePermissions.ProtocolTypes.Default, L("Permission:ProtocolTypes"));
+        protocolTypePermission.AddChild(HealthCarePermissions.ProtocolTypes.Create, L("Permission:Create"));
+        protocolTypePermission.AddChild(HealthCarePermissions.ProtocolTypes.Edit, L("Permission:Edit"));
+        protocolTypePermission.AddChild(HealthCarePermissions.ProtocolTypes.Delete, L("Permission:Delete"));
 
         var departmentPermission = myGroup.AddPermission(HealthCarePermissions.Departments.Default, L("Permission:Departments"));
         departmentPermission.AddChild(HealthCarePermissions.Departments.Create, L("Permission:Create"));
@@ -92,6 +97,16 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Create, L("Permission:Create"));
         bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Edit, L("Permission:Edit"));
         bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Delete, L("Permission:Delete"));
+
+        var icdPermission = myGroup.AddPermission(HealthCarePermissions.Icds.Default, L("Permission:Icds"));
+        icdPermission.AddChild(HealthCarePermissions.Icds.Create, L("Permission:Create"));
+        icdPermission.AddChild(HealthCarePermissions.Icds.Edit, L("Permission:Edit"));
+        icdPermission.AddChild(HealthCarePermissions.Icds.Delete, L("Permission:Delete"));
+
+        var insurancePermission = myGroup.AddPermission(HealthCarePermissions.Insurances.Default, L("Permission:Insurances"));
+        insurancePermission.AddChild(HealthCarePermissions.Insurances.Create, L("Permission:Create"));
+        insurancePermission.AddChild(HealthCarePermissions.Insurances.Edit, L("Permission:Edit"));
+        insurancePermission.AddChild(HealthCarePermissions.Insurances.Delete, L("Permission:Delete"));
 
         
         
