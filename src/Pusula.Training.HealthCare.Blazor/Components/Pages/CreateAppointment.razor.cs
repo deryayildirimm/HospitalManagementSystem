@@ -24,7 +24,7 @@ public partial class CreateAppointment
     private bool IsDoctorsEnabled { get; set; }
     private GetDoctorsWithDepartmentIdsInput DoctorsWithDepartmentIdsInput { get; set; }
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
-    private IReadOnlyList<LookupDto<Guid>> MedicalServiceCollection { get; set; }
+    private IReadOnlyList<MedicalServiceDto> MedicalServiceCollection { get; set; }
     private List<LookupDto<Guid>> DoctorsCollection { get; set; }
     private IReadOnlyList<AppointmentDto> DoctorsAppointments { get; set; }
     private IReadOnlyList<AppointmentCustomData> SlotItems { get; set; }
@@ -50,23 +50,38 @@ public partial class CreateAppointment
     private int AppointmentPageSize { get; set; } = 50;
     private int AppointmentCurrentPage { get; set; } = 1;
     private string DoctorNameInfo { get; set; } = string.Empty;
-
+    private string MedicalServiceNameInfo { get; set; } = string.Empty;
     private bool IsVisibleSearchPatient { get; set; }
 
     private PatientCreateDto NewPatient { get; set; }
     private List<KeyValuePair<string, EnumGender>> GendersCollection { get; set; }
     private SfSchedule<AppointmentCustomData> ScheduleObj { get; set; }
 
+    private bool IsCreateAppointmentOpen { get; set; }
     private SfToast ToastObj { get; set; }
     private string ToastPosition { get; set; } = "";
     private string ToastContent { get; set; } = "";
+    private string ToastTitle { get; set; } = "Information";
+    private string ToastCssClass { get; set; } = "";
+    private int AvailableSlotCount { get; set; } = 0;
 
     private bool IsSlotSearchAvailable =>
-        IsAppointmentTypeIdValid(NewAppointment.MedicalServiceId) &&
-        IsAppointmentTypeIdValid(NewAppointment.DoctorId);
+        IsIdValid(NewAppointment.MedicalServiceId) &&
+        IsIdValid(NewAppointment.DoctorId);
 
-    private static bool IsAppointmentTypeIdValid(Guid? appointmentTypeId) =>
-        appointmentTypeId.HasValue && appointmentTypeId.Value != Guid.Empty;
+    private bool IsCreateAppointmentValid =>
+        IsIdValid(NewAppointment.MedicalServiceId) &&
+        IsIdValid(NewAppointment.DoctorId) &&
+        IsIdValid(NewAppointment.PatientId);
+
+    private bool IsSelectedPatientValid
+        =>
+            IsIdValid(SelectedPatient?.Id) &&
+            !string.IsNullOrWhiteSpace(SelectedPatient?.FirstName)
+            && !string.IsNullOrWhiteSpace(SelectedPatient?.LastName);
+
+    private static bool IsIdValid(Guid? id) =>
+        id.HasValue && id.Value != Guid.Empty;
 
     public CreateAppointment()
     {
@@ -80,8 +95,8 @@ public partial class CreateAppointment
         PatientCollection = [];
         IsDoctorsEnabled = false;
         IsVisibleSearchPatient = false;
+        IsCreateAppointmentOpen = false;
         ScheduleObj = new SfSchedule<AppointmentCustomData>();
-        ToastObj = new SfToast();
         DoctorsWithDepartmentIdsInput = new GetDoctorsWithDepartmentIdsInput
         {
             Name = "",
@@ -160,14 +175,7 @@ public partial class CreateAppointment
 
             MedicalServiceCollection = MedicalServiceWithDepartmentsList
                 .Select(x => x.MedicalService)
-                .Select(x => new LookupDto<Guid>
-                {
-                    Id = x.Id,
-                    DisplayName = x.Name
-                }).ToList();
-
-            NewAppointment.MedicalServiceId = MedicalServiceCollection[0].Id;
-            await GetDoctorsList();
+                .ToList();
         }
         catch (Exception e)
         {
@@ -201,7 +209,6 @@ public partial class CreateAppointment
 
             DoctorsCollection =
                 ObjectMapper.Map<List<DoctorWithNavigationPropertiesDto>, List<LookupDto<Guid>>>(doctors);
-            NewAppointment.DoctorId = DoctorsCollection[0].Id;
         }
         catch (Exception e)
         {
@@ -217,13 +224,13 @@ public partial class CreateAppointment
             .Select(dept => dept.Id)
             .ToList();
 
-    private async Task OnMedicalServiceChange(SelectEventArgs<LookupDto<Guid>> args)
+    private async Task OnMedicalServiceChange(SelectEventArgs<MedicalServiceDto> args)
     {
-        IsDoctorsEnabled = true;
-
         try
         {
             NewAppointment.MedicalServiceId = args.ItemData.Id;
+            MedicalServiceNameInfo = args.ItemData.Name;
+            NewAppointment.Amount = args.ItemData.Cost;
             await GetDoctorsList();
         }
         catch (Exception e)
@@ -289,15 +296,18 @@ public partial class CreateAppointment
 
             SlotItems = slots.Select(x => new AppointmentCustomData
             {
-                DateOnly = x.Date,
+                DateOnly = x.Date.Date,
                 StartTime = x.Date.Date.Add(TimeSpan.Parse(x.StartTime)),
                 EndTime = x.Date.Date.Add(TimeSpan.Parse(x.EndTime)),
                 IsReadOnly = x.AvailabilityValue,
             }).ToList();
+
+            AvailableSlotCount = slots.Count(x => x.AvailabilityValue);
         }
         catch (BusinessException e)
         {
             SlotItems = [];
+            AvailableSlotCount = 0;
             await UiMessageService.Error(e.Message);
         }
     }
@@ -325,17 +335,73 @@ public partial class CreateAppointment
         }
     }
 
-    private void OnPopupOpen(PopupOpenEventArgs<AppointmentCustomData> args)
+    private async void OnPopupOpen(PopupOpenEventArgs<AppointmentCustomData> args)
     {
         if (!args.Data.IsReadOnly)
         {
+            IsCreateAppointmentOpen = false;
             args.Cancel = true;
+            return;
+        }
+
+        if (args.Type is PopupType.Editor or PopupType.QuickInfo && !IsCreateAppointmentValid)
+        {
+            args.Cancel = true;
+            ToastTitle = L["Error"];
+            ToastContent = @L["PatientDoctorServiceError"];
+            ToastCssClass = "e-toast-danger";
+            await ShowOnClick();
+            return;
         }
 
         if (args.Type is PopupType.Editor or PopupType.QuickInfo)
         {
+            IsCreateAppointmentOpen = false;
             args.Duration = 60;
         }
+
+        if (args.Type is PopupType.Editor)
+        {
+            args.Cancel = true;
+            NewAppointment.StartTime = args.Data.StartTime;
+            NewAppointment.EndTime = args.Data.EndTime;
+            NewAppointment.AppointmentDate = args.Data.DateOnly;
+            IsCreateAppointmentOpen = true;
+        }
+    }
+
+    private async Task OnValidSubmitNewAppointment()
+    {
+        try
+        {
+            await AppointmentAppService.CreateAsync(NewAppointment);
+
+            ToastContent = $"{@L[$"OperationSuccessful"]}\n{@L["AppointmentInformationWillBeSent"]}";
+            ToastTitle = @L["AppointmentCreated"];
+            ToastCssClass = "e-toast-success";
+            IsCreateAppointmentOpen = false;
+            await ShowOnClick();
+            ResetAppointmentInfo();
+        }
+        catch (Exception e)
+        {
+            await UiMessageService.Error(e.Message);
+        }
+        finally
+        {
+            await GetAppointmentSlots();
+            ScheduleObj.CloseEditor();
+            IsCreateAppointmentOpen = false;
+        }
+    }
+
+    private void ResetAppointmentInfo()
+    {
+        NewAppointment.StartTime = DateTime.Today;
+        NewAppointment.EndTime = DateTime.Today;
+        NewAppointment.AppointmentTypeId = Guid.Empty;
+        NewAppointment.ReminderSent = true;
+        NewAppointment.Notes = null;
     }
 
     private async void OnMoreDetailsClick(MouseEventArgs args, AppointmentCustomData data)
@@ -369,6 +435,7 @@ public partial class CreateAppointment
 
         SelectedPatient = patient;
 
+        NewAppointment.PatientId = patient.Id;
         ClosePatientSearchModal();
     }
 
@@ -378,6 +445,8 @@ public partial class CreateAppointment
         {
             await PatientsAppService.CreateAsync(NewPatient);
             ToastContent = @L["PatientCreated"];
+            ToastTitle = L["Information"];
+            ToastCssClass = "e-toast-info";
             await ShowOnClick();
         }
         catch (Exception e)
@@ -391,8 +460,11 @@ public partial class CreateAppointment
         await ToastObj.ShowAsync();
     }
 
-    private async Task HideOnClick()
+    private void ClearFilters()
     {
-        await ToastObj.HideAsync("All");
+        SelectedPatient = new PatientDto();
+        NewAppointment = new AppointmentCreateDto();
+        MedicalServiceNameInfo = "";
+        StateHasChanged();
     }
 }

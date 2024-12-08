@@ -1,20 +1,25 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Pusula.Training.HealthCare.Validators;
 
 namespace Pusula.Training.HealthCare.Appointments;
 
 public class AppointmentCreateDto
 {
     [Required]
+    [GuidValidator]
     public Guid DoctorId { get; set; }
     
     [Required]
+    [GuidValidator]
     public Guid PatientId { get; set; }
     
     [Required]
+    [GuidValidator]
     public Guid MedicalServiceId { get; set; }
     
     [Required]
+    [GuidValidator]
     public Guid AppointmentTypeId { get; set; }
     
     [Required]

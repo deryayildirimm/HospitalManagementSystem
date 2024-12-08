@@ -226,6 +226,7 @@
     "Permission:ProtocolTypes" : "Protocol Types",
     "InvalidDateRange" : "The start date cannot be greater than the end date.",
     "Healthcare error occured!!" : "Healthcare error occured!!",
+    "Error": "Error",
     "The provided download token is invalid." : "The provided download token is invalid.",
     "ClearFilters": "Clear Filters",
     "GetAppointmentSlots": "Get Appointment Slots",
@@ -235,6 +236,9 @@
     "PatientNumber": "Patient Number",
     "RegisterPatient": "Register Patient",
     "PatientCreated": "Patient created successfully!",
-    "Information": "Information"
+    "Information": "Information",
+    "CreateAppointment":  "Create Appointment",
+    "PatientDoctorServiceError":"Patient, Doctor and Medical Service must be selected to create new appointment!",
+    "AppointmentCreated": "Appointment Created"
   }
 }
