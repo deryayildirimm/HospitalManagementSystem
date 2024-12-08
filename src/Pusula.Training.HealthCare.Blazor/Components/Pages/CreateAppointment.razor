@@ -27,6 +27,8 @@
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["NewAppointment"]">
     <link href="../Components/Pages/CreateAppointment.razor.css" rel="stylesheet"/>
+    <link href="../Components/Pages/Appointments.razor.css" rel="stylesheet"/>
+
 </PageHeader>
 
 <div class="row py-3">
@@ -111,14 +113,46 @@
     <div class="col-sm-12 col-md-9 p-2">
         <div class="card border-1 border-black p-4">
             <h5>@L["AppointmentSchedule"]</h5>
-            <div class="d-flex justify-content-between my-1">
-                <div>
-                    <h6 class="fw-normal"> @L["AvailableAppointments"] (@AvailableSlotCount)</h6>
+            @if (IsSlotSearchAvailable)
+            {
+                <div class="row">
+                    <div class="days-container">
+                        <SfButton CssClass="e-flat e-primary left" IconCss="e-icons e-arrow-left" OnClick="OnLoadDaysDaysLeft">
+                        </SfButton>
+                        <div class="days d-flex gap-1 overflow-hidden align-items-center justify-content-center">
+                            @if (DaysLookupList.Count == 0)
+                            {
+                                @for (var i = 0; i < LoadCount; i++)
+                                {
+                                    <DayItemShimmerCard></DayItemShimmerCard>
+                                }
+                            }
+                            else
+                            {
+                                @foreach (var item in DaysLookupList)
+                                {
+                                    <AppointmentDayCard Item="@item"
+                                                        OnSelectAppointmentDay="@OnSelectAppointmentDay">
+                                    </AppointmentDayCard>
+                                }
+                            }
+
+                        </div>
+                        <SfButton CssClass="e-flat e-primary" IconCss="e-icons e-arrow-right" OnClick="OnLoadDaysRight">
+                        </SfButton>
+                    </div>
                 </div>
-            </div>
+
+                <div class="d-flex justify-content-between my-1">
+                    <div>
+                        <h6 class="fw-normal"> @L["AvailableAppointments"] (@AvailableSlotCount)</h6>
+                    </div>
+                </div>
+            }
+
 
             <SfSchedule @ref="ScheduleObj" TValue="AppointmentCustomData" Height="650px" AllowDragAndDrop="false" AllowMultiDrag="false" @bind-SelectedDate="@CurrentDate">
-                <ScheduleEvents TValue="AppointmentCustomData" OnPopupOpen="@OnPopupOpen"></ScheduleEvents>
+                <ScheduleEvents TValue="AppointmentCustomData" Navigating="@OnNavigateDate" OnPopupOpen="@OnPopupOpen"></ScheduleEvents>
 
                 <ScheduleQuickInfoTemplates>
                     <HeaderTemplate>
@@ -128,7 +162,7 @@
                                     @L["NewAppointment"]
                                 </div>
                                 <div class="duration-text">
-                                    @(GetEventDetails((context as AppointmentCustomData)))
+                                    @GetEventDetails((context as AppointmentCustomData))
                                 </div>
                             </div>
                         </div>
@@ -161,9 +195,9 @@
 
                 <ScheduleEventSettings EnableTooltip="true" DataSource="@SlotItems">
                     <Template>
-                        <div class="@(((context as AppointmentCustomData)?.IsReadOnly ?? false) ? "light-green" : "readonly-event")">
-                            <div>@L["Time Period"]: @((context as AppointmentCustomData)?.StartTime.ToString("hh:mm")) - @((context as AppointmentCustomData)?.EndTime.ToString("hh:mm"))</div>
-                            <div>Availability: @((context as AppointmentCustomData)?.IsReadOnly)</div>
+                        <div class="@(((context as AppointmentCustomData)?.IsReadOnly ?? false) ? "" : "readonly-event")">
+                            <div>@L["TimePeriod"]: @((context as AppointmentCustomData)?.StartTime.ToString("hh:mm")) - @((context as AppointmentCustomData)?.EndTime.ToString("hh:mm"))</div>
+                            <div>@L["Availability"]: @((context as AppointmentCustomData)?.IsReadOnly)</div>
                         </div>
                     </Template>
                     <TooltipTemplate>

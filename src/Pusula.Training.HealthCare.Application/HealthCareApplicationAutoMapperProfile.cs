@@ -107,7 +107,8 @@ public class HealthCareApplicationAutoMapperProfile : Profile
 
         CreateMap<Appointment, AppointmentDto>();
         CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();
-
+        CreateMap<AppointmentDayLookupDto, AppointmentDayItemLookupDto>()
+            .ForMember(dest => dest.IsSelected, opt => opt.MapFrom(src => false));
 
         CreateMap<Appointment, AppointmentExcelDto>()
             .ForMember(dest => dest.DoctorName,
@@ -119,6 +120,8 @@ public class HealthCareApplicationAutoMapperProfile : Profile
             .ForMember(dest => dest.AppointmentDate, opt => opt.MapFrom(src =>
                 $"{src.StartTime:yyyy-MM-dd}, {src.StartTime:HH:mm} - {src.EndTime:HH:mm}"));
 
+        
+        
         CreateMap<Doctor, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.FirstName));
 

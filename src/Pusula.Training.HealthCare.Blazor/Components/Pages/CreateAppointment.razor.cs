@@ -26,7 +26,6 @@ public partial class CreateAppointment
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
     private IReadOnlyList<MedicalServiceDto> MedicalServiceCollection { get; set; }
     private List<LookupDto<Guid>> DoctorsCollection { get; set; }
-    private IReadOnlyList<AppointmentDto> DoctorsAppointments { get; set; }
     private IReadOnlyList<AppointmentCustomData> SlotItems { get; set; }
     private IReadOnlyList<PatientDto> PatientCollection { get; set; }
     private SfGrid<PatientDto> PatientGrid { get; set; }
@@ -56,6 +55,12 @@ public partial class CreateAppointment
     private PatientCreateDto NewPatient { get; set; }
     private List<KeyValuePair<string, EnumGender>> GendersCollection { get; set; }
     private SfSchedule<AppointmentCustomData> ScheduleObj { get; set; }
+    
+    //
+    private GetAppointmentsLookupInput DaysLookupFilter { get; set; }
+    private int LoadCount { get; set; } = 14;
+    private List<AppointmentDayItemLookupDto> DaysLookupList { get; set; }
+    //
 
     private bool IsCreateAppointmentOpen { get; set; }
     private SfToast ToastObj { get; set; }
@@ -89,9 +94,9 @@ public partial class CreateAppointment
         AppointmentTypesCollection = [];
         MedicalServiceCollection = [];
         MedicalServiceWithDepartmentsList = [];
-        DoctorsAppointments = [];
         GendersCollection = [];
         SlotItems = [];
+        DaysLookupList = [];
         PatientCollection = [];
         IsDoctorsEnabled = false;
         IsVisibleSearchPatient = false;
@@ -128,6 +133,12 @@ public partial class CreateAppointment
             SkipCount = (PatientCurrentPage - 1) * PatientPageSize,
         };
 
+        DaysLookupFilter = new GetAppointmentsLookupInput
+        {
+            Offset = LoadCount,
+            StartDate = DateTime.Now
+        };
+        
         GetAppointmentSlotFilter = new GetAppointmentSlotInput();
         NewAppointment = new AppointmentCreateDto();
         NewPatient = new PatientCreateDto();
@@ -239,50 +250,28 @@ public partial class CreateAppointment
         }
     }
 
-    private async Task OnDoctorChange(SelectEventArgs<LookupDto<Guid>> args)
+    private async void OnDoctorChange(SelectEventArgs<LookupDto<Guid>> args)
     {
-        IsDoctorsEnabled = true;
-
+        
         try
         {
             NewAppointment.DoctorId = args.ItemData.Id;
             DoctorNameInfo = args.ItemData.DisplayName;
-            await GetAppointments();
+            await GetAppointmentDays();
         }
         catch (Exception e)
         {
             throw new UserFriendlyException(e.Message);
         }
     }
-
-    private async Task GetAppointments()
-    {
-        try
-        {
-            var items = (await AppointmentAppService.GetListAsync(AppointmentsFilter))
-                .Items
-                .ToList();
-
-            if (items.Count == 0)
-            {
-                DoctorsAppointments = [];
-            }
-
-            DoctorsAppointments = items;
-        }
-        catch (Exception e)
-        {
-            DoctorsAppointments = [];
-            throw new UserFriendlyException(e.Message);
-        }
-    }
-
+    
     private async Task GetAppointmentSlots()
     {
         try
         {
             GetAppointmentSlotFilter.MedicalServiceId = NewAppointment.MedicalServiceId;
             GetAppointmentSlotFilter.DoctorId = NewAppointment.DoctorId;
+            CurrentDate = GetAppointmentSlotFilter.Date;
 
             var slots = (await AppointmentAppService.GetAvailableSlotsAsync(GetAppointmentSlotFilter))
                 .Items
@@ -370,6 +359,22 @@ public partial class CreateAppointment
         }
     }
 
+    private async Task OnNavigateDate(NavigatingEventArgs args)
+    {
+        if (args.ActionType is ActionType.DateNavigate && !IsSlotSearchAvailable)
+        {
+            args.Cancel = true;
+            return;
+        }
+        
+        if (args.ActionType is ActionType.DateNavigate && IsSlotSearchAvailable)
+        {
+            GetAppointmentSlotFilter.Date = args.CurrentDate;
+
+            await GetAppointmentSlots();
+        }
+    }
+
     private async Task OnValidSubmitNewAppointment()
     {
         try
@@ -380,8 +385,10 @@ public partial class CreateAppointment
             ToastTitle = @L["AppointmentCreated"];
             ToastCssClass = "e-toast-success";
             IsCreateAppointmentOpen = false;
+             StateHasChanged();
             await ShowOnClick();
             ResetAppointmentInfo();
+           
         }
         catch (Exception e)
         {
@@ -390,6 +397,7 @@ public partial class CreateAppointment
         finally
         {
             await GetAppointmentSlots();
+            await GetAppointmentDays();
             ScheduleObj.CloseEditor();
             IsCreateAppointmentOpen = false;
         }
@@ -411,7 +419,7 @@ public partial class CreateAppointment
         await ScheduleObj.OpenEditorAsync(data, CurrentAction.Add);
     }
 
-    private string GetEventDetails(AppointmentCustomData? data)
+    private static string GetEventDetails(AppointmentCustomData? data)
     {
         return data?.StartTime + " - " + data?.EndTime;
     }
@@ -466,5 +474,57 @@ public partial class CreateAppointment
         NewAppointment = new AppointmentCreateDto();
         MedicalServiceNameInfo = "";
         StateHasChanged();
+    }
+    
+    private async Task OnLoadDaysDaysLeft()
+    {
+        var newStartDate = DaysLookupFilter.StartDate.AddDays(-LoadCount);
+        DaysLookupFilter.StartDate = newStartDate;
+        await GetAppointmentDays();
+    }
+    
+    private async Task OnLoadDaysRight()
+    {
+        DaysLookupFilter.StartDate = DaysLookupFilter.StartDate.AddDays(LoadCount);
+        await GetAppointmentDays();
+    }
+    
+    private async Task GetAppointmentDays()
+    {
+        try
+        {
+            if (!IsSlotSearchAvailable)
+            {
+                return;
+            }
+            
+            DaysLookupList.Clear();
+            
+            DaysLookupFilter.DoctorId = NewAppointment.DoctorId;
+            DaysLookupFilter.MedicalServiceId = NewAppointment.MedicalServiceId;
+            
+            var days = 
+                (await AppointmentAppService.GetAvailableDaysLookupAsync(DaysLookupFilter))
+                .Items
+                .ToList();
+
+            DaysLookupList = ObjectMapper.Map<List<AppointmentDayLookupDto>, List<AppointmentDayItemLookupDto>>(days);
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            DaysLookupList = [];
+            await UiMessageService.Error(e.Message);
+        }
+    }
+    
+    private async Task OnSelectAppointmentDay(AppointmentDayItemLookupDto item)
+    {
+        DaysLookupList.ForEach(e => e.IsSelected = false);
+        item.IsSelected = true;
+
+        CurrentDate = item.Date;
+        GetAppointmentSlotFilter.Date = item.Date;
+        await GetAppointmentSlots();
     }
 }

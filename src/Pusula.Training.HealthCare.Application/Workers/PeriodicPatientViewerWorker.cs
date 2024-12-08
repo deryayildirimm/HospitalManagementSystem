@@ -15,7 +15,7 @@ public class PeriodicPatientViewerWorker : AsyncPeriodicBackgroundWorkerBase
     public PeriodicPatientViewerWorker(AbpAsyncTimer timer, IServiceScopeFactory serviceScopeFactory) 
         : base(timer, serviceScopeFactory)
     {
-        Timer.Period = 10000;
+        Timer.Period = 60000;
     }
 
     [UnitOfWork]

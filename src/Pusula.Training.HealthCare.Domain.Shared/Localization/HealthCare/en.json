@@ -220,7 +220,8 @@
     "HealthCareError:DateNotInPast": "Date must be in the future",
     "HealthCareError:InvalidDepartments" : "Some of these departments already connected with the selected medical service.",
     "HealthCareError:NameAlreadyExist": "You have already a record with this name.",
-    "Menu:Treatment":  "Treatment",
+    "HealthCareError:AlreadyHaveAppointmentExactTime": "Patient already have an appointment at this time.",
+    "Menu:Treatment": "Treatment",
     "Menu:Icds":  "Icds",
     "Menu:IcdReport":  "IcdReport",
     "Permission:ProtocolTypes" : "Protocol Types",
@@ -239,6 +240,8 @@
     "Information": "Information",
     "CreateAppointment":  "Create Appointment",
     "PatientDoctorServiceError":"Patient, Doctor and Medical Service must be selected to create new appointment!",
-    "AppointmentCreated": "Appointment Created"
+    "AppointmentCreated": "Appointment Created",
+    "TimePeriod": "Time Period",
+    "Availability": "Availability"
   }
 }

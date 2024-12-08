@@ -52,9 +52,7 @@ public class AppointmentManager(
     public virtual async Task<List<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(Guid doctorId,
         Guid medicalServiceId, DateTime startDate, int offset)
     {
-        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DateNotValid,
-            startDate < DateTime.Now.Date);
-
+        
         //Check if medical service exist
         var medicalService = await medicalServiceRepository
             .FirstOrDefaultAsync(x => x.Id == medicalServiceId);
@@ -154,14 +152,22 @@ public class AppointmentManager(
         Check.NotNull(amount, nameof(amount));
         Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
 
+        var alreadyHaveAppointment = await appointmentRepository.FirstOrDefaultAsync(
+            x => x.PatientId == patientId
+                 && x.AppointmentDate.Date == appointmentDate.Date
+                 && x.StartTime >= startTime
+                 && x.EndTime <= endTime) is not null;
+
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.AlreadyHaveAppointmentExactTime,
+            alreadyHaveAppointment);
+
         var appointmentDateIsValid = startTime < DateTime.Now || endTime < DateTime.Now || startTime >= endTime;
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DateNotValid, appointmentDateIsValid);
 
-        var isAppointmentTaken = await appointmentRepository
-            .FirstOrDefaultAsync(x => x.DoctorId == doctorId
-                                      && x.AppointmentDate.Date == appointmentDate.Date
-                                      && x.StartTime == startTime);
-
+        var isAppointmentTaken = await appointmentRepository.FirstOrDefaultAsync(
+            x => x.DoctorId == doctorId
+                 && x.AppointmentDate.Date == appointmentDate.Date
+                 && x.StartTime == startTime);
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.AppointmentAlreadyTaken,
             isAppointmentTaken is not null);
 

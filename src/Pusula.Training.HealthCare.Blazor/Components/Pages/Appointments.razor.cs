@@ -72,7 +72,7 @@ public partial class Appointments
     private SfListBox<SelectionItem[], SelectionItem> SelectServiceDropdown { get; set; } = null!;
     private AppointmentCreateDto NewAppointment { get; set; }
     private List<AppointmentSlotItem> AppointmentSlots { get; set; }
-    private List<AppointmentDayLookupItem> DaysLookupList { get; set; }
+    private List<AppointmentDayItemLookupDto> DaysLookupList { get; set; }
     private GetAppointmentsLookupInput DaysLookupFilter { get; set; }
     private int LoadCount { get; set; } = 14;
     private double ScreenWidth { get; set; }
@@ -182,15 +182,13 @@ public partial class Appointments
         {
             SlotDaysLoading = true;
             DaysLookupList.Clear();
-            var days = (await AppointmentAppService.GetAvailableDaysLookupAsync(DaysLookupFilter)).Items;
+            
+            var days = 
+                (await AppointmentAppService.GetAvailableDaysLookupAsync(DaysLookupFilter))
+                .Items
+                .ToList();
 
-            DaysLookupList = days.Select(x => new AppointmentDayLookupItem
-            {
-                Date = x.Date,
-                AvailabilityValue = x.AvailabilityValue,
-                IsSelected = false,
-                AvailableSlotCount = x.AvailableSlotCount,
-            }).ToList();
+            DaysLookupList = ObjectMapper.Map<List<AppointmentDayLookupDto>, List<AppointmentDayItemLookupDto>>(days);
         }
         catch (Exception e)
         {
@@ -497,7 +495,7 @@ public partial class Appointments
 
     #endregion
 
-    private async Task OnSelectAppointmentDay(AppointmentDayLookupItem item)
+    private async Task OnSelectAppointmentDay(AppointmentDayItemLookupDto item)
     {
         DaysLookupList.ForEach(e => e.IsSelected = false);
         item.IsSelected = true;

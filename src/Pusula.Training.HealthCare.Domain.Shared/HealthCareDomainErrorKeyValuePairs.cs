@@ -11,6 +11,9 @@ public static class HealthCareDomainErrorKeyValuePairs
 
     public static KeyValuePair<string, string> DateNotValid =
         KeyValuePair.Create(HealthCareDomainErrorCodes.DateNotInPastException, "Not valid date.");
+    
+    public static KeyValuePair<string, string> AlreadyHaveAppointmentExactTime =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.AlreadyHaveAppointmentExactTime, "Patient already have an appointment at this time.");
 
     public static KeyValuePair<string, string> AppointmentAlreadyTaken =
         KeyValuePair.Create(HealthCareDomainErrorCodes.AppointmentAlreadyTaken, "Selected appointment already taken.");
