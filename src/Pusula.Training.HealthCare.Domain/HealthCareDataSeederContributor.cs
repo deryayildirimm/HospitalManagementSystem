@@ -10,6 +10,7 @@ using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.DoctorWorkingHours;
+using Pusula.Training.HealthCare.Insurances;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
@@ -43,6 +44,7 @@ namespace Pusula.Training.HealthCare
         ITestCategoryRepository testCategoryRepository,
         IProtocolTypeRepository protocolTypeRepository,
         IProtocolRepository protocolRepository,
+        IInsuranceRepository insuranceRepository,
         IRepository<Test, Guid> testRepository) : IDataSeedContributor, ITransientDependency
     {
         public async Task SeedAsync(DataSeedContext context)
@@ -64,7 +66,9 @@ namespace Pusula.Training.HealthCare
             await SeedDoctorWorkingHours();
            await SeedAppointments();
           await SeedTestCategoryRecords();
-          await SeedTestRecords(); await SeedProtocolType();
+          await SeedTestRecords(); 
+          await SeedProtocolType();
+        //  await SeedInsurance();
             await SeedProtocols(); // Protokoller en son oluşturulacak.
             
         }
@@ -515,50 +519,106 @@ namespace Pusula.Training.HealthCare
             await doctorRepository.InsertAsync(d8, true);
             await doctorRepository.InsertAsync(d9, true);
         }
-        
-        
-        
-        private async Task SeedProtocols()
+/*
+        private async Task SeedInsurance()
         {
-            // Doktorlar, hastalar, protokol türleri ve departmanlar kontrol ediliyor
-            var doctors = await doctorRepository.GetListAsync();
-            var patients = await patientRepository.GetListAsync();
-            var protocolTypes = await protocolTypeRepository.GetListAsync();
-            var departments = await departmentRepository.GetListAsync();
+            if (await insuranceRepository.GetCountAsync() > 0)  return; 
+            
+            // Create a new Insurance object
+            var insurance1 = new Insurance(
+                id: Guid.NewGuid(),
+                policyNumber: "POL123456",
+                EnumInsuranceCompanyName.AnadoluSigorta,
+                premiumAmount: 500.75m,
+                coverageAmount: 10000m,
+                startDate: DateTime.UtcNow.AddDays(-30),
+                endDate: DateTime.UtcNow.AddDays(365),
+                description: "Test insurance policy"
+            );
 
-            if (!doctors.Any() || !patients.Any() || !protocolTypes.Any() || !departments.Any())
-            {
-                throw new Exception("Doctors, Patients, ProtocolTypes, or Departments are missing. Seed them first.");
-            }
+            var insurance2 = new Insurance(
+                id: Guid.NewGuid(),
+                policyNumber: "POL789101",
+                EnumInsuranceCompanyName.AllianzSigorta,
+                premiumAmount: 250.50m,
+                coverageAmount: 5000m,
+                startDate: DateTime.UtcNow.AddDays(-10),
+                endDate: DateTime.UtcNow.AddDays(180),
+                description: "Another test insurance policy"
+            );
+            
+            var insurance3 = new Insurance(
+                id: Guid.NewGuid(),
+                policyNumber: "POL123852",
+                EnumInsuranceCompanyName.MetLife,
+                premiumAmount: 250.50m,
+                coverageAmount: 5000m,
+                startDate: DateTime.UtcNow.AddDays(-10),
+                endDate: DateTime.UtcNow.AddDays(100),
+                description: "Another test insurance policy"
+            );
+            
+            await insuranceRepository.InsertAsync(insurance1);
+            await insuranceRepository.InsertAsync(insurance2);
+            await insuranceRepository.InsertAsync(insurance3);
 
-            // Protokoller
-            var random = new Random();
-            var protocols = new List<Protocol>();
-
-            foreach (var patient in patients)
-            {
-                // Her hasta için bir protokol oluşturuluyor
-                var doctor = doctors[random.Next(doctors.Count)];
-                var department = departments[random.Next(departments.Count)];
-                var protocolType = protocolTypes[random.Next(protocolTypes.Count)];
-
-                var startTime = DateTime.Now.AddDays(random.Next(1, 10));
-                var endTime = startTime.AddHours(1);
-
-                protocols.Add(new Protocol(
-                    id: Guid.NewGuid(),
-                    patientId: patient.Id,
-                    departmentId: department.Id,
-                    doctorId: doctor.Id,
-                    protocolTypeId: protocolType.Id,
-                    startTime: startTime,
-                    note: "Routine checkup",
-                    endTime: endTime
-                ));
-            }
-
-            await protocolRepository.InsertManyAsync(protocols, autoSave: true);
         }
+        */
+        
+       private async Task SeedProtocols()
+{
+    var doctors = await doctorRepository.GetListAsync();
+    var patients = await patientRepository.GetListAsync();
+    var protocolTypes = await protocolTypeRepository.GetListAsync();
+    var departments = await departmentRepository.GetListAsync();
+
+    if (!doctors.Any() || !patients.Any() || !protocolTypes.Any() || !departments.Any())
+    {
+        throw new Exception("Doctors, Patients, ProtocolTypes, or Departments are missing. Seed them first.");
+    }
+
+    var random = new Random();
+    var protocols = new List<Protocol>();
+    var insurances = new List<Insurance>();
+
+    foreach (var patient in patients)
+    {
+        var doctor = doctors[random.Next(doctors.Count)];
+        var department = departments[random.Next(departments.Count)];
+        var protocolType = protocolTypes[random.Next(protocolTypes.Count)];
+        var startTime = DateTime.Now.AddDays(random.Next(1, 10));
+        var endTime = startTime.AddHours(1);
+
+        // Protokole özel bir sigorta oluşturuluyor
+        var insurance = new Insurance(
+            id: Guid.NewGuid(),
+            policyNumber: $"POL-{random.Next(1000, 9999)}",
+            (EnumInsuranceCompanyName)random.Next(1, 10),
+            premiumAmount: random.Next(100, 1000),
+            coverageAmount: random.Next(1000, 10000),
+            startDate: DateTime.UtcNow.AddDays(-30),
+            endDate: DateTime.UtcNow.AddYears(1),
+            description: "Insurance for protocol"
+        );
+
+        insurances.Add(insurance); // Sigortayı listeye ekliyoruz
+
+        protocols.Add(new Protocol(
+            id: Guid.NewGuid(),
+            patientId: patient.Id,
+            departmentId: department.Id,
+            doctorId: doctor.Id,
+            protocolTypeId: protocolType.Id,
+            startTime: startTime,
+            note: "Routine checkup",
+            endTime: endTime,
+            insuranceId: insurance.Id // Sigorta ID'si atanıyor
+        ));
+    }
+
+    await insuranceRepository.InsertManyAsync(insurances, autoSave: true); // Sigortalar veri tabanına ekleniyor
+    await protocolRepository.InsertManyAsync(protocols, autoSave: true); // Protokoller veri tabanına ekleniyor
+}
         
         private async Task SeedRoleRecords()
         {

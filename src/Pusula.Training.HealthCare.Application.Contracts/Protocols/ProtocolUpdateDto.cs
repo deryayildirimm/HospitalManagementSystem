@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Pusula.Training.HealthCare.Patients;
 using Volo.Abp.Domain.Entities;
 
 namespace Pusula.Training.HealthCare.Protocols
@@ -15,6 +16,8 @@ namespace Pusula.Training.HealthCare.Protocols
         public Guid DepartmentId { get; set; }
         public Guid ProtocolTypeId { get; set; }
         public Guid DoctorId { get; set; }
+        
+        public Guid InsuranceId { get; set; }
         public string ConcurrencyStamp { get; set; } = null!;
     }
 }

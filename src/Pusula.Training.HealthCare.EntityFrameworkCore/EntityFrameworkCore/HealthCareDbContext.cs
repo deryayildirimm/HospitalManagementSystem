@@ -178,6 +178,8 @@ public class HealthCareDbContext :
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(p => p.Doctor).WithMany().IsRequired().HasForeignKey(p => p.DoctorId)
                     .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(p => p.Insurance).WithMany().IsRequired().HasForeignKey(p => p.InsuranceId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
             
             builder.Entity<ProtocolType>(b =>

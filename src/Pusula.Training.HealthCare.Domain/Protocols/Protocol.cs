@@ -3,6 +3,7 @@ using System;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.GlobalExceptions;
+using Pusula.Training.HealthCare.Insurances;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Volo.Abp;
@@ -32,6 +33,10 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
     public Guid DoctorId { get; private set; }
     
     public virtual Doctor Doctor { get; set; }
+    
+    public Guid InsuranceId { get; private set; }
+    
+    public virtual Insurance Insurance { get; set; }
 
     protected Protocol()
     {
@@ -39,7 +44,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         StartTime = DateTime.Now;
     }
 
-    public Protocol(Guid id, Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId,  DateTime startTime, string? note = null, DateTime? endTime = null ) : base(id)
+    public Protocol(Guid id, Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId, Guid insuranceId,  DateTime startTime, string? note = null, DateTime? endTime = null ) : base(id)
     {
       
         SetId(id);
@@ -49,10 +54,9 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         SetStartTime(startTime);
         SetEndTime(endTime);
         SetProtocolTypeId(protocolTypeId);
+        SetInsuranceId(insuranceId);
         SetNote(note);
-
-  
-
+        
     }
     
     public void SetId(Guid id)
@@ -91,7 +95,12 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         Check.NotNull(departmentId, nameof(departmentId));
         DepartmentId = departmentId;
     }
-
+    
+     public void SetInsuranceId(Guid insuranceId)
+     {
+            Check.NotNull(insuranceId, nameof(insuranceId));
+            InsuranceId = insuranceId;
+     }
     public void SetProtocolTypeId(Guid protocolTypeId)
     {
         Check.NotNull(protocolTypeId, nameof(protocolTypeId));
@@ -101,9 +110,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
     public void SetNote(string? note)
     {
         
-        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidNoteLength_MESSAGE, 
-            HealthCareDomainErrorCodes.InvalidNoteLength_CODE, 
-            !string.IsNullOrWhiteSpace(note) || (note?.Length > ProtocolConsts.MaxNotesLength || ProtocolConsts.MinNotesLength < note?.Length ));
+       
         
         Note = note;
     }   
