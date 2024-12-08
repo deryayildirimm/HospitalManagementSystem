@@ -43,7 +43,7 @@ public class ExaminationManager(IExaminationRepository examinationRepository,
         );
         
         var newExamination = await examinationRepository.InsertAsync(examination);
-        await unitOfWorkManager.Current.SaveChangesAsync();
+        await unitOfWorkManager.Current!.SaveChangesAsync();
 
         await familyHistoryManager.CreateAsync(newExamination.Id, areParentsRelated, motherDisease, fatherDisease,
             sisterDisease, brotherDisease);
@@ -74,13 +74,17 @@ public class ExaminationManager(IExaminationRepository examinationRepository,
             ExaminationConsts.ComplaintMinLength);
         Check.Length(story, nameof(story), ExaminationConsts.StoryMaxLength);
         
-        var examination = await examinationRepository.GetAsync(id);
+        var examination = await examinationRepository.GetWithNavigationPropertiesAsync(id);
         
-        examination.SetProtocolId(protocolId);
-        examination.SetDate(date);
-        examination.SetComplaint(complaint);
-        examination.SetStartDate(startDate);
-        examination.SetStory(story);
+        examination!.SetProtocolId(protocolId);
+        examination!.SetDate(date);
+        examination!.SetComplaint(complaint);
+        examination!.SetStartDate(startDate);
+        examination!.SetStory(story);
+        
+        await familyHistoryManager.UpdateAsync(examination.FamilyHistory!.Id, id, areParentsRelated, motherDisease, 
+            fatherDisease, sisterDisease, brotherDisease);
+        await backgroundManager.UpdateAsync(examination.Background!.Id, id, allergies, medications, habits);
         
         return await examinationRepository.UpdateAsync(examination);
     }

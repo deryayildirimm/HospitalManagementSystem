@@ -14,5 +14,5 @@ public class BackgroundUpdateDto
     [StringLength(BackgroundConsts.HabitsMaxLength)]
     public string? Habits { get; set; }
     [Required]
-    public Guid ExaminationId { get; set; }
+    public Guid ExaminationId { get; set; } 
 }

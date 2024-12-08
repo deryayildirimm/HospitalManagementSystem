@@ -12,16 +12,16 @@ public class ExaminationUpdateDto
     [Required]
     public Guid Id { get; set; } = default!;
     [Required]
-    public DateTime Date { get; set; }
+    public DateTime Date { get; set; } = DateTime.Now;
     [Required]
     [StringLength(ExaminationConsts.ComplaintMaxLength, MinimumLength = ExaminationConsts.ComplaintMinLength)]
-    public string Complaint { get; set; } = null!;
+    public string Complaint { get; set; } = string.Empty;
     public DateTime? StartDate { get; set; }
     [StringLength(ExaminationConsts.StoryMaxLength)]
     public string? Story { get; set; }
 
-    public BackgroundDto Background { get; set; } = null!;
-    public FamilyHistoryDto FamilyHistory { get; set; } = null!;
+    public BackgroundUpdateDto Background { get; set; } = new BackgroundUpdateDto();
+    public FamilyHistoryUpdateDto FamilyHistory { get; set; } = new FamilyHistoryUpdateDto();
     public ICollection<ExaminationIcdDto>? ExaminationIcd { get; set; }
     [Required]
     public Guid ProtocolId { get; set; }

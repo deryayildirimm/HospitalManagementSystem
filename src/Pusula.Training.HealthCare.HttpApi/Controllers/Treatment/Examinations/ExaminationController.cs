@@ -21,6 +21,9 @@ public class ExaminationController(IExaminationsAppService examinationsAppServic
     [HttpGet("{id}")]
     public Task<ExaminationDto> GetAsync(Guid id) => examinationsAppService.GetAsync(id);
     
+    [HttpGet("withProtocolId/{protocolId}")]
+    public Task<ExaminationDto?> GetByProtocolIdAsync(Guid? protocolId) => examinationsAppService.GetByProtocolIdAsync(protocolId);
+    
     [HttpPost]
     public Task<ExaminationDto> CreateAsync(ExaminationCreateDto input) => examinationsAppService.CreateAsync(input);
     [HttpPut]

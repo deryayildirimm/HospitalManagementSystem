@@ -64,6 +64,30 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
 
+    public virtual async Task<Examination?> GetWithNavigationPropertiesAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var query = (await GetQueryableAsync())
+            .Include(e => e.Background)
+            .Include(e => e.FamilyHistory)
+            .Include(e => e.Protocol);
+
+        return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+    }
+
+    public virtual async Task<Examination?> GetByProtocolIdAsync(
+        Guid? protocolId, 
+        CancellationToken cancellationToken = default)
+    {
+        if (protocolId == null) return null;
+        
+        var query = ApplyFilter((await GetQueryableAsync()).Include(e => e.Background)
+            .Include(e => e.FamilyHistory)
+            .Include(e => e.Protocol), protocolId: protocolId);
+        return await query.FirstOrDefaultAsync(cancellationToken);
+    }
+
     protected virtual IQueryable<Examination> ApplyFilter(
         IQueryable<Examination> query,
         string? filterText = null,

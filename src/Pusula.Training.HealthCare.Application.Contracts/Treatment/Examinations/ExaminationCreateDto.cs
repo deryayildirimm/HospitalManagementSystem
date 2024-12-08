@@ -9,18 +9,17 @@ namespace Pusula.Training.HealthCare.Treatment.Examinations;
 
 public class ExaminationCreateDto
 {
-    [Required]
-    public DateTime Date { get; set; }
+    [Required] public DateTime Date { get; set; } = DateTime.Now;
     [Required]
     [StringLength(ExaminationConsts.ComplaintMaxLength, MinimumLength = ExaminationConsts.ComplaintMinLength)]
-    public string Complaint { get; set; } = null!;
+    public string Complaint { get; set; } = string.Empty;
     public DateTime? StartDate { get; set; }
     [StringLength(ExaminationConsts.StoryMaxLength)]
     public string? Story { get; set; }
     [Required]
     public Guid ProtocolId { get; set; }
     [Required]
-    public FamilyHistoryCreateInExaminationDto FamilyHistory { get; set; } = null!;
+    public FamilyHistoryCreateInExaminationDto FamilyHistory { get; set; } = new FamilyHistoryCreateInExaminationDto();
     [Required]
-    public BackgroundCreateInExaminationDto Background { get; set; } = null!;
+    public BackgroundCreateInExaminationDto Background { get; set; } = new BackgroundCreateInExaminationDto();
 }

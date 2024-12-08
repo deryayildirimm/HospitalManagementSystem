@@ -59,20 +59,20 @@ namespace Pusula.Training.HealthCare
         private async Task SetRoles()
         {
             await SeedCityRecords();
-           await SeedPatientRecords();
+            await SeedPatientRecords();
             await SeedRoleRecords();
-           await SeedDistrictRecords();
+            await SeedDistrictRecords();
             await SeedMedicalServiceRecords();
             await SeedDepartmentRecords();
-           await SeedMedicalServiceToDepartments();
+            await SeedMedicalServiceToDepartments();
             await SeedTitles();
             await SeedDoctorRecords();
             await SeedDoctorWorkingHours();
-           await SeedAppointments();
-          await SeedTestCategoryRecords();
-          await SeedTestRecords(); await SeedProtocolType();
-            await SeedProtocols(); // Protokoller en son oluşturulacak.
-            
+            await SeedAppointments();
+            await SeedTestCategoryRecords();
+            await SeedTestRecords(); 
+            await SeedProtocolType();
+            await SeedProtocols(); // Protokoller en son oluşturulacak
             await SeedExaminations();
             await SeedFamilyHistory();
             await SeedBackground();
@@ -89,13 +89,6 @@ namespace Pusula.Training.HealthCare
             };
 
             await protocolTypeRepository.InsertManyAsync(types, autoSave: true);
-            await SeedAppointments();
-            await SeedTestCategoryRecords();
-            await SeedTestRecords();
-            await SeedProtocols();
-            await SeedExaminations();
-            await SeedFamilyHistory();
-            await SeedBackground();
         }
 
         private async Task SeedTitles()
@@ -531,8 +524,6 @@ namespace Pusula.Training.HealthCare
             await doctorRepository.InsertAsync(d8, true);
             await doctorRepository.InsertAsync(d9, true);
         }
-        
-        
         
         private async Task SeedProtocols()
         {

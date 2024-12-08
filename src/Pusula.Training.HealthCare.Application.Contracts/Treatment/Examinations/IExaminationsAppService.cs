@@ -11,6 +11,7 @@ public interface IExaminationsAppService
 {
     Task<PagedResultDto<ExaminationDto>> GetListAsync(GetExaminationsInput input);
     Task<ExaminationDto> GetAsync(Guid id);
+    Task<ExaminationDto?> GetByProtocolIdAsync(Guid? protocolId);
     void DeleteAsync(Guid id);
     Task<ExaminationDto> CreateAsync(ExaminationCreateDto input);
     Task<ExaminationDto> UpdateAsync(ExaminationUpdateDto input);

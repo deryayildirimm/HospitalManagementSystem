@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Pusula.Training.HealthCare.Blazor.Services;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
@@ -47,6 +48,9 @@ public class Program
         {
             Log.Information("Starting web host.");
             var builder = WebApplication.CreateBuilder(args);
+            
+            //  protocol state service
+            builder.Services.AddSingleton<ProtocolStateService>();
 
             // Statik varlıklar için
             builder.WebHost.UseStaticWebAssets();

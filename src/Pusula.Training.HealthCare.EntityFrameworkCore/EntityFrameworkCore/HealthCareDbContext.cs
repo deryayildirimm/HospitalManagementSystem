@@ -273,10 +273,6 @@ public class HealthCareDbContext :
                 b.ConfigureByConvention();
                 b.HasKey(a => a.Id);
 
-                //Patient cannot make more than one appointment at a time 
-                b.HasIndex(a => new { a.PatientId, a.AppointmentDate, a.StartTime, a.EndTime })
-                    .IsUnique();
-
                 b.Property(a => a.AppointmentDate)
                     .IsRequired()
                     .HasColumnName(nameof(Appointment.AppointmentDate));
@@ -482,26 +478,26 @@ public class HealthCareDbContext :
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(d => d.Protocol)
                     .WithOne()
-                    .HasForeignKey<Examination>(x => x.ProtocolId)
                     .IsRequired()
+                    .HasForeignKey<Examination>(x => x.ProtocolId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
             
             builder.Entity<ExaminationIcd>(b =>
-            {
-                b.ToTable(HealthCareConsts.DbTablePrefix + "ExaminationIcds", HealthCareConsts.DbSchema);
-                b.ConfigureByConvention();
-
-                b.HasKey(x => new { x.ExaminationId, x.IcdId });
-
-                b.HasOne(ei => ei.Examination)
-                    .WithMany(e => e.ExaminationIcd)
-                    .HasForeignKey(ei => ei.ExaminationId);
-
-                b.HasOne(ei => ei.Icd)
-                    .WithMany()
-                    .HasForeignKey(ei => ei.IcdId);
-            });
+                           {
+                               b.ToTable(HealthCareConsts.DbTablePrefix + "ExaminationIcds", HealthCareConsts.DbSchema);
+                               b.ConfigureByConvention();
+               
+                               b.HasKey(x => new { x.ExaminationId, x.IcdId });
+               
+                               b.HasOne(ei => ei.Examination)
+                                   .WithMany(e => e.ExaminationIcd)
+                                   .HasForeignKey(ei => ei.ExaminationId);
+               
+                               b.HasOne(ei => ei.Icd)
+                                   .WithMany()
+                                   .HasForeignKey(ei => ei.IcdId);
+                           });
 
             builder.Entity<FamilyHistory>(b =>
             {

@@ -36,6 +36,13 @@ public class ExaminationsAppService(IExaminationRepository examinationRepository
         return ObjectMapper.Map<Examination, ExaminationDto>(examination);
     }
 
+    public virtual async Task<ExaminationDto?> GetByProtocolIdAsync(Guid? protocolId)
+    {
+        var examination = await examinationRepository.GetByProtocolIdAsync(protocolId);
+        if (examination == null) return null;
+        return ObjectMapper.Map<Examination, ExaminationDto>(examination);
+    }
+
     [Authorize(HealthCarePermissions.Examinations.Delete)]
     public virtual async void DeleteAsync(Guid id)
     {

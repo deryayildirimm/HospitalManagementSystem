@@ -40,4 +40,12 @@ public interface IExaminationRepository : IRepository<Examination, Guid>
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
         CancellationToken cancellationToken = default);
+
+    Task<Examination?> GetWithNavigationPropertiesAsync(
+        Guid id,
+        CancellationToken cancellationToken = default);
+
+    Task<Examination?> GetByProtocolIdAsync(
+        Guid? protocolId,
+        CancellationToken cancellationToken = default);
 }
