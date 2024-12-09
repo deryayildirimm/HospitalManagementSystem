@@ -5,7 +5,7 @@ using Volo.Abp.Domain.Services;
 
 namespace Pusula.Training.HealthCare.Treatment.Icds;
 
-public class IcdManager(IIcdRepository icdRepository) : DomainService
+public class IcdManager(IIcdRepository icdRepository) : DomainService, IIcdManager
 {
     public virtual async Task<Icd> CreateAsync(string codeNumber, string detail)
     {

@@ -9,6 +9,7 @@
 @using Pusula.Training.HealthCare.Permissions
 @using Volo.Abp.AspNetCore.Components.Web
 @using Pusula.Training.HealthCare.Treatment.Examinations
+@using Pusula.Training.HealthCare.Treatment.Icds
 @using Volo.Abp.Http.Client
 @inherits HealthCareComponentBase
 @inject IExaminationsAppService ExaminationsAppService
@@ -18,9 +19,11 @@
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
 @inject ProtocolStateService ProtocolStateService
+@inject IIcdsAppService IcdsAppService
 
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.DropDowns;
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["Examination"]" BreadcrumbItems="BreadcrumbItems">
@@ -214,24 +217,43 @@
 
             <!-- Examination ICD Section -->
             <div class="form-row">
-                <h5>@L["ExaminationIcd"]</h5>
-                @if (EditingExamination.ExaminationIcd != null)
+                <h5>@L["Examination ICD"]</h5>
+                <div class="col-md-6 mb-3">
+                    <label>@L["Select ICD"]</label>
+                    <SfDropDownList TItem="IcdDto" TValue="Guid" DataSource="@IcdList"
+                                    @bind-Value="@SelectedIcdId"
+                                    Placeholder="@L["SelectICD"]">
+                        <DropDownListEvents TItem="IcdDto" TValue="Guid"></DropDownListEvents>
+                        <DropDownListFieldSettings Text="CodeNumber" Value="Id"></DropDownListFieldSettings>
+
+                    </SfDropDownList>
+                    <SfButton CssClass="e-primary" Type="button" Content="@L["Add"]" OnClick="AddIcdToExamination" />
+                </div>
+            </div>
+            <div class="form-row">
+                @if (SelectedIcds.Any())
                 {
-                    @foreach (var examinationIcd in EditingExamination.ExaminationIcd)
-                    {
-                        <div class="col-md-6 mb-3">
-                            <label>@L["ICD"]</label>
-                            <SfTextBox TValue="string?" Value="@examinationIcd.Icd.CodeNumber" ReadOnly="true" />
-                        </div>
-                    }
+                    <div class="col-md-12">
+                        <h6>@L["Selected ICDs"]</h6>
+                        <ul>
+                            @foreach (var icd in SelectedIcds)
+                            {
+                                <li>
+                                    @icd.CodeNumber - @icd.Detail
+                                    <SfButton CssClass="e-danger e-small" Content="@L["Remove"]" OnClick="@(() => RemoveIcd(icd.Id))" />
+                                </li>
+                            }
+                        </ul>
+                    </div>
                 }
             </div>
+            
         </SfForm>
 
         <!-- Buttons -->
         <div class="button-row">
-            <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CancelAsync" />
-            <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" />
+            <SfButton CssClass="e-danger" Type="button" Content="@L["Cancel"]" IsPrimary="false" OnClick="CancelAsync" />
+            <SfButton CssClass="e-primary" Type="submit" Content="@L["Submit"]" IsPrimary="true" />
         </div>
     </EditForm>
 

@@ -22,4 +22,5 @@ public class ExaminationCreateDto
     public FamilyHistoryCreateInExaminationDto FamilyHistory { get; set; } = new FamilyHistoryCreateInExaminationDto();
     [Required]
     public BackgroundCreateInExaminationDto Background { get; set; } = new BackgroundCreateInExaminationDto();
+    public List<Guid> IcdIds { get; set; } = new List<Guid>();
 }

@@ -23,6 +23,7 @@ public class ExaminationUpdateDto
     public BackgroundUpdateDto Background { get; set; } = new BackgroundUpdateDto();
     public FamilyHistoryUpdateDto FamilyHistory { get; set; } = new FamilyHistoryUpdateDto();
     public ICollection<ExaminationIcdDto>? ExaminationIcd { get; set; }
+    public List<Guid> IcdIds { get; set; } = new List<Guid>();
     [Required]
     public Guid ProtocolId { get; set; }
 }

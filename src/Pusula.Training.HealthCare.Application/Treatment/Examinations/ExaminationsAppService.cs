@@ -56,7 +56,7 @@ public class ExaminationsAppService(IExaminationRepository examinationRepository
             input.Complaint, input.FamilyHistory.AreParentsRelated, input.FamilyHistory.MotherDisease,
             input.FamilyHistory.FatherDisease, input.FamilyHistory.SisterDisease, input.FamilyHistory.BrotherDisease,
             input.Background.Allergies, input.Background.Medications, input.Background.Habits, input.StartDate, 
-            input.Story);
+            input.Story, input.IcdIds);
         
         return ObjectMapper.Map<Examination, ExaminationDto>(examination);
     }
@@ -68,7 +68,7 @@ public class ExaminationsAppService(IExaminationRepository examinationRepository
             input.Date, input.Complaint, input.FamilyHistory.AreParentsRelated, 
             input.FamilyHistory.MotherDisease, input.FamilyHistory.FatherDisease, input.FamilyHistory.SisterDisease, 
             input.FamilyHistory.BrotherDisease, input.Background.Allergies, input.Background.Medications, 
-            input.Background.Habits, input.StartDate, input.Story);
+            input.Background.Habits, input.StartDate, input.Story, input.IcdIds);
         
         return ObjectMapper.Map<Examination, ExaminationDto>(examination);
     }

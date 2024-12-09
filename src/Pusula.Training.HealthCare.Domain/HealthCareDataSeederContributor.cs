@@ -10,6 +10,7 @@ using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.DoctorWorkingHours;
+using Pusula.Training.HealthCare.MedicalPersonnel;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
@@ -19,6 +20,7 @@ using Pusula.Training.HealthCare.Titles;
 using Pusula.Training.HealthCare.Treatment.Examinations;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
+using Pusula.Training.HealthCare.Treatment.Icds;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
@@ -47,9 +49,11 @@ namespace Pusula.Training.HealthCare
         IProtocolTypeRepository protocolTypeRepository,
         IProtocolRepository protocolRepository,
         IRepository<Test, Guid> testRepository,
+        IIcdRepository icdRepository,
         IExaminationRepository examinationRepository,
         IFamilyHistoryRepository familyHistoryRepository,
-        IBackgroundRepository backgroundRepository) : IDataSeedContributor, ITransientDependency
+        IBackgroundRepository backgroundRepository,
+        IMedicalStaffRepository medicalStaffRepository) : IDataSeedContributor, ITransientDependency
     {
         public async Task SeedAsync(DataSeedContext context)
         {
@@ -525,6 +529,166 @@ namespace Pusula.Training.HealthCare
             await doctorRepository.InsertAsync(d9, true);
         }
         
+        private async Task SeedMedicalStaffRecords()
+        {
+            if (await departmentRepository.GetCountAsync() == 0
+                || await cityRepository.GetCountAsync() == 0
+                || await districtRepository.GetCountAsync() == 0)
+                return;
+
+            var departments = await departmentRepository.GetListAsync();
+            var cityTitles = await cityRepository.GetListAsync();
+            var districtTitles = await districtRepository.GetListWithNavigationPropertiesAsync();
+
+            var city = cityTitles.First(x => x.Name == "Ankara");
+            var district = districtTitles.First(d => d.City.Name == "Ankara");
+
+            var d1 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[0].Id,
+                "Arif",
+                "Yılmaz",
+                "12345678901",
+                new DateTime(1980, 5, 12),
+                EnumGender.MALE,
+                new DateTime(1999, 5, 12),
+                "ahmet.yilmaz@example.com",
+                "555-1234567"
+            );
+
+            var d2 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[0].Id,
+                "Fatma",
+                "Kara",
+                "98765432109",
+                new DateTime(1990, 3, 25),
+                EnumGender.FEMALE,
+                new DateTime(2001, 5, 12),
+                "fatma.kara@example.com",
+                "555-9876543"
+            );
+
+            var d3 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[0].Id,
+                "Mehmet",
+                "Çelik",
+                "12309876543",
+                new DateTime(1975, 11, 30),
+                EnumGender.MALE,
+                new DateTime(2005, 11, 30),
+                "mehmet.celik@example.com",
+                "555-3219876"
+            );
+
+            var d4 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[1].Id,
+                "Merve",
+                "Şahin",
+                "23456789012",
+                new DateTime(1985, 8, 23),
+                EnumGender.FEMALE,
+                new DateTime(2005, 11, 30),
+                "merve.sahin@example.com",
+                "555-2345678"
+            );
+
+            var d5 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[1].Id,
+                "Zeynep",
+                "Demir",
+                "45678901234",
+                new DateTime(1990, 7, 5),
+                EnumGender.FEMALE,
+                new DateTime(2009, 7, 5),
+                "zeynep.demir@example.com",
+                "555-4567890"
+            );
+
+            var d6 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[3].Id,
+                "Ahmet",
+                "Aksoy",
+                "56789012345",
+                new DateTime(1982, 11, 30),
+                EnumGender.MALE,
+                new DateTime(2012, 7, 5),
+                "ahmet.aksoy@example.com",
+                "555-5678901"
+            );
+
+            var d7 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[2].Id,
+                "Elif",
+                "Çelik",
+                "67890123456",
+                new DateTime(1988, 4, 18),
+                EnumGender.FEMALE,
+                new DateTime(2017, 4, 18),
+                "elif.celik@example.com",
+                "555-6789012"
+            );
+
+            var d8 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[4].Id,
+                "Mehmet",
+                "Güneş",
+                "78901234567",
+                new DateTime(1970, 9, 9),
+                EnumGender.MALE,
+                new DateTime(2019, 9, 9),
+                "mehmet.gunes@example.com",
+                "555-7890123"
+            );
+
+            var d9 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[5].Id,
+                "Ayşe",
+                "Yıldız",
+                "89012345678",
+                new DateTime(1987, 6, 22),
+                EnumGender.FEMALE,
+                new DateTime(2023, 6, 22),
+                "ayse.yildiz@example.com",
+                "555-8901234"
+            );
+
+            await medicalStaffRepository.InsertAsync(d1, true);
+            await medicalStaffRepository.InsertAsync(d2, true);
+            await medicalStaffRepository.InsertAsync(d3, true);
+            await medicalStaffRepository.InsertAsync(d4, true);
+            await medicalStaffRepository.InsertAsync(d5, true);
+            await medicalStaffRepository.InsertAsync(d6, true);
+            await medicalStaffRepository.InsertAsync(d7, true);
+            await medicalStaffRepository.InsertAsync(d8, true);
+            await medicalStaffRepository.InsertAsync(d9, true);
+        }
+        
         private async Task SeedProtocols()
         {
             // Doktorlar, hastalar, protokol türleri ve departmanlar kontrol ediliyor
@@ -726,6 +890,26 @@ namespace Pusula.Training.HealthCare
                     await doctorWorkingHourRepository.InsertAsync(doctorWorkingHour);
                 }
             }
+        }
+
+        private async Task SeedIcds()
+        {
+            var icd1 = new Icd(
+                id: Guid.NewGuid(),
+                codeNumber: "A01",
+                detail: "Typhoid and paratyphoid fevers");
+            var icd2 = new Icd(
+                id: Guid.NewGuid(),
+                codeNumber: "C12",
+                detail: "Malignant neoplasm of pyriform sinus");
+            var icd3 = new Icd(
+                id: Guid.NewGuid(),
+                codeNumber: "D78",
+                detail: "Intraoperative and postprocedural complications of the spleen");
+            
+            await icdRepository.InsertAsync(icd1, true);
+            await icdRepository.InsertAsync(icd2, true);
+            await icdRepository.InsertAsync(icd3, true);
         }
         
         private async Task SeedExaminations()

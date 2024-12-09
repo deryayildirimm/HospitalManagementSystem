@@ -113,6 +113,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Examination, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
 
         CreateMap<ExaminationIcd, ExaminationIcdDto>();
+        CreateMap<ExaminationIcdDto, ExaminationIcd>();
         
         CreateMap<Appointment, AppointmentDto>();
         CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();

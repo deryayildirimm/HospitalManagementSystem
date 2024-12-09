@@ -35,6 +35,7 @@ public class Examination : FullAuditedAggregateRoot<Guid>
         SetComplaint(complaint);
         SetStartDate(startDate);
         SetStory(story);
+        ExaminationIcd = new List<ExaminationIcd>(); 
     }
 
     public void SetDate(DateTime date) => Date = date;
