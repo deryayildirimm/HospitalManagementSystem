@@ -7,8 +7,8 @@ pool:
 name: $(Date:yyyyMMdd).$(Rev:r)
 
 variables:
-  dateTimeTag: "$(Build.SourceVersion:0:7)-$(Build.QueuedTime:yyyy-MM-dd-HH.mm)"
-  validImageTag: "$(Build.SourceVersion:0:7)-$(Build.QueuedTime:yyyyMMdd-HHmm)"
+  dateTimeTag: "$(Build.SourceVersion)-$(Build.QueuedTime:yyyy-MM-dd-HH.mm)"
+  validImageTag: "$(Build.SourceVersion)-$(Build.QueuedTime:yyyyMMdd-HHmm)"
   imageTag: "$(validImageTag)"
 
 steps:
