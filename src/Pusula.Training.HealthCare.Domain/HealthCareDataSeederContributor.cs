@@ -22,7 +22,7 @@ using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
 using Volo.Abp.Identity;
 using Volo.Abp.PermissionManagement;
-using Volo.Abp.Uow;
+using Pusula.Training.HealthCare.Insurances;
 
 namespace Pusula.Training.HealthCare
 {
@@ -43,7 +43,8 @@ namespace Pusula.Training.HealthCare
         ITestCategoryRepository testCategoryRepository,
         IProtocolTypeRepository protocolTypeRepository,
         IProtocolRepository protocolRepository,
-        IRepository<Test, Guid> testRepository) : IDataSeedContributor, ITransientDependency
+        IRepository<Test, Guid> testRepository,
+        IInsuranceRepository insuranceRepository) : IDataSeedContributor, ITransientDependency
     {
         public async Task SeedAsync(DataSeedContext context)
         {
@@ -53,20 +54,22 @@ namespace Pusula.Training.HealthCare
         private async Task SetRoles()
         {
             await SeedCityRecords();
-           await SeedPatientRecords();
+            await SeedPatientRecords();
             await SeedRoleRecords();
-           await SeedDistrictRecords();
+            await SeedDistrictRecords();
             await SeedMedicalServiceRecords();
             await SeedDepartmentRecords();
-           await SeedMedicalServiceToDepartments();
+            await SeedMedicalServiceToDepartments();
             await SeedTitles();
             await SeedDoctorRecords();
             await SeedDoctorWorkingHours();
-           await SeedAppointments();
-          await SeedTestCategoryRecords();
-          await SeedTestRecords(); await SeedProtocolType();
+            await SeedAppointments();
+            await SeedTestCategoryRecords();
+            await SeedTestRecords();
+            await SeedInsurances();
+            await SeedProtocolType();
             await SeedProtocols(); // Protokoller en son oluşturulacak.
-            
+
         }
 
         private async Task SeedProtocolType()
@@ -76,12 +79,12 @@ namespace Pusula.Training.HealthCare
                 new ProtocolType(guidGenerator.Create(), "Ayakta"),
                 new ProtocolType(guidGenerator.Create(), "Yatış"),
                 new ProtocolType(guidGenerator.Create(), "Kontrol"),
-            
+
             };
 
             await protocolTypeRepository.InsertManyAsync(types, autoSave: true);
         }
-        
+
         private async Task SeedTitles()
         {
             var titles = new List<Title>
@@ -248,9 +251,9 @@ namespace Pusula.Training.HealthCare
                 EnumDiscountGroup.CONTRACTED
             );
 
-            await patientRepository.InsertAsync(patient1,true);
-            await patientRepository.InsertAsync(patient2,true);
-            await patientRepository.InsertAsync(patient3,true);
+            await patientRepository.InsertAsync(patient1, true);
+            await patientRepository.InsertAsync(patient2, true);
+            await patientRepository.InsertAsync(patient3, true);
         }
 
         private async Task SeedTestCategoryRecords()
@@ -259,11 +262,11 @@ namespace Pusula.Training.HealthCare
                 return;
 
             await testCategoryRepository.InsertAsync(
-                new TestCategory(Guid.NewGuid(), "Hematological Tests", "Measures blood cells (red blood cells, white blood cells) and related values.", "1.png", 1500),true);
+                new TestCategory(Guid.NewGuid(), "Hematological Tests", "Measures blood cells (red blood cells, white blood cells) and related values.", "1.png", 1500), true);
             await testCategoryRepository.InsertAsync(
-                new TestCategory(Guid.NewGuid(), "Biochemical Tests", "Measures vitamins, mineral levels and other chemical values.", "2.jpg", 2000),true);
+                new TestCategory(Guid.NewGuid(), "Biochemical Tests", "Measures vitamins, mineral levels and other chemical values.", "2.jpg", 2000), true);
             await testCategoryRepository.InsertAsync(
-                new TestCategory(Guid.NewGuid(), "Hormonal Tests", "Measures hormone levels and endocrine functions.", "3.jpg", 2500),true);
+                new TestCategory(Guid.NewGuid(), "Hormonal Tests", "Measures hormone levels and endocrine functions.", "3.jpg", 2500), true);
         }
 
         private async Task SeedTestRecords()
@@ -515,9 +518,46 @@ namespace Pusula.Training.HealthCare
             await doctorRepository.InsertAsync(d8, true);
             await doctorRepository.InsertAsync(d9, true);
         }
-        
-        
-        
+
+        private async Task SeedInsurances()
+        {
+            if (await insuranceRepository.GetCountAsync() > 0)
+            {
+                return;
+            }
+            var insurance1 = new Insurance(
+                guidGenerator.Create(),
+                "P1865156",
+                EnumInsuranceCompanyName.AvivaSA,
+                500,
+                15000,
+                new DateTime(2023, 6, 6),
+                new DateTime(2025, 6, 6),
+                "Health");
+            var insurance2 = new Insurance(
+                guidGenerator.Create(),
+                "P1984156",
+                EnumInsuranceCompanyName.ZiraatSigorta,
+                2500,
+                20000,
+                new DateTime(2024, 1, 08),
+                new DateTime(2025, 12, 12),
+                "Health");
+            var insurance3 = new Insurance(
+                guidGenerator.Create(),
+                "P18851156",
+                EnumInsuranceCompanyName.SompoSigorta,
+                5000,
+                30000,
+                new DateTime(2024, 7,17),
+                new DateTime(2026, 12, 6),
+                "Health");
+
+            await insuranceRepository.InsertAsync(insurance1, true);
+            await insuranceRepository.InsertAsync(insurance2, true);
+            await insuranceRepository.InsertAsync(insurance3, true);
+        }
+
         private async Task SeedProtocols()
         {
             // Doktorlar, hastalar, protokol türleri ve departmanlar kontrol ediliyor
@@ -559,7 +599,7 @@ namespace Pusula.Training.HealthCare
 
             await protocolRepository.InsertManyAsync(protocols, autoSave: true);
         }
-        
+
         private async Task SeedRoleRecords()
         {
             var doctor = new IdentityRole(guidGenerator.Create(), "doctor", null)
@@ -581,7 +621,7 @@ namespace Pusula.Training.HealthCare
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Patients.Default, true);
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Patients.Create, true);
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Patients.Delete, true);
-            
+
             //Doctor permissions
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Doctors.Default, true);
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Doctors.Create, true);

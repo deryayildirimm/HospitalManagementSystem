@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
@@ -32,7 +33,7 @@ namespace Pusula.Training.HealthCare.Insurances
         {
             var query = ApplyFilter(await GetQueryableAsync(), filterText, policyNumber, premiumAmount, coverageAmount, startDateMin, startDateMax,
                 endDateMin, endDateMax, insuranceCompanyName, description);
-            query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? InsuranceConst.GetDefaultSorting(true) : sorting);
+            //query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? InsuranceConst.GetDefaultSorting(true) : sorting);
             return query.PageBy(skipCount, maxResultCount).ToList();
         }
 
@@ -86,14 +87,13 @@ namespace Pusula.Training.HealthCare.Insurances
             EnumInsuranceCompanyName? insuranceCompanyName = null,
             string? description = null) =>
                 query
-                    .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.PolicyNumber!.ToLower().Contains(filterText!.ToLower()) || e.Description!.ToLower().Contains(filterText!.ToLower()) || e.InsuranceCompanyName!.ToString().ToLower().Contains(filterText!.ToLower()))
+                    .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.PolicyNumber!.ToLower().Contains(filterText!.ToLower()) || e.Description!.ToLower().Contains(filterText!.ToLower()))
                     .WhereIf(!string.IsNullOrWhiteSpace(policyNumber), e => e.PolicyNumber!.ToLower().Contains(policyNumber!.ToLower()))
                     .WhereIf(!string.IsNullOrWhiteSpace(description), e => e.Description!.ToLower().Contains(description!.ToLower()))
-                    .WhereIf(!string.IsNullOrWhiteSpace(insuranceCompanyName.ToString()), e => e.InsuranceCompanyName!.ToString().ToLower().Contains(insuranceCompanyName.ToString().ToLower()))
                     .WhereIf(startDateMin.HasValue, e => e.StartDate >= startDateMin!.Value)
                     .WhereIf(startDateMax.HasValue, e => e.StartDate <= startDateMax!.Value)
                     .WhereIf(endDateMin.HasValue, e => e.EndDate >= endDateMin!.Value)
-                    .WhereIf(endDateMax.HasValue, e => e.EndDate <= endDateMax!.Value);
-
+                    .WhereIf(endDateMax.HasValue, e => e.EndDate <= endDateMax!.Value)
+                    .WhereIf(insuranceCompanyName.HasValue && insuranceCompanyName != EnumInsuranceCompanyName.None, e => e.InsuranceCompanyName == insuranceCompanyName);
     }
 }
