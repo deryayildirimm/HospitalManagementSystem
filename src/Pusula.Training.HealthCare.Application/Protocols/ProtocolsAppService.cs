@@ -159,6 +159,11 @@ namespace Pusula.Training.HealthCare.Protocols
                 L["The {0} field is required.", L["ProtocolType"]],
                 input.ProtocolTypeId ==  Guid.Empty
             );
+            
+            HealthCareGlobalException.ThrowIf(
+                L["The {0} field is required.", L["Insurance"]],
+                input.InsuranceId ==  Guid.Empty
+            );
             var protocol = await protocolManager.CreateAsync(
             input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId, input.InsuranceId, input.StartTime, input.Notes, input.EndTime
             );
@@ -185,6 +190,10 @@ namespace Pusula.Training.HealthCare.Protocols
             HealthCareGlobalException.ThrowIf(
                 L["The {0} field is required.", L["ProtocolType"]],
                 input.ProtocolTypeId ==  Guid.Empty
+            );
+            HealthCareGlobalException.ThrowIf(
+                L["The {0} field is required.", L["Insurance"]],
+                input.InsuranceId ==  Guid.Empty
             );
             var protocol = await protocolManager.UpdateAsync(
             id,

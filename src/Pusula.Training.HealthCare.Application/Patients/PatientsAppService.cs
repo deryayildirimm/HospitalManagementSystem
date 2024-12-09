@@ -60,6 +60,13 @@ namespace Pusula.Training.HealthCare.Patients
           
         }
         
+        public virtual async Task<PatientDto> GetPatientByIdentityAsync(string number)
+        {
+       
+            var patient = await patientRepository.GetPatientByIdentityAsync(number);
+            return ObjectMapper.Map<Patient, PatientDto>(patient);
+          
+        }
 
         [Authorize(HealthCarePermissions.Patients.Delete)]
         public virtual async Task DeleteAsync(Guid id)

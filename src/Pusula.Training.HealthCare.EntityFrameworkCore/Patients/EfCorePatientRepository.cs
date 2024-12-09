@@ -81,6 +81,17 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
                ?? throw new EntityNotFoundException(typeof(Patient), patientNumber);
     }
     
+    public virtual async Task<Patient> GetPatientByIdentityAsync(
+        string identityNumber ,
+        CancellationToken cancellationToken = default)
+    {
+        var dbContext = await GetDbContextAsync();
+        
+        return await dbContext.Patients
+                   .Where(a => a.IdentityAndPassportNumber == identityNumber)
+                   .FirstOrDefaultAsync(cancellationToken)
+               ?? throw new EntityNotFoundException(typeof(Patient), identityNumber);
+    }
 
 
     public virtual async Task<long> GetCountAsync(
