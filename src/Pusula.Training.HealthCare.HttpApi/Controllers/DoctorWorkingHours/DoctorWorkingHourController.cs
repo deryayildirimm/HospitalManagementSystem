@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
@@ -17,4 +19,19 @@ public class DoctorWorkingHourController(IDoctorWorkingHourAppService doctorWork
     [HttpGet]
     public Task<PagedResultDto<DoctorWorkingHoursDto>> GetListAsync(GetDoctorWorkingHoursInput input)
         => doctorWorkingHourAppService.GetListAsync(input);
+
+    [HttpGet]
+    [Route("{id}")]
+    public Task<DoctorWorkingHoursDto> GetAsync(Guid id)
+        => doctorWorkingHourAppService.GetAsync(id);
+
+    [HttpDelete]
+    [Route("")]
+    public Task DeleteByIdsAsync(List<Guid> ids)
+        => doctorWorkingHourAppService.DeleteByIdsAsync(ids);
+
+    [HttpDelete]
+    [Route("{id}")]
+    public Task DeleteAsync(Guid id)
+        => doctorWorkingHourAppService.DeleteAsync(id);
 }

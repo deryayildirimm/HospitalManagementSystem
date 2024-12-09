@@ -1,6 +1,7 @@
+using Pusula.Training.HealthCare.Shared;
+
 namespace Pusula.Training.HealthCare.AppointmentTypes;
 
-public class AppointmentTypesDownloadTokenCacheItem
+public class AppointmentTypesDownloadTokenCacheItem : BaseTokenCacheItem
 {
-    public string Token { get; set; } = null!;
 }

@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.Permissions;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
@@ -16,7 +16,8 @@ public class DoctorWorkingHourAppService(IDoctorWorkingHourRepository workingHou
 {
     public virtual async Task<PagedResultDto<DoctorWorkingHoursDto>> GetListAsync(GetDoctorWorkingHoursInput input)
     {
-        var items = await workingHourRepository.GetListAsync(input.DoctorId, input.Sorting, input.MaxResultCount, input.SkipCount);
+        var items = await workingHourRepository.GetListAsync(input.DoctorId, input.Sorting, input.MaxResultCount,
+            input.SkipCount);
 
         return new PagedResultDto<DoctorWorkingHoursDto>
         {
@@ -25,4 +26,13 @@ public class DoctorWorkingHourAppService(IDoctorWorkingHourRepository workingHou
                 ObjectMapper.Map<List<DoctorWorkingHour>, List<DoctorWorkingHoursDto>>(items)
         };
     }
+
+    public virtual async Task<DoctorWorkingHoursDto> GetAsync(Guid id) =>
+        ObjectMapper.Map<DoctorWorkingHour, DoctorWorkingHoursDto>(await workingHourRepository.GetAsync(id));
+
+    [Authorize(HealthCarePermissions.Doctors.Delete)]
+    public virtual async Task DeleteAsync(Guid id) => await workingHourRepository.DeleteAsync(id);
+
+    [Authorize(HealthCarePermissions.Doctors.Delete)]
+    public virtual async Task DeleteByIdsAsync(List<Guid> ids) => await workingHourRepository.DeleteManyAsync(ids);
 }

@@ -114,7 +114,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
 
         return await query.LongCountAsync(cancellationToken);
     }
-    
+
     public virtual async Task<long> GetGroupCountByDepartmentsAsync(
         Guid? doctorId = null,
         Guid? patientId = null,
@@ -190,8 +190,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
                 AppointmentCount = g.Count()
             })
             .OrderBy(d => d.DepartmentName)
-            .Skip(skipCount)
-            .Take(maxResultCount)
+            .PageBy(skipCount, maxResultCount)
             .ToListAsync(cancellationToken);
     }
 

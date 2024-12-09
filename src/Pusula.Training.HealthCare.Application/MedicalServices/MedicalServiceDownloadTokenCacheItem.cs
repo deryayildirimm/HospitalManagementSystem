@@ -1,7 +1,8 @@
+using Pusula.Training.HealthCare.Shared;
+
 namespace Pusula.Training.HealthCare.MedicalServices;
 
-public class MedicalServiceDownloadTokenCacheItem
+public class MedicalServiceDownloadTokenCacheItem : BaseTokenCacheItem
 {
-    public string Token { get; set; } = null!;
-
+    
 }
