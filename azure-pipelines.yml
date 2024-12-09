@@ -20,7 +20,9 @@ steps:
 - task: Bash@3
   inputs:
     targetType: 'inline'
-    script: 'docker tag blazorapp:$(imageTag) registry.gitlab.com/medplus1/medplusproject:$(imageTag)'
+    script: |
+      docker tag blazorapp:$(imageTag) registry.gitlab.com/medplus1/medplusproject:$(imageTag)
+      docker rmi blazorapp:$(imageTag)
 - task: Docker@2
   inputs:
     containerRegistry: 'GitLab'
