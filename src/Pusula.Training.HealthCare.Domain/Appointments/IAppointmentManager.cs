@@ -25,6 +25,7 @@ public interface IAppointmentManager
         Guid patientId, 
         Guid medicalServiceId, 
         Guid appointmentTypeId,
+        Guid departmentId,
         DateTime appointmentDate,
         DateTime startTime,
         DateTime endTime,

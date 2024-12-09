@@ -17,7 +17,7 @@ using Volo.Abp;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
-public partial class CreateAppointment
+public partial class CreateAppointment : HealthCareComponentBase
 {
     private DateTime CurrentDate { get; set; }
     private int LookupPageSize { get; } = 100;
@@ -25,7 +25,7 @@ public partial class CreateAppointment
     private GetDoctorsWithDepartmentIdsInput DoctorsWithDepartmentIdsInput { get; set; }
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
     private IReadOnlyList<MedicalServiceDto> MedicalServiceCollection { get; set; }
-    private List<LookupDto<Guid>> DoctorsCollection { get; set; }
+    private List<DoctorLookupDto<Guid>> DoctorsCollection { get; set; }
     private IReadOnlyList<AppointmentCustomData> SlotItems { get; set; }
     private IReadOnlyList<PatientDto> PatientCollection { get; set; }
     private SfGrid<PatientDto> PatientGrid { get; set; }
@@ -55,7 +55,7 @@ public partial class CreateAppointment
     private PatientCreateDto NewPatient { get; set; }
     private List<KeyValuePair<string, EnumGender>> GendersCollection { get; set; }
     private SfSchedule<AppointmentCustomData> ScheduleObj { get; set; }
-    
+
     //
     private GetAppointmentsLookupInput DaysLookupFilter { get; set; }
     private int LoadCount { get; set; } = 14;
@@ -64,7 +64,6 @@ public partial class CreateAppointment
 
     private bool IsCreateAppointmentOpen { get; set; }
     private SfToast ToastObj { get; set; }
-    private string ToastPosition { get; set; } = "";
     private string ToastContent { get; set; } = "";
     private string ToastTitle { get; set; } = "Information";
     private string ToastCssClass { get; set; } = "";
@@ -76,6 +75,7 @@ public partial class CreateAppointment
 
     private bool IsCreateAppointmentValid =>
         IsIdValid(NewAppointment.MedicalServiceId) &&
+        IsIdValid(NewAppointment.DepartmentId) &&
         IsIdValid(NewAppointment.DoctorId) &&
         IsIdValid(NewAppointment.PatientId);
 
@@ -90,6 +90,9 @@ public partial class CreateAppointment
 
     public CreateAppointment()
     {
+        SelectedPatient = new PatientDto();
+        PatientGrid = new SfGrid<PatientDto>();
+        ToastObj = new SfToast();
         CurrentDate = DateTime.Now;
         AppointmentTypesCollection = [];
         MedicalServiceCollection = [];
@@ -98,6 +101,7 @@ public partial class CreateAppointment
         SlotItems = [];
         DaysLookupList = [];
         PatientCollection = [];
+        DoctorsCollection = [];
         IsDoctorsEnabled = false;
         IsVisibleSearchPatient = false;
         IsCreateAppointmentOpen = false;
@@ -138,7 +142,7 @@ public partial class CreateAppointment
             Offset = LoadCount,
             StartDate = DateTime.Now
         };
-        
+
         GetAppointmentSlotFilter = new GetAppointmentSlotInput();
         NewAppointment = new AppointmentCreateDto();
         NewPatient = new PatientCreateDto();
@@ -219,7 +223,7 @@ public partial class CreateAppointment
             IsDoctorsEnabled = true;
 
             DoctorsCollection =
-                ObjectMapper.Map<List<DoctorWithNavigationPropertiesDto>, List<LookupDto<Guid>>>(doctors);
+                ObjectMapper.Map<List<DoctorWithNavigationPropertiesDto>, List<DoctorLookupDto<Guid>>>(doctors);
         }
         catch (Exception e)
         {
@@ -250,12 +254,12 @@ public partial class CreateAppointment
         }
     }
 
-    private async void OnDoctorChange(SelectEventArgs<LookupDto<Guid>> args)
+    private async void OnDoctorChange(SelectEventArgs<DoctorLookupDto<Guid>> args)
     {
-        
         try
         {
             NewAppointment.DoctorId = args.ItemData.Id;
+            NewAppointment.DepartmentId = args.ItemData.DepartmentId;
             DoctorNameInfo = args.ItemData.DisplayName;
             await GetAppointmentDays();
         }
@@ -264,7 +268,7 @@ public partial class CreateAppointment
             throw new UserFriendlyException(e.Message);
         }
     }
-    
+
     private async Task GetAppointmentSlots()
     {
         try
@@ -366,7 +370,7 @@ public partial class CreateAppointment
             args.Cancel = true;
             return;
         }
-        
+
         if (args.ActionType is ActionType.DateNavigate && IsSlotSearchAvailable)
         {
             GetAppointmentSlotFilter.Date = args.CurrentDate;
@@ -385,10 +389,9 @@ public partial class CreateAppointment
             ToastTitle = @L["AppointmentCreated"];
             ToastCssClass = "e-toast-success";
             IsCreateAppointmentOpen = false;
-             StateHasChanged();
+            StateHasChanged();
             await ShowOnClick();
             ResetAppointmentInfo();
-           
         }
         catch (Exception e)
         {
@@ -475,20 +478,20 @@ public partial class CreateAppointment
         MedicalServiceNameInfo = "";
         StateHasChanged();
     }
-    
+
     private async Task OnLoadDaysDaysLeft()
     {
         var newStartDate = DaysLookupFilter.StartDate.AddDays(-LoadCount);
         DaysLookupFilter.StartDate = newStartDate;
         await GetAppointmentDays();
     }
-    
+
     private async Task OnLoadDaysRight()
     {
         DaysLookupFilter.StartDate = DaysLookupFilter.StartDate.AddDays(LoadCount);
         await GetAppointmentDays();
     }
-    
+
     private async Task GetAppointmentDays()
     {
         try
@@ -497,13 +500,13 @@ public partial class CreateAppointment
             {
                 return;
             }
-            
+
             DaysLookupList.Clear();
-            
+
             DaysLookupFilter.DoctorId = NewAppointment.DoctorId;
             DaysLookupFilter.MedicalServiceId = NewAppointment.MedicalServiceId;
-            
-            var days = 
+
+            var days =
                 (await AppointmentAppService.GetAvailableDaysLookupAsync(DaysLookupFilter))
                 .Items
                 .ToList();
@@ -517,7 +520,7 @@ public partial class CreateAppointment
             await UiMessageService.Error(e.Message);
         }
     }
-    
+
     private async Task OnSelectAppointmentDay(AppointmentDayItemLookupDto item)
     {
         DaysLookupList.ForEach(e => e.IsSelected = false);

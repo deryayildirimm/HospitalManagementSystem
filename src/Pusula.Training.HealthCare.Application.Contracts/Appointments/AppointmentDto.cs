@@ -1,5 +1,6 @@
 using System;
 using Pusula.Training.HealthCare.AppointmentTypes;
+using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
@@ -13,6 +14,7 @@ public class AppointmentDto : FullAuditedEntityDto<Guid>
     public DoctorDto Doctor { get; set; }
     public PatientDto Patient { get; set; }
     public MedicalServiceDto MedicalService { get; set; }
+    public DepartmentDto Department { get; set; }
     public AppointmentTypeDto AppointmentType { get; set; }
     public DateTime AppointmentDate { get; set; }
     public DateTime StartTime { get; set; }

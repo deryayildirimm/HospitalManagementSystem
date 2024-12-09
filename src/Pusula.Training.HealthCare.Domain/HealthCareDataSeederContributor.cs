@@ -53,20 +53,20 @@ namespace Pusula.Training.HealthCare
             await SeedCityRecords();
             await SeedAppointmentTypes();
             await SeedPatientRecords();
-           await SeedPatientRecords();
+            await SeedPatientRecords();
             await SeedRoleRecords();
-           await SeedDistrictRecords();
+            await SeedDistrictRecords();
             await SeedMedicalServiceRecords();
             await SeedDepartmentRecords();
-           await SeedMedicalServiceToDepartments();
+            await SeedMedicalServiceToDepartments();
             await SeedTitles();
             await SeedDoctorRecords();
             await SeedDoctorWorkingHours();
-           await SeedAppointments();
-          await SeedTestCategoryRecords();
-          await SeedTestRecords(); await SeedProtocolType();
-            await SeedProtocols(); // Protokoller en son oluşturulacak.
-            
+            await SeedAppointments();
+            await SeedTestCategoryRecords();
+            await SeedTestRecords();
+            await SeedProtocolType();
+            //await SeedProtocols(); // Protokoller en son oluşturulacak.
         }
 
         private async Task SeedProtocolType()
@@ -76,12 +76,11 @@ namespace Pusula.Training.HealthCare
                 new ProtocolType(guidGenerator.Create(), "Ayakta"),
                 new ProtocolType(guidGenerator.Create(), "Yatış"),
                 new ProtocolType(guidGenerator.Create(), "Kontrol"),
-            
             };
 
             await protocolTypeRepository.InsertManyAsync(types, autoSave: true);
         }
-        
+
         private async Task SeedTitles()
         {
             var titles = new List<Title>
@@ -148,7 +147,6 @@ namespace Pusula.Training.HealthCare
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Urology"), true);
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Oncology"), true);
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Neurology"), true);
-            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Dermatology"), true);
         }
 
         private async Task SeedMedicalServiceToDepartments()
@@ -174,7 +172,7 @@ namespace Pusula.Training.HealthCare
                 var service = medicalServices[medicalServiceIndex];
 
                 service.DepartmentMedicalServices = new Collection<DepartmentMedicalService>();
-                
+
                 service.AddDepartment(department.Id);
                 await medicalServiceRepository.UpdateAsync(service, true);
                 medicalServiceIndex++;
@@ -248,9 +246,9 @@ namespace Pusula.Training.HealthCare
                 EnumDiscountGroup.CONTRACTED
             );
 
-            await patientRepository.InsertAsync(patient1,true);
-            await patientRepository.InsertAsync(patient2,true);
-            await patientRepository.InsertAsync(patient3,true);
+            await patientRepository.InsertAsync(patient1, true);
+            await patientRepository.InsertAsync(patient2, true);
+            await patientRepository.InsertAsync(patient3, true);
         }
 
         private async Task SeedTestCategoryRecords()
@@ -521,9 +519,8 @@ namespace Pusula.Training.HealthCare
             await doctorRepository.InsertAsync(d8, true);
             await doctorRepository.InsertAsync(d9, true);
         }
-        
-        
-        
+
+
         private async Task SeedProtocols()
         {
             // Doktorlar, hastalar, protokol türleri ve departmanlar kontrol ediliyor
@@ -565,7 +562,7 @@ namespace Pusula.Training.HealthCare
 
             await protocolRepository.InsertManyAsync(protocols, autoSave: true);
         }
-        
+
 
         private async Task SeedRoleRecords()
         {
@@ -674,6 +671,7 @@ namespace Pusula.Training.HealthCare
                             patient.Id,
                             medicalService.Id,
                             types[random.Next(types.Count)].Id,
+                            doctor.DepartmentId,
                             appointmentDate,
                             appointmentDate + appointmentTime,
                             appointmentDate + appointmentTime + serviceDuration,
@@ -692,7 +690,7 @@ namespace Pusula.Training.HealthCare
                     }
 
                     // Her hasta için 10 farklı randevu saati olmalı
-                    if (patientAppointments.Count >= 10)
+                    if (patientAppointments.Count >= 4)
                     {
                         break;
                     }

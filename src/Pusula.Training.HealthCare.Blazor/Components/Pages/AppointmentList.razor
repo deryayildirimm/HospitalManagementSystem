@@ -18,7 +18,6 @@
 @using Syncfusion.Blazor.Calendars
 @inherits HealthCareComponentBase
 
-@inject AppointmentAdaptor AppointmentAdaptor
 @inject IAppointmentAppService AppointmentAppService
 @inject ILookupAppService LookupAppService
 @inject IUiMessageService UiMessageService
@@ -42,62 +41,62 @@
     <div class="col-12 border-1 bg-white rounded-1 p-4">
         <div class="row">
             <div class="col-3 my-1">
-                <FieldLabel>@L["DoctorName"]</FieldLabel>
+                <h6>@L["DoctorName"]</h6>
                 <SfTextBox @bind-Value="@Filter.DoctorName" Placeholder="@L["DoctorName"]"></SfTextBox>
             </div>
             <div class="col-3 my-1">
-                <FieldLabel>@L["PatientName"]</FieldLabel>
+                <h6>@L["PatientName"]</h6>
                 <SfTextBox @bind-Value="@Filter.PatientName" Placeholder="@L["PatientName"]"></SfTextBox>
             </div>
             <div class="col-3 my-1">
-                <FieldLabel>@L["ServiceName"]</FieldLabel>
+                <h6>@L["ServiceName"]</h6>
                 <SfTextBox @bind-Value="@Filter.ServiceName" Placeholder="@L["ServiceName"]"></SfTextBox>
             </div>
             <div class="col-3 my-1">
-                <Field>
-                    <FieldLabel>@L["PatientType"]</FieldLabel>
+                <div>
+                    <h6>@L["PatientType"]</h6>
                     <SfDropDownList TItem="KeyValuePair<string, EnumPatientTypes>" TValue="EnumPatientTypes?"
                                     @bind-Value="Filter.PatientType"
                                     DataSource="@PatientTypeCollection">
                         <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
                     </SfDropDownList>
-                </Field>
+                </div>
             </div>
             <div class="col-3 my-1">
-                <FieldLabel>@L["MinCost"]</FieldLabel>
+                <h6>@L["MinCost"]</h6>
                 <SfNumericTextBox TValue="double?" @bind-Value="@Filter.MinAmount" Placeholder="@L["MinCost"]" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue"></SfNumericTextBox>
             </div>
             <div class="col-3 my-1">
-                <FieldLabel>@L["MaxCost"]</FieldLabel>
+                <h6>@L["MaxCost"]</h6>
                 <SfNumericTextBox TValue="double?" @bind-Value="@Filter.MaxAmount" Placeholder="@L["MaxCost"]" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue"></SfNumericTextBox>
             </div>
             <div class="col-3 my-1">
-                <FieldLabel>@L["AppointmentMinDate"]</FieldLabel>
+                <h6>@L["AppointmentMinDate"]</h6>
                 <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.AppointmentMinDate" Placeholder="@L["AppointmentMinDate"]"></SfDatePicker>
             </div>
             <div class="col-3 my-1">
-                <FieldLabel>@L["AppointmentMaxDate"]</FieldLabel>
+                <h6>@L["AppointmentMaxDate"]</h6>
                 <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.AppointmentMaxDate" Placeholder="@L["AppointmentMaxDate"]"></SfDatePicker>
             </div>
             <div class="col-3 my-1">
-                <Field>
-                    <FieldLabel>@L["Departments"]</FieldLabel>
+                <div>
+                    <h6>@L["Departments"]</h6>
                     <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
                                     @bind-Value="Filter.DepartmentId"
                                     DataSource="@DepartmentsCollection">
                         <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
                     </SfDropDownList>
-                </Field>
+                </div>
             </div>
             <div class="col-3 my-1">
-                <Field>
-                    <FieldLabel>@L["MedicalService"]</FieldLabel>
+                <div>
+                    <h6>@L["MedicalService"]</h6>
                     <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
                                     @bind-Value="Filter.MedicalServiceId"
                                     DataSource="@MedicalServiceCollection">
                         <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
                     </SfDropDownList>
-                </Field>
+                </div>
             </div>
         </div>
         <div>
@@ -117,12 +116,12 @@
     <div class="col-12 border-1 bg-white rounded-1 p-4">
         <SfGrid
             @ref="Grid"
-            DataSource="@AppointmentCollection"
             TValue="AppointmentDto"
             AllowPaging="true"
             AllowSorting="true"
             Toolbar="@(new List<string>() { "Delete" })"
-            SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
+            SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }"
+            Query="@FilterQuery">
             <SfDataManager
                 AdaptorInstance="@typeof(AppointmentAdaptor)"
                 Adaptor="Adaptors.CustomAdaptor">
@@ -140,31 +139,28 @@
                 {
                     <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
                 }
-                <GridColumn HeaderText="Appointment Date" Width="110">
-                    <Template Context="context">
-                        @($"{((AppointmentDto)context).AppointmentDate:yyyy-MM-dd}")
-                    </Template>
+                <GridColumn Type="ColumnType.Date" Format="dd/MM/yyyy" Field="AppointmentDate" HeaderText="@L["AppointmentDate"]" Width="130">
                 </GridColumn>
-                <GridColumn HeaderText="Time Period" Width="110">
-                    <Template Context="context">
-                        @($"{((AppointmentDto)context).StartTime:HH:mm} - {((AppointmentDto)context).EndTime:HH:mm}")
-                    </Template>
+                <GridColumn Type="ColumnType.Date" Format="HH:mm" Field="StartTime" HeaderText="@L["Start"]" Width="auto">
                 </GridColumn>
-                <GridColumn HeaderText="Patient Name" Width="110">
+                <GridColumn Type="ColumnType.Date" Format="HH:mm" Field="EndTime" HeaderText="@L["End"]" Width="auto">
+                </GridColumn>
+                <GridColumn HeaderText="@L["PatientName"]" Width="110">
                     <Template Context="context">
                         @($"{((AppointmentDto)context).Patient?.FirstName} {((AppointmentDto)context).Patient?.LastName}")
                     </Template>
                 </GridColumn>
-                <GridColumn HeaderText="Doctor Name" Width="110">
+                <GridColumn HeaderText="@L["DoctorName"]" Width="110">
                     <Template Context="context">
                         @($"{((AppointmentDto)context).Doctor?.FirstName} {((AppointmentDto)context).Doctor?.LastName}")
                     </Template>
                 </GridColumn>
                 <GridColumn Field="@nameof(AppointmentDto.Amount)" HeaderText="Cost" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field="Patient.PatientType" HeaderText="Patient Type" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field="MedicalService.Name" HeaderText="Service Name" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+                <GridColumn Field="Patient.PatientType" HeaderText="@L["PatientType"]" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                <GridColumn Field="Department.Name" HeaderText="@L["Department"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+                <GridColumn Field="MedicalService.Name" HeaderText="@L["ServiceName"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
 
-                <GridColumn HeaderText="@L["Actions"]" Width="150">
+                <GridColumn HeaderText="@L["Actions"]" Width="auto">
                     <Template Context="context">
                         <SfButton IconCss="e-icons e-delete" CssClass="e-danger" OnClick="@(() => DeleteAppointmentAsync((AppointmentDto)context))">
                         </SfButton>

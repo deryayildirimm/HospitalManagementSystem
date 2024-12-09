@@ -328,6 +328,12 @@ public class HealthCareDbContext :
                     .IsRequired()
                     .HasForeignKey(a => a.MedicalServiceId)
                     .OnDelete(DeleteBehavior.NoAction);
+                
+                b.HasOne(a => a.Department)
+                    .WithMany()
+                    .IsRequired()
+                    .HasForeignKey(a => a.DepartmentId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             builder.Entity<AppointmentType>(b =>

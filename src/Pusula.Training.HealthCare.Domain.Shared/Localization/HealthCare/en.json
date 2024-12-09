@@ -55,6 +55,8 @@
     "NumberOfItemsOnThisPageAreSelected": "All {0} items on this page are selected",
     "SelectAllItems": "Select all {0} items",
     "ClearSelection": "Clear selection",
+    "DepartmentName": "Department Name",
+    "AppointmentCount": "Appointment Count",
     "DeleteAllRecords": "Are you sure you want to delete all records?",
     "DeleteSelectedRecords": "Are you sure you want to delete {0} record(s)?",
     "NoDataAvailable": "No data available",

@@ -17,7 +17,7 @@ using Doctor = Pusula.Training.HealthCare.Blazor.Models.Doctor;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
-public partial class Appointments
+public partial class Appointments : HealthCareComponentBase
 {
 #pragma warning disable BL0005
     [Parameter] public int PatientNo { get; set; }
@@ -255,6 +255,7 @@ public partial class Appointments
         {
             StepperModel.DoctorName = item.Name;
             StepperModel.DoctorId = item.Id;
+            StepperModel.DepartmentId = item.DepartmentId;
             StepperModel.DepartmentName = item.Department;
             GetAppointmentSlotFilter.DoctorId = item.Id;
             DaysLookupFilter.DoctorId = item.Id;
@@ -359,6 +360,7 @@ public partial class Appointments
                 .Select(x => new Doctor
                 {
                     Id = x.Doctor.Id,
+                    DepartmentId = x.Doctor.DepartmentId,
                     Name = $"{x.Title.TitleName} {x.Doctor.FirstName} {x.Doctor.LastName}",
                     Department = x.Department.Name,
                     Gender = x.Doctor.Gender,
@@ -435,7 +437,7 @@ public partial class Appointments
 
     private async Task OnDoctorSearchChanged(string? newText)
     {
-        DoctorsWithDepartmentIdsInput.Name = newText ?? string.Empty;
+        DoctorsWithDepartmentIdsInput.FilterText = newText ?? string.Empty;
         await GetDoctorsList();
     }
 
@@ -551,6 +553,7 @@ public partial class Appointments
 
             //New appointment object mapping
             NewAppointment.DoctorId = StepperModel.DoctorId;
+            NewAppointment.DepartmentId = StepperModel.DepartmentId;
             NewAppointment.PatientId = StepperModel.PatientId;
             NewAppointment.MedicalServiceId = StepperModel.MedicalServiceId;
             NewAppointment.AppointmentDate = StepperModel.AppointmentDate;

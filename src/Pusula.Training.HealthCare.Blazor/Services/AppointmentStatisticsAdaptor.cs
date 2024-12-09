@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Appointments;
@@ -9,7 +8,7 @@ using Volo.Abp;
 
 namespace Pusula.Training.HealthCare.Blazor.Services;
 
-public class AppointmentAdaptor(IAppointmentAppService appointmentAppService) : DataAdaptor
+public class AppointmentStatisticsAdaptor(IAppointmentAppService appointmentAppService) : DataAdaptor
 {
     public override async Task<object> ReadAsync(
         DataManagerRequest dataManagerRequest,
@@ -23,14 +22,10 @@ public class AppointmentAdaptor(IAppointmentAppService appointmentAppService) : 
             var filter = string.IsNullOrEmpty(filterJson)
                 ? new GetAppointmentsInput { MaxResultCount = dataManagerRequest!.Take, SkipCount = dataManagerRequest!.Skip }
                 : JsonSerializer.Deserialize<GetAppointmentsInput>(filterJson);
-
-            filter!.Sorting = dataManagerRequest!.Sorted is { Count: > 0 }
-                ? $"{dataManagerRequest.Sorted[0].Name} {dataManagerRequest.Sorted[0].Direction}"
-                : null;
             
             filter!.SkipCount = dataManagerRequest!.Skip;
             filter.MaxResultCount = dataManagerRequest.Take;
-            var result = await appointmentAppService.GetListAsync(filter!);
+            var result = await appointmentAppService.GetCountByDepartmentsAsync(filter);
 
             var dataResult = new DataResult
             {
@@ -45,4 +40,5 @@ public class AppointmentAdaptor(IAppointmentAppService appointmentAppService) : 
         }
         
     }
+    
 }

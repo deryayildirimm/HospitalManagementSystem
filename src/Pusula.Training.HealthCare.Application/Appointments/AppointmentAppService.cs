@@ -97,6 +97,59 @@ public class AppointmentAppService(
         };
     }
 
+    public virtual async Task<PagedResultDto<DepartmentAppointmentCountDto>> GetCountByDepartmentsAsync(GetAppointmentsInput input)
+    {
+        
+        var count = await appointmentRepository.GetGroupCountByDepartmentsAsync(
+            doctorId: input.DoctorId,
+            patientId: input.PatientId,
+            medicalServiceId: input.MedicalServiceId,
+            appointmentTypeId: input.AppointmentTypeId,
+            departmentId: input.DepartmentId,
+            patientName: input.PatientName,
+            doctorName: input.DoctorName,
+            serviceName: input.ServiceName,
+            patientNumber: input.PatientNumber,
+            appointmentMinDate: input.AppointmentMinDate,
+            appointmentMaxDate: input.AppointmentMaxDate,
+            startTime: input.StartTime,
+            endTime: input.EndTime,
+            status: input.Status,
+            patientType: input.PatientType,
+            reminderSent: input.ReminderSent,
+            minAmount: input.MinAmount,
+            maxAmount: input.MaxAmount);
+        
+        var items = await appointmentRepository.GetGroupByDepartmentsAsync(
+            doctorId: input.DoctorId,
+            patientId: input.PatientId,
+            medicalServiceId: input.MedicalServiceId,
+            appointmentTypeId: input.AppointmentTypeId,
+            departmentId: input.DepartmentId,
+            patientName: input.PatientName,
+            doctorName: input.DoctorName,
+            serviceName: input.ServiceName,
+            patientNumber: input.PatientNumber,
+            appointmentMinDate: input.AppointmentMinDate,
+            appointmentMaxDate: input.AppointmentMaxDate,
+            startTime: input.StartTime,
+            endTime: input.EndTime,
+            status: input.Status,
+            patientType: input.PatientType,
+            reminderSent: input.ReminderSent,
+            minAmount: input.MinAmount,
+            maxAmount: input.MaxAmount,
+            input.Sorting,
+            input.MaxResultCount,
+            input.SkipCount);
+        
+        return new PagedResultDto<DepartmentAppointmentCountDto>
+        {
+            TotalCount = count,
+            Items = ObjectMapper.Map<List<DepartmentAppointmentCount>, List<DepartmentAppointmentCountDto>>(items)
+        };
+    }
+
     public virtual async Task<AppointmentDto> GetAsync(Guid id)
     {
         await distributedEventBus.PublishAsync(new AppointmentsViewedEto { Id = id, ViewedAt = Clock.Now },
@@ -121,6 +174,7 @@ public class AppointmentAppService(
             input.PatientId,
             input.MedicalServiceId,
             input.AppointmentTypeId,
+            input.DepartmentId,
             input.AppointmentDate,
             input.StartTime,
             input.EndTime,

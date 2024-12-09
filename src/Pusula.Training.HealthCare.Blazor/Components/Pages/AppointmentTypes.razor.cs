@@ -14,7 +14,7 @@ using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
-public partial class AppointmentTypes
+public partial class AppointmentTypes : HealthCareComponentBase
 {
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private SfGrid<AppointmentTypeDto> Grid { get; set; }
@@ -36,6 +36,8 @@ public partial class AppointmentTypes
 
     public AppointmentTypes()
     {
+        DeleteConfirmDialog = new SfDialog();
+        Grid = new SfGrid<AppointmentTypeDto>();
         NewType = new AppointmentTypeCreateDto();
         Filter = new GetAppointmentTypesInput
         {

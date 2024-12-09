@@ -12,6 +12,9 @@ public static class HealthCareDomainErrorKeyValuePairs
     public static KeyValuePair<string, string> DateNotValid =
         KeyValuePair.Create(HealthCareDomainErrorCodes.DateNotInPastException, "Not valid date.");
     
+    public static KeyValuePair<string, string> TextLenghtExceeded =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.TextLenghtExceeded, "Text lenght exceeded. Max lenght is 1000 characters.");
+    
     public static KeyValuePair<string, string> AlreadyHaveAppointmentExactTime =
         KeyValuePair.Create(HealthCareDomainErrorCodes.AlreadyHaveAppointmentExactTime, "Patient already have an appointment at this time.");
 

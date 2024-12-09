@@ -11,6 +11,8 @@ public static class HealthCareDomainErrorCodes
     
     public const string NameExists = "HealthCareError:NameAlreadyExist";
     
+    public const string TextLenghtExceeded = "HealthCareError:TextLenghtExceeded";
+    
     public const string AppointmentAlreadyTaken = "HealthCareError:AppointmentAlreadyTaken";
     public const string AppointmentDateNotValid = "HealthCareError:AppointmentDateNotValid";
     public const string AlreadyHaveAppointmentExactTime = "HealthCareError:AlreadyHaveAppointmentExactTime";

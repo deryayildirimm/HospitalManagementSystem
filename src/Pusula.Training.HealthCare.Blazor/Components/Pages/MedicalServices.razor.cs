@@ -18,7 +18,7 @@ using Volo.Abp.BlazoriseUI.Components;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
-public partial class MedicalServices
+public partial class MedicalServices : HealthCareComponentBase
 {
     #pragma warning disable BL0005
     protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];

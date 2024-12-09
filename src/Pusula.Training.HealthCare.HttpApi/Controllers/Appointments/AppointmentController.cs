@@ -34,6 +34,11 @@ public class AppointmentController(IAppointmentAppService appointmentAppService)
         => appointmentAppService.GetListAsync(input);
 
     [HttpGet]
+    [Route("statistics")]
+    public Task<PagedResultDto<DepartmentAppointmentCountDto>> GetCountByDepartmentsAsync(GetAppointmentsInput input)
+      => appointmentAppService.GetCountByDepartmentsAsync(input);
+
+    [HttpGet]
     [Route("{id}")]
     public virtual Task<AppointmentDto> GetAsync(Guid id)
         => appointmentAppService.GetAsync(id);

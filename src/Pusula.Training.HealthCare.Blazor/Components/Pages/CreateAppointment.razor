@@ -85,14 +85,14 @@
                     <SfDropDownList
                         Readonly="@(!IsDoctorsEnabled)"
                         TValue="Guid"
-                        TItem="LookupDto<Guid>"
+                        TItem="DoctorLookupDto<Guid>"
                         Placeholder="@L["Select"]"
                         AllowFiltering="true"
                         DataSource="@DoctorsCollection"
                         @bind-Value="NewAppointment.DoctorId"
                         Width="100%">
                         <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
-                        <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@OnDoctorChange"></DropDownListEvents>
+                        <DropDownListEvents TItem="DoctorLookupDto<Guid>" TValue="Guid" OnValueSelect="@OnDoctorChange"></DropDownListEvents>
                     </SfDropDownList>
                 </div>
                 <div>

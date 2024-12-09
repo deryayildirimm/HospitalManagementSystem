@@ -12,6 +12,10 @@ public class AppointmentCreateDto
     
     [Required]
     [GuidValidator]
+    public Guid DepartmentId { get; set; }
+    
+    [Required]
+    [GuidValidator]
     public Guid PatientId { get; set; }
     
     [Required]

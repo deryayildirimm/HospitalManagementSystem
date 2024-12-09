@@ -16,7 +16,7 @@ public class PeriodicAppointmentTrackerWorker : AsyncPeriodicBackgroundWorkerBas
     public PeriodicAppointmentTrackerWorker(AbpAsyncTimer timer, IServiceScopeFactory serviceScopeFactory)
         : base(timer, serviceScopeFactory)
     {
-        Timer.Period = 10000;
+        Timer.Period = 1000000;
     }
 
     [UnitOfWork]

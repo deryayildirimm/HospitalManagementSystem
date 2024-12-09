@@ -1,17 +1,14 @@
-using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using Microsoft.AspNetCore.Authorization;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Shared;
-using Syncfusion.Blazor;
 using Syncfusion.Blazor.Buttons;
 using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor.Grids;
@@ -23,9 +20,10 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
 public partial class AppointmentList : HealthCareComponentBase
 {
+    private Query FilterQuery { get; set; }
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private SfGrid<AppointmentDto> Grid { get; set; }
-    private int PageSize { get; } = 20;
+    private int PageSize { get; } = 5;
     private int LookupPageSize { get; } = 100;
     private int CurrentPage { get; set; } = 1;
     private string CurrentSorting { get; set; } = string.Empty;
@@ -36,7 +34,6 @@ public partial class AppointmentList : HealthCareComponentBase
     private bool IsCreateDialogVisible { get; set; }
     private GetAppointmentsInput Filter { get; set; }
     private AppointmentTypeUpdateDto EditingType { get; set; }
-    private Guid EditingTypeId { get; set; } = default;
     private AppointmentTypeCreateDto NewType { get; set; }
     private bool IsDeleteDialogVisible { get; set; }
     private SfDialog DeleteConfirmDialog { get; set; }
@@ -44,11 +41,12 @@ public partial class AppointmentList : HealthCareComponentBase
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> MedicalServiceCollection { get; set; }
-    private IReadOnlyList<AppointmentDto> AppointmentCollection { get; set; }
     private List<KeyValuePair<string, EnumPatientTypes>> PatientTypeCollection { get; set; }
 
     public AppointmentList()
     {
+        Grid = new SfGrid<AppointmentDto>();
+        DeleteConfirmDialog = new SfDialog();;
         NewType = new AppointmentTypeCreateDto();
         Filter = new GetAppointmentsInput
         {
@@ -63,6 +61,8 @@ public partial class AppointmentList : HealthCareComponentBase
         AppointmentTypesCollection = [];
         DepartmentsCollection = [];
         PatientTypeCollection = [];
+        MedicalServiceCollection = [];
+        FilterQuery = new Query();
     }
 
     protected override async Task OnInitializedAsync()
@@ -70,6 +70,13 @@ public partial class AppointmentList : HealthCareComponentBase
         await SetPermissionsAsync();
         await SetLookupsAsync();
         SetPatientTypes();
+        SetFilters();
+    }
+
+    private void SetFilters()
+    {
+        FilterQuery.Queries.Params = new Dictionary<string, object>();
+        FilterQuery.Queries.Params.Add("Filter", Filter);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -134,22 +141,8 @@ public partial class AppointmentList : HealthCareComponentBase
         Filter.MaxResultCount = PageSize;
         Filter.SkipCount = (CurrentPage - 1) * PageSize;
         Filter.Sorting = CurrentSorting;
-
-        var req = new DataManagerRequest
-        {
-            Params = new Dictionary<string, object>
-            {
-                { "Filter", Filter },
-            },
-        };
-
-        var result = await AppointmentAdaptor.ReadAsync(req);
-
-        if (result is DataResult dataResult)
-        {
-            AppointmentCollection = dataResult.Result as List<AppointmentDto> ?? [];
-        }
-
+        
+        SetFilters();
         await Refresh();
     }
 
@@ -171,19 +164,27 @@ public partial class AppointmentList : HealthCareComponentBase
         };
 
         StateHasChanged();
-        await GetAppointmentsAsync();
+        SetFilters();
+        await Refresh();
     }
 
-    public void OnActionBegin(ActionEventArgs<AppointmentDto> args)
+    public async void OnActionBegin(ActionEventArgs<AppointmentDto> args)
     {
+        
         if (args.RequestType.ToString() != "Delete" || !IsDeleteDialogVisible)
+        {
+            return;
+        }
+        
+        if (args.RequestType.ToString() == "Paging")
         {
             return;
         }
 
         args.Cancel = true;
-        DeleteConfirmDialog.ShowAsync();
+        await DeleteConfirmDialog.ShowAsync();
         Flag = false;
+        await Refresh();
     }
 
     public void Closed()

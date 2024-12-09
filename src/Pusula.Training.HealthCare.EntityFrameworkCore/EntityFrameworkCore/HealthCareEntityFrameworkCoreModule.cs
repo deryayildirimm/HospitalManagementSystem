@@ -21,6 +21,7 @@ using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Districts;
 using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.MedicalPersonnel;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.ProtocolTypes;
@@ -73,6 +74,8 @@ public class HealthCareEntityFrameworkCoreModule : AbpModule
             options.AddRepository<MedicalService, EfCoreMedicalServiceRepository>();
             options.AddRepository<Appointment, EfCoreAppointmentRepository>();
             options.AddRepository<AppointmentType, EfCoreAppointmentTypeRepository>();
+            options.AddRepository<DoctorWorkingHour, EfCoreDoctorWorkingHourRepository>();
+
         });
 
         Configure<AbpDbContextOptions>(options =>

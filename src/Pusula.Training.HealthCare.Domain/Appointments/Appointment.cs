@@ -1,9 +1,12 @@
 using System;
 using JetBrains.Annotations;
 using Pusula.Training.HealthCare.AppointmentTypes;
+using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
+using Pusula.Training.HealthCare.Protocols;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -23,6 +26,9 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
     [NotNull]
     public virtual Guid AppointmentTypeId { get; protected set; }
     
+    [NotNull]
+    public virtual Guid DepartmentId { get; protected set; }
+    
     public virtual Doctor Doctor { get; protected set; }
     
     public virtual Patient Patient { get; protected set; }
@@ -30,6 +36,8 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
     public virtual MedicalService MedicalService { get; protected set; }
     
     public virtual AppointmentType AppointmentType { get; protected set; }
+    
+    public virtual Department Department { get; protected set; }
 
     [NotNull]
     public virtual DateTime AppointmentDate { get; protected set; }
@@ -58,7 +66,7 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
         ReminderSent = false;
     }
 
-    public Appointment(Guid id, Guid doctorId, Guid patientId, Guid medicalServiceId, Guid appointmentTypeId, DateTime appointmentDate,
+    public Appointment(Guid id, Guid doctorId, Guid patientId, Guid medicalServiceId, Guid appointmentTypeId, Guid departmentId, DateTime appointmentDate,
         DateTime startTime, DateTime endTime, EnumAppointmentStatus status, string? notes, bool reminderSent, double amount)
     {
         Id = id;
@@ -66,6 +74,7 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
         SetPatientId(patientId);
         SetMedicalServiceId(medicalServiceId);
         SetAppointmentTypeId(appointmentTypeId);
+        SetDepartmentId(departmentId);
         SetAppointmentDate(appointmentDate);
         SetStartTime(startTime);
         SetEndTime(endTime);
@@ -91,6 +100,12 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
     {
         Check.NotNull(appointmentTypeId, nameof(appointmentTypeId));
         AppointmentTypeId = appointmentTypeId;
+    }
+    
+    private void SetDepartmentId(Guid departmentId)
+    {
+        Check.NotNull(departmentId, nameof(departmentId));
+        DepartmentId = departmentId;
     }
     
     private void SetMedicalServiceId(Guid medicalServiceId)
@@ -119,19 +134,17 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
 
     public void SetStatus(EnumAppointmentStatus status)
     {
-        if (!Array.Exists(AppointmentConsts.ValidStatuses, s => s == status))
-        {
-            throw new ArgumentException($"Invalid appointment status.");
-        }
+        Check.Range((int)status, nameof(status), AppointmentConsts.StatusMinValue, AppointmentConsts.StatusMaxValue);
         Status = status;
     }
 
     public void SetNotes(string? notes)
     {
-        if (!string.IsNullOrEmpty(notes) && notes.Length > AppointmentConsts.MaxNotesLength)
-        {
-            throw new ArgumentException($"Notes length cannot exceed {AppointmentConsts.MaxNotesLength} characters.");
-        }
+        HealthCareGlobalException.ThrowIf(
+            HealthCareDomainErrorKeyValuePairs.TextLenghtExceeded,
+            !string.IsNullOrWhiteSpace(notes) && 
+            (notes.Length > AppointmentConsts.MaxNotesLength || notes.Length < ProtocolConsts.MinNotesLength)
+        );
         Notes = notes;
     }
 
