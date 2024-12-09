@@ -234,6 +234,7 @@ public class AppointmentManager(
     private async Task<List<(TimeSpan StartTime, TimeSpan EndTime)>> GetDoctorAppointmentTimesAsync(Guid doctorId,
         DateTime date)
     {
+
         return (await appointmentRepository
                 .GetListAsync(x => x.DoctorId == doctorId && x.AppointmentDate.Date == date.Date))
             .Select(x => (StartTime: x.StartTime.TimeOfDay, EndTime: x.EndTime.TimeOfDay))
