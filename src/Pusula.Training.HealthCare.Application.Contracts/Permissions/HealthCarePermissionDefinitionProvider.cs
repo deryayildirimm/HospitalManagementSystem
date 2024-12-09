@@ -102,6 +102,20 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         insurancePermission.AddChild(HealthCarePermissions.Insurances.Edit, L("Permission:Edit"));
         insurancePermission.AddChild(HealthCarePermissions.Insurances.Delete, L("Permission:Delete"));
 
+        var familyHistoryPermission = myGroup.AddPermission(HealthCarePermissions.FamilyHistories.Default, L("Permission:FamilyHistories"));
+        familyHistoryPermission.AddChild(HealthCarePermissions.FamilyHistories.Create, L("Permission:Create"));
+        familyHistoryPermission.AddChild(HealthCarePermissions.FamilyHistories.Edit, L("Permission:Edit"));
+        familyHistoryPermission.AddChild(HealthCarePermissions.FamilyHistories.Delete, L("Permission:Delete"));
+        
+        var backgroundPermission = myGroup.AddPermission(HealthCarePermissions.Backgrounds.Default, L("Permission:Backgrounds"));
+        backgroundPermission.AddChild(HealthCarePermissions.Backgrounds.Create, L("Permission:Create"));
+        backgroundPermission.AddChild(HealthCarePermissions.Backgrounds.Edit, L("Permission:Edit"));
+        backgroundPermission.AddChild(HealthCarePermissions.Backgrounds.Delete, L("Permission:Delete"));
+        
+        var examinationPermission = myGroup.AddPermission(HealthCarePermissions.Examinations.Default, L("Permission:Examinations"));
+        examinationPermission.AddChild(HealthCarePermissions.Examinations.Create, L("Permission:Create"));
+        examinationPermission.AddChild(HealthCarePermissions.Examinations.Edit, L("Permission:Edit"));
+        examinationPermission.AddChild(HealthCarePermissions.Examinations.Delete, L("Permission:Delete"));
     }
 
     private static LocalizableString L(string name)

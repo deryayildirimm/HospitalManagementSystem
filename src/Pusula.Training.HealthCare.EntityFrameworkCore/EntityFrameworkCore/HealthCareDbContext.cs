@@ -28,6 +28,9 @@ using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Tests;
+using Pusula.Training.HealthCare.Treatment.Examinations;
+using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
+using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
 using Pusula.Training.HealthCare.Treatment.Icds;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Insurances;
@@ -59,8 +62,13 @@ public class HealthCareDbContext :
     public DbSet<TestCategory> TestCategories { get; set; } = null!;
     public DbSet<Test> Tests { get; set; } = null!;
     public DbSet<BloodTestResult> BloodTestResults { get; set; } = null!;
-    public DbSet<Icd> Icds { get; set; } = null!;
     public DbSet<Insurance> Insurances { get; set; } = null!;
+
+    // Treatment
+    public DbSet<Icd> Icds { get; set; } = null!;
+    public DbSet<Examination> Examinations { get; set; } = null!;
+    public DbSet<FamilyHistory> FamilyHistories { get; set; } = null!;
+    public DbSet<Background> Backgrounds { get; set; } = null!;
 
     public DbSet<Appointment> Appointments { get; set; } = null!;
     public DbSet<DoctorWorkingHour> DoctorWorkingHours { get; set; } = null!;
@@ -295,10 +303,6 @@ public class HealthCareDbContext :
                 b.ConfigureByConvention();
                 b.HasKey(a => a.Id);
 
-                //Patient cannot make more than one appointment at a time 
-                b.HasIndex(a => new { a.PatientId, a.AppointmentDate, a.StartTime, a.EndTime })
-                    .IsUnique();
-
                 b.Property(a => a.AppointmentDate)
                     .IsRequired()
                     .HasColumnName(nameof(Appointment.AppointmentDate));
@@ -480,6 +484,76 @@ public class HealthCareDbContext :
                     .HasMaxLength(IcdConsts.CodeNumberMaxLength);
                 b.Property(x => x.Detail).HasColumnName(nameof(Icd.Detail)).IsRequired()
                     .HasMaxLength(IcdConsts.DetailMaxLength);
+            });
+
+            builder.Entity<Examination>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Examinations", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.Date).HasColumnName(nameof(Examination.Date)).IsRequired();
+                b.Property(x => x.Complaint).HasColumnName(nameof(Examination.Complaint)).IsRequired()
+                    .HasMaxLength(ExaminationConsts.ComplaintMaxLength);
+                b.Property(x => x.StartDate).HasColumnName(nameof(Examination.StartDate));
+                b.Property(x => x.Story).HasColumnName(nameof(Examination.Story))
+                    .HasMaxLength(ExaminationConsts.StoryMaxLength);
+                b.HasOne(d => d.Background)
+                    .WithOne(d => d.Examination)
+                    .IsRequired()
+                    .HasForeignKey<Background>(d => d.ExaminationId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(d => d.FamilyHistory)
+                    .WithOne(d => d.Examination)
+                    .IsRequired()
+                    .HasForeignKey<FamilyHistory>(d => d.ExaminationId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(d => d.Protocol)
+                    .WithOne()
+                    .IsRequired()
+                    .HasForeignKey<Examination>(x => x.ProtocolId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+            
+            builder.Entity<ExaminationIcd>(b =>
+                           {
+                               b.ToTable(HealthCareConsts.DbTablePrefix + "ExaminationIcds", HealthCareConsts.DbSchema);
+                               b.ConfigureByConvention();
+               
+                               b.HasKey(x => new { x.ExaminationId, x.IcdId });
+               
+                               b.HasOne(ei => ei.Examination)
+                                   .WithMany(e => e.ExaminationIcd)
+                                   .HasForeignKey(ei => ei.ExaminationId);
+               
+                               b.HasOne(ei => ei.Icd)
+                                   .WithMany()
+                                   .HasForeignKey(ei => ei.IcdId);
+                           });
+
+            builder.Entity<FamilyHistory>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "FamilyHistories", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.MotherDisease).HasColumnName(nameof(FamilyHistory.MotherDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.FatherDisease).HasColumnName(nameof(FamilyHistory.FatherDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.SisterDisease).HasColumnName(nameof(FamilyHistory.SisterDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.BrotherDisease).HasColumnName(nameof(FamilyHistory.BrotherDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.AreParentsRelated).IsRequired();
+            });
+
+            builder.Entity<Background>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Backgrounds", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.Allergies).HasColumnName(nameof(Background.Allergies))
+                    .HasMaxLength(BackgroundConsts.AllergiesMaxLength);
+                b.Property(x => x.Medications).HasColumnName(nameof(Background.Medications))
+                    .HasMaxLength(BackgroundConsts.MedicationsMaxLength);
+                b.Property(x => x.Habits).HasColumnName(nameof(Background.Habits))
+                    .HasMaxLength(BackgroundConsts.HabitsMaxLength);
             });
         }
     }
