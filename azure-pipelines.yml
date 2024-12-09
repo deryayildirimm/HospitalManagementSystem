@@ -5,11 +5,14 @@ pool:
   name: pusula-akademi-team2-agent
 
 name: $(Date:yyyyMMdd).$(Rev:r)
+
 variables:
-  imageTag: "$(Build.BuildNumber)"
+  dateTimeTag: "$(Build.SourceVersion:0:7)-$(Build.QueuedTime:yyyy-MM-dd-HH.mm)"
+  imageTag: "$(dateTimeTag)"
 
 steps:
 - task: Docker@2
+  displayName: 'Docker Image Build'
   inputs:
     repository: 'Blazorapp'
     command: 'build'
@@ -18,10 +21,14 @@ steps:
     buildArguments: '--memory=4g --cpu-shares=1024'
 
 - task: Bash@3
+  displayName: 'Image’i Tagle'
   inputs:
     targetType: 'inline'
-    script: 'docker tag blazorapp:$(imageTag) registry.gitlab.com/medplus1/medplusproject:$(imageTag)'
+    script: |
+      docker tag blazorapp:$(imageTag) registry.gitlab.com/medplus1/medplusproject:$(imageTag)
+
 - task: Docker@2
+  displayName: 'Docker Image Push'
   inputs:
     containerRegistry: 'GitLab'
     repository: 'medplus1/medplusproject'
