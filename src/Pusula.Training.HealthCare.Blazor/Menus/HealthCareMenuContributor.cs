@@ -115,6 +115,15 @@ public class HealthCareMenuContributor : IMenuContributor
 
         context.Menu.AddItem(
             new ApplicationMenuItem(
+                HealthCareMenus.MedicalStaff,
+                l["Menu:Insurances"],
+                url: "/insurances",
+                icon: "fa fa-user-md",
+                requiredPermissionName: HealthCarePermissions.Insurances.Default)
+        );
+
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
                     name: HealthCareMenus.Treatment,
                     displayName: l["Menu:Treatment"],
                     icon: "fa-solid fa-medkit"
