@@ -5,27 +5,72 @@ pool:
   name: pusula-akademi-team2-agent
 
 name: $(Date:yyyyMMdd).$(Rev:r)
+
 variables:
   imageTag: "$(Build.BuildNumber)"
 
-steps:
-- task: Docker@2
-  inputs:
-    repository: 'Blazorapp'
-    command: 'build'
-    Dockerfile: '**/Dockerfile-BlazorApp'
-    tags: $(imageTag)
-    buildArguments: '--memory=4g --cpu-shares=1024'
+stages:
+  - stage: SonarQubeAnalysis
+    displayName: SonarQube Analysis
+    jobs:
+      - job: AnalyzeCode
+        displayName: Run SonarQube Analysis
+        steps:
 
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: |
-      docker tag blazorapp:$(imageTag) registry.gitlab.com/medplus1/medplusproject:$(imageTag)
-      docker rmi blazorapp:$(imageTag)
-- task: Docker@2
-  inputs:
-    containerRegistry: 'GitLab'
-    repository: 'medplus1/medplusproject'
-    command: 'push'
-    tags: '$(imageTag)'
+          - task: SonarQubePrepare@5
+            inputs:
+              SonarQube: 'sonarqube'
+              scannerMode: 'CLI'
+              configMode: 'manual'
+              cliProjectKey: 'Pusula.Training.HealthCare'
+              cliProjectName: 'Pusula.Training.HealthCare'
+              cliProjectVersion: '1.0'
+              cliSources: '.'
+
+          - script: |
+              "$(SonarPath)/sonar-scanner"
+            displayName: Run SonarQube Scanner
+
+          - task: SonarQubePublish@5
+            inputs:
+              pollingTimeoutSec: '300'
+
+  - stage: BuildDockerImage
+    displayName: Build Docker Image
+    jobs:
+      - job: BuildImage
+        displayName: Build Blazor Docker Image
+        steps:
+          - task: Docker@2
+            inputs:
+              repository: 'Blazorapp'
+              command: 'build'
+              Dockerfile: '**/Dockerfile-BlazorApp'
+              tags: $(imageTag)
+              buildArguments: '--memory=4g --cpu-shares=1024'
+
+  - stage: TagAndRemoveImage
+    displayName: Tag and Remove Docker Image
+    jobs:
+      - job: TagAndRemove
+        displayName: Tag and Remove Blazor Docker Image
+        steps:
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                docker tag blazorapp:$(imageTag) registry.gitlab.com/medplus1/medplusproject:$(imageTag)
+                docker rmi blazorapp:$(imageTag)
+
+  - stage: PushDockerImage
+    displayName: Push Docker Image to GitLab
+    jobs:
+      - job: PushImage
+        displayName: Push Docker Image to GitLab Registry
+        steps:
+          - task: Docker@2
+            inputs:
+              containerRegistry: 'GitLab'
+              repository: 'medplus1/medplusproject'
+              command: 'push'
+              tags: '$(imageTag)'
