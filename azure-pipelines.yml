@@ -27,8 +27,3 @@ steps:
     repository: 'medplus1/medplusproject'
     command: 'push'
     tags: '$(imageTag)'
-- task: PublishBuildArtifacts@1
-  inputs:
-    pathToPublish: $(Build.ArtifactStagingDirectory)
-    artifactName: 'blazorapp-artifact'
-    publishLocation: 'Container'
