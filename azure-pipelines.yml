@@ -28,7 +28,7 @@ stages:
               cliSources: '.'
 
           - script: |
-              sonar-scanner
+              "$SonarPath/sonar-scanner"
             displayName: Run SonarQube Scanner
 
           - task: SonarQubePublish@5
