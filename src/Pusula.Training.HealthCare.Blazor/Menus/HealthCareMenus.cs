@@ -18,4 +18,5 @@ public class HealthCareMenus
     public const string Insurances = Prefix + ".Insurances";
     public const string Icds = Treatment + ".Icds";
     public const string IcdReport = Treatment + ".IcdReport";
+    public const string ProtocolType = Prefix + ".ProtocolTypes";
 }

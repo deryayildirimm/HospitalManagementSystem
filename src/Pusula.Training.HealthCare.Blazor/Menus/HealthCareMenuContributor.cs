@@ -49,6 +49,16 @@ public class HealthCareMenuContributor : IMenuContributor
                 icon: "fa fa-users",
                 requiredPermissionName: HealthCarePermissions.Patients.Default)
         );
+        
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
+                HealthCareMenus.ProtocolType,
+                l["Menu:ProtocolType"],
+                url: "/protocol-types",
+                icon: "fa fa-file-alt",
+                requiredPermissionName: HealthCarePermissions.ProtocolTypes.Default)
+        );
+
 
         context.Menu.AddItem(
             new ApplicationMenuItem(

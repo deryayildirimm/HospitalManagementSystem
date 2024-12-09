@@ -26,7 +26,7 @@ public partial class Protocols
 {
     protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
     protected PageToolbar Toolbar { get; } = new PageToolbar();
-    protected bool ShowAdvancedFilters { get; set; }
+    protected bool ShowAdvancedFilters { get; set; } 
     private IReadOnlyList<ProtocolWithNavigationPropertiesDto> ProtocolList { get; set; }
     
     private IReadOnlyList<PatientDto> PatientList { get; set; }
@@ -250,7 +250,7 @@ public partial class Protocols
     {
         //seçili hastayı servise kaydediyoruz 
         //   patientService.SetPatient(patientDto);
-        NavigationManager.NavigateTo($"/protocols/detail/{protocolDto.Protocol.Patient.FirstName}");
+        NavigationManager.NavigateTo($"/protocols/detail/{protocolDto.Protocol.Patient.PatientNumber}");
 
     }
     
@@ -262,7 +262,7 @@ public partial class Protocols
     
     private async Task OnCheckIdentityNumberClicked()
     {
-        if (string.IsNullOrWhiteSpace(IdentityNumber) && IdentityNumber.Length != 11 )
+        if (string.IsNullOrWhiteSpace(IdentityNumber) )
         {
             await UiMessageService.Warn("Please enter an Identity Number.");
             return;
@@ -273,11 +273,13 @@ public partial class Protocols
             var patient = await PatientsAppService.GetPatientByIdentityAsync(IdentityNumber);
             FoundPatientName = $"{patient.FirstName} {patient.LastName}";
             IsPatientFound = true;
+           
         }
         catch (EntityNotFoundException)
         {
             // if patient cannot found 
             IsPatientFound = false;
+         
             FoundPatientName = string.Empty;
             NewPatient = new PatientCreateDto
             {
@@ -298,16 +300,7 @@ public partial class Protocols
 
                 if (!IsPatientFound)
                 {
-                    // check the patient area
-                    if (string.IsNullOrWhiteSpace(NewPatient.FirstName) ||
-                        string.IsNullOrWhiteSpace(NewPatient.LastName) ||
-                        NewPatient.BirthDate == default ||
-                        NewPatient.Gender == default)
-                    {
-                        await UiMessageService.Warn($"Please fill all patient details. {   NewPatient.IdentityAndPassportNumber}");
-                        return;
-                    }
-                 
+                
                     // creating new patient 
                     patient = await PatientsAppService.CreateAsync(NewPatient);
                 }
@@ -356,9 +349,7 @@ public partial class Protocols
             await HandleErrorAsync(ex);
         }
     }
-    
-
-    
+  
     protected virtual async Task OnStartTimeMinChangedAsync(DateTime? startTimeMin)
     {
         Filter.StartTimeMin = startTimeMin.HasValue ? startTimeMin.Value.Date : startTimeMin;
@@ -381,14 +372,10 @@ public partial class Protocols
         Filter.StartTimeMin = endTimeMax.HasValue ? endTimeMax.Value.Date : endTimeMax;
         await SearchAsync();
     }
-    protected virtual async Task OnPatientIdChangedAsync(Guid? patientId)
-    {
-        Filter.PatientId = patientId;
-        await SearchAsync();
-    }
     protected virtual async Task OnDepartmentIdChangedAsync(Guid? departmentId)
     {
         Filter.DepartmentId = departmentId;
+        
         await SearchAsync();
     }
     
