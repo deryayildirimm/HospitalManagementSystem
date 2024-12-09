@@ -69,8 +69,9 @@ namespace Pusula.Training.HealthCare
           await SeedTestRecords(); 
           await SeedProtocolType();
         //  await SeedInsurance();
-            await SeedProtocols(); // Protokoller en son oluşturulacak.
-            
+            await SeedProtocols(); 
+            await SeedProtocolMedicalService();
+
         }
 
         private async Task SeedProtocolType()
@@ -183,6 +184,38 @@ namespace Pusula.Training.HealthCare
             }
 
             await departmentRepository.UpdateManyAsync(departments, true);
+        }
+
+        
+        private async Task SeedProtocolMedicalService()
+        {
+            if (await medicalServiceRepository.GetCountAsync() == 0
+                || await protocolRepository.GetCountAsync() == 0)
+            {
+                return;
+            }
+
+            var medicalServices = await medicalServiceRepository.GetListAsync();
+            var protocols = await protocolRepository.GetListAsync();
+
+            foreach (var protocol in protocols)
+            {
+                var random = new Random();
+
+                var randomServices = medicalServices.OrderBy(ms => random.Next()).Take(2).ToList();
+                foreach (var service in randomServices)
+                {
+                    var protocolMedicalService = new ProtocolMedicalService
+                    {
+                        MedicalServiceId = service.Id,
+                        ProtocolId = protocol.Id
+                    };
+
+                    service.ProtocolMedicalServices.Add(protocolMedicalService);
+                }
+            }
+
+            await protocolRepository.UpdateManyAsync(protocols, true);
         }
 
         private async Task SeedPatientRecords()

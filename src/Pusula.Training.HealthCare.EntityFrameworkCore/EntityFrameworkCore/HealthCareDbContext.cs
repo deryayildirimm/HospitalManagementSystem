@@ -180,6 +180,10 @@ public class HealthCareDbContext :
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(p => p.Insurance).WithMany().IsRequired().HasForeignKey(p => p.InsuranceId)
                     .OnDelete(DeleteBehavior.NoAction);
+                
+                b.HasMany(x => x.ProtocolMedicalServices)
+                    .WithOne(e => e.Protocol)
+                    .HasForeignKey(e => e.ProtocolId);
             });
             
             builder.Entity<ProtocolType>(b =>
@@ -206,6 +210,10 @@ public class HealthCareDbContext :
                 b.Property(x => x.ServiceCreatedAt).HasColumnName(nameof(MedicalService.ServiceCreatedAt)).IsRequired();
 
                 b.HasIndex(e => new { e.Name }).IsUnique();
+                
+                b.HasMany(x => x.ProtocolMedicalServices)
+                    .WithOne(e => e.MedicalService)
+                    .HasForeignKey(e => e.MedicalServiceId);
             });
 
             builder.Entity<DepartmentMedicalService>(b =>
@@ -224,6 +232,26 @@ public class HealthCareDbContext :
                     .HasForeignKey(x => x.MedicalServiceId);
 
                 b.HasIndex(x => new { x.MedicalServiceId, x.DepartmentId }).IsUnique();
+            });
+            
+            builder.Entity<ProtocolMedicalService>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "ProtocolMedicalServices", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+
+                b.HasKey(x => new { x.MedicalServiceId, x.ProtocolId });
+
+                b.HasOne<Protocol>(sc => sc.Protocol)
+                    .WithMany(x => x.ProtocolMedicalServices)
+                    .IsRequired(false)
+                    .HasForeignKey(x => x.ProtocolId);
+
+                b.HasOne<MedicalService>(sc => sc.MedicalService)
+                    .WithMany(x => x.ProtocolMedicalServices)
+                    .IsRequired(false)
+                    .HasForeignKey(x => x.MedicalServiceId);
+
+                b.HasIndex(x => new { x.MedicalServiceId, x.ProtocolId }).IsUnique();
             });
 
             builder.Entity<Doctor>(b =>

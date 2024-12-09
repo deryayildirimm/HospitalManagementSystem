@@ -152,6 +152,18 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 
+    public virtual async Task<List<ProtocolWithMedicalService>> GetProtocolWithMedicalServiceAsync(
+       
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default
+    )
+    {
+        throw new NotImplementedException();
+    }
+
+
     public virtual async Task<long> GetCountAsync(
         string? filterText = null,
         string? note = null,

@@ -1,5 +1,6 @@
 using JetBrains.Annotations;
 using System;
+using System.Collections.Generic;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.GlobalExceptions;
@@ -37,6 +38,10 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
     public Guid InsuranceId { get; private set; }
     
     public virtual Insurance Insurance { get; set; }
+    
+    public virtual IList<ProtocolMedicalService> ProtocolMedicalServices { get; set; } =
+        new List<ProtocolMedicalService>();
+
 
     protected Protocol()
     {
