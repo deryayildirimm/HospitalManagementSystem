@@ -52,6 +52,8 @@
     "Menu:Reports": "Raporlar",
     "Menu:IcdReport": "Icd Raporu",
     "Menu:Insurances": "Sigortalar",
+    "Menu:ProtocolType": "Protokol Tipleri",
+    "ProtocolTypes" : "Protokol TipLeri",
     "Permission:ProtocolTypes": "Protokol Tipleri",
     "Permission:Protocols": "Protokol",
     "InvalidDateRange": "Başlangıç tarihi bitiş tarihinden büyük olamaz.",

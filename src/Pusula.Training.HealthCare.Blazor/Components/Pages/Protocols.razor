@@ -293,7 +293,7 @@
 
                 <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
                                 Field="ProtocolType.Name"
-                                Caption="@L["ProtocolType"]">
+                                Caption="@L["Protocol Type"]">
                     <DisplayTemplate>
                         @context.ProtocolType?.Name
                     </DisplayTemplate>
@@ -346,7 +346,7 @@
                 </DataGridEntityActionsColumn>
 
                 <!-- Detail Page Column -->
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"  Caption="@L["Detail"]">
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"  Caption="@L["Detay"]">
                     <DisplayTemplate>
                         <Button Color="Color.Primary" @onclick="() => NavigateToDetail(context)">
                             <Icon Name="@IconName.ExternalLinkSquareAlt" />
@@ -376,84 +376,136 @@
                              Mode="ValidationMode.Auto"
                              Model="@NewProtocol"
                              ValidateOnLoad="false">
-                    <Row>
-                        <Column ColumnSize="ColumnSize.Is4">
-                            <Field>
-                                <FieldLabel style="display: inline-flex; align-items: center;">@L["Identity Number"]</FieldLabel>
-                                <TextEdit Text="@IdentityNumber" TextChanged="@((value) => IdentityNumber = value)" Placeholder="Enter Identity Number"/>
-                                <a href="javascript:;" class="text-decoration-none" @onclick=" OnCheckIdentityNumberClicked">@L["SeeAdvancedFilters"]</a>
-                                <Button Color="Color.Primary" Clicked="OnCheckIdentityNumberClicked">
-                                    @L["Check"]
-                                </Button>
-                                <ValidationMessage For="@(() => IdentityNumber)"/>
-                            </Field>
-                        </Column>
-                        <Column ColumnSize="ColumnSize.Is4" >
-                            
-                        </Column>
-                        @if (IsPatientFound)
-                        {
 
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is6">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>@L["StartTime"]</FieldLabel>
+                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.StartTime">
+                                        <Feedback>
+                                            <ValidationError/>
+                                        </Feedback>
+                                    </DateEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is6">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>@L["EndTime"]</FieldLabel>
+                                    <DateEdit TValue="DateTime?" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.EndTime">
+                                        <Feedback>
+                                            <ValidationError/>
+                                        </Feedback>
+                                    </DateEdit>
+                                </Field>
+                            </Validation>
+
+                        </Column>
+
+                    </Row>
+                    @if (IsPatientFound)
+                    {
+                        <Row >
+                            <Column ColumnSize="ColumnSize.Is8">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">@L["Identity Number"]</FieldLabel>
+                                    <TextEdit Text="@IdentityNumber" TextChanged="@((value) => IdentityNumber = value)" Placeholder="Enter Identity Number"/>
+                                    <ValidationMessage For="@(() => IdentityNumber)"/>
+                                </Field>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is4">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center; color: white">@L["     sdfşklg      "]</FieldLabel>
+                                    <Button Color="Color.Primary" Clicked="OnCheckIdentityNumberClicked">
+                                        @L["Check"]
+                                    </Button>
+                                </Field>
+
+                            </Column>
+                        </Row>
+                    }
+                    <div style="display: @(IsPatientFound ? "block" : "none")">
+                        <Column>
                             <Field>
                                 <TextEdit Value="@FoundPatientName" Plaintext Disabled/>
                             </Field>
-                        }
-                        else
-                        {
-                            <Field>
-                                <FieldLabel>@L["First Name"]</FieldLabel>
-                                <TextEdit @bind-Text="@NewPatient.FirstName" Placeholder="Enter First Name"/>
-                            </Field>
-                            <Field>
-                                <FieldLabel>@L["Last Name"]</FieldLabel>
-                                <TextEdit @bind-Text="@NewPatient.LastName" Placeholder="Enter Last Name"/>
-                            </Field>
-                            <Field>
-                                <FieldLabel>@L["Identity Number"]</FieldLabel>
-                                <TextEdit @bind-Text="@NewPatient.IdentityAndPassportNumber" Placeholder="Enter Identity Number"/>
-                            </Field>
-
-                            <Field>
-                                <FieldLabel>@L["Birthdate"] *</FieldLabel>
-                                <DateEdit TValue="DateTime" @bind-Date="@NewPatient.BirthDate" InputMode="DateInputMode.Date"/>
-                            </Field>
-
-                            <Field>
-                                <FieldLabel style="display: inline-flex; align-items: center;">@L["Gender"] *</FieldLabel>
-                                <Select TValue="EnumGender" @bind-SelectedValue="@NewPatient.Gender">
-                                    <SelectItem Value="EnumGender.MALE">@L["Male"]</SelectItem>
-                                    <SelectItem Value="EnumGender.FEMALE">@L["Female"]</SelectItem>
-                                </Select>
-                            </Field>
-                        }
-                    </Row>
-
+                        </Column>
+                    </div>
+                    <div style="display: @(!IsPatientFound ? "block" : "none")">
+                        <Row>
+                            <Column ColumnSize="ColumnSize.Is12" >
+                                <Field>
+                                    <FieldLabel>@L["First Name"]</FieldLabel>
+                                    <TextEdit @bind-Text="@NewPatient.FirstName" Placeholder="Enter First Name"/>
+                                </Field>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is12">
+                                <Field>
+                                    <FieldLabel>@L["Last Name"]</FieldLabel>
+                                    <TextEdit @bind-Text="@NewPatient.LastName" Placeholder="Enter Last Name"/>
+                                </Field>
+                            </Column> 
+                            <Column ColumnSize="ColumnSize.Is12">
+                                <Field>
+                                    <FieldLabel>@L["Identity Number"]</FieldLabel>
+                                    <TextEdit @bind-Text="@NewPatient.IdentityAndPassportNumber" Placeholder="Enter Identity Number"/>
+                                </Field>
+                            </Column>
+                           
+                            <Column ColumnSize="ColumnSize.Is6">
+                                <Field >
+                                    <FieldLabel>@L["Birthdate"] *</FieldLabel>
+                                    <DateEdit TValue="DateTime" @bind-Date="@NewPatient.BirthDate" InputMode="DateInputMode.Date"/>
+                                </Field>
+                            </Column>
+                           
+                            <Column ColumnSize="ColumnSize.Is6">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">@L["Gender"] *</FieldLabel>
+                                    <Select TValue="EnumGender" @bind-SelectedValue="@NewPatient.Gender">
+                                        <SelectItem Value="EnumGender.MALE">@L["Male"]</SelectItem>
+                                        <SelectItem Value="EnumGender.FEMALE">@L["Female"]</SelectItem>
+                                    </Select>
+                                </Field>
+                            </Column>
+                        </Row>
+                    </div>
                     <Row>
-                        <Validation MessageLocalizer="@LH.Localize">
-                            <Field>
-                                <FieldLabel>@L["StartTime"]</FieldLabel>
-                                <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.StartTime">
-                                    <Feedback>
-                                        <ValidationError/>
-                                    </Feedback>
-                                </DateEdit>
-                            </Field>
-                        </Validation>
+                       
+                        <Field>
+                            <FieldLabel>@L["Department"]</FieldLabel>
+                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DepartmentId" >
 
-                        <Validation MessageLocalizer="@LH.Localize">
-                            <Field>
-                                <FieldLabel>@L["EndTime"]</FieldLabel>
-                                <DateEdit TValue="DateTime?" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.EndTime">
-                                    <Feedback>
-                                        <ValidationError/>
-                                    </Feedback>
-                                </DateEdit>
-                            </Field>
-                        </Validation>
+                                <SelectItem></SelectItem>
+
+                                @foreach (var department in DepartmentsCollection)
+                                {
+                                    <SelectItem TValue="Guid" Value="@(department.Id)">
+                                        @(department.DisplayName)
+                                    </SelectItem>
+                                }
+                            </Select>
+                        </Field>
 
                         <Field>
+                            <FieldLabel>@L["Doctor"]</FieldLabel>
+                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DoctorId">
+
+                                <SelectItem></SelectItem>
+
+                                @foreach (var doctor in DoctorsCollection)
+                                {
+                                    <SelectItem TValue="Guid" Value="@(doctor.Id)">
+                                        @(doctor.DisplayName)
+                                    </SelectItem>
+                                }
+                            </Select>
+                        </Field>
+                        <Field>
                             <FieldLabel>@L["Insurance"]</FieldLabel>
-                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.InsuranceId" >
+                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.InsuranceId">
 
                                 <SelectItem></SelectItem>
 
@@ -465,40 +517,6 @@
                                 }
                             </Select>
                         </Field>
-                    </Row>
-                    <Row>
-                        <Field>
-                            <FieldLabel>@L["Department"]</FieldLabel>
-                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DepartmentId" >
-
-                                <SelectItem></SelectItem>
-
-                                @foreach (var department in DepartmentsCollection)
-                                {
-                                <SelectItem TValue="Guid" Value="@(department.Id)">
-                                    @(department.DisplayName)
-                                </SelectItem>
-                                }
-                            </Select>
-                        </Field>
-
-                        <Field>
-                            <FieldLabel>@L["Doctor"]</FieldLabel>
-                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DoctorId"   >
-
-                                <SelectItem></SelectItem>
-
-                                @foreach (var doctor in DoctorsCollection)
-                                {
-                                <SelectItem TValue="Guid" Value="@(doctor.Id)">
-                                    @(doctor.DisplayName)
-                                </SelectItem>
-                                }
-                            </Select>
-                        </Field>
-                    </Row>
-                    
-                    <Row>
                         <Field>
                             <FieldLabel>@L["Protocol Type"]</FieldLabel>
                             <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.ProtocolTypeId" >
@@ -513,6 +531,10 @@
                                 }
                             </Select>
                         </Field>
+                    </Row>
+                    
+                    <Row>
+                    
 
                         <Validation MessageLocalizer="@LH.Localize">
                             <Field>

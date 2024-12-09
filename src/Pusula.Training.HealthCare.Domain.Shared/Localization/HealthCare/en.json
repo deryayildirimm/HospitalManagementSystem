@@ -3,6 +3,7 @@
   "texts": {
     "AppName": "HealthCare",
     "Menu:Home": "Home",
+    "Menu:ProtocolType": "Protocol Type",
     "Welcome": "Welcome",
     "LongWelcomeMessage": "Welcome to the application. This is a startup project based on the ABP framework. For more information, visit abp.io.",
     "Language": "Language",
@@ -120,6 +121,7 @@
     "Doctors": "Doctors",
     "Cancel": "Cancel",
     "Save": "Save",
+    "ProtocolType" : "Protocol Type",
     "SaveProceed": "Save And Proceed",
     "Proceed": "Proceed",
     "SelectService": "Select Your Service",
