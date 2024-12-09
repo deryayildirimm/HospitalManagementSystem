@@ -20,6 +20,7 @@ public class ProtocolExcelDownloadDto
     
     public Guid? DoctorId { get; set; }
 
+    public Guid? InsuranceId { get; set; }
     public ProtocolExcelDownloadDto()
     {
 

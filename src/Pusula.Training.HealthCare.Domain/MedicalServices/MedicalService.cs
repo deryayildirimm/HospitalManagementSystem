@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Protocols;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -19,6 +20,9 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
 
     public virtual IList<DepartmentMedicalService> DepartmentMedicalServices { get; set; } =
         new List<DepartmentMedicalService>();
+    
+    public virtual IList<ProtocolMedicalService> ProtocolMedicalServices { get; set; } =
+        new List<ProtocolMedicalService>();
 
     protected MedicalService()
     {

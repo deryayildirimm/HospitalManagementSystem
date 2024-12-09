@@ -16,6 +16,8 @@ public interface IPatientsAppService : IApplicationService
     
     Task<PatientDto> GetPatientByNumberAsync(int number);
 
+    Task<PatientDto> GetPatientByIdentityAsync(string number);
+    
     Task DeleteAsync(Guid id);
 
     Task<PatientDto> CreateAsync(PatientCreateDto input);

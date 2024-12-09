@@ -1,5 +1,10 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.Insurances;
+using Pusula.Training.HealthCare.Patients;
+using Pusula.Training.HealthCare.ProtocolTypes;
 
 namespace Pusula.Training.HealthCare.Protocols;
 
@@ -15,4 +20,8 @@ public class ProtocolCreateDto
     public Guid DoctorId { get; set; }
     
     public Guid ProtocolTypeId { get; set; }
+    
+    public Guid InsuranceId { get; set; }
+   
+
 }

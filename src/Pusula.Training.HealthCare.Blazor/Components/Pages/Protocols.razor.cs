@@ -12,10 +12,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.Patients;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using Volo.Abp.BlazoriseUI.Components;
-
+using Volo.Abp.Domain.Entities;
 
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
@@ -26,6 +28,8 @@ public partial class Protocols
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     protected bool ShowAdvancedFilters { get; set; }
     private IReadOnlyList<ProtocolWithNavigationPropertiesDto> ProtocolList { get; set; }
+    
+    private IReadOnlyList<PatientDto> PatientList { get; set; }
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private string CurrentSorting { get; set; } = string.Empty;
@@ -33,6 +37,8 @@ public partial class Protocols
     private bool CanCreateProtocol { get; set; }
     private bool CanEditProtocol { get; set; }
     private bool CanDeleteProtocol { get; set; }
+    
+    private PatientDto EditingPatient { get; set; } 
     private ProtocolCreateDto NewProtocol { get; set; }
     private Validations NewProtocolValidations { get; set; } = new();
     private ProtocolUpdateDto EditingProtocol { get; set; }
@@ -41,12 +47,15 @@ public partial class Protocols
     private Modal CreateProtocolModal { get; set; } = new();
     private Modal EditProtocolModal { get; set; } = new();
     private GetProtocolsInput Filter { get; set; }
+    
+     private GetPatientsInput FilterPatient { get; set; }
     private DataGridEntityActionsColumn<ProtocolWithNavigationPropertiesDto> EntityActionsColumn { get; set; } = new();
     protected string SelectedCreateTab = "protocol-create-tab";
     protected string SelectedEditTab = "protocol-edit-tab";
-
-    private IReadOnlyList<LookupDto<Guid>> PatientsCollection { get; set; } = [];
+    
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; } = [];
+    
+    private IReadOnlyList<LookupDto<Guid>> InsuranceCollections { get; set; } = [];
     private IReadOnlyList<LookupDto<Guid>> DoctorsCollection { get; set; } = [];
     private IReadOnlyList<LookupDto<Guid>> ProtocolTypesCollection { get; set; } = [];
     private List<ProtocolWithNavigationPropertiesDto> SelectedProtocols { get; set; } = [];
@@ -71,12 +80,23 @@ public partial class Protocols
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
-        await GetDepartmentCollectionLookupAsync();
-        await GetDoctorCollectionLookupAsync();
-        await GetProtocolTypeCollectionLookupAsync();
-        await GetPatientCollectionLookupAsync();
+
+    }
+    
+    private bool IsLookupsLoaded { get; set; } = false; 
+    
+    protected  async Task LoadLookupsAsync()
+    {
+        
+            await GetDepartmentCollectionLookupAsync();
+            await GetDoctorCollectionLookupAsync();
+            await GetProtocolTypeCollectionLookupAsync();
+            await GetInsuranceCollectionLookupAsync();
+        
     }
 
+    
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -114,6 +134,8 @@ public partial class Protocols
 
 
     }
+    
+    
 
     private async Task GetProtocolsAsync()
     {
@@ -123,6 +145,7 @@ public partial class Protocols
 
         var result = await ProtocolsAppService.GetListAsync(Filter);
         ProtocolList = result.Items;
+        EditingPatient = ProtocolList[0].Patient;
         TotalCount = (int)result.TotalCount;
 
         await ClearSelection();
@@ -167,6 +190,12 @@ public partial class Protocols
         };
 
         SelectedCreateTab = "protocol-create-tab";
+        
+        if (!IsLookupsLoaded) 
+        {
+            await LoadLookupsAsync();
+            IsLookupsLoaded = true; // Veriler bir kez yüklendikten sonra tekrar yüklenmesini engelle
+        }
 
 
         await NewProtocolValidations.ClearAll();
@@ -182,6 +211,12 @@ public partial class Protocols
             DepartmentId = DepartmentsCollection.Select(i => i.Id).FirstOrDefault(),
 
         };
+        
+        //resetle
+        IdentityNumber = string.Empty;
+        FoundPatientName = string.Empty;
+        NewPatient = new PatientCreateDto();
+
         await CreateProtocolModal.Hide();
     }
 
@@ -189,9 +224,16 @@ public partial class Protocols
     {
         SelectedEditTab = "protocol-edit-tab";
         
+        if (!IsLookupsLoaded) // Eğer daha önce yüklenmemişse verileri çek
+        {
+            await LoadLookupsAsync();
+            IsLookupsLoaded = true; // Veriler bir kez yüklendikten sonra tekrar yüklenmesini engelle
+        }
+        
         var protocol = await ProtocolsAppService.GetWithNavigationPropertiesAsync(input.Protocol.Id);
 
         EditingProtocolId = protocol.Id;
+        EditingPatient = input.Patient;
         EditingProtocol = ObjectMapper.Map<ProtocolDto, ProtocolUpdateDto>(protocol);
 
         await EditingProtocolValidations.ClearAll();
@@ -204,23 +246,91 @@ public partial class Protocols
         await GetProtocolsAsync();
     }
 
-    private async Task CreateProtocolAsync()
+    protected void NavigateToDetail(ProtocolWithNavigationPropertiesDto protocolDto)
     {
+        //seçili hastayı servise kaydediyoruz 
+        //   patientService.SetPatient(patientDto);
+        NavigationManager.NavigateTo($"/protocols/detail/{protocolDto.Protocol.Patient.FirstName}");
+
+    }
+    
+    private string IdentityNumber { get; set; } = string.Empty; // Kimlik Numarası Alanı
+    private string FoundPatientName { get; set; } = string.Empty; // Bulunan hastanın adı (eğer varsa)
+    private PatientCreateDto NewPatient { get; set; } = new(); // Yeni hasta bilgileri
+    private bool IsPatientFound { get; set; } = true; // Hasta bulunup bulunmadığını takip eder
+    
+    
+    private async Task OnCheckIdentityNumberClicked()
+    {
+        if (string.IsNullOrWhiteSpace(IdentityNumber) && IdentityNumber.Length != 11 )
+        {
+            await UiMessageService.Warn("Please enter an Identity Number.");
+            return;
+        }
         try
         {
-            if (await NewProtocolValidations.ValidateAll() == false)
-            {
-                return;
-            }
-
-            await ProtocolsAppService.CreateAsync(NewProtocol); // burada create işlemi yapıyor 
-            await GetProtocolsAsync();
-            await CloseCreateProtocolModalAsync();
+            // check the patient
+            var patient = await PatientsAppService.GetPatientByIdentityAsync(IdentityNumber);
+            FoundPatientName = $"{patient.FirstName} {patient.LastName}";
+            IsPatientFound = true;
         }
-        catch (Exception ex)
+        catch (EntityNotFoundException)
         {
-            await HandleErrorAsync(ex);
+            // if patient cannot found 
+            IsPatientFound = false;
+            FoundPatientName = string.Empty;
+            NewPatient = new PatientCreateDto
+            {
+                IdentityAndPassportNumber = IdentityNumber // take the identitiy number 
+            };
+            // warn the user 
+            await UiMessageService.Warn("No patient found. Please fill in the patient details.");
         }
+    }
+
+    private async Task CreateProtocolAsync()
+    {
+
+        if (await NewProtocolValidations.ValidateAll() == false) return;
+            try
+            {
+                PatientDto patient;
+
+                if (!IsPatientFound)
+                {
+                    // check the patient area
+                    if (string.IsNullOrWhiteSpace(NewPatient.FirstName) ||
+                        string.IsNullOrWhiteSpace(NewPatient.LastName) ||
+                        NewPatient.BirthDate == default ||
+                        NewPatient.Gender == default)
+                    {
+                        await UiMessageService.Warn($"Please fill all patient details. {   NewPatient.IdentityAndPassportNumber}");
+                        return;
+                    }
+                 
+                    // creating new patient 
+                    patient = await PatientsAppService.CreateAsync(NewPatient);
+                }
+                else
+                {
+                    // Zaten bulunan hasta bilgisi alınır
+                    patient = await PatientsAppService.GetPatientByIdentityAsync(IdentityNumber);
+                }
+
+                // create the protocol
+                NewProtocol.PatientId = patient.Id;
+                await ProtocolsAppService.CreateAsync(NewProtocol);
+
+                await UiMessageService.Success("Protocol created successfully!");
+
+                await GetProtocolsAsync();
+                await CloseCreateProtocolModalAsync();
+            }
+            catch (Exception ex)
+            {
+                await HandleErrorAsync(ex);
+            }
+        
     }
 
     private async Task CloseEditProtocolModalAsync()
@@ -281,6 +391,12 @@ public partial class Protocols
         Filter.DepartmentId = departmentId;
         await SearchAsync();
     }
+    
+    protected virtual async Task OnInsuranceIdChangedAsync(Guid? insuranceId)
+    {
+        Filter.InsuranceId = insuranceId;
+        await SearchAsync();
+    }
     protected virtual async Task OnDoctorIdChangedAsync(Guid? doctorId)
     {
         Filter.DoctorId = doctorId;
@@ -292,32 +408,26 @@ public partial class Protocols
         Filter.ProtocolTypeId = protocolTypeId;
         await SearchAsync();
     }
-    
-    private async Task GetPatientCollectionLookupAsync(string? newValue = null)
-    {
-        PatientsCollection = (await ProtocolsAppService.GetPatientLookupAsync(new LookupRequestDto { Filter = newValue })).Items;
-    }
 
     private async Task GetDepartmentCollectionLookupAsync(string? newValue = null)
     {
         DepartmentsCollection = (await ProtocolsAppService.GetDepartmentLookupAsync(new LookupRequestDto { Filter = newValue })).Items;
     }
     
+    private async Task GetInsuranceCollectionLookupAsync(string? newValue = null)
+    {
+        InsuranceCollections = (await ProtocolsAppService.GetInsuranceLookUpAsync(new LookupRequestDto { Filter = newValue })).Items;
+    }
+    
     private async Task GetDoctorCollectionLookupAsync(string? newValue = null)
     {
         DoctorsCollection = (await ProtocolsAppService.GetDoctorLookUpAsync(new LookupRequestDto { Filter = newValue })).Items;
     }
-
-    #region protocoltype lookup
-  
+    
     private async Task GetProtocolTypeCollectionLookupAsync(string? newValue = null)
     {
         ProtocolTypesCollection = (await ProtocolsAppService.GetProtocolTypeLookUpAsync(new LookupRequestDto { Filter = newValue })).Items;
     }
-    
-
-    #endregion
-  
     
 
     private Task SelectAllItems()

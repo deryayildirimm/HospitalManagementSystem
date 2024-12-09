@@ -11,19 +11,17 @@ using Volo.Abp.Data;
 using Volo.Abp.Domain.Services;
 namespace Pusula.Training.HealthCare.Protocols;
 
-public class ProtocolManager(IProtocolRepository protocolRepository,
-                            IPatientRepository _patientRepository,
-                            IDepartmentRepository _departmentRepository,
-                            IProtocolTypeRepository _protocolTypeRepository,
-                            IDoctorRepository _doctorRepository
+public class ProtocolManager(IProtocolRepository protocolRepository
     ) : DomainService, IProtocolManager
 {
     public virtual async Task<Protocol> CreateAsync(
-    Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId,  DateTime startTime,string? notes = null, DateTime? endTime = null)
+    Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId, Guid insuranceId,  DateTime startTime,string? notes = null, DateTime? endTime = null)
     {
+     
         Check.NotNull(protocolTypeId, nameof(protocolTypeId));
         Check.NotNull(doctorId, nameof(doctorId));
         Check.NotNull(departmentId, nameof(departmentId));
+        Check.NotNull(insuranceId, nameof(insuranceId));
         Check.NotNull(patientId, nameof(patientId));
         Check.NotNull(startTime, nameof(startTime));
         
@@ -34,18 +32,15 @@ public class ProtocolManager(IProtocolRepository protocolRepository,
      
         var protocol = new Protocol(
             GuidGenerator.Create(),
-            patientId, departmentId, protocolTypeId, doctorId, startTime,notes, endTime
+            patientId, departmentId, protocolTypeId, doctorId, insuranceId, startTime,notes, endTime
         );
-  
-        Console.WriteLine(patientId);
-        Console.WriteLine(protocol);
         
         return await protocolRepository.InsertAsync(protocol);
     }
 
     public virtual async Task<Protocol> UpdateAsync(
         Guid id,
-        Guid patientId, Guid departmentId,Guid protocolTypeId, Guid doctorId, DateTime startTime,string? note = null, DateTime? endTime = null, [CanBeNull] string? concurrencyStamp = null
+        Guid patientId, Guid departmentId,Guid protocolTypeId, Guid doctorId, Guid insuranceId, DateTime startTime,string? note = null, DateTime? endTime = null, [CanBeNull] string? concurrencyStamp = null
     )
     {
         
@@ -64,6 +59,7 @@ public class ProtocolManager(IProtocolRepository protocolRepository,
         protocol.SetDepartmentId(departmentId);
         protocol.SetProtocolTypeId(protocolTypeId);
         protocol.SetDoctorId(doctorId);
+        protocol.SetInsuranceId(insuranceId);
         protocol.SetStartTime(startTime);
         protocol.SetNote(note);
         protocol.SetEndTime(endTime);
