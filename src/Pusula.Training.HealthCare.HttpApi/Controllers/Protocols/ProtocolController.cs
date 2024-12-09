@@ -47,6 +47,10 @@ public class ProtocolController(IProtocolsAppService _protocolsAppService) : Hea
     [HttpGet]
     [Route("protocol-type-lookup")]
     public virtual Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookUpAsync(LookupRequestDto input) => _protocolsAppService.GetProtocolTypeLookUpAsync(input);
+    
+    [HttpGet]
+    [Route("insurance-lookup")]
+    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetInsuranceLookUpAsync(LookupRequestDto input) => _protocolsAppService.GetInsuranceLookUpAsync(input);
 
 
     [HttpPost]

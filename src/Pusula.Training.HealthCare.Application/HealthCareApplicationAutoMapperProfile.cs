@@ -140,5 +140,6 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<TestWithNavigationProperties, TestWithNavigationPropertiesDto>();
 
         CreateMap<Insurance, InsuranceDto>();
+        CreateMap<Insurance, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.InsuranceCompanyName.ToString()));
     }
 }
