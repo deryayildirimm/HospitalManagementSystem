@@ -48,6 +48,9 @@ public class Program
         {
             Log.Information("Starting web host.");
             var builder = WebApplication.CreateBuilder(args);
+            
+            //  protocol state service
+            builder.Services.AddSingleton<ProtocolStateService>();
 
             // Statik varlıklar için
             builder.WebHost.UseStaticWebAssets();

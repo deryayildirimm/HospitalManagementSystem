@@ -49,6 +49,16 @@ public class HealthCareMenuContributor : IMenuContributor
                 icon: "fa fa-users",
                 requiredPermissionName: HealthCarePermissions.Patients.Default)
         );
+        
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
+                HealthCareMenus.ProtocolType,
+                l["Menu:ProtocolType"],
+                url: "/protocol-types",
+                icon: "fa fa-file-alt",
+                requiredPermissionName: HealthCarePermissions.ProtocolTypes.Default)
+        );
+
 
         context.Menu.AddItem(
             new ApplicationMenuItem(
@@ -174,6 +184,15 @@ public class HealthCareMenuContributor : IMenuContributor
 
         context.Menu.AddItem(
             new ApplicationMenuItem(
+                HealthCareMenus.MedicalStaff,
+                l["Menu:Insurances"],
+                url: "/insurances",
+                icon: "fa fa-user-md",
+                requiredPermissionName: HealthCarePermissions.Insurances.Default)
+        );
+
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
                     name: HealthCareMenus.Treatment,
                     displayName: l["Menu:Treatment"],
                     icon: "fa-solid fa-medkit"
@@ -197,7 +216,12 @@ public class HealthCareMenuContributor : IMenuContributor
                             displayName: l["Menu:Operations"],
                             icon: "fa-solid fa-cogs"
                         )
-                    
+                        .AddItem(new ApplicationMenuItem(
+                            name: HealthCareMenus.MyProtocols,
+                            displayName: l["Menu:MyProtocols"],
+                            url: "/my-protocols",
+                            icon: "fa-solid fa-plus-square")
+                        )
                 )
                 .AddItem(
                     new ApplicationMenuItem(

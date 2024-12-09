@@ -20,6 +20,9 @@ public class HealthCareMenus
     public const string AppointmentList = Prefix + ".AppointmentList";
     public const string AppointmentsOverview = Prefix + ".AppointmentsOverview";
     public const string Treatment = Prefix + ".Treatment";
+    public const string Insurances = Prefix + ".Insurances";
     public const string Icds = Treatment + ".Icds";
+    public const string MyProtocols = Treatment + ".MyProtocols";
     public const string IcdReport = Treatment + ".IcdReport";
+    public const string ProtocolType = Prefix + ".ProtocolTypes";
 }

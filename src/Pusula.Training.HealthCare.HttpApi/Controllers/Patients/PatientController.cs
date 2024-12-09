@@ -46,6 +46,13 @@ public class PatientController : HealthCareController, IPatientsAppService
     {
         return _patientsAppService.GetPatientByNumberAsync(PatientNumber);
     }
+    
+    [HttpGet]
+    [Route("identity-number")]
+    public virtual Task<PatientDto> GetPatientByIdentityAsync(string IdentityNumber)
+    {
+        return _patientsAppService.GetPatientByIdentityAsync(IdentityNumber);
+    }
 
     
     [HttpPost]

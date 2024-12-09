@@ -29,6 +29,9 @@ using Volo.Abp.TenantManagement;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Tests;
+using Pusula.Training.HealthCare.Treatment.Examinations;
+using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
+using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
 using Pusula.Training.HealthCare.Treatment.Icds;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Insurances;
@@ -60,8 +63,13 @@ public class HealthCareDbContext :
     public DbSet<TestCategory> TestCategories { get; set; } = null!;
     public DbSet<Test> Tests { get; set; } = null!;
     public DbSet<BloodTestResult> BloodTestResults { get; set; } = null!;
-    public DbSet<Icd> Icds { get; set; } = null!;
     public DbSet<Insurance> Insurances { get; set; } = null!;
+
+    // Treatment
+    public DbSet<Icd> Icds { get; set; } = null!;
+    public DbSet<Examination> Examinations { get; set; } = null!;
+    public DbSet<FamilyHistory> FamilyHistories { get; set; } = null!;
+    public DbSet<Background> Backgrounds { get; set; } = null!;
 
     public DbSet<Appointment> Appointments { get; set; } = null!;
     public DbSet<AppointmentType> AppointmentTypes { get; set; } = null!;
@@ -184,6 +192,12 @@ public class HealthCareDbContext :
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(p => p.Doctor).WithMany().IsRequired().HasForeignKey(p => p.DoctorId)
                     .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(p => p.Insurance).WithMany().IsRequired().HasForeignKey(p => p.InsuranceId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                
+                b.HasMany(x => x.ProtocolMedicalServices)
+                    .WithOne(e => e.Protocol)
+                    .HasForeignKey(e => e.ProtocolId);
             });
             
             builder.Entity<ProtocolType>(b =>
@@ -215,6 +229,13 @@ public class HealthCareDbContext :
                 b.HasMany(x => x.DepartmentMedicalServices)
                     .WithOne(e => e.MedicalService)
                     .HasForeignKey(e => e.MedicalServiceId);
+                b.Property(x => x.ServiceCreatedAt).HasColumnName(nameof(MedicalService.ServiceCreatedAt)).IsRequired();
+
+                b.HasIndex(e => new { e.Name }).IsUnique();
+                
+                b.HasMany(x => x.ProtocolMedicalServices)
+                    .WithOne(e => e.MedicalService)
+                    .HasForeignKey(e => e.MedicalServiceId);
             });
 
             builder.Entity<DepartmentMedicalService>(b =>
@@ -233,6 +254,26 @@ public class HealthCareDbContext :
                     .WithMany(x => x.DepartmentMedicalServices)
                     .IsRequired(false)
                     .HasForeignKey(x => x.MedicalServiceId);
+            });
+            
+            builder.Entity<ProtocolMedicalService>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "ProtocolMedicalServices", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+
+                b.HasKey(x => new { x.MedicalServiceId, x.ProtocolId });
+
+                b.HasOne<Protocol>(sc => sc.Protocol)
+                    .WithMany(x => x.ProtocolMedicalServices)
+                    .IsRequired(false)
+                    .HasForeignKey(x => x.ProtocolId);
+
+                b.HasOne<MedicalService>(sc => sc.MedicalService)
+                    .WithMany(x => x.ProtocolMedicalServices)
+                    .IsRequired(false)
+                    .HasForeignKey(x => x.MedicalServiceId);
+
+                b.HasIndex(x => new { x.MedicalServiceId, x.ProtocolId }).IsUnique();
             });
 
             builder.Entity<Doctor>(b =>
@@ -486,6 +527,76 @@ public class HealthCareDbContext :
                     .HasMaxLength(IcdConsts.CodeNumberMaxLength);
                 b.Property(x => x.Detail).HasColumnName(nameof(Icd.Detail)).IsRequired()
                     .HasMaxLength(IcdConsts.DetailMaxLength);
+            });
+
+            builder.Entity<Examination>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Examinations", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.Date).HasColumnName(nameof(Examination.Date)).IsRequired();
+                b.Property(x => x.Complaint).HasColumnName(nameof(Examination.Complaint)).IsRequired()
+                    .HasMaxLength(ExaminationConsts.ComplaintMaxLength);
+                b.Property(x => x.StartDate).HasColumnName(nameof(Examination.StartDate));
+                b.Property(x => x.Story).HasColumnName(nameof(Examination.Story))
+                    .HasMaxLength(ExaminationConsts.StoryMaxLength);
+                b.HasOne(d => d.Background)
+                    .WithOne(d => d.Examination)
+                    .IsRequired()
+                    .HasForeignKey<Background>(d => d.ExaminationId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(d => d.FamilyHistory)
+                    .WithOne(d => d.Examination)
+                    .IsRequired()
+                    .HasForeignKey<FamilyHistory>(d => d.ExaminationId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(d => d.Protocol)
+                    .WithOne()
+                    .IsRequired()
+                    .HasForeignKey<Examination>(x => x.ProtocolId)
+                    .OnDelete(DeleteBehavior.NoAction);
+            });
+            
+            builder.Entity<ExaminationIcd>(b =>
+                           {
+                               b.ToTable(HealthCareConsts.DbTablePrefix + "ExaminationIcds", HealthCareConsts.DbSchema);
+                               b.ConfigureByConvention();
+               
+                               b.HasKey(x => new { x.ExaminationId, x.IcdId });
+               
+                               b.HasOne(ei => ei.Examination)
+                                   .WithMany(e => e.ExaminationIcd)
+                                   .HasForeignKey(ei => ei.ExaminationId);
+               
+                               b.HasOne(ei => ei.Icd)
+                                   .WithMany()
+                                   .HasForeignKey(ei => ei.IcdId);
+                           });
+
+            builder.Entity<FamilyHistory>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "FamilyHistories", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.MotherDisease).HasColumnName(nameof(FamilyHistory.MotherDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.FatherDisease).HasColumnName(nameof(FamilyHistory.FatherDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.SisterDisease).HasColumnName(nameof(FamilyHistory.SisterDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.BrotherDisease).HasColumnName(nameof(FamilyHistory.BrotherDisease))
+                    .HasMaxLength(FamilyHistoryConsts.DiseaseMaxLength);
+                b.Property(x => x.AreParentsRelated).IsRequired();
+            });
+
+            builder.Entity<Background>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Backgrounds", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.Allergies).HasColumnName(nameof(Background.Allergies))
+                    .HasMaxLength(BackgroundConsts.AllergiesMaxLength);
+                b.Property(x => x.Medications).HasColumnName(nameof(Background.Medications))
+                    .HasMaxLength(BackgroundConsts.MedicationsMaxLength);
+                b.Property(x => x.Habits).HasColumnName(nameof(Background.Habits))
+                    .HasMaxLength(BackgroundConsts.HabitsMaxLength);
             });
         }
     }

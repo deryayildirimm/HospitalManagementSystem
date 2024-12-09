@@ -5,6 +5,8 @@
 @using Pusula.Training.HealthCare.Localization
 @using Pusula.Training.HealthCare.Shared
 @using Blazorise.Components
+@using Pusula.Training.HealthCare.Doctors
+@using Pusula.Training.HealthCare.Patients
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 
@@ -13,6 +15,8 @@
 @using Volo.Abp.Http.Client
 @inherits HealthCareComponentBase
 @inject IProtocolsAppService ProtocolsAppService
+@inject IPatientsAppService PatientsAppService
+@inject IDoctorsAppService DoctorsAppService
 
 @inject IUiMessageService UiMessageService
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
@@ -50,7 +54,7 @@
             </div>
         </Row>
 
-        <div style="display: @(!ShowAdvancedFilters ? "none" : "block")">
+        <div style="display: @(!ShowAdvancedFilters ? "none" : "block")" >
             <Row>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
@@ -92,30 +96,12 @@
                                     Placeholder="@string.Empty"/>
                     </Field>
                 </Column>
-           
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["Patient"]</FieldLabel>
-                        <Select TValue="Guid?" 
-                                SelectedValue="@Filter.PatientId"
-                                SelectedValueChanged="@OnPatientIdChangedAsync">
-
-                            <SelectItem></SelectItem>
-
-                            @foreach (var item in PatientsCollection)
-                            {
-                                <SelectItem TValue="Guid" Value="@item.Id">
-                                    @item.DisplayName
-                                </SelectItem>
-                            }
-
-                        </Select>
-                    </Field>
-                </Column>
+                
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["Department"]</FieldLabel>
-                        <Select TValue="Guid?" 
+                        <Select TValue="Guid?"
+                                @onclick="LoadLookupsAsync"
                                 SelectedValue="@Filter.DepartmentId"
                                 SelectedValueChanged="@OnDepartmentIdChangedAsync">
 
@@ -131,10 +117,32 @@
                         </Select>
                     </Field>
                 </Column>
+                
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["Insurance"]</FieldLabel>
+                        <Select TValue="Guid?"
+                                @onclick=" LoadLookupsAsync"
+                                SelectedValue="@Filter.InsuranceId"
+                                SelectedValueChanged="@OnInsuranceIdChangedAsync">
+
+                            <SelectItem></SelectItem>
+
+                            @foreach (var item in InsuranceCollections)
+                            {
+                            <SelectItem TValue="Guid" Value="@item.Id">
+                                @item.DisplayName
+                            </SelectItem>
+                            }
+
+                        </Select>
+                    </Field>
+                </Column>
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["Doctor"]</FieldLabel>
-                        <Select TValue="Guid?"  
+                        <Select TValue="Guid?"
+                                @onclick="LoadLookupsAsync"
                                 SelectedValue="@Filter.DoctorId"
                                 SelectedValueChanged="@OnDoctorIdChangedAsync">
 
@@ -153,21 +161,23 @@
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["Protocol Type"]</FieldLabel>
-                        <Select TValue="Guid?" 
+                        <Select TValue="Guid?"
+                                @onclick="LoadLookupsAsync"
                                 SelectedValue="@Filter.ProtocolTypeId"
                                 SelectedValueChanged="@OnProtocolTypeIdChangedAsync">
                             <SelectItem></SelectItem>
 
                             @foreach (var item in ProtocolTypesCollection)
                             {
-                            <SelectItem TValue="Guid" Value="@item.Id">
-                                @item.DisplayName
-                            </SelectItem>
+                                <SelectItem TValue="Guid" Value="@item.Id">
+                                    @item.DisplayName
+                                </SelectItem>
                             }
 
                         </Select>
                     </Field>
                 </Column>
+
             </Row>
             @*//<suite-custom-code-block-2>*@
             @*//</suite-custom-code-block-2>*@
@@ -258,14 +268,6 @@
                     <DataGridMultiSelectColumn TItem="ProtocolWithNavigationPropertiesDto" DisplayOrder="-1" Width="30px"></DataGridMultiSelectColumn>
                 }
 
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Protocol.StartTime"
-                                Caption="@L["StartTime"]">
-                    <DisplayTemplate>
-                        @context.Protocol.StartTime.ToShortDateString()
-                    </DisplayTemplate>
-                </DataGridColumn>
-
 
                 <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
                                 Field="Patient.FirstName"
@@ -282,14 +284,6 @@
 
 
                 <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Protocol.EndTime"
-                                Caption="@L["EndTime"]">
-                    <DisplayTemplate>
-                        @context.Protocol?.EndTime?.ToShortDateString()
-                    </DisplayTemplate>
-                </DataGridColumn>
-                
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
                                 Field="Doctor.FirstName"
                                 Caption="@L["Doctor"]">
                     <DisplayTemplate>
@@ -299,12 +293,40 @@
 
                 <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
                                 Field="ProtocolType.Name"
-                                Caption="@L["ProtocolType"]">
+                                Caption="@L["Protocol Type"]">
                     <DisplayTemplate>
                         @context.ProtocolType?.Name
                     </DisplayTemplate>
                 </DataGridColumn>
 
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Insurance.InsuranceCompanyName"
+                                Caption="@L["Insurance"]">
+                    <DisplayTemplate>
+                        @context.Insurance?.InsuranceCompanyName
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+                
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Protocol.StartTime"
+                                Caption="@L["StartTime"]">
+                    <DisplayTemplate>
+                        @context.Protocol.StartTime.ToShortDateString()
+                    </DisplayTemplate>
+                </DataGridColumn>
+
+
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
+                                Field="Protocol.EndTime"
+                                Caption="@L["EndTime"]">
+                    <DisplayTemplate>
+                        @context.Protocol?.EndTime?.ToShortDateString()
+                    </DisplayTemplate>
+                </DataGridColumn>
+                
                 <DataGridEntityActionsColumn TItem="ProtocolWithNavigationPropertiesDto" @ref="@EntityActionsColumn">
                     <DisplayTemplate>
                         <EntityActions TItem="ProtocolWithNavigationPropertiesDto" EntityActionsColumn="@EntityActionsColumn">
@@ -323,6 +345,15 @@
                     </DisplayTemplate>
                 </DataGridEntityActionsColumn>
 
+                <!-- Detail Page Column -->
+                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"  Caption="@L["Detay"]">
+                    <DisplayTemplate>
+                        <Button Color="Color.Primary" @onclick="() => NavigateToDetail(context)">
+                            <Icon Name="@IconName.ExternalLinkSquareAlt" />
+                        </Button>
+                    </DisplayTemplate>
+                </DataGridColumn>
+                
             </DataGridColumns>
 
 
@@ -332,7 +363,7 @@
 
 @* ************************* CREATE MODAL ************************* *@
 <Modal @ref="CreateProtocolModal" Closing="@CreateProtocolModal.CancelClosingModalWhenFocusLost">
-    <ModalContent Centered="true">
+    <ModalContent Centered="true" >
         @*//<suite-custom-code-block-5>*@
         @*//</suite-custom-code-block-5>*@
         <Form id="CreateProtocolForm">
@@ -346,98 +377,177 @@
                              Model="@NewProtocol"
                              ValidateOnLoad="false">
 
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is6">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>@L["StartTime"]</FieldLabel>
+                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.StartTime">
+                                        <Feedback>
+                                            <ValidationError/>
+                                        </Feedback>
+                                    </DateEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is6">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>@L["EndTime"]</FieldLabel>
+                                    <DateEdit TValue="DateTime?" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.EndTime">
+                                        <Feedback>
+                                            <ValidationError/>
+                                        </Feedback>
+                                    </DateEdit>
+                                </Field>
+                            </Validation>
 
-                    <Validation MessageLocalizer="@LH.Localize">
+                        </Column>
+
+                    </Row>
+                    @if (IsPatientFound)
+                    {
+                        <Row >
+                            <Column ColumnSize="ColumnSize.Is8">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">@L["Identity Number"]</FieldLabel>
+                                    <TextEdit Text="@IdentityNumber" TextChanged="@((value) => IdentityNumber = value)" Placeholder="Enter Identity Number"/>
+                                    <ValidationMessage For="@(() => IdentityNumber)"/>
+                                </Field>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is4">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center; color: white">@L["     sdfşklg      "]</FieldLabel>
+                                    <Button Color="Color.Primary" Clicked="OnCheckIdentityNumberClicked">
+                                        @L["Check"]
+                                    </Button>
+                                </Field>
+
+                            </Column>
+                        </Row>
+                    }
+                    <div style="display: @(IsPatientFound ? "block" : "none")">
+                        <Column>
+                            <Field>
+                                <TextEdit Value="@FoundPatientName" Plaintext Disabled/>
+                            </Field>
+                        </Column>
+                    </div>
+                    <div style="display: @(!IsPatientFound ? "block" : "none")">
+                        <Row>
+                            <Column ColumnSize="ColumnSize.Is12" >
+                                <Field>
+                                    <FieldLabel>@L["First Name"]</FieldLabel>
+                                    <TextEdit @bind-Text="@NewPatient.FirstName" Placeholder="Enter First Name"/>
+                                </Field>
+                            </Column>
+                            <Column ColumnSize="ColumnSize.Is12">
+                                <Field>
+                                    <FieldLabel>@L["Last Name"]</FieldLabel>
+                                    <TextEdit @bind-Text="@NewPatient.LastName" Placeholder="Enter Last Name"/>
+                                </Field>
+                            </Column> 
+                            <Column ColumnSize="ColumnSize.Is12">
+                                <Field>
+                                    <FieldLabel>@L["Identity Number"]</FieldLabel>
+                                    <TextEdit @bind-Text="@NewPatient.IdentityAndPassportNumber" Placeholder="Enter Identity Number"/>
+                                </Field>
+                            </Column>
+                           
+                            <Column ColumnSize="ColumnSize.Is6">
+                                <Field >
+                                    <FieldLabel>@L["Birthdate"] *</FieldLabel>
+                                    <DateEdit TValue="DateTime" @bind-Date="@NewPatient.BirthDate" InputMode="DateInputMode.Date"/>
+                                </Field>
+                            </Column>
+                           
+                            <Column ColumnSize="ColumnSize.Is6">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">@L["Gender"] *</FieldLabel>
+                                    <Select TValue="EnumGender" @bind-SelectedValue="@NewPatient.Gender">
+                                        <SelectItem Value="EnumGender.MALE">@L["Male"]</SelectItem>
+                                        <SelectItem Value="EnumGender.FEMALE">@L["Female"]</SelectItem>
+                                    </Select>
+                                </Field>
+                            </Column>
+                        </Row>
+                    </div>
+                    <Row>
+                       
                         <Field>
-                            <FieldLabel>@L["Notes"] *</FieldLabel>
-                            <TextEdit @bind-Text="@NewProtocol.Notes" MaxLength="ProtocolConsts.MaxNotesLength" Plaintext >
-                                <Feedback>
-                                    <ValidationError/>
-                                </Feedback>
-                            </TextEdit>
+                            <FieldLabel>@L["Department"]</FieldLabel>
+                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DepartmentId" >
+
+                                <SelectItem></SelectItem>
+
+                                @foreach (var department in DepartmentsCollection)
+                                {
+                                    <SelectItem TValue="Guid" Value="@(department.Id)">
+                                        @(department.DisplayName)
+                                    </SelectItem>
+                                }
+                            </Select>
                         </Field>
-                    </Validation>
 
-
-                    <Validation MessageLocalizer="@LH.Localize">
                         <Field>
-                            <FieldLabel>@L["StartTime"]</FieldLabel>
-                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.StartTime">
-                                <Feedback>
-                                    <ValidationError/>
-                                </Feedback>
-                            </DateEdit>
-                        </Field>
-                    </Validation>
+                            <FieldLabel>@L["Doctor"]</FieldLabel>
+                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DoctorId">
 
-                    <Validation MessageLocalizer="@LH.Localize">
+                                <SelectItem></SelectItem>
+
+                                @foreach (var doctor in DoctorsCollection)
+                                {
+                                    <SelectItem TValue="Guid" Value="@(doctor.Id)">
+                                        @(doctor.DisplayName)
+                                    </SelectItem>
+                                }
+                            </Select>
+                        </Field>
                         <Field>
-                            <FieldLabel>@L["EndTime"]</FieldLabel>
-                            <DateEdit TValue="DateTime?" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.EndTime">
-                                <Feedback>
-                                    <ValidationError/>
-                                </Feedback>
-                            </DateEdit>
-                        </Field>
-                    </Validation>
+                            <FieldLabel>@L["Insurance"]</FieldLabel>
+                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.InsuranceId">
 
-                    <Field>
-                        <FieldLabel>@L["Patient"] *</FieldLabel>
-                        <Autocomplete Data="@PatientsCollection"
-                                      TItem="LookupDto<Guid>"
-                                      TValue="Guid" 
-                                      TextField="@((item) => item?.DisplayName)"
-                                      ValueField="@((item) => item?.Id ?? default)"
-                                      SearchChanged="@GetPatientCollectionLookupAsync"
-                                      @bind-SelectedValue="@NewProtocol.PatientId"
-                                      Placeholder="&#8212;"/>
-                    </Field>
+                                <SelectItem></SelectItem>
 
-                    <Field>
-                        <FieldLabel>@L["Department"]</FieldLabel>
-                        <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DepartmentId" >
-
-                            <SelectItem></SelectItem>
-                            
-                            @foreach (var department in DepartmentsCollection)
-                            {
-                                <SelectItem TValue="Guid" Value="@(department.Id)">
-                                    @(department.DisplayName)
+                                @foreach (var insurance in InsuranceCollections)
+                                {
+                                <SelectItem TValue="Guid" Value="@(insurance.Id)">
+                                    @(insurance.DisplayName)
                                 </SelectItem>
-                            }
-                        </Select>
-                    </Field>
+                                }
+                            </Select>
+                        </Field>
+                        <Field>
+                            <FieldLabel>@L["Protocol Type"]</FieldLabel>
+                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.ProtocolTypeId" >
 
-                    <Field>
-                        <FieldLabel>@L["Doctor"]</FieldLabel>
-                        <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DoctorId"   >
+                                <SelectItem></SelectItem>
 
-                            <SelectItem></SelectItem>
-                            
-                            @foreach (var doctor in DoctorsCollection)
-                            {
-                                <SelectItem TValue="Guid" Value="@(doctor.Id)">
-                                    @(doctor.DisplayName)
-                                </SelectItem>
-                            }
-                        </Select>
-                    </Field>
-
-                    <Field>
-                        <FieldLabel>@L["Protocol Type"]</FieldLabel>
-                        <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.ProtocolTypeId" >
-
-                            <SelectItem></SelectItem>
-                            
-                            @foreach (var type in ProtocolTypesCollection)
-                            {
+                                @foreach (var type in ProtocolTypesCollection)
+                                {
                                 <SelectItem TValue="Guid" Value="@(type.Id)">
                                     @(type.DisplayName)
                                 </SelectItem>
-                            }
-                        </Select>
-                    </Field>
+                                }
+                            </Select>
+                        </Field>
+                    </Row>
+                    
+                    <Row>
+                    
 
+                        <Validation MessageLocalizer="@LH.Localize">
+                            <Field>
+                                <FieldLabel>@L["Notes"] *</FieldLabel>
+                                <TextEdit @bind-Text="@NewProtocol.Notes" MaxLength="ProtocolConsts.MaxNotesLength" Plaintext >
+                                    <Feedback>
+                                        <ValidationError/>
+                                    </Feedback>
+                                </TextEdit>
+                            </Field>
+                        </Validation>
+                        
+                    </Row>
 
                 </Validations>
             </ModalBody>
@@ -458,7 +568,7 @@
 
 @* ************************* EDIT MODAL ************************* *@
 <Modal @ref="EditProtocolModal" Closing="@EditProtocolModal.CancelClosingModalWhenFocusLost">
-    <ModalContent Centered="true">
+    <ModalContent Centered="true" >
         @*//<suite-custom-code-block-8>*@
         @*//</suite-custom-code-block-8>*@
         <Form id="EditProtocolForm">
@@ -482,19 +592,17 @@
                             </DateEdit>
                         </Field>
                     </Validation>
-                    
-                    <Field>
-                        <FieldLabel>@L["Patient"] *</FieldLabel>
-                        <Autocomplete Data="@PatientsCollection"
-                                      TItem="LookupDto<Guid>"
-                                      TValue="Guid"
-                                      TextField="@((item) => item?.DisplayName)"
-                                      ValueField="@((item) => item?.Id ?? default)"
-                                      SearchChanged="@GetPatientCollectionLookupAsync"
-                                      @bind-SelectedValue="@EditingProtocol.PatientId"
-                                      Placeholder="&#8212;"/>
-                    </Field>
-
+                
+                    <Validation MessageLocalizer="@LH.Localize">
+                        <Field>
+                            <FieldLabel>@L["EndTime"]</FieldLabel>
+                            <DateEdit TValue="DateTime?" InputMode="DateInputMode.Date" @bind-Date="@EditingProtocol.EndTime">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
 
                     <Field>
                         <FieldLabel>@L["Department"]</FieldLabel>
@@ -531,8 +639,17 @@
                             }
                         </Select>
                     </Field>
-                    
-
+                    <Field>
+                        <FieldLabel>@L["Insurance"]</FieldLabel>
+                        <Select TValue="Guid" @bind-SelectedValue="@EditingProtocol.InsuranceId">
+                            @foreach (var type in InsuranceCollections)
+                            {
+                            <SelectItem TValue="Guid" Value="@(type.Id)">
+                                @(type.DisplayName)
+                            </SelectItem>
+                            }
+                        </Select>
+                    </Field>
 
                 </Validations>
             </ModalBody>
