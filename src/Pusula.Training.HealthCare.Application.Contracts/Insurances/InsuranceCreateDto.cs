@@ -9,15 +9,15 @@ namespace Pusula.Training.HealthCare.Insurances
 {
     public class InsuranceCreateDto
     {
-        [Required]
-        [StringLength(InsuranceConst.MaxPolicyNumberLength, MinimumLength = InsuranceConst.MinPolicyNumberLength)]
+        [Required(ErrorMessage = "Please enter a valid Policy Number.")]
+        [StringLength(InsuranceConst.MaxPolicyNumberLength, MinimumLength = InsuranceConst.MinPolicyNumberLength,ErrorMessage = "Please enter a valid Policy Number.")]
         public string PolicyNumber { get; set; } = null!;
         public decimal? PremiumAmount { get; set; }
         public decimal? CoverageAmount { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        [Required]
-        [Range(InsuranceConst.MinInsuranceCompanyName, InsuranceConst.MaxInsuranceCompanyName)]
+        [Required(ErrorMessage = "Please choose a Insurance Company")]
+        [Range(InsuranceConst.MinInsuranceCompanyName, InsuranceConst.MaxInsuranceCompanyName,ErrorMessage = "Please choose a Insurance Company")]
         public EnumInsuranceCompanyName InsuranceCompanyName { get; set; } = EnumInsuranceCompanyName.None;
         public string? Description { get; set; }
     }
