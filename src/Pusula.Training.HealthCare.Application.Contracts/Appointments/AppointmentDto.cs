@@ -1,19 +1,30 @@
 using System;
+using Pusula.Training.HealthCare.AppointmentTypes;
+using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.MedicalServices;
+using Pusula.Training.HealthCare.Patients;
 using Volo.Abp.Application.Dtos;
-using Volo.Abp.Domain.Entities;
 
 namespace Pusula.Training.HealthCare.Appointments;
 
 public class AppointmentDto : FullAuditedEntityDto<Guid>
 {
-    public Guid DoctorId { get; set; }
-    public Guid MedicalServiceId { get; set; }
-    public Guid PatientId { get; set; }
+    
+    public DoctorDto Doctor { get; set; }
+    public PatientDto Patient { get; set; }
+    public MedicalServiceDto MedicalService { get; set; }
+    public DepartmentDto Department { get; set; }
+    public AppointmentTypeDto AppointmentType { get; set; }
     public DateTime AppointmentDate { get; set; }
     public DateTime StartTime { get; set; }
-    public DateTime EndTime { get; set; } 
-    public EnumAppointmentStatus Status { get; protected set; }
-    public string? Notes { get; protected set; } = string.Empty;
-    public bool ReminderSent { get; protected set; }
-    public double Amount { get; protected set; }
+    public DateTime EndTime { get; set; }
+    public EnumAppointmentStatus Status { get; set; }
+    public string? Notes { get; set; }
+    public bool ReminderSent { get; set; }
+    public double Amount { get; set; }
+    
+    public AppointmentDto()
+    {
+    }
 }

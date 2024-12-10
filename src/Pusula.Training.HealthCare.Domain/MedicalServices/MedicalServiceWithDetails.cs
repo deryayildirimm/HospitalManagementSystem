@@ -6,5 +6,5 @@ namespace Pusula.Training.HealthCare.MedicalServices;
 public class MedicalServiceWithDetails
 {
     public MedicalService MedicalService { get; set; } = null!;
-    public List<Department> Departments { get; set; } =  new List<Department>();
+    public List<Department> Departments { get; set; } = [];
 }

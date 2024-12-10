@@ -61,6 +61,10 @@ public class Program
             // Syncfusion Blazor hizmeti ekleniyor
             builder.Services.AddSyncfusionBlazor();
 
+            //Custom adaptors for using on SFGrids
+            builder.Services.AddScoped<AppointmentTypeAdaptor>();
+            builder.Services.AddScoped<AppointmentStatisticsAdaptor>();
+            builder.Services.AddScoped<AppointmentAdaptor>();
 
             // Serilog ve diğer ayarları ekleme
             builder.Host.AddAppSettingsSecretsJson()

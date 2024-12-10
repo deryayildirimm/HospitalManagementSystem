@@ -1,0 +1,36 @@
+<div class="@DynamicCssClass" @onclick="() => { Action.InvokeAsync(Item); }">
+    <div class="d-flex flex-column align-items-center justify-content-center px-1 py-1 h-100">
+        <Text class="fs-5" TextWeight="TextWeight.SemiBold" TextColor="TextColor.Dark">
+            @Item.StartTime - @Item.EndTime
+        </Text>
+        @if (Item.IsSelected)
+        {
+            <div class="slot-selected-tag">
+                <Icon Name="IconName.Check" IconSize="IconSize.Small" TextColor="TextColor.Light"></Icon>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    
+    [Parameter] public AppointmentSlotItem Item { get; set; } = null!;
+    [Parameter] public EventCallback<AppointmentSlotItem> Action { get; set; }
+
+    private string DynamicCssClass => CalculateDynamicCssClass();
+
+    private string CalculateDynamicCssClass()
+    {
+        var classes = "shadow-sm text-center align-items-center justify-content-center ";
+        if (Item.AvailabilityValue)
+        {
+            classes += $"time-slot-card light-green {(Item.IsSelected ? "active" : "")}";
+        }
+        else
+        {
+            classes += "is-booked";
+        }
+        return classes;
+    }
+
+}

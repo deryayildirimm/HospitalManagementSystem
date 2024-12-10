@@ -80,12 +80,71 @@ public class HealthCareMenuContributor : IMenuContributor
 
         context.Menu.AddItem(
             new ApplicationMenuItem(
-                HealthCareMenus.MedicalServices,
-                l["Menu:MedicalServices"],
-                url: "/medical-services",
-                icon: "fa-solid fa-notes-medical",
-                requiredPermissionName: HealthCarePermissions.MedicalServices.Default)
+                    name: HealthCareMenus.Appointments,
+                    displayName: l["Menu:Appointment"],
+                    icon: "fa-solid fa-calendar-check"
+                )
+                .AddItem(
+                    new ApplicationMenuItem(
+                            name: "Definitions",
+                            displayName: l["Menu:Definitions"],
+                            icon: "fa-solid fa-folder"
+                        )
+                        .AddItem(new ApplicationMenuItem(
+                            name: HealthCareMenus.AppointmentTypes,
+                            displayName: l["Menu:AppointmentTypes"],
+                            url: "appointments/definitions/types",
+                            icon: "fa-solid fa-calendar-days")
+                        )
+                        .AddItem(new ApplicationMenuItem(
+                            name: HealthCareMenus.MedicalServices,
+                            displayName: l["Menu:MedicalServices"],
+                            url: "appointments/definitions/medical-services",
+                            icon: "fa-solid fa-notes-medical",
+                            requiredPermissionName: HealthCarePermissions.MedicalServices.Default)
+                        )
+                )
+                .AddItem(
+                    new ApplicationMenuItem(
+                            name: "Operations",
+                            displayName: l["Menu:Operations"],
+                            icon: "fa-solid fa-cogs"
+                        )
+                        .AddItem(new ApplicationMenuItem(
+                            name: HealthCareMenus.Appointments,
+                            displayName: l["Menu:Appointments"],
+                            url: "/appointments/operations/create",
+                            icon: "fa-solid fa-calendar-check")
+                        )
+                )
+                .AddItem(
+                    new ApplicationMenuItem(
+                            name: "Reports",
+                            displayName: l["Menu:Reports"],
+                            url:"/appointments/reports",
+                            icon: "fa-solid fa-chart-bar"
+                        )
+                        .AddItem(new ApplicationMenuItem(
+                            name: HealthCareMenus.AppointmentList,
+                            displayName: l["Menu:AppointmentList"],
+                            url: "appointments/reports/list",
+                            icon: "fa-solid fa-list")
+                        )
+                        .AddItem(new ApplicationMenuItem(
+                            name: HealthCareMenus.AppointmentsOverview,
+                            displayName: l["Menu:AppointmentsOverview"],
+                            url: "/appointments/reports/overview",
+                            icon: "fa-solid fa-table")
+                        )
+                        .AddItem(new ApplicationMenuItem(
+                            name: HealthCareMenus.AppointmentsOverview,
+                            displayName: l["Menu:DoctorAppointmentsOverview"],
+                            url: "/appointments/reports/doctor-appointments",
+                            icon: "fa-solid fa-table")
+                        )
+                )
         );
+
 
         context.Menu.AddItem(
             new ApplicationMenuItem(
@@ -192,4 +251,3 @@ public class HealthCareMenuContributor : IMenuContributor
         }
     }
 }
-

@@ -1,25 +1,33 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Exceptions;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Volo.Abp;
 using Volo.Abp.Data;
+using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Domain.Services;
 
 namespace Pusula.Training.HealthCare.MedicalServices;
 
 public class MedicalServiceManager(
     IMedicalServiceRepository medicalServiceRepository,
-    IDepartmentRepository departmentRepository) : DomainService
+    IDepartmentRepository departmentRepository) : DomainService, IMedicalServiceManager
 {
     public virtual async Task<MedicalService> CreateAsync(
-        string name, DateTime serviceCreatedAt, double cost, int duration, List<string> departmentNames)
+        string name,
+        DateTime serviceCreatedAt,
+        double cost,
+        int duration,
+        List<string> departmentNames)
     {
         Check.NotNullOrWhiteSpace(name, nameof(name));
         Check.NotNull(serviceCreatedAt, nameof(serviceCreatedAt));
         Check.Range(cost, nameof(cost), MedicalServiceConsts.CostMinValue);
-        Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue, MedicalServiceConsts.DurationMaxValue);
+        Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue,
+            MedicalServiceConsts.DurationMaxValue);
         Check.NotNull(departmentNames, nameof(departmentNames));
 
         var medicalService = new MedicalService(
@@ -30,23 +38,7 @@ public class MedicalServiceManager(
             serviceCreatedAt
         );
 
-        var departments = await departmentRepository.GetListByNamesAsync(departmentNames.ToArray());
-
-        if (departments == null || departments.Count == 0)
-        {
-            throw new InvalidDepartmentsException();
-        }
-
-        foreach (var department in departments)
-        {
-            var departmentMedicalService = new DepartmentMedicalService
-            {
-                DepartmentId = department.Id,
-                MedicalServiceId = medicalService.Id,
-            };
-            medicalService.DepartmentMedicalServices.Add(departmentMedicalService);
-        }
-
+        await SetDepartmentsAsync(service: medicalService, departmentNames: departmentNames);
         return await medicalServiceRepository.InsertAsync(medicalService);
     }
 
@@ -60,45 +52,45 @@ public class MedicalServiceManager(
         string? concurrencyStamp = null
     )
     {
-        
         Check.NotNull(id, nameof(id));
         Check.NotNull(serviceCreatedAt, nameof(serviceCreatedAt));
         Check.NotNullOrWhiteSpace(name, nameof(name));
         Check.Range(cost, nameof(cost), MedicalServiceConsts.CostMinValue);
         Check.NotNull(departmentNames, nameof(departmentNames));
-        Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue, MedicalServiceConsts.DurationMaxValue);
-        
-        var service = await medicalServiceRepository.GetAsync(id);
+        Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue,
+            MedicalServiceConsts.DurationMaxValue);
 
-        if (service == null)
-        {
-            throw new MedicalServiceNotFoundException();
-        }
+        var service = await medicalServiceRepository.FirstOrDefaultAsync(x => x.Id == id);
 
-        service.SetName(name);
-        service.SetCost(cost);
-        service.SetDuration(duration);
-        service.SetServiceCreatedAt(serviceCreatedAt);
-        service.SetConcurrencyStampIfNotNull(concurrencyStamp);
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.MedicalServiceNotFound, service is null);
 
-        var departments = await departmentRepository
-            .GetListByNamesAsync(departmentNames.ToArray());
+        service!.SetName(name);
+        service!.SetCost(cost);
+        service!.SetDuration(duration);
+        service!.SetServiceCreatedAt(serviceCreatedAt);
+        service!.SetConcurrencyStampIfNotNull(concurrencyStamp);
 
-        if (departments.Count == 0)
-        {
-            return await medicalServiceRepository.UpdateAsync(service);
-        }
-
-        foreach (var department in departments)
-        {
-            service.DepartmentMedicalServices.Add(new DepartmentMedicalService
-            {
-                DepartmentId = department.Id,
-                MedicalServiceId = service.Id,
-            });
-        }
-        
+        await SetDepartmentsAsync(service: service, departmentNames: departmentNames);
         return await medicalServiceRepository.UpdateAsync(service);
+    }
 
+    protected virtual async Task SetDepartmentsAsync(MedicalService service, List<string> departmentNames)
+    {
+        if (departmentNames.Count == 0)
+        {
+            return;
+        }
+
+        var departmentIds = (await departmentRepository.GetListByNamesAsync(departmentNames.ToArray()))
+            .Select(x => x.Id)
+            .ToList();
+
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DepartmentNotFound,
+            departmentIds.Count == 0);
+
+        foreach (var id in departmentIds)
+        {
+            service.AddDepartment(id);
+        }
     }
 }

@@ -4,11 +4,10 @@
 @using Pusula.Training.HealthCare.Appointments
 @using Pusula.Training.HealthCare.Doctors
 @using Pusula.Training.HealthCare.Permissions
-@using Pusula.Training.HealthCare.Localization
 @using Pusula.Training.HealthCare.MedicalServices
 @using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Shared
 @using Volo.Abp.AspNetCore.Components.Messages
-@using Volo.Abp.AspNetCore.Components.Web
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 @inherits HealthCareComponentBase
 
@@ -18,6 +17,7 @@
 @inject IPatientsAppService PatientsAppService
 @inject IUiMessageService UiMessageService
 @inject NavigationManager NavigationManager
+@inject ILookupAppService LookupAppService
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["Appointments"]">
@@ -205,7 +205,6 @@
         </div>
     </Div>
 }
-
 @* Step 2 - Schedule *@
 else if (ActiveStep == 1)
 {
@@ -226,18 +225,9 @@ else if (ActiveStep == 1)
                         {
                             @foreach (var item in DaysLookupList)
                             {
-                                <div class="day-card @(item.IsSelected ? "active" : "")" @onclick="() => OnSelectAppointmentDay(item)">
-                                    <div class="day-name">@item.Date.ToString("ddd")</div>
-                                    <div class="day-number">@item.Date.Day</div>
-                                    <div class="month">@item.Date.ToString("MMM")</div>
-                                    <div class="is-day-available @(item.AvailabilityValue ? "success-color" : "fail-color")">
-                                    </div>
-                                    <div class="available-slots">
-                                        <div class="small-circle @(item.AvailableSlotCount > 0 ? "success-color" : "fail-color")">
-                                        </div>
-                                        <Text Class="month">@item.AvailableSlotCount</Text>
-                                    </div>
-                                </div>
+                                <AppointmentDayCard Item="@item"
+                                                    OnSelectAppointmentDay="@OnSelectAppointmentDay">
+                                </AppointmentDayCard>
                             }
                         }
 
@@ -277,30 +267,7 @@ else if (ActiveStep == 1)
                         {
                             @foreach (var appointment in AppointmentSlots)
                             {
-                                var dynamicClasses = "shadow-sm text-center align-items-center justify-content-center ";
-
-                                if (appointment.AvailabilityValue)
-                                {
-                                    dynamicClasses += $"time-slot-card light-green {(appointment.IsSelected ? "active" : "")}";
-                                }
-                                else
-                                {
-                                    dynamicClasses += $"is-booked";
-                                }
-
-                                <div class="@dynamicClasses" @onclick="() => { SelectAppointmentSlot(appointment); }">
-                                    <div class="d-flex flex-column align-items-center justify-content-center px-1 py-1 h-100">
-                                        <Text class="fs-5" TextWeight="TextWeight.SemiBold" TextColor="TextColor.Dark">
-                                            @appointment.StartTime - @appointment.EndTime
-                                        </Text>
-                                        @if (appointment.IsSelected)
-                                        {
-                                            <div class="slot-selected-tag">
-                                                <Icon Name="IconName.Check" IconSize="IconSize.Small" TextColor="TextColor.Light"></Icon>
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
+                                <AppointmentSlotCard Item="@appointment" Action="@SelectAppointmentSlot"></AppointmentSlotCard>
                             }
                         }
 
@@ -320,7 +287,6 @@ else if (ActiveStep == 1)
         </div>
     </Div>
 }
-
 @* Step 3 - Confirmation *@
 else if (ActiveStep == 2)
 {
@@ -333,7 +299,7 @@ else if (ActiveStep == 2)
                             <Label Class="form-label">@L["AppointmentNote"]</Label>
                             <TextEdit @bind-Value="StepperModel.Note" Placeholder="@L["TypeTheNote"]" Class="form-control"/>
                         </div>
-                        
+
                         <div>
                             <Label Class="form-label">@L["EAppointmentID"]</Label>
                             <TextEdit Disabled="true" @bind-Value="AppointmentId" Placeholder="@L["EAppointmentID"]" Class="form-control"/>
@@ -342,6 +308,21 @@ else if (ActiveStep == 2)
                         <div>
                             <Label Class="form-label">@L["EAppointmentPaymentID"]</Label>
                             <TextEdit Disabled="true" @bind-Value="PaymentId" Placeholder="@L["EAppointmentPaymentID"]" Class="form-control"/>
+                        </div>
+                        <div class="flex flex-column">
+                            <div>
+                                <Label Class="form-label">@L["AppointmentType"]</Label>
+                            </div>
+                            <SfDropDownList
+                                TValue="Guid"
+                                TItem="LookupDto<Guid>"
+                                @bind-Value="StepperModel.AppointmentTypeId"
+                                Placeholder="@L["Select"]"
+                                AllowFiltering="true"
+                                DataSource="@AppointmentTypesCollection"
+                                Width="300px">
+                                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                            </SfDropDownList>
                         </div>
                         <div>
                             <Label Class="form-label">@L["SendReminder"]</Label>
@@ -409,7 +390,6 @@ else if (ActiveStep == 2)
         </div>
     </Div>
 }
-
 @* Step 4 - Result *@
 else if (ActiveStep == 3)
 {
@@ -437,7 +417,7 @@ else if (ActiveStep == 3)
                 </CardBody>
             </Card>
         </div>
-        <Div class="d-flex gap-3">
+        <div class="d-flex gap-3">
             <Button Color="Color.Success" Outline
                     Clicked="NavigateToPatient">
                 <Icon Name="IconName.ArrowLeft"></Icon>
@@ -448,8 +428,8 @@ else if (ActiveStep == 3)
                 <Icon Name="IconName.Add"></Icon>
                 @L["NewAppointment"]
             </Button>
-        </Div>
-       
+        </div>
+
     </Div>
 }
 

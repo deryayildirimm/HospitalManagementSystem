@@ -78,7 +78,6 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
 
     public void SetEndTime(DateTime? endTime)
     {
-       
         EndTime = endTime;
     }
     

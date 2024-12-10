@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Appointments;
+using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Cities;
 using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Tests;
@@ -39,6 +41,7 @@ namespace Pusula.Training.HealthCare
         IPatientRepository patientRepository,
         IDepartmentRepository departmentRepository,
         IAppointmentRepository appointmentRepository,
+        IAppointmentTypeRepository appointmentTypeRepository,
         ITitleRepository titleRepository,
         IMedicalServiceRepository medicalServiceRepository,
         IRepository<Doctor> doctorRepository,
@@ -59,12 +62,8 @@ namespace Pusula.Training.HealthCare
     {
         public async Task SeedAsync(DataSeedContext context)
         {
-            await SetRoles();
-        }
-
-        private async Task SetRoles()
-        {
             await SeedCityRecords();
+            await SeedAppointmentTypes();
             await SeedPatientRecords();
             await SeedRoleRecords();
             await SeedDistrictRecords();
@@ -73,23 +72,19 @@ namespace Pusula.Training.HealthCare
             await SeedMedicalServiceToDepartments();
             await SeedTitles();
             await SeedDoctorRecords();
+            await SeedMedicalStaffRecords();
             await SeedDoctorWorkingHours();
             await SeedAppointments();
-            await SeedTestCategoryRecords();
-            await SeedTestRecords(); 
             await SeedProtocolType();
-            await SeedProtocols(); // Protokoller en son oluşturulacak
+            await SeedProtocols();
+            await SeedIcds();
             await SeedExaminations();
             await SeedFamilyHistory();
             await SeedBackground();
-           await SeedAppointments();
-          await SeedTestCategoryRecords();
-          await SeedTestRecords(); 
-          await SeedProtocolType();
-        //  await SeedInsurance();
-            await SeedProtocols(); 
-            await SeedProtocolMedicalService();
-
+            await SeedTestCategoryRecords();
+            await SeedTestRecords();
+            //await SeedInsurance();
+            //await SeedProtocolMedicalService();
         }
 
         private async Task SeedProtocolType()
@@ -99,7 +94,6 @@ namespace Pusula.Training.HealthCare
                 new ProtocolType(guidGenerator.Create(), "Ayakta"),
                 new ProtocolType(guidGenerator.Create(), "Yatış"),
                 new ProtocolType(guidGenerator.Create(), "Kontrol"),
-            
             };
 
             await protocolTypeRepository.InsertManyAsync(types, autoSave: true);
@@ -117,6 +111,167 @@ namespace Pusula.Training.HealthCare
 
             await titleRepository.InsertManyAsync(titles, autoSave: true);
         }
+
+        private async Task SeedMedicalStaffRecords()
+        {
+            if (await departmentRepository.GetCountAsync() == 0
+                || await cityRepository.GetCountAsync() == 0
+                || await districtRepository.GetCountAsync() == 0)
+                return;
+
+            var departments = await departmentRepository.GetListAsync();
+            var cityTitles = await cityRepository.GetListAsync();
+            var districtTitles = await districtRepository.GetListWithNavigationPropertiesAsync();
+
+            var city = cityTitles.First(x => x.Name == "Ankara");
+            var district = districtTitles.First(d => d.City.Name == "Ankara");
+
+            var d1 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[0].Id,
+                "Arif",
+                "Yılmaz",
+                "12345678901",
+                new DateTime(1980, 5, 12),
+                EnumGender.MALE,
+                new DateTime(1999, 5, 12),
+                "ahmet.yilmaz@example.com",
+                "555-1234567"
+            );
+
+            var d2 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[0].Id,
+                "Fatma",
+                "Kara",
+                "98765432109",
+                new DateTime(1990, 3, 25),
+                EnumGender.FEMALE,
+                new DateTime(2001, 5, 12),
+                "fatma.kara@example.com",
+                "555-9876543"
+            );
+
+            var d3 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[0].Id,
+                "Mehmet",
+                "Çelik",
+                "12309876543",
+                new DateTime(1975, 11, 30),
+                EnumGender.MALE,
+                new DateTime(2005, 11, 30),
+                "mehmet.celik@example.com",
+                "555-3219876"
+            );
+
+            var d4 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[1].Id,
+                "Merve",
+                "Şahin",
+                "23456789012",
+                new DateTime(1985, 8, 23),
+                EnumGender.FEMALE,
+                new DateTime(2005, 11, 30),
+                "merve.sahin@example.com",
+                "555-2345678"
+            );
+
+            var d5 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[1].Id,
+                "Zeynep",
+                "Demir",
+                "45678901234",
+                new DateTime(1990, 7, 5),
+                EnumGender.FEMALE,
+                new DateTime(2009, 7, 5),
+                "zeynep.demir@example.com",
+                "555-4567890"
+            );
+
+            var d6 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[3].Id,
+                "Ahmet",
+                "Aksoy",
+                "56789012345",
+                new DateTime(1982, 11, 30),
+                EnumGender.MALE,
+                new DateTime(2012, 7, 5),
+                "ahmet.aksoy@example.com",
+                "555-5678901"
+            );
+
+            var d7 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[2].Id,
+                "Elif",
+                "Çelik",
+                "67890123456",
+                new DateTime(1988, 4, 18),
+                EnumGender.FEMALE,
+                new DateTime(2017, 4, 18),
+                "elif.celik@example.com",
+                "555-6789012"
+            );
+
+            var d8 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[4].Id,
+                "Mehmet",
+                "Güneş",
+                "78901234567",
+                new DateTime(1970, 9, 9),
+                EnumGender.MALE,
+                new DateTime(2019, 9, 9),
+                "mehmet.gunes@example.com",
+                "555-7890123"
+            );
+
+            var d9 = new MedicalStaff(
+                guidGenerator.Create(),
+                city.Id,
+                district.District.Id,
+                departments[5].Id,
+                "Ayşe",
+                "Yıldız",
+                "89012345678",
+                new DateTime(1987, 6, 22),
+                EnumGender.FEMALE,
+                new DateTime(2023, 6, 22),
+                "ayse.yildiz@example.com",
+                "555-8901234"
+            );
+
+            await medicalStaffRepository.InsertAsync(d1, true);
+            await medicalStaffRepository.InsertAsync(d2, true);
+            await medicalStaffRepository.InsertAsync(d3, true);
+            await medicalStaffRepository.InsertAsync(d4, true);
+            await medicalStaffRepository.InsertAsync(d5, true);
+            await medicalStaffRepository.InsertAsync(d6, true);
+            await medicalStaffRepository.InsertAsync(d7, true);
+            await medicalStaffRepository.InsertAsync(d8, true);
+            await medicalStaffRepository.InsertAsync(d9, true);
+        }
+
         private async Task SeedMedicalServiceRecords()
         {
             if (await medicalServiceRepository.GetCountAsync() > 0)
@@ -170,41 +325,39 @@ namespace Pusula.Training.HealthCare
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Urology"), true);
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Oncology"), true);
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Neurology"), true);
-            await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Dermatology"), true);
         }
 
         private async Task SeedMedicalServiceToDepartments()
         {
             if (await medicalServiceRepository.GetCountAsync() == 0
-                || await medicalServiceRepository.GetCountAsync() == 0)
+                || await departmentRepository.GetCountAsync() == 0)
             {
                 return;
             }
 
-            var medicalServices = await medicalServiceRepository.GetListAsync();
-            var departments = await departmentRepository.GetListAsync();
+            var medicalServices = await medicalServiceRepository.GetListAsync(includeDetails: true);
+            var departments = await departmentRepository.GetListAsync(includeDetails: true);
+
+            var medicalServiceIndex = 0;
 
             foreach (var department in departments)
             {
-                var random = new Random();
-
-                var randomServices = medicalServices.OrderBy(ms => random.Next()).Take(2).ToList();
-                foreach (var service in randomServices)
+                if (medicalServiceIndex >= medicalServices.Count)
                 {
-                    var departmentMedicalService = new DepartmentMedicalService
-                    {
-                        MedicalServiceId = service.Id,
-                        DepartmentId = department.Id
-                    };
-
-                    service.DepartmentMedicalServices.Add(departmentMedicalService);
+                    medicalServiceIndex = 0;
                 }
-            }
 
-            await departmentRepository.UpdateManyAsync(departments, true);
+                var service = medicalServices[medicalServiceIndex];
+
+                service.DepartmentMedicalServices = new Collection<DepartmentMedicalService>();
+
+                service.AddDepartment(department.Id);
+                await medicalServiceRepository.UpdateAsync(service, true);
+                medicalServiceIndex++;
+            }
         }
 
-        
+
         private async Task SeedProtocolMedicalService()
         {
             if (await medicalServiceRepository.GetCountAsync() == 0
@@ -220,7 +373,12 @@ namespace Pusula.Training.HealthCare
             {
                 var random = new Random();
 
-                var randomServices = medicalServices.OrderBy(ms => random.Next()).Take(2).ToList();
+                var randomServices = medicalServices
+                    .OrderBy(ms => random.Next())
+                    .Distinct()
+                    .Take(2) 
+                    .ToList();
+                
                 foreach (var service in randomServices)
                 {
                     var protocolMedicalService = new ProtocolMedicalService
@@ -303,9 +461,9 @@ namespace Pusula.Training.HealthCare
                 EnumDiscountGroup.CONTRACTED
             );
 
-            await patientRepository.InsertAsync(patient1,true);
-            await patientRepository.InsertAsync(patient2,true);
-            await patientRepository.InsertAsync(patient3,true);
+            await patientRepository.InsertAsync(patient1, true);
+            await patientRepository.InsertAsync(patient2, true);
+            await patientRepository.InsertAsync(patient3, true);
         }
 
         private async Task SeedTestCategoryRecords()
@@ -314,11 +472,17 @@ namespace Pusula.Training.HealthCare
                 return;
 
             await testCategoryRepository.InsertAsync(
-                new TestCategory(Guid.NewGuid(), "Hematological Tests", "Measures blood cells (red blood cells, white blood cells) and related values.", "1.png", 1500), true);
+                new TestCategory(Guid.NewGuid(), "Hematological Tests",
+                    "Measures blood cells (red blood cells, white blood cells) and related values.", "1.png", 1500),
+                true);
+
             await testCategoryRepository.InsertAsync(
-                new TestCategory(Guid.NewGuid(), "Biochemical Tests", "Measures vitamins, mineral levels and other chemical values.", "2.jpg", 2000), true);
-            await testCategoryRepository.InsertAsync(
-                new TestCategory(Guid.NewGuid(), "Hormonal Tests", "Measures hormone levels and endocrine functions.", "3.jpg", 2500), true);
+                new TestCategory(Guid.NewGuid(), "Biochemical Tests",
+                    "Measures vitamins, mineral levels and other chemical values.", "2.jpg", 2000), true);
+
+            await testCategoryRepository.InsertAsync(new TestCategory(Guid.NewGuid(), "Hormonal Tests",
+                "Measures hormone levels and endocrine functions.",
+                "3.jpg", 2500), true);
         }
 
         private async Task SeedTestRecords()
@@ -327,8 +491,10 @@ namespace Pusula.Training.HealthCare
             if (testCount > 0)
                 return;
 
-            var hematologicalCategory = await testCategoryRepository.FirstOrDefaultAsync(tc => tc.Name == "Hematological Tests");
-            var biochemicalCategory = await testCategoryRepository.FirstOrDefaultAsync(tc => tc.Name == "Biochemical Tests");
+            var hematologicalCategory =
+                await testCategoryRepository.FirstOrDefaultAsync(tc => tc.Name == "Hematological Tests");
+            var biochemicalCategory =
+                await testCategoryRepository.FirstOrDefaultAsync(tc => tc.Name == "Biochemical Tests");
             var hormonalCategory = await testCategoryRepository.FirstOrDefaultAsync(tc => tc.Name == "Hormonal Tests");
 
             if (hematologicalCategory == null || biochemicalCategory == null || hormonalCategory == null)
@@ -338,19 +504,19 @@ namespace Pusula.Training.HealthCare
 
             var testList = new List<Test>
             {
-                new Test(guidGenerator.Create(),hematologicalCategory.Id,"Hemoglobin",13.5,17.5),
-                new Test(guidGenerator.Create(),hematologicalCategory.Id,"Hematocrit",38.0,50.0),
-                new Test(guidGenerator.Create(),hematologicalCategory.Id,"White Blood Cell Count",4.0,11.0),
+                new Test(guidGenerator.Create(), hematologicalCategory.Id, "Hemoglobin", 13.5, 17.5),
+                new Test(guidGenerator.Create(), hematologicalCategory.Id, "Hematocrit", 38.0, 50.0),
+                new Test(guidGenerator.Create(), hematologicalCategory.Id, "White Blood Cell Count", 4.0, 11.0),
 
-                new Test(guidGenerator.Create(),biochemicalCategory.Id,"Glucose",70,99),
-                new Test(guidGenerator.Create(),biochemicalCategory.Id,"Cholesterol",125,200),
-                new Test(guidGenerator.Create(),biochemicalCategory.Id,"Creatinine",0.6,1.2),
+                new Test(guidGenerator.Create(), biochemicalCategory.Id, "Glucose", 70, 99),
+                new Test(guidGenerator.Create(), biochemicalCategory.Id, "Cholesterol", 125, 200),
+                new Test(guidGenerator.Create(), biochemicalCategory.Id, "Creatinine", 0.6, 1.2),
 
-                new Test(guidGenerator.Create(),hormonalCategory.Id,"TSH",0.5,5.5),
-                new Test(guidGenerator.Create(),hormonalCategory.Id,"Free T3",2.3,4.2),
-                new Test(guidGenerator.Create(),hormonalCategory.Id,"Free T4",0.7,1.8)
+                new Test(guidGenerator.Create(), hormonalCategory.Id, "TSH", 0.5, 5.5),
+                new Test(guidGenerator.Create(), hormonalCategory.Id, "Free T3", 2.3, 4.2),
+                new Test(guidGenerator.Create(), hormonalCategory.Id, "Free T4", 0.7, 1.8)
             };
-            await testRepository.InsertManyAsync(testList);
+            await testRepository.InsertManyAsync(testList, true);
         }
 
         private async Task SeedCityRecords()
@@ -570,9 +736,8 @@ namespace Pusula.Training.HealthCare
             await doctorRepository.InsertAsync(d8, true);
             await doctorRepository.InsertAsync(d9, true);
         }
-        
-        
-        
+
+
         private async Task SeedProtocols()
         {
             // Doktorlar, hastalar, protokol türleri ve departmanlar kontrol ediliyor
@@ -581,54 +746,55 @@ namespace Pusula.Training.HealthCare
             var protocolTypes = await protocolTypeRepository.GetListAsync();
             var departments = await departmentRepository.GetListAsync();
 
-    if (!doctors.Any() || !patients.Any() || !protocolTypes.Any() || !departments.Any())
-    {
-        throw new Exception("Doctors, Patients, ProtocolTypes, or Departments are missing. Seed them first.");
-    }
+            if (!doctors.Any() || !patients.Any() || !protocolTypes.Any() || !departments.Any())
+            {
+                throw new Exception("Doctors, Patients, ProtocolTypes, or Departments are missing. Seed them first.");
+            }
 
-    var random = new Random();
-    var protocols = new List<Protocol>();
-    var insurances = new List<Insurance>();
+            var random = new Random();
+            var protocols = new List<Protocol>();
+            var insurances = new List<Insurance>();
 
-    foreach (var patient in patients)
-    {
-        var doctor = doctors[random.Next(doctors.Count)];
-        var department = departments[random.Next(departments.Count)];
-        var protocolType = protocolTypes[random.Next(protocolTypes.Count)];
-        var startTime = DateTime.Now.AddDays(random.Next(1, 10));
-        var endTime = startTime.AddHours(1);
+            foreach (var patient in patients)
+            {
+                var doctor = doctors[random.Next(doctors.Count)];
+                var department = departments[random.Next(departments.Count)];
+                var protocolType = protocolTypes[random.Next(protocolTypes.Count)];
+                var startTime = DateTime.Now.AddDays(random.Next(1, 10));
+                var endTime = startTime.AddHours(1);
 
-        // Protokole özel bir sigorta oluşturuluyor
-        var insurance = new Insurance(
-            id: Guid.NewGuid(),
-            policyNumber: $"POL-{random.Next(1000, 9999)}",
-            (EnumInsuranceCompanyName)random.Next(1, 10),
-            premiumAmount: random.Next(100, 1000),
-            coverageAmount: random.Next(1000, 10000),
-            startDate: DateTime.UtcNow.AddDays(-30),
-            endDate: DateTime.UtcNow.AddYears(1),
-            description: "Insurance for protocol"
-        );
+                // Protokole özel bir sigorta oluşturuluyor
+                var insurance = new Insurance(
+                    id: Guid.NewGuid(),
+                    policyNumber: $"POL-{random.Next(1000, 9999)}",
+                    (EnumInsuranceCompanyName)random.Next(1, 10),
+                    premiumAmount: random.Next(100, 1000),
+                    coverageAmount: random.Next(1000, 10000),
+                    startDate: DateTime.UtcNow.AddDays(-30),
+                    endDate: DateTime.UtcNow.AddYears(1),
+                    description: "Insurance for protocol"
+                );
 
-        insurances.Add(insurance); // Sigortayı listeye ekliyoruz
+                insurances.Add(insurance); // Sigortayı listeye ekliyoruz
 
-        protocols.Add(new Protocol(
-            id: Guid.NewGuid(),
-            patientId: patient.Id,
-            departmentId: department.Id,
-            doctorId: doctor.Id,
-            protocolTypeId: protocolType.Id,
-            startTime: startTime,
-            note: "Routine checkup",
-            endTime: endTime,
-            insuranceId: insurance.Id // Sigorta ID'si atanıyor
-        ));
-    }
+                protocols.Add(new Protocol(
+                    id: Guid.NewGuid(),
+                    patientId: patient.Id,
+                    departmentId: department.Id,
+                    doctorId: doctor.Id,
+                    protocolTypeId: protocolType.Id,
+                    startTime: startTime,
+                    note: "Routine checkup",
+                    endTime: endTime,
+                    insuranceId: insurance.Id // Sigorta ID'si atanıyor
+                ));
+            }
 
-    await insuranceRepository.InsertManyAsync(insurances, autoSave: true); // Sigortalar veri tabanına ekleniyor
-    await protocolRepository.InsertManyAsync(protocols, autoSave: true); // Protokoller veri tabanına ekleniyor
-}
-        
+            await insuranceRepository.InsertManyAsync(insurances, autoSave: true); // Sigortalar veri tabanına ekleniyor
+            await protocolRepository.InsertManyAsync(protocols, autoSave: true); // Protokoller veri tabanına ekleniyor
+        }
+
+
         private async Task SeedRoleRecords()
         {
             var doctor = new IdentityRole(guidGenerator.Create(), "doctor", null)
@@ -680,12 +846,16 @@ namespace Pusula.Training.HealthCare
         {
             if (await medicalServiceRepository.GetCountAsync() == 0
                 || await patientRepository.GetCountAsync() == 0
-                || await doctorRepository.GetCountAsync() == 0)
+                || await doctorRepository.GetCountAsync() == 0
+                || await appointmentTypeRepository.GetCountAsync() == 0)
+            {
                 return;
+            }
 
             var medicalServices = await medicalServiceRepository.GetListAsync();
             var doctors = await doctorRepository.GetListAsync();
             var patients = await patientRepository.GetListAsync();
+            var types = await appointmentTypeRepository.GetListAsync();
 
             var random = new Random();
             var startHour = TimeSpan.FromHours(9);
@@ -711,7 +881,7 @@ namespace Pusula.Training.HealthCare
                 var patientAppointments =
                     new HashSet<(DateTime, TimeSpan)>();
 
-                for (int i = 0; i < 10; i++)
+                for (var i = 0; i < 10; i++)
                 {
                     bool isSlotTaken;
                     TimeSpan appointmentTime;
@@ -731,6 +901,8 @@ namespace Pusula.Training.HealthCare
                             doctor.Id,
                             patient.Id,
                             medicalService.Id,
+                            types[random.Next(types.Count)].Id,
+                            doctor.DepartmentId,
                             appointmentDate,
                             appointmentDate + appointmentTime,
                             appointmentDate + appointmentTime + serviceDuration,
@@ -749,7 +921,7 @@ namespace Pusula.Training.HealthCare
                     }
 
                     // Her hasta için 10 farklı randevu saati olmalı
-                    if (patientAppointments.Count >= 10)
+                    if (patientAppointments.Count >= 4)
                     {
                         break;
                     }
@@ -767,7 +939,7 @@ namespace Pusula.Training.HealthCare
                 }
             }
 
-            await appointmentRepository.InsertManyAsync(allAppointments);
+            await appointmentRepository.InsertManyAsync(allAppointments, true);
         }
 
         private async Task SeedDoctorWorkingHours()
@@ -790,6 +962,22 @@ namespace Pusula.Training.HealthCare
             }
         }
 
+        private async Task SeedAppointmentTypes()
+        {
+            if (await appointmentTypeRepository.GetCountAsync() > 0)
+            {
+                return;
+            }
+
+            await appointmentTypeRepository.InsertAsync(new AppointmentType(guidGenerator.Create(), "Operation"), true);
+            await appointmentTypeRepository.InsertAsync(new AppointmentType(guidGenerator.Create(), "General Checkup"),
+                true);
+            await appointmentTypeRepository.InsertAsync(
+                new AppointmentType(guidGenerator.Create(), "Cardiology Consultation"), true);
+            await appointmentTypeRepository.InsertAsync(
+                new AppointmentType(guidGenerator.Create(), "Pediatrics"), true);
+        }
+
         private async Task SeedIcds()
         {
             var icd1 = new Icd(
@@ -804,19 +992,19 @@ namespace Pusula.Training.HealthCare
                 id: Guid.NewGuid(),
                 codeNumber: "D78",
                 detail: "Intraoperative and postprocedural complications of the spleen");
-            
+
             await icdRepository.InsertAsync(icd1, true);
             await icdRepository.InsertAsync(icd2, true);
             await icdRepository.InsertAsync(icd3, true);
         }
-        
+
         private async Task SeedExaminations()
         {
             if (await protocolRepository.GetCountAsync() == 0)
                 return;
-            
+
             var protocols = await protocolRepository.GetListAsync();
-            
+
             var examination1 = new Examination(
                 id: Guid.NewGuid(),
                 protocolId: protocols[0].Id,
@@ -824,7 +1012,7 @@ namespace Pusula.Training.HealthCare
                 complaint: "complaint1",
                 startDate: DateTime.Now,
                 story: "story1");
-            
+
             var examination2 = new Examination(
                 id: Guid.NewGuid(),
                 protocolId: protocols[1].Id,
@@ -832,7 +1020,7 @@ namespace Pusula.Training.HealthCare
                 complaint: "complaint2",
                 startDate: DateTime.Now,
                 story: "story2");
-            
+
             var examination3 = new Examination(
                 id: Guid.NewGuid(),
                 protocolId: protocols[2].Id,
@@ -840,18 +1028,19 @@ namespace Pusula.Training.HealthCare
                 complaint: "complaint3",
                 startDate: DateTime.Now,
                 story: "story3");
-            
+
             await examinationRepository.InsertAsync(examination1, true);
             await examinationRepository.InsertAsync(examination2, true);
             await examinationRepository.InsertAsync(examination3, true);
         }
+
         private async Task SeedFamilyHistory()
         {
             if (await examinationRepository.GetCountAsync() == 0)
                 return;
-            
+
             var examinations = await examinationRepository.GetListAsync();
-            
+
             var familyHistory1 = new FamilyHistory(
                 id: Guid.NewGuid(),
                 examinationId: examinations[0].Id,
@@ -861,7 +1050,7 @@ namespace Pusula.Training.HealthCare
                 sisterDisease: null,
                 brotherDisease: null
             );
-            
+
             var familyHistory2 = new FamilyHistory(
                 id: Guid.NewGuid(),
                 examinationId: examinations[1].Id,
@@ -880,18 +1069,19 @@ namespace Pusula.Training.HealthCare
                 sisterDisease: null,
                 brotherDisease: null
             );
-            
+
             await familyHistoryRepository.InsertAsync(familyHistory1, true);
             await familyHistoryRepository.InsertAsync(familyHistory2, true);
             await familyHistoryRepository.InsertAsync(familyHistory3, true);
         }
+
         private async Task SeedBackground()
         {
             if (await examinationRepository.GetCountAsync() == 0)
                 return;
-            
+
             var examinations = await examinationRepository.GetListAsync();
-            
+
             var background1 = new Background(
                 id: Guid.NewGuid(),
                 examinationId: examinations[0].Id,
@@ -899,7 +1089,7 @@ namespace Pusula.Training.HealthCare
                 medications: "medication1",
                 habits: "habit1"
             );
-            
+
             var background2 = new Background(
                 id: Guid.NewGuid(),
                 examinationId: examinations[1].Id,
@@ -907,7 +1097,7 @@ namespace Pusula.Training.HealthCare
                 medications: "medication2",
                 habits: "habit2"
             );
-            
+
             var background3 = new Background(
                 id: Guid.NewGuid(),
                 examinationId: examinations[2].Id,
@@ -915,7 +1105,7 @@ namespace Pusula.Training.HealthCare
                 medications: "medication2",
                 habits: "habit2"
             );
-            
+
             await backgroundRepository.InsertAsync(background1, true);
             await backgroundRepository.InsertAsync(background2, true);
             await backgroundRepository.InsertAsync(background3, true);

@@ -18,11 +18,11 @@ namespace Pusula.Training.HealthCare.Controllers.Appointments;
 public class AppointmentController(IAppointmentAppService appointmentAppService)
     : HealthCareController, IAppointmentAppService
 {
-    
     [HttpGet]
     [Route("available-days-lookup")]
-    public virtual Task<PagedResultDto<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(GetAppointmentsLookupInput input)
-    => appointmentAppService.GetAvailableDaysLookupAsync(input);
+    public virtual Task<PagedResultDto<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(
+        GetAppointmentsLookupInput input)
+        => appointmentAppService.GetAvailableDaysLookupAsync(input);
 
     [HttpGet]
     [Route("available-slots")]
@@ -34,10 +34,9 @@ public class AppointmentController(IAppointmentAppService appointmentAppService)
         => appointmentAppService.GetListAsync(input);
 
     [HttpGet]
-    [Route("with-navigation-properties")]
-    public virtual Task<PagedResultDto<AppointmentWithNavigationPropertiesDto>> GetListWithNavigationPropertiesAsync(
-        GetAppointmentsWithNavigationPropertiesInput input)
-        => appointmentAppService.GetListWithNavigationPropertiesAsync(input);
+    [Route("statistics")]
+    public Task<PagedResultDto<DepartmentAppointmentCountDto>> GetCountByDepartmentsAsync(GetAppointmentsInput input)
+      => appointmentAppService.GetCountByDepartmentsAsync(input);
 
     [HttpGet]
     [Route("{id}")]

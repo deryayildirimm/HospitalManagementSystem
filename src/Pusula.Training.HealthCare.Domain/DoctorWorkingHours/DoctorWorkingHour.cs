@@ -7,19 +7,17 @@ namespace Pusula.Training.HealthCare.DoctorWorkingHours;
 
 public class DoctorWorkingHour : FullAuditedEntity<Guid>
 {
-    [NotNull]
-    public virtual Guid DoctorId { get; protected set; }
+    [NotNull] public virtual Guid DoctorId { get; protected set; }
 
-    [NotNull]
-    public virtual DayOfWeek DayOfWeek { get; protected set; }
+    [NotNull] public virtual DayOfWeek DayOfWeek { get; protected set; }
 
-    [NotNull]
-    public virtual TimeSpan StartHour { get; protected set; }
+    [NotNull] public virtual TimeSpan StartHour { get; protected set; }
 
-    [NotNull]
-    public virtual TimeSpan EndHour { get; protected set; }
-    
-    protected DoctorWorkingHour() { }
+    [NotNull] public virtual TimeSpan EndHour { get; protected set; }
+
+    protected DoctorWorkingHour()
+    {
+    }
 
     public DoctorWorkingHour(Guid doctorId, DayOfWeek dayOfWeek, TimeSpan startHour, TimeSpan endHour)
     {
@@ -42,22 +40,10 @@ public class DoctorWorkingHour : FullAuditedEntity<Guid>
 
     private void SetWorkingHours(TimeSpan startHour, TimeSpan endHour)
     {
-        
         Check.NotNull(startHour, nameof(startHour));
         Check.NotNull(endHour, nameof(endHour));
-        
-        if (startHour >= endHour)
-        {
-            throw new ArgumentException("Start hour must be earlier than end hour.");
-        }
 
-        if (startHour < DoctorWorkingHoursConsts.MinStartHour || endHour > DoctorWorkingHoursConsts.MaxEndHour)
-        {
-            throw new ArgumentException($"Working hours must be between {DoctorWorkingHoursConsts.MinStartHour} and {DoctorWorkingHoursConsts.MaxEndHour}.");
-        }
-        
         StartHour = startHour;
         EndHour = endHour;
     }
-    
 }

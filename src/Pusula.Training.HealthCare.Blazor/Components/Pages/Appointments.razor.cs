@@ -9,6 +9,7 @@ using Pusula.Training.HealthCare.Blazor.Models;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
+using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Navigations;
 using Volo.Abp;
@@ -16,7 +17,7 @@ using Doctor = Pusula.Training.HealthCare.Blazor.Models.Doctor;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
-public partial class Appointments
+public partial class Appointments : HealthCareComponentBase
 {
 #pragma warning disable BL0005
     [Parameter] public int PatientNo { get; set; }
@@ -53,6 +54,7 @@ public partial class Appointments
     private int DoctorLoadingShimmerCount { get; set; } = 5;
     private GetDoctorsWithDepartmentIdsInput DoctorsWithDepartmentIdsInput { get; set; }
     private int DoctorPageSize { get; } = 50;
+    private int TypePageSize { get; } = 50;
     private int DoctorCurrentPage { get; set; } = 1;
     private string DoctorCurrentSorting { get; set; } = string.Empty;
 
@@ -65,11 +67,12 @@ public partial class Appointments
     #endregion
 
     private PatientDto Patient { get; set; }
+    private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; } = [];
     private List<SelectionItem> ServicesList { get; set; }
     private SfListBox<SelectionItem[], SelectionItem> SelectServiceDropdown { get; set; } = null!;
     private AppointmentCreateDto NewAppointment { get; set; }
     private List<AppointmentSlotItem> AppointmentSlots { get; set; }
-    private List<AppointmentDayLookupItem> DaysLookupList { get; set; }
+    private List<AppointmentDayItemLookupDto> DaysLookupList { get; set; }
     private GetAppointmentsLookupInput DaysLookupFilter { get; set; }
     private int LoadCount { get; set; } = 14;
     private double ScreenWidth { get; set; }
@@ -95,7 +98,11 @@ public partial class Appointments
     private bool IsThirdStepValid =>
         IsSecondStepValid &&
         !string.IsNullOrEmpty(StepperModel.PatientName) &&
+        IsAppointmentTypeIdValid(StepperModel.AppointmentTypeId) &&
         !string.IsNullOrEmpty(StepperModel.HospitalName);
+
+    private static bool IsAppointmentTypeIdValid(Guid? appointmentTypeId) =>
+        appointmentTypeId.HasValue && appointmentTypeId.Value != Guid.Empty;
 
     public Appointments()
     {
@@ -141,6 +148,7 @@ public partial class Appointments
     {
         await GetPatient();
         await GetServices();
+        await GetAppointmentTypes();
         SetDayLoadCount();
     }
 
@@ -174,20 +182,18 @@ public partial class Appointments
         {
             SlotDaysLoading = true;
             DaysLookupList.Clear();
-            var days = (await AppointmentAppService.GetAvailableDaysLookupAsync(DaysLookupFilter)).Items;
+            
+            var days = 
+                (await AppointmentAppService.GetAvailableDaysLookupAsync(DaysLookupFilter))
+                .Items
+                .ToList();
 
-            DaysLookupList = days.Select(x => new AppointmentDayLookupItem
-            {
-                Date = x.Date,
-                AvailabilityValue = x.AvailabilityValue,
-                IsSelected = false,
-                AvailableSlotCount = x.AvailableSlotCount,
-            }).ToList();
+            DaysLookupList = ObjectMapper.Map<List<AppointmentDayLookupDto>, List<AppointmentDayItemLookupDto>>(days);
         }
         catch (Exception e)
         {
             DaysLookupList = [];
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
         finally
         {
@@ -249,6 +255,7 @@ public partial class Appointments
         {
             StepperModel.DoctorName = item.Name;
             StepperModel.DoctorId = item.Id;
+            StepperModel.DepartmentId = item.DepartmentId;
             StepperModel.DepartmentName = item.Department;
             GetAppointmentSlotFilter.DoctorId = item.Id;
             DaysLookupFilter.DoctorId = item.Id;
@@ -265,24 +272,33 @@ public partial class Appointments
     {
         try
         {
-            var patientFilter = new GetPatientsInput
-            {
-                PatientNumber = PatientNo
-            };
-
-            var patients = (await PatientsAppService.GetListAsync(patientFilter)).Items;
-
-            if (patients.Count > 0)
-            {
-                Patient = patients[0];
-                StepperModel.PatientId = Patient.Id;
-                StepperModel.PatientName = Patient.FirstName + " " + Patient.LastName;
-            }
+            var patient = await PatientsAppService.GetPatientByNumberAsync(PatientNo);
+            Patient = patient;
+            StepperModel.PatientId = Patient.Id;
+            StepperModel.PatientName = Patient.FirstName + " " + Patient.LastName;
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
-            throw;
+            await UiMessageService.Error(e.Message);
+        }
+    }
+
+    private async Task GetAppointmentTypes(string? newValue = null)
+    {
+        try
+        {
+            IsServiceListLoading = true;
+            AppointmentTypesCollection =
+                (await LookupAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto
+                    { Filter = newValue, MaxResultCount = TypePageSize }))
+                .Items;
+
+            StateHasChanged();
+        }
+        catch (Exception e)
+        {
+            AppointmentTypesCollection = [];
+            await UiMessageService.Error(e.Message);
         }
     }
 
@@ -314,7 +330,7 @@ public partial class Appointments
         }
         catch (Exception e)
         {
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
         finally
         {
@@ -327,11 +343,7 @@ public partial class Appointments
         try
         {
             IsDoctorListLoading = true;
-            var deptIds = MedicalServiceWithDepartmentsList
-                .Where(x => x.MedicalService.Id == StepperModel.MedicalServiceId)
-                .SelectMany(x => x.Departments)
-                .Select(dept => dept.Id)
-                .ToList();
+            var deptIds = GetRelevantDepartmentIds(StepperModel.MedicalServiceId);
 
             DoctorsWithDepartmentIdsInput.DepartmentIds = deptIds;
             var doctors = (await DoctorsAppService.GetByDepartmentIdsAsync(DoctorsWithDepartmentIdsInput)).Items;
@@ -348,6 +360,7 @@ public partial class Appointments
                 .Select(x => new Doctor
                 {
                     Id = x.Doctor.Id,
+                    DepartmentId = x.Doctor.DepartmentId,
                     Name = $"{x.Title.TitleName} {x.Doctor.FirstName} {x.Doctor.LastName}",
                     Department = x.Department.Name,
                     Gender = x.Doctor.Gender,
@@ -358,13 +371,20 @@ public partial class Appointments
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            await UiMessageService.Error(e.Message);
         }
         finally
         {
             IsDoctorListLoading = false;
         }
     }
+
+    private List<Guid> GetRelevantDepartmentIds(Guid? medicalServiceId) =>
+        MedicalServiceWithDepartmentsList
+            .Where(x => x.MedicalService.Id == medicalServiceId)
+            .SelectMany(x => x.Departments)
+            .Select(dept => dept.Id)
+            .ToList();
 
     private async Task GetAvailableSlots()
     {
@@ -417,7 +437,7 @@ public partial class Appointments
 
     private async Task OnDoctorSearchChanged(string? newText)
     {
-        DoctorsWithDepartmentIdsInput.Name = newText ?? string.Empty;
+        DoctorsWithDepartmentIdsInput.FilterText = newText ?? string.Empty;
         await GetDoctorsList();
     }
 
@@ -477,7 +497,7 @@ public partial class Appointments
 
     #endregion
 
-    private async Task OnSelectAppointmentDay(AppointmentDayLookupItem item)
+    private async Task OnSelectAppointmentDay(AppointmentDayItemLookupDto item)
     {
         DaysLookupList.ForEach(e => e.IsSelected = false);
         item.IsSelected = true;
@@ -533,6 +553,7 @@ public partial class Appointments
 
             //New appointment object mapping
             NewAppointment.DoctorId = StepperModel.DoctorId;
+            NewAppointment.DepartmentId = StepperModel.DepartmentId;
             NewAppointment.PatientId = StepperModel.PatientId;
             NewAppointment.MedicalServiceId = StepperModel.MedicalServiceId;
             NewAppointment.AppointmentDate = StepperModel.AppointmentDate;
@@ -541,6 +562,7 @@ public partial class Appointments
             NewAppointment.Amount = StepperModel.Amount;
             NewAppointment.Notes = StepperModel.Note;
             NewAppointment.ReminderSent = StepperModel.ReminderSent;
+            NewAppointment.AppointmentTypeId = StepperModel.AppointmentTypeId;
 
             var message = L["ConfirmMessage"];
             var confirm = L["Confirm"];
@@ -566,7 +588,7 @@ public partial class Appointments
         }
     }
 
-    private DateTime ConvertToDateTime(DateTime appointmentDate, string timeString)
+    private static DateTime ConvertToDateTime(DateTime appointmentDate, string timeString)
     {
         if (TimeSpan.TryParse(timeString, out var time))
         {
@@ -644,7 +666,7 @@ public partial class Appointments
         }
         catch (Exception e)
         {
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
     }
 

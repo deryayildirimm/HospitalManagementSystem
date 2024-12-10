@@ -63,17 +63,13 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
             ? MedicalServiceConsts.GetDefaultSorting(false)
             : sorting);
 
-        var result = await query
-            .Skip(skipCount)
-            .Take(maxResultCount)
-            .Select(ms => new MedicalServiceWithDepartments
-            {
-                MedicalService = ms,
-                Departments = ms.DepartmentMedicalServices
-                    .Select(dms => dms.Department)
-                    .ToList()
-            })
-            .ToListAsync(cancellationToken);
+        var result = await query.Select(ms => new MedicalServiceWithDepartments
+        {
+            MedicalService = ms,
+            Departments = ms.DepartmentMedicalServices
+                .Select(dms => dms.Department)
+                .ToList()
+        }).ToListAsync(cancellationToken: cancellationToken);
 
         return result;
     }
@@ -92,6 +88,11 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         return await query.LongCountAsync(cancellationToken);
     }
 
+    #region Queryable
+
+    
+    #endregion
+    
     #region Filters
 
     protected virtual IQueryable<MedicalService> ApplyFilter(

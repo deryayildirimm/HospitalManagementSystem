@@ -139,16 +139,26 @@ public partial class Protocols
 
     private async Task GetProtocolsAsync()
     {
-        Filter.MaxResultCount = PageSize;
-        Filter.SkipCount = (CurrentPage - 1) * PageSize;
-        Filter.Sorting = CurrentSorting;
+        try
+        {
+            Filter.MaxResultCount = PageSize;
+            Filter.SkipCount = (CurrentPage - 1) * PageSize;
+            Filter.Sorting = CurrentSorting;
 
-        var result = await ProtocolsAppService.GetListAsync(Filter);
-        ProtocolList = result.Items;
-        EditingPatient = ProtocolList[0].Patient;
-        TotalCount = (int)result.TotalCount;
+            var result = await ProtocolsAppService.GetListAsync(Filter);
+            ProtocolList = result.Items;
+            
+            EditingPatient = ProtocolList[0].Patient;
+            TotalCount = (int)result.TotalCount;
 
-        await ClearSelection();
+            await ClearSelection();
+        }
+        catch (Exception e)
+        {
+            EditingPatient = new PatientDto();
+            await UiMessageService.Error(@L["RecordNotFound"]);
+        }
+       
     }
 
     protected virtual async Task SearchAsync()

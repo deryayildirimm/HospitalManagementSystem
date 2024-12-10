@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Pusula.Training.HealthCare.Appointments;
+using Pusula.Training.HealthCare.Blazor.Models;
 using Pusula.Training.HealthCare.Doctors;
+using Syncfusion.Blazor.Schedule.Internal;
 using Volo.Abp;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
@@ -13,9 +15,9 @@ public partial class DoctorDashboard : ComponentBase
 {
     private DateTime CurrentDate { get; set; }
 
-    private List<AppointmentData> DataSource { get; set; }
+    private List<AppointmentCustomData> DataSource { get; set; }
 
-    private GetAppointmentsWithNavigationPropertiesInput AppointmentsFilter { get; set; }
+    private GetAppointmentsInput AppointmentsFilter { get; set; }
 
     private DoctorWithNavigationPropertiesDto DoctorWithNavigation { get; set; }
     private GetDoctorsInput DoctorsInput { get; set; }
@@ -32,7 +34,7 @@ public partial class DoctorDashboard : ComponentBase
     {
         DoctorWithNavigation = new DoctorWithNavigationPropertiesDto();
         CurrentDate = DateTime.Now;
-        AppointmentsFilter = new GetAppointmentsWithNavigationPropertiesInput
+        AppointmentsFilter = new GetAppointmentsInput
         {
             AppointmentMinDate = CurrentDate,
             AppointmentMaxDate = CurrentDate.AddDays(7),
@@ -79,42 +81,30 @@ public partial class DoctorDashboard : ComponentBase
     {
         try
         {
-            var items = (await AppointmentAppService.GetListWithNavigationPropertiesAsync(AppointmentsFilter))
+            var items = (await AppointmentAppService.GetListAsync(AppointmentsFilter))
                 .Items
                 .ToList();
-
-            if (items.Count > 0)
+            
+            if(items.Count == 0)
             {
-                DataSource = items.Select(x => new AppointmentData
-                {
-                    Id = x.Appointment.Id,
-                    PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
-                    DoctorName = x.Doctor.FirstName + " " + x.Doctor.LastName,
-                    StartTime = x.Appointment.StartTime,
-                    EndTime = x.Appointment.EndTime,
-                    ServiceName = x.MedicalService.Name
-                }).ToList();
+                DataSource = [];
+                return;
             }
+
+            DataSource = items.Select(x => new AppointmentCustomData
+            {
+                Id = x.Id,
+                PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
+                DoctorName = x.Doctor.FirstName + " " + x.Doctor.LastName,
+                StartTime = x.StartTime,
+                EndTime = x.EndTime,
+                ServiceName = x.MedicalService.Name
+            }).ToList();
         }
         catch (Exception e)
         {
             DataSource = [];
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
-    }
-
-
-    public class AppointmentData
-    {
-        public Guid Id { get; set; }
-        public string DoctorName { get; set; } = string.Empty;
-        public string PatientName { get; set; } = string.Empty;
-        public string ServiceName { get; set; } = string.Empty;
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-        public DateTime DateOnly { get; set; }
-        public DateTime HourOnly { get; set; }
-        public string Description { get; set; } = string.Empty;
-        public bool IsAllDay { get; set; }
     }
 }

@@ -44,6 +44,7 @@ public class HealthCareApplicationModule : AbpModule
     public override async Task OnApplicationInitializationAsync(ApplicationInitializationContext context)
     {
         await context.AddBackgroundWorkerAsync<PeriodicPatientViewerWorker>();
+        await context.AddBackgroundWorkerAsync<PeriodicAppointmentTrackerWorker>();
     }
 
     public override void ConfigureServices(ServiceConfigurationContext context)
@@ -59,11 +60,7 @@ public class HealthCareApplicationModule : AbpModule
         {
             options.AddMaps<HealthCareApplicationModule>();
         });
-
-#if DEBUG
-        context.Services.Replace(ServiceDescriptor.Singleton<IEmailSender, NullEmailSender>());
-#endif
-
+        
         Configure<AbpBackgroundJobWorkerOptions>(options =>
         {
             options.DefaultFirstWaitDuration = 10;

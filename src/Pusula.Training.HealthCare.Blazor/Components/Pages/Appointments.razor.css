@@ -101,54 +101,6 @@
     width: 100%;
 }
 
-.day-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    width: 70px;
-    height: 100px;
-    background-color: #ffffff;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-    border: 1px solid transparent;
-}
-
-.day-card:hover {
-    transform: scale(1.08);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.day-card.active {
-    border: 1.5px solid var(--bs-gray-600) !important;
-    transform: scale(1.08);
-}
-
-.day-name {
-    font-size: 0.9em;
-    color: #555;
-}
-
-.day-number {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #333;
-}
-
-.is-day-available {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 5px;
-    width: 100%;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-}
 
 .success-color {
     background-color: var(--bs-success);
@@ -230,6 +182,55 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.day-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    width: 70px;
+    height: 100px;
+    background-color: #ffffff;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    border: 1px solid transparent;
+}
+
+.day-card:hover {
+    transform: scale(1.08);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.day-card.active {
+    border: 1.5px solid var(--bs-gray-600) !important;
+    transform: scale(1.08);
+}
+
+.day-name {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.day-number {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: #333;
+}
+
+.is-day-available {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 5px;
+    width: 100%;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }
 
 .available-slots {

@@ -34,6 +34,12 @@ public class AppointmentStepperModel
 
     [Required] 
     public Guid DoctorId { get; set; }
+    
+    [Required] 
+    public Guid DepartmentId { get; set; }
+    
+    [Required] 
+    public Guid AppointmentTypeId { get; set; }
 
     [Required] 
     public string DepartmentName { get; set; } = null!;

@@ -14,12 +14,12 @@ public class NullMailSender(
     IBackgroundJobManager backgroundJobManager)
     : EmailSenderBase(currentTenant, configuration, backgroundJobManager)
 {
-    public new ILogger<NullEmailSender> Logger { get; } = NullLogger<NullEmailSender>.Instance;
+    private new ILogger<NullEmailSender> Logger { get; } = NullLogger<NullEmailSender>.Instance;
 
     protected override Task SendEmailAsync(MailMessage mail)
     {
-        Logger.LogWarning("USING null mail!!");
-        Logger.LogDebug("Send Mail....");
+        Logger.LogWarning("Using Null Mail Service");
+        Logger.LogDebug("Sent Mail....");
         LogMail(mail);
         return Task.CompletedTask;
     }

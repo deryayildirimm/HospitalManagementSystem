@@ -1,0 +1,185 @@
+@page "/appointments/reports/list"
+
+@attribute [Authorize(HealthCarePermissions.Appointments.Default)]
+
+@using Pusula.Training.HealthCare.Appointments
+@using Pusula.Training.HealthCare.Blazor.Services
+@using Pusula.Training.HealthCare.Localization
+@using Pusula.Training.HealthCare.MedicalServices
+@using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.Shared
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Volo.Abp.Http.Client
+@using Syncfusion.Blazor.Buttons
+@using SelectionType = Syncfusion.Blazor.Grids.SelectionType
+@using Syncfusion.Blazor.Calendars
+@inherits HealthCareComponentBase
+
+@inject IAppointmentAppService AppointmentAppService
+@inject ILookupAppService LookupAppService
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home"/>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["AppointmentList"]/>
+    </BreadcrumbItems>
+</SfBreadcrumb>
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["AppointmentList"]" Toolbar="Toolbar">
+    <link href="../Components/Pages/AppointmentList.razor.css" rel="stylesheet"/>
+</PageHeader>
+
+@* ************************* SEARCH ************************* *@
+<div class="row py-3 px-2">
+    <div class="col-12 border-1 bg-white rounded-1 p-4">
+        <div class="row">
+            <div class="col-3 my-1">
+                <h6>@L["DoctorName"]</h6>
+                <SfTextBox @bind-Value="@Filter.DoctorName" Placeholder="@L["DoctorName"]"></SfTextBox>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["PatientName"]</h6>
+                <SfTextBox @bind-Value="@Filter.PatientName" Placeholder="@L["PatientName"]"></SfTextBox>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["ServiceName"]</h6>
+                <SfTextBox @bind-Value="@Filter.ServiceName" Placeholder="@L["ServiceName"]"></SfTextBox>
+            </div>
+            <div class="col-3 my-1">
+                <div>
+                    <h6>@L["PatientType"]</h6>
+                    <SfDropDownList TItem="KeyValuePair<string, EnumPatientTypes>" TValue="EnumPatientTypes?"
+                                    @bind-Value="Filter.PatientType"
+                                    DataSource="@PatientTypeCollection">
+                        <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["MinCost"]</h6>
+                <SfNumericTextBox TValue="double?" @bind-Value="@Filter.MinAmount" Placeholder="@L["MinCost"]" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue"></SfNumericTextBox>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["MaxCost"]</h6>
+                <SfNumericTextBox TValue="double?" @bind-Value="@Filter.MaxAmount" Placeholder="@L["MaxCost"]" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue"></SfNumericTextBox>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["AppointmentMinDate"]</h6>
+                <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.AppointmentMinDate" Placeholder="@L["AppointmentMinDate"]"></SfDatePicker>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["AppointmentMaxDate"]</h6>
+                <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.AppointmentMaxDate" Placeholder="@L["AppointmentMaxDate"]"></SfDatePicker>
+            </div>
+            <div class="col-3 my-1">
+                <div>
+                    <h6>@L["Departments"]</h6>
+                    <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                    @bind-Value="Filter.DepartmentId"
+                                    DataSource="@DepartmentsCollection">
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+            <div class="col-3 my-1">
+                <div>
+                    <h6>@L["MedicalService"]</h6>
+                    <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                    @bind-Value="Filter.MedicalServiceId"
+                                    DataSource="@MedicalServiceCollection">
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+        </div>
+        <div>
+            <SfButton CssClass="e-primary" OnClick="GetAppointmentsAsync">
+                <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
+            </SfButton>
+            <SfButton CssClass="e-danger" OnClick="ClearFilters">
+                <SfIcon IconCss="e-icons e-filter-clear"></SfIcon> @L["ClearFilters"]
+            </SfButton>
+        </div>
+
+    </div>
+</div>
+
+@* ************************* GRID ************************* *@
+<div class="row py-3 px-2">
+    <div class="col-12 border-1 bg-white rounded-1 p-4">
+        <SfGrid
+            @ref="Grid"
+            TValue="AppointmentDto"
+            AllowPaging="true"
+            AllowSorting="true"
+            Toolbar="@(new List<string>() { "Delete" })"
+            SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }"
+            Query="@FilterQuery">
+            <SfDataManager
+                AdaptorInstance="@typeof(AppointmentAdaptor)"
+                Adaptor="Adaptors.CustomAdaptor">
+            </SfDataManager>
+            <GridEvents
+                OnActionBegin="OnActionBegin"
+                RowSelected="RowSelectHandler"
+                OnToolbarClick="ToolbarClickHandler"
+                RowDeselected="RowDeselectHandler"
+                TValue="AppointmentDto">
+            </GridEvents>
+            <GridPageSettings PageSize="@PageSize"></GridPageSettings>
+            <GridColumns>
+                @if (CanDeleteType)
+                {
+                    <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+                }
+                <GridColumn Type="ColumnType.Date" Format="dd/MM/yyyy" Field="AppointmentDate" HeaderText="@L["AppointmentDate"]" Width="130">
+                </GridColumn>
+                <GridColumn Type="ColumnType.Date" Format="HH:mm" Field="StartTime" HeaderText="@L["Start"]" Width="auto">
+                </GridColumn>
+                <GridColumn Type="ColumnType.Date" Format="HH:mm" Field="EndTime" HeaderText="@L["End"]" Width="auto">
+                </GridColumn>
+                <GridColumn HeaderText="@L["PatientName"]" Width="110">
+                    <Template Context="context">
+                        @($"{((AppointmentDto)context).Patient?.FirstName} {((AppointmentDto)context).Patient?.LastName}")
+                    </Template>
+                </GridColumn>
+                <GridColumn HeaderText="@L["DoctorName"]" Width="110">
+                    <Template Context="context">
+                        @($"{((AppointmentDto)context).Doctor?.FirstName} {((AppointmentDto)context).Doctor?.LastName}")
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(AppointmentDto.Amount)" HeaderText="Cost" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                <GridColumn Field="Patient.PatientType" HeaderText="@L["PatientType"]" TextAlign="TextAlign.Left" Width="100"></GridColumn>
+                <GridColumn Field="Department.Name" HeaderText="@L["Department"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+                <GridColumn Field="MedicalService.Name" HeaderText="@L["ServiceName"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+
+                <GridColumn HeaderText="@L["Actions"]" Width="auto">
+                    <Template Context="context">
+                        <SfButton IconCss="e-icons e-delete" CssClass="e-danger" OnClick="@(() => DeleteAppointmentAsync((AppointmentDto)context))">
+                        </SfButton>
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+@* ************************* CONFIRM MODAL ************************* *@
+<SfDialog @ref="DeleteConfirmDialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
+    <DialogEvents Closed="Closed"></DialogEvents>
+    <DialogTemplates>
+        <Header>@L["DeleteRecord"]</Header>
+        <Content>@L["DeleteConfirmationMessage"] </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton OnClick="OkClick" Content="@L["Yes"]" IsPrimary="true"></DialogButton>
+        <DialogButton OnClick="CancelClick" Content="@L["No"]"></DialogButton>
+    </DialogButtons>
+</SfDialog>

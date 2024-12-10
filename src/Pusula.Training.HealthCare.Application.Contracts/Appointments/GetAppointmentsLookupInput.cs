@@ -13,7 +13,6 @@ public class GetAppointmentsLookupInput
     public Guid MedicalServiceId { get; set; }
     
     [Required]
-    [NotInPast]
     public DateTime StartDate { get; set; }
     
     [Required]

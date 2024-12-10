@@ -29,7 +29,7 @@ public partial class ProtocolDetail
     protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private List<AppointmentViewModel> AppointmentList { get; set; }
-    private IReadOnlyList<AppointmentWithNavigationPropertiesDto> FetchedAppointmentList { get; set; }
+    private IReadOnlyList<AppointmentDto> FetchedAppointmentList { get; set; }
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private int TotalCount { get; set; }
@@ -44,7 +44,7 @@ public partial class ProtocolDetail
     private Guid EditingPatientId { get; set; }
     private Modal EditPatientModal { get; set; } = new();
 
-    private GetAppointmentsWithNavigationPropertiesInput FilterText { get; set; }
+    private GetAppointmentsInput FilterText { get; set; }
 
     private IEnumerable<CountryPhoneCodeDto> Nationalities = [];
     private IEnumerable<KeyValuePair<int, string>> Genders = [];
@@ -59,7 +59,7 @@ public partial class ProtocolDetail
     {
         NewPatient = new PatientCreateDto();
         EditingPatient = new PatientUpdateDto();
-        FilterText = new GetAppointmentsWithNavigationPropertiesInput
+        FilterText = new GetAppointmentsInput
         {
             MaxResultCount = PageSize,
             SkipCount = (CurrentPage - 1) * PageSize,
@@ -170,15 +170,15 @@ public partial class ProtocolDetail
         FilterText.PatientNumber = PatientNumber;
 
         FilterText.Status = _status;
-        var apps = (await AppointmentAppService.GetListWithNavigationPropertiesAsync(FilterText)).Items;
+        var apps = (await AppointmentAppService.GetListAsync(FilterText)).Items;
 
         AppointmentList = apps.Select(x => new AppointmentViewModel
         {
 
             PatientName = x.Patient?.FirstName + " " + x.Patient?.LastName ?? "Unknown",
             DoctorName = x.Doctor?.FirstName + " " + x.Doctor?.LastName ?? "Unknown",
-            Date = x.Appointment?.AppointmentDate.Date.ToString("dd MMMM yyyy") ?? DateTime.MinValue.ToString("dd MMMM yyyy"),
-            Status = x.Appointment?.Status ?? EnumAppointmentStatus.Scheduled,
+            Date = x?.AppointmentDate.Date.ToString("dd MMMM yyyy") ?? DateTime.MinValue.ToString("dd MMMM yyyy"),
+            Status = x?.Status ?? EnumAppointmentStatus.Scheduled,
             Service = x.MedicalService?.Name ?? "Not Available"
 
         }).ToList();
@@ -186,7 +186,6 @@ public partial class ProtocolDetail
         TotalCount = (int)apps.Count;
 
         FetchedAppointmentList = apps;
-
 
     }
     #endregion

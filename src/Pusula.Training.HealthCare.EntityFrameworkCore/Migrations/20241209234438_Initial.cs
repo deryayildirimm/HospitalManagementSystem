@@ -413,6 +413,27 @@ namespace Pusula.Training.HealthCare.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AppAppointmentTypes",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    ExtraProperties = table.Column<string>(type: "text", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppAppointmentTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AppCities",
                 columns: table => new
                 {
@@ -531,7 +552,7 @@ namespace Pusula.Training.HealthCare.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
-                    Cost = table.Column<double>(type: "double precision", precision: 18, scale: 6, nullable: false),
+                    Cost = table.Column<double>(type: "double precision", nullable: false),
                     Duration = table.Column<int>(type: "integer", nullable: false),
                     ServiceCreatedAt = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
@@ -984,14 +1005,12 @@ namespace Pusula.Training.HealthCare.Migrations
                         name: "FK_AppDepartmentMedicalServices_AppDepartments_DepartmentId",
                         column: x => x.DepartmentId,
                         principalTable: "AppDepartments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_AppDepartmentMedicalServices_AppMedicalServices_MedicalServ~",
                         column: x => x.MedicalServiceId,
                         principalTable: "AppMedicalServices",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -1225,6 +1244,8 @@ namespace Pusula.Training.HealthCare.Migrations
                     DoctorId = table.Column<Guid>(type: "uuid", nullable: false),
                     PatientId = table.Column<Guid>(type: "uuid", nullable: false),
                     MedicalServiceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AppointmentTypeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DepartmentId = table.Column<Guid>(type: "uuid", nullable: false),
                     AppointmentDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     StartTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     EndTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -1245,6 +1266,16 @@ namespace Pusula.Training.HealthCare.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AppAppointments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppAppointments_AppAppointmentTypes_AppointmentTypeId",
+                        column: x => x.AppointmentTypeId,
+                        principalTable: "AppAppointmentTypes",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AppAppointments_AppDepartments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "AppDepartments",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_AppAppointments_AppDoctors_DoctorId",
                         column: x => x.DoctorId,
@@ -1342,6 +1373,7 @@ namespace Pusula.Training.HealthCare.Migrations
                     DepartmentId = table.Column<Guid>(type: "uuid", nullable: false),
                     ProtocolTypeId = table.Column<Guid>(type: "uuid", nullable: false),
                     DoctorId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InsuranceId = table.Column<Guid>(type: "uuid", nullable: false),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -1364,6 +1396,11 @@ namespace Pusula.Training.HealthCare.Migrations
                         name: "FK_AppProtocols_AppDoctors_DoctorId",
                         column: x => x.DoctorId,
                         principalTable: "AppDoctors",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AppProtocols_AppInsurances_InsuranceId",
+                        column: x => x.InsuranceId,
+                        principalTable: "AppInsurances",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_AppProtocols_AppPatients_PatientId",
@@ -1439,6 +1476,28 @@ namespace Pusula.Training.HealthCare.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "AppProtocolMedicalServices",
+                columns: table => new
+                {
+                    ProtocolId = table.Column<Guid>(type: "uuid", nullable: false),
+                    MedicalServiceId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppProtocolMedicalServices", x => new { x.MedicalServiceId, x.ProtocolId });
+                    table.ForeignKey(
+                        name: "FK_AppProtocolMedicalServices_AppMedicalServices_MedicalServic~",
+                        column: x => x.MedicalServiceId,
+                        principalTable: "AppMedicalServices",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AppProtocolMedicalServices_AppProtocols_ProtocolId",
+                        column: x => x.ProtocolId,
+                        principalTable: "AppProtocols",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AppBackgrounds",
                 columns: table => new
                 {
@@ -1481,14 +1540,12 @@ namespace Pusula.Training.HealthCare.Migrations
                         name: "FK_AppExaminationIcds_AppExaminations_ExaminationId",
                         column: x => x.ExaminationId,
                         principalTable: "AppExaminations",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_AppExaminationIcds_AppIcds_IcdId",
                         column: x => x.IcdId,
                         principalTable: "AppIcds",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -1737,6 +1794,16 @@ namespace Pusula.Training.HealthCare.Migrations
                 column: "UserName");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppAppointments_AppointmentTypeId",
+                table: "AppAppointments",
+                column: "AppointmentTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppAppointments_DepartmentId",
+                table: "AppAppointments",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AppAppointments_DoctorId",
                 table: "AppAppointments",
                 column: "DoctorId");
@@ -1786,12 +1853,6 @@ namespace Pusula.Training.HealthCare.Migrations
                 name: "IX_AppDepartmentMedicalServices_DepartmentId",
                 table: "AppDepartmentMedicalServices",
                 column: "DepartmentId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AppDepartmentMedicalServices_MedicalServiceId_DepartmentId",
-                table: "AppDepartmentMedicalServices",
-                columns: new[] { "MedicalServiceId", "DepartmentId" },
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppDistricts_CityId",
@@ -1868,6 +1929,17 @@ namespace Pusula.Training.HealthCare.Migrations
                 column: "DistrictId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppProtocolMedicalServices_MedicalServiceId_ProtocolId",
+                table: "AppProtocolMedicalServices",
+                columns: new[] { "MedicalServiceId", "ProtocolId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppProtocolMedicalServices_ProtocolId",
+                table: "AppProtocolMedicalServices",
+                column: "ProtocolId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AppProtocols_DepartmentId",
                 table: "AppProtocols",
                 column: "DepartmentId");
@@ -1876,6 +1948,11 @@ namespace Pusula.Training.HealthCare.Migrations
                 name: "IX_AppProtocols_DoctorId",
                 table: "AppProtocols",
                 column: "DoctorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppProtocols_InsuranceId",
+                table: "AppProtocols",
+                column: "InsuranceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppProtocols_PatientId",
@@ -2023,10 +2100,10 @@ namespace Pusula.Training.HealthCare.Migrations
                 name: "AppFamilyHistories");
 
             migrationBuilder.DropTable(
-                name: "AppInsurances");
+                name: "AppMedicalStaff");
 
             migrationBuilder.DropTable(
-                name: "AppMedicalStaff");
+                name: "AppProtocolMedicalServices");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictScopes");
@@ -2050,19 +2127,22 @@ namespace Pusula.Training.HealthCare.Migrations
                 name: "AbpUsers");
 
             migrationBuilder.DropTable(
+                name: "AppAppointmentTypes");
+
+            migrationBuilder.DropTable(
                 name: "AppBloodTests");
 
             migrationBuilder.DropTable(
                 name: "AppTests");
 
             migrationBuilder.DropTable(
-                name: "AppMedicalServices");
-
-            migrationBuilder.DropTable(
                 name: "AppIcds");
 
             migrationBuilder.DropTable(
                 name: "AppExaminations");
+
+            migrationBuilder.DropTable(
+                name: "AppMedicalServices");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictAuthorizations");
@@ -2081,6 +2161,9 @@ namespace Pusula.Training.HealthCare.Migrations
 
             migrationBuilder.DropTable(
                 name: "AppDoctors");
+
+            migrationBuilder.DropTable(
+                name: "AppInsurances");
 
             migrationBuilder.DropTable(
                 name: "AppPatients");

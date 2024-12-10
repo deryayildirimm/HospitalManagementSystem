@@ -1,5 +1,12 @@
 using System;
 using JetBrains.Annotations;
+using Pusula.Training.HealthCare.AppointmentTypes;
+using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.GlobalExceptions;
+using Pusula.Training.HealthCare.MedicalServices;
+using Pusula.Training.HealthCare.Patients;
+using Pusula.Training.HealthCare.Protocols;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -15,15 +22,31 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
 
     [NotNull]
     public virtual Guid MedicalServiceId { get; protected set; }
+    
+    [NotNull]
+    public virtual Guid AppointmentTypeId { get; protected set; }
+    
+    [NotNull]
+    public virtual Guid DepartmentId { get; protected set; }
+    
+    public virtual Doctor Doctor { get; protected set; }
+    
+    public virtual Patient Patient { get; protected set; }
+    
+    public virtual MedicalService MedicalService { get; protected set; }
+    
+    public virtual AppointmentType AppointmentType { get; protected set; }
+    
+    public virtual Department Department { get; protected set; }
 
     [NotNull]
     public virtual DateTime AppointmentDate { get; protected set; }
     
     [NotNull]
-    public virtual DateTime StartTime { get; set; }
+    public virtual DateTime StartTime { get; protected set; }
 
     [NotNull]
-    public virtual DateTime EndTime { get; set; } 
+    public virtual DateTime EndTime { get; protected  set; } 
 
     [NotNull]
     public virtual EnumAppointmentStatus Status { get; protected set; }
@@ -43,13 +66,15 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
         ReminderSent = false;
     }
 
-    public Appointment(Guid id, Guid doctorId, Guid patientId, Guid medicalServiceId, DateTime appointmentDate,
+    public Appointment(Guid id, Guid doctorId, Guid patientId, Guid medicalServiceId, Guid appointmentTypeId, Guid departmentId, DateTime appointmentDate,
         DateTime startTime, DateTime endTime, EnumAppointmentStatus status, string? notes, bool reminderSent, double amount)
     {
-        SetId(id);
+        Id = id;
         SetDoctorId(doctorId);
         SetPatientId(patientId);
         SetMedicalServiceId(medicalServiceId);
+        SetAppointmentTypeId(appointmentTypeId);
+        SetDepartmentId(departmentId);
         SetAppointmentDate(appointmentDate);
         SetStartTime(startTime);
         SetEndTime(endTime);
@@ -57,12 +82,6 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
         SetNotes(notes);
         SetReminderSent(reminderSent);
         SetAmount(amount);
-    }
-    
-    public void SetId(Guid id)
-    {
-        Check.NotNull(id, nameof(id));
-        Id = id;
     }
 
     private void SetDoctorId(Guid doctorId)
@@ -77,6 +96,18 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
         PatientId = patientId;
     }
 
+    private void SetAppointmentTypeId(Guid appointmentTypeId)
+    {
+        Check.NotNull(appointmentTypeId, nameof(appointmentTypeId));
+        AppointmentTypeId = appointmentTypeId;
+    }
+    
+    private void SetDepartmentId(Guid departmentId)
+    {
+        Check.NotNull(departmentId, nameof(departmentId));
+        DepartmentId = departmentId;
+    }
+    
     private void SetMedicalServiceId(Guid medicalServiceId)
     {
         Check.NotNull(medicalServiceId, nameof(medicalServiceId));
@@ -92,42 +123,28 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
     public void SetStartTime(DateTime startTime)
     {
         Check.NotNull(startTime, nameof(startTime));
-        if (startTime.TimeOfDay < AppointmentConsts.MinAppointmentTime ||
-            startTime.TimeOfDay > AppointmentConsts.MaxAppointmentTime)
-        {
-            throw new ArgumentException(
-                $"Appointment time must be between {AppointmentConsts.MinAppointmentTime} and {AppointmentConsts.MaxAppointmentTime}.");
-        }
         StartTime = startTime;
     }
 
     public void SetEndTime(DateTime endTime)
     {
         Check.NotNull(endTime, nameof(endTime));
-        if (endTime.TimeOfDay < AppointmentConsts.MinAppointmentTime ||
-            endTime.TimeOfDay > AppointmentConsts.MaxAppointmentTime)
-        {
-            throw new ArgumentException(
-                $"Appointment time must be between {AppointmentConsts.MinAppointmentTime} and {AppointmentConsts.MaxAppointmentTime}.");
-        }
         EndTime = endTime;
     }
 
     public void SetStatus(EnumAppointmentStatus status)
     {
-        if (!Array.Exists(AppointmentConsts.ValidStatuses, s => s == status))
-        {
-            throw new ArgumentException($"Invalid appointment status.");
-        }
+        Check.Range((int)status, nameof(status), AppointmentConsts.StatusMinValue, AppointmentConsts.StatusMaxValue);
         Status = status;
     }
 
     public void SetNotes(string? notes)
     {
-        if (!string.IsNullOrEmpty(notes) && notes.Length > AppointmentConsts.MaxNotesLength)
-        {
-            throw new ArgumentException($"Notes length cannot exceed {AppointmentConsts.MaxNotesLength} characters.");
-        }
+        HealthCareGlobalException.ThrowIf(
+            HealthCareDomainErrorKeyValuePairs.TextLenghtExceeded,
+            !string.IsNullOrWhiteSpace(notes) && 
+            (notes.Length > AppointmentConsts.MaxNotesLength || notes.Length < ProtocolConsts.MinNotesLength)
+        );
         Notes = notes;
     }
 

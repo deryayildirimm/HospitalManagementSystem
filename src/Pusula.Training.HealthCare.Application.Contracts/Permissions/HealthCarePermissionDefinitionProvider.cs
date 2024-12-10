@@ -47,6 +47,12 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         appointmentPermission.AddChild(HealthCarePermissions.Appointments.Edit, L("Permission:Edit"));
         appointmentPermission.AddChild(HealthCarePermissions.Appointments.Delete, L("Permission:Delete"));
 
+        var appointmentTypesPermission = myGroup.AddPermission(HealthCarePermissions.AppointmentTypes.Default, L("Permission:AppointmentTypes"));
+        appointmentTypesPermission.AddChild(HealthCarePermissions.AppointmentTypes.Create, L("Permission:Create"));
+        appointmentTypesPermission.AddChild(HealthCarePermissions.AppointmentTypes.Edit, L("Permission:Edit"));
+        appointmentTypesPermission.AddChild(HealthCarePermissions.AppointmentTypes.Delete, L("Permission:Delete"));
+        
+        
         var titlePermission = myGroup.AddPermission(HealthCarePermissions.Titles.Default, L("Permission:Titles"));
         titlePermission.AddChild(HealthCarePermissions.Titles.Create, L("Permission:Create"));
         titlePermission.AddChild(HealthCarePermissions.Titles.Edit, L("Permission:Edit"));
@@ -101,7 +107,7 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         insurancePermission.AddChild(HealthCarePermissions.Insurances.Create, L("Permission:Create"));
         insurancePermission.AddChild(HealthCarePermissions.Insurances.Edit, L("Permission:Edit"));
         insurancePermission.AddChild(HealthCarePermissions.Insurances.Delete, L("Permission:Delete"));
-
+        
         var familyHistoryPermission = myGroup.AddPermission(HealthCarePermissions.FamilyHistories.Default, L("Permission:FamilyHistories"));
         familyHistoryPermission.AddChild(HealthCarePermissions.FamilyHistories.Create, L("Permission:Create"));
         familyHistoryPermission.AddChild(HealthCarePermissions.FamilyHistories.Edit, L("Permission:Edit"));

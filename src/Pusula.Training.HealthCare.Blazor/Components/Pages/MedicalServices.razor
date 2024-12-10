@@ -1,4 +1,4 @@
-@page "/medical-services"
+@page "/appointments/definitions/medical-services"
 
 @attribute [Authorize(HealthCarePermissions.MedicalServices.Default)]
 @using Pusula.Training.HealthCare.MedicalServices
@@ -16,6 +16,7 @@
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> Lh
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
+@inject ILookupAppService LookupAppService
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["MedicalServices"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
