@@ -82,7 +82,8 @@ public class HealthCareMenuContributor : IMenuContributor
             new ApplicationMenuItem(
                     name: HealthCareMenus.Appointments,
                     displayName: l["Menu:Appointment"],
-                    icon: "fa-solid fa-calendar-check"
+                    icon: "fa-solid fa-calendar-check",
+                    requiredPermissionName:HealthCarePermissions.Appointments.Default
                 )
                 .AddItem(
                     new ApplicationMenuItem(
@@ -100,8 +101,7 @@ public class HealthCareMenuContributor : IMenuContributor
                             name: HealthCareMenus.MedicalServices,
                             displayName: l["Menu:MedicalServices"],
                             url: "appointments/definitions/medical-services",
-                            icon: "fa-solid fa-notes-medical",
-                            requiredPermissionName: HealthCarePermissions.MedicalServices.Default)
+                            icon: "fa-solid fa-notes-medical")
                         )
                 )
                 .AddItem(
