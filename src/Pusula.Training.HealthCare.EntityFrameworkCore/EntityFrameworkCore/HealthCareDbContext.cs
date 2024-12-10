@@ -116,6 +116,7 @@ public class HealthCareDbContext :
         // Lazy loading enable 
         //  optionsBuilder.UseLazyLoadingProxies();
     }
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -171,7 +172,7 @@ public class HealthCareDbContext :
                 b.ConfigureByConvention();
                 b.Property(x => x.Name).HasColumnName(nameof(Department.Name)).IsRequired()
                     .HasMaxLength(DepartmentConsts.NameMaxLength);
-                
+
                 b.HasMany(x => x.DepartmentMedicalServices)
                     .WithOne(e => e.Department)
                     .HasForeignKey(e => e.DepartmentId);
@@ -187,32 +188,33 @@ public class HealthCareDbContext :
                 b.Property(x => x.EndTime).HasColumnName(nameof(Protocol.EndTime));
                 b.HasOne(p => p.Patient).WithMany().IsRequired().HasForeignKey(x => x.PatientId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(p => p.ProtocolType).WithMany().IsRequired().HasForeignKey(o => o.ProtocolTypeId).OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(p => p.ProtocolType).WithMany().IsRequired().HasForeignKey(o => o.ProtocolTypeId)
+                    .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(p => p.Department).WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(p => p.Doctor).WithMany().IsRequired().HasForeignKey(p => p.DoctorId)
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(p => p.Insurance).WithMany().IsRequired().HasForeignKey(p => p.InsuranceId)
                     .OnDelete(DeleteBehavior.NoAction);
-                
+
                 b.HasMany(x => x.ProtocolMedicalServices)
                     .WithOne(e => e.Protocol)
                     .HasForeignKey(e => e.ProtocolId);
             });
-            
+
             builder.Entity<ProtocolType>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "ProtocolTypes", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                    b.Property(x => x.Name).HasColumnName(nameof(ProtocolType.Name)).IsRequired()
-                        .HasMaxLength(ProtocolTypeConsts.NameMaxLength);
+                b.Property(x => x.Name).HasColumnName(nameof(ProtocolType.Name)).IsRequired()
+                    .HasMaxLength(ProtocolTypeConsts.NameMaxLength);
             });
 
             builder.Entity<MedicalService>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "MedicalServices", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                
+
                 b.Property(x => x.Name)
                     .HasColumnName(nameof(MedicalService.Name))
                     .IsRequired()
@@ -225,14 +227,14 @@ public class HealthCareDbContext :
                 b.Property(x => x.ServiceCreatedAt)
                     .HasColumnName(nameof(MedicalService.ServiceCreatedAt))
                     .IsRequired();
-                
+
                 b.HasMany(x => x.DepartmentMedicalServices)
                     .WithOne(e => e.MedicalService)
                     .HasForeignKey(e => e.MedicalServiceId);
                 b.Property(x => x.ServiceCreatedAt).HasColumnName(nameof(MedicalService.ServiceCreatedAt)).IsRequired();
 
                 b.HasIndex(e => new { e.Name }).IsUnique();
-                
+
                 b.HasMany(x => x.ProtocolMedicalServices)
                     .WithOne(e => e.MedicalService)
                     .HasForeignKey(e => e.MedicalServiceId);
@@ -255,7 +257,7 @@ public class HealthCareDbContext :
                     .IsRequired(false)
                     .HasForeignKey(x => x.MedicalServiceId);
             });
-            
+
             builder.Entity<ProtocolMedicalService>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "ProtocolMedicalServices", HealthCareConsts.DbSchema);
@@ -351,7 +353,7 @@ public class HealthCareDbContext :
                     .IsRequired()
                     .HasForeignKey(a => a.DoctorId)
                     .OnDelete(DeleteBehavior.NoAction);
-    
+
                 b.HasOne(a => a.AppointmentType)
                     .WithMany()
                     .IsRequired()
@@ -369,7 +371,7 @@ public class HealthCareDbContext :
                     .IsRequired()
                     .HasForeignKey(a => a.MedicalServiceId)
                     .OnDelete(DeleteBehavior.NoAction);
-                
+
                 b.HasOne(a => a.Department)
                     .WithMany()
                     .IsRequired()
@@ -514,10 +516,11 @@ public class HealthCareDbContext :
                 b.Property(x => x.CoverageAmount).HasColumnName(nameof(Insurance.CoverageAmount));
                 b.Property(x => x.StartDate).HasColumnName(nameof(Insurance.StartDate));
                 b.Property(x => x.EndDate).HasColumnName(nameof(Insurance.EndDate));
-                b.Property(x => x.InsuranceCompanyName).HasColumnName(nameof(Insurance.InsuranceCompanyName)).IsRequired();
+                b.Property(x => x.InsuranceCompanyName).HasColumnName(nameof(Insurance.InsuranceCompanyName))
+                    .IsRequired();
                 b.Property(x => x.Description).HasColumnName(nameof(Insurance.Description));
             });
-            
+
 
             builder.Entity<Icd>(b =>
             {
@@ -555,22 +558,24 @@ public class HealthCareDbContext :
                     .HasForeignKey<Examination>(x => x.ProtocolId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
-            
+
             builder.Entity<ExaminationIcd>(b =>
-                           {
-                               b.ToTable(HealthCareConsts.DbTablePrefix + "ExaminationIcds", HealthCareConsts.DbSchema);
-                               b.ConfigureByConvention();
-               
-                               b.HasKey(x => new { x.ExaminationId, x.IcdId });
-               
-                               b.HasOne(ei => ei.Examination)
-                                   .WithMany(e => e.ExaminationIcd)
-                                   .HasForeignKey(ei => ei.ExaminationId);
-               
-                               b.HasOne(ei => ei.Icd)
-                                   .WithMany()
-                                   .HasForeignKey(ei => ei.IcdId);
-                           });
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "ExaminationIcds", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+
+                b.HasKey(x => new { x.ExaminationId, x.IcdId });
+
+                b.HasOne(ei => ei.Examination)
+                    .WithMany(e => e.ExaminationIcd)
+                    .IsRequired(false)
+                    .HasForeignKey(ei => ei.ExaminationId);
+
+                b.HasOne(ei => ei.Icd)
+                    .WithMany()
+                    .IsRequired(false)
+                    .HasForeignKey(ei => ei.IcdId);
+            });
 
             builder.Entity<FamilyHistory>(b =>
             {

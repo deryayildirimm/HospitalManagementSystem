@@ -373,7 +373,12 @@ namespace Pusula.Training.HealthCare
             {
                 var random = new Random();
 
-                var randomServices = medicalServices.OrderBy(ms => random.Next()).Take(2).ToList();
+                var randomServices = medicalServices
+                    .OrderBy(ms => random.Next())
+                    .Distinct()
+                    .Take(2) 
+                    .ToList();
+                
                 foreach (var service in randomServices)
                 {
                     var protocolMedicalService = new ProtocolMedicalService
@@ -478,7 +483,6 @@ namespace Pusula.Training.HealthCare
             await testCategoryRepository.InsertAsync(new TestCategory(Guid.NewGuid(), "Hormonal Tests",
                 "Measures hormone levels and endocrine functions.",
                 "3.jpg", 2500), true);
-
         }
 
         private async Task SeedTestRecords()

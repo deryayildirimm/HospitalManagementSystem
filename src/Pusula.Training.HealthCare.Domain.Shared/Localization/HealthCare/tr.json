@@ -156,6 +156,7 @@
     "StartDateMax": "Maximum Başlangıç Tarihi",
     "EndDateMax": "Maximum Bitiş Tarihi",
     "Search": "Ara",
-    "Insurances": "Sigortalar"
+    "Insurances": "Sigortalar",
+    "RecordNotFound": "Kaydı bulamadım."
   }
 }

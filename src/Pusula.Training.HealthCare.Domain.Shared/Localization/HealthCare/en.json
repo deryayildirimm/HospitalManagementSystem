@@ -259,6 +259,7 @@
     "PatientDoctorServiceError":"Patient, Doctor and Medical Service must be selected to create new appointment!",
     "AppointmentCreated": "Appointment Created",
     "TimePeriod": "Time Period",
-    "Availability": "Availability"
+    "Availability": "Availability",
+    "RecordNotFound":  "Record not found."
   }
 }
