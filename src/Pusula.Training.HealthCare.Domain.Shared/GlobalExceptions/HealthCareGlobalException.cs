@@ -10,7 +10,7 @@ public class HealthCareGlobalException : IHealthCareGlobalException
 
     public static void ThrowIf(string message) => ThrowIf(message, true);
 
-    public static void ThrowIf(string message, bool condition) => ThrowIf(message, default, true);
+    public static void ThrowIf(string message, bool condition) => ThrowIf(message, default, condition);
     
     public static void ThrowIf(KeyValuePair<string, string> pair, bool condition) =>
         ThrowIf(pair.Value, pair.Key, condition);
