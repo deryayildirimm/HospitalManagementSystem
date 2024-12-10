@@ -37,13 +37,11 @@
     <EditForm Model="@NewExamination" OnValidSubmit="CreateExaminationAsync">
         <SfForm>
             <div class="form-row">
-                <!-- Date Field -->
                 <div class="col-md-6 mb-3">
                     <label>@L["Date"]</label>
                     <SfDatePicker TValue="DateTime" @bind-Value="@NewExamination.Date" Placeholder="@L["SelectDate"]" />
                 </div>
 
-                <!-- Complaint Field -->
                 <div class="col-md-6 mb-3">
                     <label>@L["Complaint"]</label>
                     <SfTextBox TValue="string" @bind-Value="@NewExamination.Complaint" Placeholder="@L["EnterComplaint"]"
@@ -52,13 +50,11 @@
                     </SfTextBox>
                 </div>
 
-                <!-- StartDate Field -->
                 <div class="col-md-6 mb-3">
                     <label>@L["StartDate"]</label>
                     <SfDatePicker TValue="DateTime?" @bind-Value="@NewExamination.StartDate" Placeholder="@L["SelectStartDate"]" />
                 </div>
 
-                <!-- Story Field -->
                 <div class="col-md-6 mb-3">
                     <label>@L["Story"]</label>
                     <SfTextBox TValue="string?" @bind-Value="@NewExamination.Story" Placeholder="@L["EnterStory"]"
@@ -68,7 +64,6 @@
                 </div>
             </div>
 
-            <!-- Family History Section -->
             <div class="form-row">
                 <h5>@L["FamilyHistory"]</h5>
 
@@ -98,7 +93,6 @@
                 </div>
             </div>
 
-            <!-- Background Section -->
             <div class="form-row">
                 <h5>@L["Background"]</h5>
 
@@ -117,12 +111,45 @@
                     <SfTextBox TValue="string?" @bind-Value="@NewExamination.Background.Habits" Placeholder="@L["EnterHabits"]" />
                 </div>
             </div>
+            
+            <div class="form-row">
+                <h5>@L["Examination ICD"]</h5>
+                <div class="col-md-6 mb-3">
+                    <label>@L["Select ICD"]</label>
+                    <SfDropDownList TItem="IcdDto" TValue="Guid" DataSource="@IcdList"
+                                    @bind-Value="@SelectedIcdId"
+                                    Placeholder="@L["SelectICD"]">
+                        <DropDownListEvents TItem="IcdDto" TValue="Guid"></DropDownListEvents>
+                        <DropDownListFieldSettings Text="CodeNumber" Value="Id"></DropDownListFieldSettings>
+
+                    </SfDropDownList>
+                    <SfButton CssClass="e-primary" Type="button" Content="@L["Add"]" OnClick="AddIcdToExamination" />
+                </div>
+            </div>
+            
+            <div class="form-row">
+                @if (SelectedIcds.Any())
+                {
+                <div class="col-md-12">
+                    <h6>@L["Selected ICDs"]</h6>
+                    <ul>
+                        @foreach (var icd in SelectedIcds)
+                        {
+                        <li>
+                            @icd.CodeNumber - @icd.Detail
+                            <SfButton CssClass="e-danger e-small" Content="@L["Remove"]" OnClick="@(() => RemoveIcd(icd.Id))" />
+                        </li>
+                        }
+                    </ul>
+                </div>
+                }
+            </div>
+
         </SfForm>
 
-        <!-- Buttons -->
         <div class="button-row">
-            <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CancelAsync" />
-            <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" />
+            <SfButton CssClass="e-danger" Type="button" Content="@L["Cancel"]" IsPrimary="false" OnClick="CancelAsync" />
+            <SfButton CssClass="e-primary" Type="submit" Content="@L["Submit"]" IsPrimary="true" />
         </div>
     </EditForm>
 }
@@ -134,13 +161,11 @@
     <EditForm Model="@EditingExamination" OnValidSubmit="UpdateExaminationAsync">
         <SfForm>
             <div class="form-row">
-                <!-- Date Field -->
                 <div class="col-md-6 mb-3">
                     <label>@L["Date"]</label>
                     <SfDatePicker TValue="DateTime" @bind-Value="@EditingExamination.Date" Placeholder="@L["SelectDate"]" />
                 </div>
 
-                <!-- Complaint Field -->
                 <div class="col-md-6 mb-3">
                     <label>@L["Complaint"]</label>
                     <SfTextBox TValue="string" @bind-Value="@EditingExamination.Complaint" Placeholder="@L["EnterComplaint"]"
@@ -149,13 +174,11 @@
                     </SfTextBox>
                 </div>
 
-                <!-- StartDate Field -->
                 <div class="col-md-6 mb-3">
                     <label>@L["StartDate"]</label>
                     <SfDatePicker TValue="DateTime?" @bind-Value="@EditingExamination.StartDate" Placeholder="@L["SelectStartDate"]" />
                 </div>
 
-                <!-- Story Field -->
                 <div class="col-md-6 mb-3">
                     <label>@L["Story"]</label>
                     <SfTextBox TValue="string?" @bind-Value="@EditingExamination.Story" Placeholder="@L["EnterStory"]"
@@ -165,7 +188,6 @@
                 </div>
             </div>
 
-            <!-- Family History Section -->
             <div class="form-row">
                 <h5>@L["FamilyHistory"]</h5>
 
@@ -195,7 +217,6 @@
                 </div>
             </div>
 
-            <!-- Background Section -->
             <div class="form-row">
                 <h5>@L["Background"]</h5>
 
@@ -215,7 +236,6 @@
                 </div>
             </div>
 
-            <!-- Examination ICD Section -->
             <div class="form-row">
                 <h5>@L["Examination ICD"]</h5>
                 <div class="col-md-6 mb-3">
@@ -250,7 +270,6 @@
             
         </SfForm>
 
-        <!-- Buttons -->
         <div class="button-row">
             <SfButton CssClass="e-danger" Type="button" Content="@L["Cancel"]" IsPrimary="false" OnClick="CancelAsync" />
             <SfButton CssClass="e-primary" Type="submit" Content="@L["Submit"]" IsPrimary="true" />
