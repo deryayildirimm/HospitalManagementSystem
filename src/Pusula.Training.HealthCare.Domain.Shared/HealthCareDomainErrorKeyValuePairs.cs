@@ -5,6 +5,9 @@ namespace Pusula.Training.HealthCare;
 public static class HealthCareDomainErrorKeyValuePairs
 {
     /* You can add your business exception error message here, as constants */
+    
+    public static KeyValuePair<string, string> GroupNameNotValid =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.NameExists, "Group name not valid.");
 
     public static KeyValuePair<string, string> NameAlreadyExists =
         KeyValuePair.Create(HealthCareDomainErrorCodes.NameExists, "You have already a record with this name.");

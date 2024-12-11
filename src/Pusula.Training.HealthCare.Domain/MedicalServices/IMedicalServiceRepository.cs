@@ -41,6 +41,18 @@ public interface IMedicalServiceRepository : IRepository<MedicalService, Guid>
         CancellationToken cancellationToken = default
     );
 
+    Task<MedicalServiceWithDoctors> GetMedicalServiceWithDoctorsAsync(
+        Guid medicalServiceId,
+        string? name = null,
+        double? costMin = null,
+        double? costMax = null,
+        DateTime? serviceDateMin = null,
+        DateTime? serviceDateMax = null,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default);
+
     Task<long> GetCountAsync(
         string? name = null,
         double? costMin = null,

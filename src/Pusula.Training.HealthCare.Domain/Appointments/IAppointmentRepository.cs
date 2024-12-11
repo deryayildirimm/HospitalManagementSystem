@@ -65,7 +65,8 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         double? maxAmount = null,
         CancellationToken cancellationToken = default);
     
-    Task<long> GetGroupCountByDepartmentsAsync(
+    Task<long> GetGroupCountByAsync(
+        string groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
@@ -86,7 +87,8 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         double? maxAmount = null,
         CancellationToken cancellationToken = default);
     
-    Task<List<DepartmentAppointmentCount>> GetGroupByDepartmentsAsync(
+    Task<List<GroupedAppointmentCount>> GetGroupByListAsync(
+        string groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,

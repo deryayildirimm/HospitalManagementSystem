@@ -176,6 +176,12 @@ public class HealthCareDbContext :
                 b.HasMany(x => x.DepartmentMedicalServices)
                     .WithOne(e => e.Department)
                     .HasForeignKey(e => e.DepartmentId);
+                
+                b.HasMany(x => x.Doctors)
+                    .WithOne(d => d.Department)
+                    .HasForeignKey(d => d.DepartmentId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             builder.Entity<Protocol>(b =>
@@ -232,8 +238,6 @@ public class HealthCareDbContext :
                     .WithOne(e => e.MedicalService)
                     .HasForeignKey(e => e.MedicalServiceId);
                 b.Property(x => x.ServiceCreatedAt).HasColumnName(nameof(MedicalService.ServiceCreatedAt)).IsRequired();
-
-                b.HasIndex(e => new { e.Name }).IsUnique();
 
                 b.HasMany(x => x.ProtocolMedicalServices)
                     .WithOne(e => e.MedicalService)
@@ -301,7 +305,11 @@ public class HealthCareDbContext :
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(d => d.Title).WithMany().IsRequired().HasForeignKey(x => x.TitleId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne(d => d.Department).WithMany().IsRequired().HasForeignKey(x => x.DepartmentId)
+                
+                b.HasOne(x => x.Department)
+                    .WithMany(d => d.Doctors)
+                    .HasForeignKey(x => x.DepartmentId)
+                    .IsRequired(false)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 

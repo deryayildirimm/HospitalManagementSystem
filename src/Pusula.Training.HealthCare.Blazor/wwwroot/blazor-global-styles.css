@@ -22,5 +22,30 @@
 }
 
 .clickable {
-    cursor: pointer;
+    cursor:pointer;
+}
+
+.in-progress {
+    background: #FFA500;
+}
+
+.scheduled {
+    background: #0094ff;
+}
+
+.completed {
+    background:#32CD32;
+}
+
+.canceled {
+    background: rgba(248, 20, 78, 0.67);
+}
+
+.missed {
+    background: rgba(178, 0, 255, 0.66);
+}
+
+.status-div {
+    border-radius: 7px;
+    padding: 4px 8px;
 }

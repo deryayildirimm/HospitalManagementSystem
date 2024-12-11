@@ -97,10 +97,11 @@ public class AppointmentAppService(
         };
     }
 
-    public virtual async Task<PagedResultDto<DepartmentAppointmentCountDto>> GetCountByDepartmentsAsync(GetAppointmentsInput input)
+    public virtual async Task<PagedResultDto<GroupedAppointmentCountDto>> GetCountByGroupAsync(
+        GetAppointmentsInput input)
     {
-        
-        var count = await appointmentRepository.GetGroupCountByDepartmentsAsync(
+        var count = await appointmentRepository.GetGroupCountByAsync(
+            groupByField: input.GroupByField,
             doctorId: input.DoctorId,
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
@@ -119,8 +120,9 @@ public class AppointmentAppService(
             reminderSent: input.ReminderSent,
             minAmount: input.MinAmount,
             maxAmount: input.MaxAmount);
-        
-        var items = await appointmentRepository.GetGroupByDepartmentsAsync(
+
+        var items = await appointmentRepository.GetGroupByListAsync(
+            groupByField: input.GroupByField,
             doctorId: input.DoctorId,
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
@@ -142,11 +144,11 @@ public class AppointmentAppService(
             input.Sorting,
             input.MaxResultCount,
             input.SkipCount);
-        
-        return new PagedResultDto<DepartmentAppointmentCountDto>
+
+        return new PagedResultDto<GroupedAppointmentCountDto>
         {
             TotalCount = count,
-            Items = ObjectMapper.Map<List<DepartmentAppointmentCount>, List<DepartmentAppointmentCountDto>>(items)
+            Items = ObjectMapper.Map<List<GroupedAppointmentCount>, List<GroupedAppointmentCountDto>>(items)
         };
     }
 

@@ -25,7 +25,7 @@ public class AppointmentStatisticsAdaptor(IAppointmentAppService appointmentAppS
             
             filter!.SkipCount = dataManagerRequest!.Skip;
             filter.MaxResultCount = dataManagerRequest.Take;
-            var result = await appointmentAppService.GetCountByDepartmentsAsync(filter);
+            var result = await appointmentAppService.GetCountByGroupAsync(filter);
 
             var dataResult = new DataResult
             {

@@ -65,6 +65,17 @@ public class MedicalServicesAppService(
         };
     }
 
+    public virtual async Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(
+        GetMedicalServiceInput input)
+    {
+        var result = await medicalServiceRepository.GetMedicalServiceWithDoctorsAsync(input.MedicalServiceId, input.Name,
+            input.CostMin, input.CostMax, input.ServiceDateMin, input.ServiceDateMax, input.Sorting,
+            input.MaxResultCount, input.SkipCount);
+
+        return ObjectMapper.Map<MedicalServiceWithDoctors, MedicalServiceWithDoctorsDto>(result);
+    }
+
+
     public virtual async Task<MedicalServiceDto> GetAsync(Guid id)
     {
         return ObjectMapper.Map<MedicalService, MedicalServiceDto>(await medicalServiceRepository.GetAsync(id));
@@ -97,7 +108,7 @@ public class MedicalServicesAppService(
     [Authorize(HealthCarePermissions.MedicalServices.Edit)]
     public virtual async Task<MedicalServiceDto> UpdateAsync(Guid id, MedicalServiceUpdateDto input)
     {
-         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorNotWorking,
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorNotWorking,
             await medicalServiceRepository.FirstOrDefaultAsync(x => x.Name == input.Name && x.Id != id) is not null);
 
         var medicalService = await medicalServiceManager.UpdateAsync(

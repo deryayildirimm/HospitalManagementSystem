@@ -29,6 +29,11 @@ public class MedicalServiceController(IMedicalServicesAppService medicalServices
         => medicalServicesAppService.GetMedicalServiceWithDepartmentsAsync(input);
 
     [HttpGet]
+    [Route("with-doctors")]
+    public Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(GetMedicalServiceInput input)
+        => medicalServicesAppService.GetMedicalServiceWithDoctorsAsync(input);
+
+    [HttpGet]
     [Route("{id}")]
     public Task<MedicalServiceDto> GetAsync(Guid id)
         => medicalServicesAppService.GetAsync(id);

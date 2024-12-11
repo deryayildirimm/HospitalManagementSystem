@@ -1,0 +1,147 @@
+@page "/appointments/definitions/medical-service/{Id:guid}"
+
+@attribute [Authorize(HealthCarePermissions.MedicalServices.Default)]
+
+
+@using Pusula.Training.HealthCare.Appointments
+@using Pusula.Training.HealthCare.Blazor.Services
+@using Pusula.Training.HealthCare.Doctors
+@using Syncfusion.Blazor.Charts
+@using Pusula.Training.HealthCare.MedicalServices
+@using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.ServiceRestriction
+@using Pusula.Training.HealthCare.Shared
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Syncfusion.Blazor.Buttons
+@using Volo.Abp.AspNetCore.Components.Messages
+@using SelectionType = Syncfusion.Blazor.Grids.SelectionType
+@using Syncfusion.Blazor.Calendars
+@inherits HealthCareComponentBase
+
+@inject IUiMessageService UiMessageService
+@inject IAppointmentAppService AppointmentAppService
+@inject ILookupAppService LookupAppService
+@inject AppointmentStatisticsAdaptor AppointmentStatisticsAdaptor
+@inject IDoctorsAppService DoctorsAppService
+@inject IMedicalServicesAppService MedicalServicesAppService
+
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home"/>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["MedicalServiceDetails"]/>
+    </BreadcrumbItems>
+</SfBreadcrumb>
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["MedicalServiceDetails"]">
+</PageHeader>
+
+<div class="row p-4 border-1 bg-white rounded-1">
+    <div class="card">
+
+        <h5 class="fw-bold">@L["ServiceInformation"]</h5>
+
+        <div class="d-flex align-items-center gap-2">
+            <h6>@L["Name"]: @MedicalService.Name</h6>
+        </div>
+        <div class="d-flex align-items-center  gap-2">
+            <h6>@L["Status"]: @MedicalService.Cost</h6>
+        </div>
+        <div class="d-flex align-items-center  gap-2">
+            <h6>@L["Cost"]: @MedicalService.Cost</h6>
+        </div>
+        <div class="d-flex align-items-center  gap-2">
+            <h6>@L["Duration"]: @MedicalService.Duration</h6>
+        </div>
+        <div class="d-flex align-items-center  gap-2">
+            <h6>@L["CreatedAt"]: @MedicalService.CreationTime.ToShortDateString()</h6>
+        </div>
+    </div>
+</div>
+
+<div class="row p-4 border-1 bg-white rounded-1 my-2">
+    <SfTab>
+        <TabItems>
+            <TabItem>
+                <ChildContent>
+                    <TabHeader Text="@L["ServiceDoctors"]"></TabHeader>
+                </ChildContent>
+
+                <ContentTemplate>
+                    <div class="my-3">
+                        <SfGrid TItem="DoctorDto"
+                                DataSource="DoctorCollection"
+                                AllowPaging="true"
+                                AllowSorting="true"
+                                SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
+                            <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
+                            <GridColumns>
+                                <GridColumn HeaderText="@L["Doctor"]" width="260px">
+                                    <Template>
+                                        @{
+                                            var doctorContext = (context as DoctorDto);
+                                            var doctor = doctorContext?.FirstName + " " + doctorContext?.LastName;
+                                        }
+                                        @doctor
+                                    </Template>
+                                </GridColumn>
+
+                                <GridColumn HeaderText="@L["Department"]">
+                                    <Template>
+                                        @{
+                                            var doctor = (context as DoctorDto);
+                                            var department = doctor?.Department?.Name ?? "No Data";
+                                        }
+                                        @department
+                                    </Template>
+                                </GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
+                </ContentTemplate>
+            </TabItem>
+
+            <TabItem>
+                <ChildContent>
+                    <TabHeader Text="@L["ServiceRestrictions"]"></TabHeader>
+                </ChildContent>
+
+                <ContentTemplate>
+                    <div class="my-3">
+                        <SfGrid TItem="ServiceRestrictionDto"
+                                DataSource="RestrictionCollection"
+                                AllowPaging="true"
+                                AllowSorting="true"
+                                SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
+                            <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
+                            <GridColumns>
+                                <GridColumn HeaderText="@L["Doctor"]" width="145px">
+                                    <Template>
+                                        @{
+                                            var ctx = (context as ServiceRestrictionDto);
+                                            var doctor = ctx?.Doctor.Title.TitleName + " " + ctx?.Doctor.FirstName + " " + ctx?.Doctor.LastName;
+                                        }
+                                        @doctor
+                                    </Template>
+                                </GridColumn>
+
+                                <GridColumn HeaderText="@L["Department"]">
+                                    <Template>
+                                        @{
+                                            var doctor = (context as ServiceRestrictionDto);
+                                            var department = doctor?.Department?.Name;
+                                        }
+                                        @department
+                                    </Template>
+                                </GridColumn>
+                                <GridColumn HeaderText="@L["MinAge"]" Field="MinAge"></GridColumn>
+                                <GridColumn HeaderText="@L["MaxAge"]" Field="MaxAge"></GridColumn>
+                                <GridColumn HeaderText="@L["Gender"]" Field="Gender"></GridColumn>
+                            </GridColumns>
+                        </SfGrid>
+                    </div>
+                </ContentTemplate>
+            </TabItem>
+        </TabItems>
+    </SfTab>
+</div>

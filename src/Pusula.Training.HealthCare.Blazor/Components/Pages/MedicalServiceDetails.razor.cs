@@ -4,8 +4,12 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Blazorise.DeepCloner;
+using Microsoft.AspNetCore.Components;
 using Pusula.Training.HealthCare.Appointments;
+using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
+using Pusula.Training.HealthCare.ServiceRestriction;
 using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.Charts;
 using Syncfusion.Blazor.Data;
@@ -15,8 +19,10 @@ using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
-public partial class AppointmentOverview : HealthCareComponentBase
+public partial class MedicalServiceDetails : HealthCareComponentBase
 {
+    [Parameter] public Guid Id { get; set; }
+
     private SfAccumulationChart AccumulationChart { get; set; }
     private SfGrid<GroupedAppointmentCountDto> Grid { get; set; }
     protected PageToolbar Toolbar { get; } = new PageToolbar();
@@ -24,7 +30,9 @@ public partial class AppointmentOverview : HealthCareComponentBase
     private GetAppointmentsInput FilterDepartmentChart { get; set; }
 
     private GetAppointmentsInput FilterDateChart { get; set; }
-    private List<KeyValuePair<string, EnumPatientTypes>> PatientTypeCollection { get; set; }
+    private GetMedicalServiceInput DoctorFilter { get; set; }
+    private IReadOnlyList<DoctorDto> DoctorCollection { get; set; }
+    private IReadOnlyList<ServiceRestrictionDto> RestrictionCollection { get; set; }
     private List<KeyValuePair<string, EnumAppointmentStatus>> StatusCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
     private IReadOnlyList<GroupedAppointmentCountDto> AppointmentByDateCollection { get; set; }
@@ -33,12 +41,15 @@ public partial class AppointmentOverview : HealthCareComponentBase
     private IReadOnlyList<LookupDto<Guid>> MedicalServiceCollection { get; set; }
     private Query FilterQuery { get; set; }
 
+    private LookupRequestDto RequestDto { get; set; }
+    private MedicalServiceDto MedicalService { get; set; }
+
     private string CurrentSorting { get; set; } = string.Empty;
-    private int PageSize { get; } = 5;
+    private int PageSize { get; } = 12;
     private int LookupPageSize { get; } = 100;
     private int CurrentPage { get; set; } = 1;
 
-    public AppointmentOverview()
+    public MedicalServiceDetails()
     {
         FilterQuery = new Query();
         AccumulationChart = new SfAccumulationChart();
@@ -49,6 +60,8 @@ public partial class AppointmentOverview : HealthCareComponentBase
             MaxResultCount = PageSize,
             SkipCount = 0
         };
+
+        MedicalService = new MedicalServiceDto();
 
         FilterDepartmentChart = new GetAppointmentsInput
         {
@@ -63,10 +76,21 @@ public partial class AppointmentOverview : HealthCareComponentBase
             MaxResultCount = PageSize,
             SkipCount = 0
         };
+        
+        DoctorFilter = new GetMedicalServiceInput()
+        {
+            MaxResultCount = PageSize,
+            SkipCount = (CurrentPage - 1) * PageSize,
+            Sorting = CurrentSorting
+        };
+
+        RequestDto = new LookupRequestDto
+            { MaxResultCount = LookupPageSize };
 
         AppointmentTypesCollection = [];
         DepartmentsCollection = [];
-        PatientTypeCollection = [];
+        DoctorCollection = [];
+        RestrictionCollection = [];
         MedicalServiceCollection = [];
         StatusCollection = [];
         AppointmentByDateCollection = [];
@@ -79,7 +103,8 @@ public partial class AppointmentOverview : HealthCareComponentBase
         await SetToolbarItemsAsync();
         await SetLookupsAsync();
         await SetDatas();
-        SetPatientTypes();
+        await GetDoctorsAsync();
+        await GetMedicalServiceAsync();
         SetStatus();
     }
 
@@ -106,31 +131,20 @@ public partial class AppointmentOverview : HealthCareComponentBase
         try
         {
             AppointmentTypesCollection =
-                (await LookupAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto
-                    { MaxResultCount = LookupPageSize }))
+                (await LookupAppService.GetAppointmentTypeLookupAsync(RequestDto))
                 .Items;
 
             DepartmentsCollection =
-                (await LookupAppService.GetDepartmentLookupAsync(new LookupRequestDto
-                    { MaxResultCount = LookupPageSize }))
+                (await LookupAppService.GetDepartmentLookupAsync(RequestDto))
                 .Items;
 
-            MedicalServiceCollection = (await LookupAppService.GetMedicalServiceLookupAsync(new LookupRequestDto
-                    { MaxResultCount = LookupPageSize }))
+            MedicalServiceCollection = (await LookupAppService.GetMedicalServiceLookupAsync(RequestDto))
                 .Items;
         }
         catch (Exception e)
         {
             throw new UserFriendlyException(e.Message);
         }
-    }
-
-    private void SetPatientTypes()
-    {
-        PatientTypeCollection = Enum.GetValues(typeof(EnumPatientTypes))
-            .Cast<EnumPatientTypes>()
-            .Select(e => new KeyValuePair<string, EnumPatientTypes>(e.ToString(), e))
-            .ToList();
     }
 
     private void SetStatus()
@@ -148,12 +162,30 @@ public partial class AppointmentOverview : HealthCareComponentBase
         await SetDatas();
         await Refresh();
     }
+    
+    private async Task GetDoctorsAsync()
+    {
+        DoctorFilter.MaxResultCount = PageSize;
+        DoctorFilter.SkipCount = (CurrentPage - 1) * PageSize;
+        DoctorFilter.Sorting = CurrentSorting;
+        DoctorFilter.MedicalServiceId = Id;
 
+        var res = (await MedicalServicesAppService.GetMedicalServiceWithDoctorsAsync(DoctorFilter));
+        
+        DoctorCollection = res.Doctors.ToList();
+        
+    }
+
+    private async Task GetMedicalServiceAsync()
+    {
+        MedicalService = await MedicalServicesAppService.GetAsync(Id);
+    }
+    
     private async Task SetDatas()
     {
         FilterDateChart.GroupByField = "Department";
         AppointmentByDepartmentCollection = await GetAppointmentsStatistics(FilterDepartmentChart);
-        
+
         FilterDateChart.GroupByField = "Date";
         AppointmentByDateCollection = await GetAppointmentsStatistics(FilterDateChart);
     }
@@ -178,7 +210,7 @@ public partial class AppointmentOverview : HealthCareComponentBase
         FilterQuery.Queries.Params = new Dictionary<string, object>();
         FilterQuery.Queries.Params.Add("Filter", Filter);
     }
-    
+
     private void MapFilters()
     {
         var jsonFilter = JsonSerializer.Serialize(Filter);

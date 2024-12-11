@@ -33,7 +33,7 @@
 </SfBreadcrumb>
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["AppointmentList"]" Toolbar="Toolbar">
-    <link href="../Components/Pages/AppointmentList.razor.css" rel="stylesheet"/>
+    <link href="../Components/Pages/AppointmentList.razor.css?version=1.2" rel="stylesheet"/>
 </PageHeader>
 
 @* ************************* SEARCH ************************* *@
@@ -58,6 +58,18 @@
                     <SfDropDownList TItem="KeyValuePair<string, EnumPatientTypes>" TValue="EnumPatientTypes?"
                                     @bind-Value="Filter.PatientType"
                                     DataSource="@PatientTypeCollection">
+                        <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+            <div class="col-3 my-1">
+                <div>
+                    <h6>@L["Status"]</h6>
+                    <SfDropDownList
+                        TItem="KeyValuePair<string, EnumAppointmentStatus>"
+                        TValue="EnumAppointmentStatus?"
+                        @bind-Value="Filter.Status"
+                        DataSource="@StatusCollection">
                         <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
                     </SfDropDownList>
                 </div>
@@ -139,11 +151,23 @@
                 {
                     <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
                 }
-                <GridColumn Type="ColumnType.Date" Format="dd/MM/yyyy" Field="AppointmentDate" HeaderText="@L["AppointmentDate"]" Width="130">
+                <GridColumn Type="ColumnType.Date" Format="dd/MM/yyyy" Field="AppointmentDate" HeaderText="@L["Date"]" Width="130">
                 </GridColumn>
                 <GridColumn Type="ColumnType.Date" Format="HH:mm" Field="StartTime" HeaderText="@L["Start"]" Width="auto">
                 </GridColumn>
                 <GridColumn Type="ColumnType.Date" Format="HH:mm" Field="EndTime" HeaderText="@L["End"]" Width="auto">
+                </GridColumn>
+                <GridColumn HeaderText="@L["Status"]" Width="110">
+                    <Template Context="context">
+                        @{
+                            var cssClasses = "status-div text-white text-center ";
+                            cssClasses += GetStatusClass(((AppointmentDto)context).Status.ToString());
+                        }
+                        
+                        <div class="@cssClasses ">
+                            @($"{((AppointmentDto)context).Status}")
+                        </div>
+                    </Template>
                 </GridColumn>
                 <GridColumn HeaderText="@L["PatientName"]" Width="110">
                     <Template Context="context">

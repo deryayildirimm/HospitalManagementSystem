@@ -260,6 +260,13 @@
     "AppointmentCreated": "Appointment Created",
     "TimePeriod": "Time Period",
     "Availability": "Availability",
-    "RecordNotFound":  "Record not found."
+    "RecordNotFound":  "Record not found.",
+    "AppointmentsByDates": "Appointments By Dates",
+    "AppointmentsByDepartments": "Appointments By Departments",
+    "ServiceDetail":  "Service Detail",
+    "MedicalServiceDetails": "Medical Service Details",
+    "ServiceInformation": "Service Information",
+    "ServiceRestrictions": "Service Restrictions",
+    "ServiceDoctors": "Service Doctors"
   }
 }

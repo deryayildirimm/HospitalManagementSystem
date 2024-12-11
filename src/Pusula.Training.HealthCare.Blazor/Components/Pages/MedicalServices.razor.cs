@@ -383,4 +383,9 @@ public partial class MedicalServices : HealthCareComponentBase
         await GetMedicalServicesAsync();
     }
     
+    private void NavigateToDetail(MedicalServiceDto service)
+    {
+        NavigationManager.NavigateTo($"/appointments/definitions/medical-service/{service.Id}");
+    }
+    
 }

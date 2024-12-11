@@ -42,6 +42,7 @@ public partial class AppointmentList : HealthCareComponentBase
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> MedicalServiceCollection { get; set; }
     private List<KeyValuePair<string, EnumPatientTypes>> PatientTypeCollection { get; set; }
+    private List<KeyValuePair<string, EnumAppointmentStatus>> StatusCollection { get; set; }
 
     public AppointmentList()
     {
@@ -62,6 +63,7 @@ public partial class AppointmentList : HealthCareComponentBase
         DepartmentsCollection = [];
         PatientTypeCollection = [];
         MedicalServiceCollection = [];
+        StatusCollection = [];
         FilterQuery = new Query();
     }
 
@@ -71,12 +73,21 @@ public partial class AppointmentList : HealthCareComponentBase
         await SetLookupsAsync();
         SetPatientTypes();
         SetFilters();
+        SetStatus();
     }
 
     private void SetFilters()
     {
         FilterQuery.Queries.Params = new Dictionary<string, object>();
         FilterQuery.Queries.Params.Add("Filter", Filter);
+    }
+    
+    private void SetStatus()
+    {
+        StatusCollection = Enum.GetValues(typeof(EnumAppointmentStatus))
+            .Cast<EnumAppointmentStatus>()
+            .Select(e => new KeyValuePair<string, EnumAppointmentStatus>(e.ToString(), e))
+            .ToList();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -310,5 +321,19 @@ public partial class AppointmentList : HealthCareComponentBase
     private async Task Refresh()
     {
         await Grid.Refresh();
+    }
+    
+    private string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "InProgress" => "in-progress",
+            "Scheduled" => "scheduled",
+            "Completed" => "completed",
+            "Cancelled" => "cancelled",
+            "Missed" => "missed",
+            _ => string.Empty,
+        };
+
     }
 }

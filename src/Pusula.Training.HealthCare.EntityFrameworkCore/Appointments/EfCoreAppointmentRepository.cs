@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
@@ -114,8 +115,9 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
 
         return await query.LongCountAsync(cancellationToken);
     }
-
-    public virtual async Task<long> GetGroupCountByDepartmentsAsync(
+    
+    public virtual async Task<long> GetGroupCountByAsync(
+        string groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
@@ -143,13 +145,15 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             patientNumber, appointmentMinDate, appointmentMaxDate, startTime, endTime, status, patientType,
             reminderSent,
             minAmount, maxAmount);
+        
 
-        return await query
-            .GroupBy(a => a.Department.Id)
-            .LongCountAsync(cancellationToken);
+        var groupedQuery = ApplyDynamicGrouping(query, groupByField);
+
+        return await groupedQuery.LongCountAsync(cancellationToken);
     }
 
-    public virtual async Task<List<DepartmentAppointmentCount>> GetGroupByDepartmentsAsync(
+    public virtual async Task<List<GroupedAppointmentCount>> GetGroupByListAsync(
+        string groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
@@ -180,16 +184,11 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             patientNumber, appointmentMinDate, appointmentMaxDate, startTime, endTime, status, patientType,
             reminderSent,
             minAmount, maxAmount);
+        
+        var groupedQuery = ApplyDynamicGrouping(query, groupByField);
 
-        return await query
-            .GroupBy(a => a.Department.Id)
-            .Select(g => new DepartmentAppointmentCount
-            {
-                DepartmentId = g.Key,
-                DepartmentName = g.First().Department.Name,
-                AppointmentCount = g.Count()
-            })
-            .OrderBy(d => d.DepartmentName)
+        return await groupedQuery
+            .OrderBy(d => d.GroupName)
             .PageBy(skipCount, maxResultCount)
             .ToListAsync(cancellationToken);
     }
@@ -291,6 +290,56 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
                 e => e.Amount >= minAmount!.Value)
             .WhereIf(maxAmount.HasValue,
                 e => e.Amount <= maxAmount!.Value);
+
+    #endregion
+
+    #region DynamicGroupByQuery
+
+    private IQueryable<GroupedAppointmentCount> ApplyDynamicGrouping(IQueryable<Appointment> query, string groupByField)
+    {
+        if (groupByField == "Department")
+        {
+            return query.GroupBy(a => a.DepartmentId)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToString(),
+                    GroupName = g.First().Department.Name,
+                    AppointmentCount = g.Count()
+                });
+        }
+
+        if (groupByField == "Doctor")
+        {
+            return query.GroupBy(a => a.DoctorId)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToString(),
+                    GroupName =
+                        $"{g.First().Doctor.Title.TitleName} {g.First().Doctor.FirstName} {g.First().Doctor.LastName}",
+                    AppointmentCount = g.Count()
+                });
+        }
+
+        if (groupByField == "Date")
+        {
+            return query.GroupBy(a => a.AppointmentDate.Date)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToString(),
+                    GroupName = g.Key.ToString(),
+                    AppointmentCount = g.Count()
+                });
+        }
+
+            //Group by department by default
+        return query.GroupBy(a => a.DepartmentId)
+            .Select(g => new GroupedAppointmentCount
+            {
+                GroupKey = g.Key.ToString(),
+                GroupName = g.First().Department.Name,
+                AppointmentCount = g.Count()
+            });
+    }
 
     #endregion
 }

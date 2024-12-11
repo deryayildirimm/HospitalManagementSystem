@@ -74,6 +74,37 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         return result;
     }
 
+    public async Task<MedicalServiceWithDoctors> GetMedicalServiceWithDoctorsAsync(
+        Guid medicalServiceId,
+        string? name = null,
+        double? costMin = null,
+        double? costMax = null,
+        DateTime? serviceDateMin = null,
+        DateTime? serviceDateMax = null,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default)
+    {
+        var query = ApplyFilter((await GetQueryForNavigationPropertiesAsync()), medicalServiceId, name, costMin, costMax, serviceDateMin,
+            serviceDateMax);
+
+        query = query.OrderBy(string.IsNullOrWhiteSpace(sorting)
+            ? MedicalServiceConsts.GetDefaultSorting(false)
+            : sorting);
+
+        return (await query
+            .Select(ms => new MedicalServiceWithDoctors
+            {
+                MedicalService = ms,
+                Doctors = ms.DepartmentMedicalServices
+                    .Select(dms => dms.Department)
+                    .SelectMany(dept => dept.Doctors)
+                    .ToList()
+            })
+            .FirstOrDefaultAsync(cancellationToken))!;
+    }
+
     public async Task<long> GetCountAsync(
         string? name = null,
         double? costMin = null,
@@ -88,11 +119,17 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         return await query.LongCountAsync(cancellationToken);
     }
 
-    #region Queryable
+    #region NavigationQueryCreator
 
-    
+    protected virtual async Task<IQueryable<MedicalService>> GetQueryForNavigationPropertiesAsync()
+        =>
+            (await GetQueryableAsync())
+            .Include(ms => ms.DepartmentMedicalServices)
+            .ThenInclude(dms => dms.Department)
+            .ThenInclude(dept => dept.Doctors);
+
     #endregion
-    
+
     #region Filters
 
     protected virtual IQueryable<MedicalService> ApplyFilter(
@@ -105,6 +142,26 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
     {
         return query
             .WhereIf(!string.IsNullOrWhiteSpace(name), e => e.Name!.Contains(name!))
+            .WhereIf(costMin.HasValue,
+                e => e.Cost >= costMin!.Value)
+            .WhereIf(costMax.HasValue,
+                e => e.Cost <= costMax!.Value)
+            .WhereIf(serviceDateMin.HasValue, e => e.ServiceCreatedAt >= serviceDateMin!.Value)
+            .WhereIf(serviceDateMax.HasValue, e => e.ServiceCreatedAt <= serviceDateMax!.Value);
+    }
+
+    protected virtual IQueryable<MedicalService> ApplyFilter(
+        IQueryable<MedicalService> query,
+        Guid? medicalServiceId = null,
+        string? name = null,
+        double? costMin = null,
+        double? costMax = null,
+        DateTime? serviceDateMin = null,
+        DateTime? serviceDateMax = null)
+    {
+        return query
+            .WhereIf(!string.IsNullOrWhiteSpace(name), e => e.Name!.Contains(name!))
+            .WhereIf(medicalServiceId.HasValue, e => e.Id == medicalServiceId)
             .WhereIf(costMin.HasValue,
                 e => e.Cost >= costMin!.Value)
             .WhereIf(costMax.HasValue,

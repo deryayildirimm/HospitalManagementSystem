@@ -5,6 +5,7 @@ namespace Pusula.Training.HealthCare.Appointments;
 public static class AppointmentConsts
 {
     private const string DefaultSorting = "{0}AppointmentDate asc";
+    public const string DefaultGroupBy = "Department";
     
     public static string GetDefaultSorting(bool withEntityName)
     {

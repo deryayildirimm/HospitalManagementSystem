@@ -5,18 +5,21 @@
 
 @using Pusula.Training.HealthCare.Appointments
 @using Pusula.Training.HealthCare.Blazor.Services
-@using Pusula.Training.HealthCare.Localization
+@using Syncfusion.Blazor.Charts
 @using Pusula.Training.HealthCare.MedicalServices
 @using Pusula.Training.HealthCare.Patients
 @using Pusula.Training.HealthCare.Permissions
 @using Pusula.Training.HealthCare.Shared
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 @using Syncfusion.Blazor.Buttons
+@using Volo.Abp.AspNetCore.Components.Messages
 @using Syncfusion.Blazor.Calendars
 @inherits HealthCareComponentBase
 
+@inject IUiMessageService UiMessageService
+@inject IAppointmentAppService AppointmentAppService
 @inject ILookupAppService LookupAppService
-
+@inject AppointmentStatisticsAdaptor AppointmentStatisticsAdaptor
 
 <SfBreadcrumb>
     <BreadcrumbItems>
@@ -26,11 +29,10 @@
 </SfBreadcrumb>
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["AppointmentOverview"]">
-    <link href="../Components/Pages/AppointmentOverview.razor.css" rel="stylesheet"/>
 </PageHeader>
 
 @* ************************* SEARCH ************************* *@
-<div class="row py-3 px-2">
+<div class="row py-2 px-2">
     <div class="col-12 border-1 bg-white rounded-1 p-4">
         <div class="row">
             <div class="col-3 my-1">
@@ -41,6 +43,18 @@
                         TValue="EnumPatientTypes?"
                         @bind-Value="Filter.PatientType"
                         DataSource="@PatientTypeCollection">
+                        <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+            <div class="col-3 my-1">
+                <div>
+                    <h6>@L["Status"]</h6>
+                    <SfDropDownList
+                        TItem="KeyValuePair<string, EnumAppointmentStatus>"
+                        TValue="EnumAppointmentStatus?"
+                        @bind-Value="Filter.Status"
+                        DataSource="@StatusCollection">
                         <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
                     </SfDropDownList>
                 </div>
@@ -97,12 +111,51 @@
     </div>
 </div>
 
+<div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
+    <div class="w-50">
+        <SfAccumulationChart @ref="AccumulationChart" Width="100%" Height="380px" Title="@L["AppointmentsByDepartments"]">
+            <AccumulationChartSeriesCollection >
+                <AccumulationChartSeries DataSource="@AppointmentByDepartmentCollection" XName="GroupName" YName="AppointmentCount">
+                </AccumulationChartSeries>
+            </AccumulationChartSeriesCollection>
+
+            <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
+            <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
+            <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
+
+        </SfAccumulationChart>
+    </div>
+    <div class="w-50">
+        <SfChart Title="@L["AppointmentsByDates"]">
+            <ChartTitleStyle Size="16px" Color="black" FontFamily="Helvetica"  FontWeight="600" FontStyle="normal"></ChartTitleStyle>
+            <ChartPrimaryXAxis Title="Day" ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime">
+                <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
+                <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
+            </ChartPrimaryXAxis>
+            <ChartPrimaryYAxis Title="Appointments">
+                <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
+                <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
+            </ChartPrimaryYAxis>
+            <ChartTooltipSettings Enable="true">
+                <ChartTooltipTextStyle FontFamily="Helvetica"></ChartTooltipTextStyle>
+            </ChartTooltipSettings>
+            <ChartSeriesCollection>
+                <ChartSeries DataSource="@AppointmentByDateCollection" XName="GroupName" YName="AppointmentCount" Type="ChartSeriesType.Column">
+                </ChartSeries>
+            </ChartSeriesCollection>
+            <ChartLegendSettings Visible="true">
+                <ChartLegendTextStyle FontFamily="Helvetica"></ChartLegendTextStyle>
+            </ChartLegendSettings>
+        </SfChart>
+    </div>
+</div>
+
 @* ************************* GRID ************************* *@
-<div class="row py-3 px-2">
+<div class="row py-2 px-2">
     <div class="col-12 border-1 bg-white rounded-1 p-4">
         <SfGrid
             @ref="Grid"
-            TValue="DepartmentAppointmentCount"
+            TValue="GroupedAppointmentCountDto"
             AllowPaging="true"
             AllowSorting="false"
             Query="@FilterQuery">
@@ -112,7 +165,7 @@
             </SfDataManager>
             <GridPageSettings PageSize="@PageSize"></GridPageSettings>
             <GridColumns>
-                <GridColumn Field="DepartmentName" HeaderText="@L["DepartmentName"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+                <GridColumn Field="GroupName" HeaderText="@L["DepartmentName"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
                 <GridColumn Field="AppointmentCount" HeaderText="@L["AppointmentCount"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
             </GridColumns>
         </SfGrid>
