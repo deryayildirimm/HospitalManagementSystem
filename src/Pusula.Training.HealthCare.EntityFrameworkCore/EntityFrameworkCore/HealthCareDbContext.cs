@@ -35,6 +35,7 @@ using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
 using Pusula.Training.HealthCare.Treatment.Icds;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Insurances;
+using Pusula.Training.HealthCare.Restrictions;
 
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
 
@@ -64,6 +65,7 @@ public class HealthCareDbContext :
     public DbSet<Test> Tests { get; set; } = null!;
     public DbSet<BloodTestResult> BloodTestResults { get; set; } = null!;
     public DbSet<Insurance> Insurances { get; set; } = null!;
+    public DbSet<Restriction> Restrictions { get; set; } = null!;
 
     // Treatment
     public DbSet<Icd> Icds { get; set; } = null!;
@@ -393,6 +395,43 @@ public class HealthCareDbContext :
                 b.ConfigureByConvention();
                 b.Property(x => x.Name).HasColumnName(nameof(AppointmentType.Name)).IsRequired()
                     .HasMaxLength(AppointmentTypeConsts.NameMaxLength);
+            });
+            
+            builder.Entity<Restriction>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Restrictions", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.HasKey(a => a.Id);
+
+                b.Property(a => a.MinAge)
+                    .IsRequired()
+                    .HasColumnName(nameof(Restriction.MinAge));
+
+                b.Property(a => a.MaxAge)
+                    .IsRequired()
+                    .HasColumnName(nameof(Restriction.MaxAge));
+
+                b.Property(a => a.AllowedGender)
+                    .IsRequired()
+                    .HasColumnName(nameof(Restriction.AllowedGender));
+
+                b.HasOne(a => a.Doctor)
+                    .WithMany()
+                    .IsRequired(false)
+                    .HasForeignKey(a => a.DoctorId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                b.HasOne(a => a.Department)
+                    .WithMany()
+                    .IsRequired(false)
+                    .HasForeignKey(a => a.DepartmentId)
+                    .OnDelete(DeleteBehavior.NoAction);
+
+                b.HasOne(a => a.MedicalService)
+                    .WithMany()
+                    .IsRequired(false)
+                    .HasForeignKey(a => a.MedicalServiceId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             builder.Entity<DoctorWorkingHour>(b =>

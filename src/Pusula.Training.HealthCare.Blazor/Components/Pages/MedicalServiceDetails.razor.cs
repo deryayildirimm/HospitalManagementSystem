@@ -3,19 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Blazorise.DeepCloner;
 using Microsoft.AspNetCore.Components;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
-using Pusula.Training.HealthCare.ServiceRestriction;
+using Pusula.Training.HealthCare.Restrictions;
 using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.Charts;
 using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Navigations;
 using Volo.Abp;
-using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
@@ -24,15 +23,17 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
     [Parameter] public Guid Id { get; set; }
 
     private SfAccumulationChart AccumulationChart { get; set; }
+    private List<KeyValuePair<string, EnumGender>> GendersCollection { get; set; }
     private SfGrid<GroupedAppointmentCountDto> Grid { get; set; }
-    protected PageToolbar Toolbar { get; } = new PageToolbar();
+    private List<Object> Toolbaritems = new List<Object>() { "Add", "Delete", "Edit", "Update", "Cancel", new ItemModel() { Text = "Click", TooltipText = "Click", PrefixIcon = "e-click", Id = "Click" } };
     private GetAppointmentsInput Filter { get; set; }
     private GetAppointmentsInput FilterDepartmentChart { get; set; }
-
+    public string[] ToolbarItems { get; set; }
     private GetAppointmentsInput FilterDateChart { get; set; }
     private GetMedicalServiceInput DoctorFilter { get; set; }
+    private GetRestrictionsInput RestrictionFilter { get; set; }
     private IReadOnlyList<DoctorDto> DoctorCollection { get; set; }
-    private IReadOnlyList<ServiceRestrictionDto> RestrictionCollection { get; set; }
+    private IReadOnlyList<RestrictionDto> RestrictionCollection { get; set; }
     private List<KeyValuePair<string, EnumAppointmentStatus>> StatusCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
     private IReadOnlyList<GroupedAppointmentCountDto> AppointmentByDateCollection { get; set; }
@@ -48,15 +49,25 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
     private int PageSize { get; } = 12;
     private int LookupPageSize { get; } = 100;
     private int CurrentPage { get; set; } = 1;
-
+    private bool IsAddModalVisible { get; set; }
+    private bool IsEditModalVisible { get; set; }
+    private RestrictionCreateDto NewRestriction { get; set; }
+    
     public MedicalServiceDetails()
     {
         FilterQuery = new Query();
         AccumulationChart = new SfAccumulationChart();
         Grid = new SfGrid<GroupedAppointmentCountDto>();
+        NewRestriction = new RestrictionCreateDto();
         Filter = new GetAppointmentsInput
         {
             GroupByField = AppointmentConsts.DefaultGroupBy,
+            MaxResultCount = PageSize,
+            SkipCount = 0
+        };
+
+        RestrictionFilter = new GetRestrictionsInput
+        {
             MaxResultCount = PageSize,
             SkipCount = 0
         };
@@ -95,6 +106,8 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
         StatusCollection = [];
         AppointmentByDateCollection = [];
         AppointmentByDepartmentCollection = [];
+        GendersCollection = [];
+        IsAddModalVisible = false;
     }
 
     protected override async Task OnInitializedAsync()
@@ -105,7 +118,9 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
         await SetDatas();
         await GetDoctorsAsync();
         await GetMedicalServiceAsync();
+        await GetRestrictionsAsync();
         SetStatus();
+        SetGenders();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -154,26 +169,43 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
             .Select(e => new KeyValuePair<string, EnumAppointmentStatus>(e.ToString(), e))
             .ToList();
     }
-
-    private async Task GetAppointmentsAsync()
-    {
-        SetFilters();
-        MapFilters();
-        await SetDatas();
-        await Refresh();
-    }
     
     private async Task GetDoctorsAsync()
     {
-        DoctorFilter.MaxResultCount = PageSize;
-        DoctorFilter.SkipCount = (CurrentPage - 1) * PageSize;
-        DoctorFilter.Sorting = CurrentSorting;
-        DoctorFilter.MedicalServiceId = Id;
+        try
+        {
+            DoctorFilter.MaxResultCount = PageSize;
+            DoctorFilter.SkipCount = (CurrentPage - 1) * PageSize;
+            DoctorFilter.Sorting = CurrentSorting;
+            DoctorFilter.MedicalServiceId = Id;
 
-        var res = (await MedicalServicesAppService.GetMedicalServiceWithDoctorsAsync(DoctorFilter));
-        
-        DoctorCollection = res.Doctors.ToList();
-        
+            var res = (await MedicalServicesAppService.GetMedicalServiceWithDoctorsAsync(DoctorFilter));
+            DoctorCollection = res.Doctors.ToList();
+        }
+        catch (Exception e)
+        {
+            DoctorCollection = [];
+            await UiMessageService.Error(e.Message);
+        }
+       
+    }
+    
+    private async Task GetRestrictionsAsync()
+    {
+        try
+        {
+            RestrictionFilter.MedicalServiceId = Id;
+            RestrictionCollection = 
+                (await RestrictionAppService.GetListAsync(RestrictionFilter))
+                .Items
+                .ToList();
+        }
+        catch (Exception e)
+        {
+            RestrictionCollection = [];
+            await UiMessageService.Error(e.Message);
+        }
+       
     }
 
     private async Task GetMedicalServiceAsync()
@@ -238,8 +270,51 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
         await Grid.Refresh();
     }
 
-    private void OnResize(AccumulationResizeEventArgs arg)
+    public Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
     {
-        AccumulationChart.Refresh();
+        switch (args.Item.Text)
+        {
+            case "Add":
+                args.Cancel = true;
+                IsAddModalVisible = true;
+                return Task.CompletedTask;
+            case "Edit":
+                args.Cancel = true;
+                IsEditModalVisible = true;
+                break;
+        }
+
+        return Task.CompletedTask;
+    }
+    
+    private void CloseCreateRestrictionModal()
+    {
+        NewRestriction = new RestrictionCreateDto();
+        IsAddModalVisible = false;
+    }
+    
+    private void SetGenders()
+    {
+        GendersCollection = Enum.GetValues(typeof(EnumGender))
+            .Cast<EnumGender>()
+            .Select(e => new KeyValuePair<string, EnumGender>(e.ToString(), e))
+            .ToList();
+    }
+    
+    private async Task CreateRestrictionAsync()
+    {
+        try
+        {
+            await RestrictionAppService.CreateAsync(NewRestriction);
+        }
+        catch (Exception ex)
+        {
+            await HandleErrorAsync(ex);
+        }
+        finally
+        {
+            CloseCreateRestrictionModal();
+            await Refresh();
+        }
     }
 }

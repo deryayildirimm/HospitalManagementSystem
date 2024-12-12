@@ -25,7 +25,6 @@ namespace Pusula.Training.HealthCare.MedicalServices;
 [Authorize(HealthCarePermissions.MedicalServices.Default)]
 public class MedicalServicesAppService(
     IMedicalServiceRepository medicalServiceRepository,
-    IDepartmentRepository departmentRepository,
     MedicalServiceManager medicalServiceManager,
     IDistributedCache<MedicalServiceDownloadTokenCacheItem, string> downloadCache
 ) : HealthCareAppService, IMedicalServicesAppService

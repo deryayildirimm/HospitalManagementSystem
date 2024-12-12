@@ -24,6 +24,7 @@ using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.Treatment.Icds;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Insurances;
+using Pusula.Training.HealthCare.Restrictions;
 
 namespace Pusula.Training.HealthCare;
 
@@ -155,6 +156,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<BloodTestResult, BloodTestResultDto>();
         CreateMap<BloodTestResultWithNavigationProperties, BloodTestResultWithNavigationPropertiesDto>();
 
+        CreateMap<Restriction, RestrictionDto>();
 
         CreateMap<Test, TestDto>();
         CreateMap<TestWithNavigationProperties, TestWithNavigationPropertiesDto>();

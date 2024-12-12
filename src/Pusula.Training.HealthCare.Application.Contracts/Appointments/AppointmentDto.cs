@@ -23,8 +23,5 @@ public class AppointmentDto : FullAuditedEntityDto<Guid>
     public string? Notes { get; set; }
     public bool ReminderSent { get; set; }
     public double Amount { get; set; }
-    
-    public AppointmentDto()
-    {
-    }
+ 
 }

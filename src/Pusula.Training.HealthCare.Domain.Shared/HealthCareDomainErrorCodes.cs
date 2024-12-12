@@ -18,6 +18,8 @@ public static class HealthCareDomainErrorCodes
     public const string AppointmentDateNotValid = "HealthCareError:AppointmentDateNotValid";
     public const string AlreadyHaveAppointmentExactTime = "HealthCareError:AlreadyHaveAppointmentExactTime";
     
+    public const string RestrictionNotFound = "HealthCareError:RestrictionNotFound";
+
     
     public const string InvalidDepartments = "HealthCareError:InvalidDepartments";
     public const string DepartmentsNotFound = "HealthCareError:DepartmentsNotFound";

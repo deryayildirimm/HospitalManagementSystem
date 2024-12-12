@@ -267,6 +267,8 @@
     "MedicalServiceDetails": "Medical Service Details",
     "ServiceInformation": "Service Information",
     "ServiceRestrictions": "Service Restrictions",
-    "ServiceDoctors": "Service Doctors"
+    "ServiceDoctors": "Service Doctors",
+    "MinAge": "Minimum Age",
+    "MaxAge": "Maximum Age"
   }
 }

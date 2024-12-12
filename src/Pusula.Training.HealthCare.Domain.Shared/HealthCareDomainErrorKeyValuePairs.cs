@@ -32,6 +32,9 @@ public static class HealthCareDomainErrorKeyValuePairs
 
     public static KeyValuePair<string, string> MedicalServiceNotFound =
         KeyValuePair.Create(HealthCareDomainErrorCodes.MedicalServiceNotFound, "MedicalService not found.");
+    
+    public static KeyValuePair<string, string> RestrictionNotFound =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.RestrictionNotFound, "Restriction not found.");
 
     public static KeyValuePair<string, string> DepartmentNotFound =
         KeyValuePair.Create(HealthCareDomainErrorCodes.DepartmentsNotFound, "Department not found.");

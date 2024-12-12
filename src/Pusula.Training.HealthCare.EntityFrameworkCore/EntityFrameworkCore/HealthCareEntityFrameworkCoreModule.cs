@@ -25,6 +25,7 @@ using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.MedicalPersonnel;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.ProtocolTypes;
+using Pusula.Training.HealthCare.Restrictions;
 using Pusula.Training.HealthCare.Titles;
 using Pusula.Training.HealthCare.Treatment.Examinations;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
@@ -78,7 +79,7 @@ public class HealthCareEntityFrameworkCoreModule : AbpModule
             options.AddRepository<Appointment, EfCoreAppointmentRepository>();
             options.AddRepository<AppointmentType, EfCoreAppointmentTypeRepository>();
             options.AddRepository<DoctorWorkingHour, EfCoreDoctorWorkingHourRepository>();
-
+            options.AddRepository<Restriction, EfCoreRestrictionRepository>();
             options.AddRepository<Examination, EfCoreExaminationRepository>();
             options.AddRepository<FamilyHistory, EfCoreFamilyHistoryRepository>();
             options.AddRepository<Background, EfCoreBackgroundRepository>();

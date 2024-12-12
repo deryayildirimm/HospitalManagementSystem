@@ -29,9 +29,7 @@ namespace Pusula.Training.HealthCare.Controllers.Insurances
         [Route("{id}")]
         public Task<InsuranceDto> UpdateAsync(Guid id, InsuranceUpdateDto input) 
         {
-            var a = 0;
             return insuranceAppService.UpdateAsync(id, input);
-            
         }
 
         [HttpDelete]

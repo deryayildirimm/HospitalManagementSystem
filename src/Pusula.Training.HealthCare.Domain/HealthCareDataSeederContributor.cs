@@ -31,6 +31,7 @@ using Volo.Abp.Guids;
 using Volo.Abp.Identity;
 using Volo.Abp.PermissionManagement;
 using Pusula.Training.HealthCare.Insurances;
+using Pusula.Training.HealthCare.Restrictions;
 
 namespace Pusula.Training.HealthCare
 {
@@ -58,6 +59,7 @@ namespace Pusula.Training.HealthCare
         IBackgroundRepository backgroundRepository,
         IMedicalStaffRepository medicalStaffRepository,
         IInsuranceRepository insuranceRepository,
+        IRestrictionManager restrictionManager,
         IRepository<Test, Guid> testRepository) : IDataSeedContributor, ITransientDependency
     {
         public async Task SeedAsync(DataSeedContext context)
@@ -83,6 +85,7 @@ namespace Pusula.Training.HealthCare
             await SeedBackground();
             await SeedTestCategoryRecords();
             await SeedTestRecords();
+            await SeedMedicalServiceRestrictions();
             //await SeedInsurance();
             //await SeedProtocolMedicalService();
         }
@@ -325,6 +328,42 @@ namespace Pusula.Training.HealthCare
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Urology"), true);
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Oncology"), true);
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Neurology"), true);
+        }
+        
+        private async Task SeedMedicalServiceRestrictions()
+        {
+            if (await medicalServiceRepository.GetCountAsync() == 0
+                || await departmentRepository.GetCountAsync() == 0
+                || await departmentRepository.GetCountAsync() == 0)
+            {
+                return;
+            }
+            
+            var medicalServices = await medicalServiceRepository.GetListAsync(includeDetails: true);
+            var departments = await departmentRepository.GetListAsync(includeDetails: true);
+            var doctors = await doctorRepository.GetListAsync(includeDetails: true);
+            var medicalServiceIndex = 0;
+            
+            foreach (var doctor in doctors)
+            {
+                if (medicalServiceIndex + 1 > medicalServices.Count)
+                    return;
+                
+                var medicalService = medicalServices[medicalServiceIndex++];
+                
+                if (medicalService == null)
+                {
+                    continue;
+                }
+                
+                await restrictionManager.CreateAsync(
+                    medicalService.Id,
+                    doctor.Department.Id,
+                    doctor.Id,
+                    new Random().Next(18, 50),
+                    new Random().Next(51, 80),
+                    (EnumGender)new Random().Next(0, 2));
+            }
         }
 
         private async Task SeedMedicalServiceToDepartments()
@@ -736,8 +775,7 @@ namespace Pusula.Training.HealthCare
             await doctorRepository.InsertAsync(d8, true);
             await doctorRepository.InsertAsync(d9, true);
         }
-
-
+        
         private async Task SeedProtocols()
         {
             // Doktorlar, hastalar, protokol türleri ve departmanlar kontrol ediliyor

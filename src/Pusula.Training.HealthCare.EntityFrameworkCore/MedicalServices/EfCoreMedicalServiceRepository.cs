@@ -63,15 +63,13 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
             ? MedicalServiceConsts.GetDefaultSorting(false)
             : sorting);
 
-        var result = await query.Select(ms => new MedicalServiceWithDepartments
+        return await query.Select(ms => new MedicalServiceWithDepartments
         {
             MedicalService = ms,
             Departments = ms.DepartmentMedicalServices
                 .Select(dms => dms.Department)
                 .ToList()
         }).ToListAsync(cancellationToken: cancellationToken);
-
-        return result;
     }
 
     public async Task<MedicalServiceWithDoctors> GetMedicalServiceWithDoctorsAsync(
@@ -126,7 +124,8 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
             (await GetQueryableAsync())
             .Include(ms => ms.DepartmentMedicalServices)
             .ThenInclude(dms => dms.Department)
-            .ThenInclude(dept => dept.Doctors);
+            .ThenInclude(dept => dept.Doctors)
+            .ThenInclude(doc => doc.Title);
 
     #endregion
 
