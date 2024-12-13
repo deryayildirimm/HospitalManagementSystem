@@ -5,7 +5,6 @@ using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -52,10 +51,32 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 
-    public async Task<List<MedicalServiceWithDepartments>> GetMedicalServiceWithDepartmentsAsync(string? name = null,
-        double? costMin = null, double? costMax = null,
-        DateTime? serviceDateMin = null, DateTime? serviceDateMax = null, string? sorting = null,
-        int maxResultCount = int.MaxValue, int skipCount = 0, CancellationToken cancellationToken = default)
+    public async Task<List<MedicalService>> GetMedicalServiceListByDepartmentIdAsync(
+        Guid departmentId,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default)
+    {
+        var query = ApplyFilter((await GetQueryableAsync()), medicalServiceId:null, departmentId:departmentId, null, null, null,null);
+
+        query = query.OrderBy(string.IsNullOrWhiteSpace(sorting)
+            ? MedicalServiceConsts.GetDefaultSorting(false)
+            : sorting);
+
+        return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
+    }
+
+    public async Task<List<MedicalServiceWithDepartments>> GetMedicalServiceWithDepartmentsAsync(
+        string? name = null,
+        double? costMin = null,
+        double? costMax = null,
+        DateTime? serviceDateMin = null,
+        DateTime? serviceDateMax = null,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetQueryableAsync()), name, costMin, costMax, serviceDateMin, serviceDateMax);
 
@@ -74,6 +95,7 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
 
     public async Task<MedicalServiceWithDoctors> GetMedicalServiceWithDoctorsAsync(
         Guid medicalServiceId,
+        Guid? departmentId,
         string? name = null,
         double? costMin = null,
         double? costMax = null,
@@ -84,7 +106,14 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryForNavigationPropertiesAsync()), medicalServiceId, name, costMin, costMax, serviceDateMin,
+        var query = ApplyFilter(
+            (await GetQueryForNavigationPropertiesAsync()), 
+            medicalServiceId: medicalServiceId, 
+            departmentId: departmentId, 
+            name,
+            costMin, 
+            costMax, 
+            serviceDateMin,
             serviceDateMax);
 
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting)
@@ -152,6 +181,7 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
     protected virtual IQueryable<MedicalService> ApplyFilter(
         IQueryable<MedicalService> query,
         Guid? medicalServiceId = null,
+        Guid? departmentId = null,
         string? name = null,
         double? costMin = null,
         double? costMax = null,
@@ -159,15 +189,18 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         DateTime? serviceDateMax = null)
     {
         return query
+            .WhereIf(medicalServiceId.HasValue,e => e.Id == medicalServiceId!.Value)
             .WhereIf(!string.IsNullOrWhiteSpace(name), e => e.Name!.Contains(name!))
-            .WhereIf(medicalServiceId.HasValue, e => e.Id == medicalServiceId)
-            .WhereIf(costMin.HasValue,
+            .WhereIf(departmentId.HasValue, 
+                e => e.DepartmentMedicalServices.Any(dms => dms.Department.Id == departmentId!.Value))
+            .WhereIf(costMin.HasValue, 
                 e => e.Cost >= costMin!.Value)
-            .WhereIf(costMax.HasValue,
+            .WhereIf(costMax.HasValue, 
                 e => e.Cost <= costMax!.Value)
-            .WhereIf(serviceDateMin.HasValue, e => e.ServiceCreatedAt >= serviceDateMin!.Value)
-            .WhereIf(serviceDateMax.HasValue, e => e.ServiceCreatedAt <= serviceDateMax!.Value);
+            .WhereIf(serviceDateMin.HasValue, 
+                e => e.ServiceCreatedAt >= serviceDateMin!.Value)
+            .WhereIf(serviceDateMax.HasValue, 
+                e => e.ServiceCreatedAt <= serviceDateMax!.Value);
     }
-
     #endregion
 }

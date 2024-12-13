@@ -4,12 +4,13 @@
 
 
 @using Pusula.Training.HealthCare.Appointments
-@using Pusula.Training.HealthCare.Blazor.Services
+@using Pusula.Training.HealthCare.Departments
 @using Pusula.Training.HealthCare.Doctors
 @using Pusula.Training.HealthCare.MedicalServices
 @using Pusula.Training.HealthCare.Patients
 @using Pusula.Training.HealthCare.Permissions
 @using Pusula.Training.HealthCare.Restrictions
+@using Pusula.Training.HealthCare.Shared
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 @using Volo.Abp.AspNetCore.Components.Messages
 @using SelectionType = Syncfusion.Blazor.Grids.SelectionType
@@ -86,7 +87,7 @@
                                     <Template>
                                         @{
                                             var doctor = (context as DoctorDto);
-                                            var department = doctor?.Department?.Name ?? "No Data";
+                                            var department = doctor?.Department.Name ?? "No Data";
                                         }
                                         @department
                                     </Template>
@@ -104,25 +105,27 @@
 
                 <ContentTemplate>
                     <div class="my-3">
-                        <SfGrid TItem="RestrictionDto"
-                                DataSource="@RestrictionCollection"
-                                AllowPaging="true"
-                                AllowSorting="true"
-                                Toolbar="@Toolbaritems"
-                                SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
+                        <SfGrid
+                            @ref="RestrictionGrid"
+                            TItem="RestrictionDto"
+                            DataSource="@RestrictionCollection"
+                            AllowPaging="true"
+                            AllowSorting="true"
+                            Toolbar="@Toolbaritems"
+                            SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
                             <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
                             <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true"></GridEditSettings>
                             <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="RestrictionDto"></GridEvents>
                             <GridColumns>
                                 <GridColumn HeaderText="@L["Doctor"]" width="145px">
                                     <Template Context="context">
-                                        @($"{((RestrictionDto)context).Doctor?.FirstName} {((RestrictionDto)context).Doctor?.LastName}")
+                                        @($"{((RestrictionDto)context)?.Doctor?.FirstName} {((RestrictionDto)context)?.Doctor?.LastName}")
                                     </Template>
                                 </GridColumn>
 
                                 <GridColumn HeaderText="@L["Department"]">
                                     <Template Context="context">
-                                        @($"{((RestrictionDto)context).Department?.Name}")
+                                        @($"{((RestrictionDto)context).Department.Name}")
                                     </Template>
                                 </GridColumn>
                                 <GridColumn HeaderText="@L["MinAge"]" Field="MinAge"></GridColumn>
@@ -138,17 +141,68 @@
 </div>
 
 @* Create Modal *@
-<SfDialog Width="450px" IsModal="true" Header="@L["NewRestriction"]"
+<SfDialog Width="550px" CssClass="p-3" IsModal="true" Header="@L["NewRestriction"]"
           ShowCloseIcon="true" Visible="@IsAddModalVisible">
 
     <EditForm Model="@NewRestriction" OnValidSubmit="CreateRestrictionAsync">
         <DataAnnotationsValidator/>
-        <div class="form-group col-6">
+        <div class="form-group">
+            <h6>@L["Departments"]</h6>
+            <SfDropDownList
+                ShowClearButton="true"
+                TValue="Guid"
+                TItem="LookupDto<Guid>"
+                Placeholder="@L["Select"]"
+                AllowFiltering="true"
+                DataSource="@DepartmentsCollection"
+                @bind-Value="NewRestriction.DepartmentId"
+                Width="100%">
+                <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@OnDepartmentChange"></DropDownListEvents>
+                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+        <div class="form-group">
+            <h6>@L["MedicalServices"]</h6>
+            <SfDropDownList
+                ShowClearButton="true"
+                TValue="Guid"
+                TItem="LookupDto<Guid>"
+                Placeholder="@L["Select"]"
+                @bind-Value="NewRestriction.MedicalServiceId"
+                DataSource="@MedicalServiceCollection"
+                AllowFiltering="true">
+                <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@OnServiceChange"></DropDownListEvents>
+                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+        <div class="form-group">
+            <h6>@L["Doctors"]</h6>
+            <SfDropDownList
+                ShowClearButton="true"
+                TValue="Guid?"
+                TItem="LookupDto<Guid>"
+                Placeholder="@L["Select"]"
+                @bind-Value="NewRestriction.DoctorId"
+                DataSource="@DoctorDepartmentCollection"
+                AllowFiltering="true">
+                <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid?"></DropDownListEvents>
+                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+        <div class="form-group">
             <h6 class="text-black">@L["Gender"]</h6>
             <SfDropDownList DataSource="@GendersCollection" @bind-Value="@NewRestriction.AllowedGender" TItem="KeyValuePair<string, EnumGender>" TValue="EnumGender?">
                 <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
             </SfDropDownList>
             <ValidationMessage For="@(() => NewRestriction.AllowedGender)"></ValidationMessage>
+        </div>
+        <div class="form-group">
+            <h6>@L["MinAge"]</h6>
+            <SfNumericTextBox TValue="int?" @bind-Value="@NewRestriction.MinAge" Placeholder="@L["MinAge"]" Min="RestrictionConsts.AgeMinValue" Max="RestrictionConsts.AgeMaxValue"></SfNumericTextBox>
+        </div>
+        <div class="form-group">
+            <h6>@L["MaxAge"]</h6>
+            <SfNumericTextBox TValue="int?" @bind-Value="@NewRestriction.MaxAge" Placeholder="@L["MaxAge"]" Min="RestrictionConsts.AgeMinValue" Max="RestrictionConsts.AgeMaxValue"></SfNumericTextBox>
         </div>
         <div class="form-group">
             <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="true" @onclick="CloseCreateRestrictionModal"/>

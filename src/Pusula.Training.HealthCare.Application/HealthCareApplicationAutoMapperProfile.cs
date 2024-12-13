@@ -63,7 +63,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<MedicalServiceDto, MedicalServiceUpdateDto>();
         CreateMap<MedicalServiceWithDepartments, MedicalServiceWithDepartmentsDto>();
         CreateMap<MedicalServiceWithDoctors, MedicalServiceWithDoctorsDto>();
-        CreateMap<MedicalService, LookupDto<Guid>>()
+        CreateMap<MedicalServiceDto, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
 
         CreateMap<Title, TitleDto>();
@@ -76,9 +76,9 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<DoctorDto, DoctorUpdateDto>();
         CreateMap<DoctorWithNavigationPropertiesDto, DoctorUpdateDto>();
         CreateMap<DoctorWithNavigationProperties, DoctorWithNavigationPropertiesDto>();
-        CreateMap<Doctor, LookupDto<Guid>>()
-            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.FirstName));
-
+        CreateMap<DoctorDto, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.FirstName + " " + src.LastName));
+        
         CreateMap<DoctorLeave, DoctorLeaveDto>();
         CreateMap<DoctorLeave, DoctorLeaveExcelDto>();
         CreateMap<DoctorLeaveDto, DoctorLeaveUpdateDto>();
@@ -111,27 +111,31 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<IcdDto, IcdUpdateDto>();
         CreateMap<Icd, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
-        CreateMap<Icd, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
-        
+        CreateMap<Icd, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
+
         CreateMap<FamilyHistory, FamilyHistoryDto>();
         CreateMap<FamilyHistoryDto, FamilyHistoryUpdateDto>();
-        CreateMap<FamilyHistory, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
+        CreateMap<FamilyHistory, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
 
         CreateMap<Background, BackgroundDto>();
         CreateMap<BackgroundDto, BackgroundUpdateDto>();
-        CreateMap<Background, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
+        CreateMap<Background, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
 
         CreateMap<Examination, ExaminationDto>();
         CreateMap<ExaminationDto, ExaminationUpdateDto>();
-        CreateMap<Examination, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
+        CreateMap<Examination, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
 
         CreateMap<ExaminationIcd, ExaminationIcdDto>();
         CreateMap<ExaminationIcdDto, ExaminationIcd>();
-        
+
         CreateMap<Appointment, AppointmentDto>();
         CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();
         CreateMap<GroupedAppointmentCount, GroupedAppointmentCountDto>();
-        
+
         CreateMap<AppointmentDayLookupDto, AppointmentDayItemLookupDto>()
             .ForMember(dest => dest.IsSelected, opt => opt.MapFrom(src => false));
 
@@ -168,9 +172,10 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<AppointmentType, AppointmentTypeExcelDto>();
         CreateMap<AppointmentType, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
-        
+
         CreateMap<DoctorWorkingHour, DoctorWorkingHoursDto>();
-        
-        CreateMap<Insurance, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.InsuranceCompanyName.ToString()));
+
+        CreateMap<Insurance, LookupDto<Guid>>().ForMember(dest => dest.DisplayName,
+            opt => opt.MapFrom(src => src.InsuranceCompanyName.ToString()));
     }
 }

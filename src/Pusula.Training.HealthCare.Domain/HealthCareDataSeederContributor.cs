@@ -30,8 +30,6 @@ using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
 using Volo.Abp.Identity;
 using Volo.Abp.PermissionManagement;
-using Pusula.Training.HealthCare.Insurances;
-using Pusula.Training.HealthCare.Restrictions;
 
 namespace Pusula.Training.HealthCare
 {

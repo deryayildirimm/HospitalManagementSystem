@@ -12,7 +12,12 @@ namespace Pusula.Training.HealthCare.Restrictions;
 public class RestrictionManager(
     IRestrictionRepository restrictionRepository) : DomainService, IRestrictionManager
 {
-    public virtual async Task<Restriction> CreateAsync(Guid medicalServiceId, Guid departmentId, Guid doctorId, int? minAge, int? maxAge,
+    public virtual async Task<Restriction> CreateAsync(
+        Guid medicalServiceId, 
+        Guid departmentId, 
+        Guid? doctorId, 
+        int? minAge, 
+        int? maxAge,
         EnumGender? allowedGender)
     {
         Check.NotNull(medicalServiceId, nameof(medicalServiceId));

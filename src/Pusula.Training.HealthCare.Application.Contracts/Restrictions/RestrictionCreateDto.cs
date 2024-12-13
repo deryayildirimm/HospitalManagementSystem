@@ -17,7 +17,7 @@ public class RestrictionCreateDto
     public virtual Guid DepartmentId { get; set; }
     
     [GuidValidator]
-    public virtual Guid DoctorId { get; set; }
+    public virtual Guid? DoctorId { get; set; }
     
     [Range(RestrictionConsts.AgeMinValue, RestrictionConsts.AgeMaxValue)]
     public virtual int? MinAge { get;  set; }

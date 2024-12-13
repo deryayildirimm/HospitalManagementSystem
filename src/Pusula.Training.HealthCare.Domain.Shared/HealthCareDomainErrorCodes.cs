@@ -13,6 +13,9 @@ public static class HealthCareDomainErrorCodes
     public const string GroupNameNotValid = "HealthCareError:GroupNameNotValid";
     
     public const string TextLenghtExceeded = "HealthCareError:TextLenghtExceeded";
+    public const string GenderNotValid = "HealthCareError:GenderNotValid";
+    public const string ValueExceedLimit = "HealthCareError:ValueExceedLimit";
+    
     
     public const string AppointmentAlreadyTaken = "HealthCareError:AppointmentAlreadyTaken";
     public const string AppointmentDateNotValid = "HealthCareError:AppointmentDateNotValid";

@@ -1,9 +1,12 @@
 using System;
 using JetBrains.Annotations;
+using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
+using Pusula.Training.HealthCare.Protocols;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -13,12 +16,12 @@ public class Restriction : FullAuditedAggregateRoot<Guid>
 {
     [NotNull] public virtual MedicalService MedicalService { get; protected set; }
     [NotNull] public virtual Guid MedicalServiceId { get; protected set; }
-    
+
     [NotNull] public virtual Department Department { get; protected set; }
     [NotNull] public virtual Guid DepartmentId { get; protected set; }
 
     [CanBeNull] public virtual Doctor? Doctor { get; protected set; }
-    [CanBeNull] public virtual Guid DoctorId { get; protected set; }
+    [CanBeNull] public virtual Guid? DoctorId { get; protected set; }
     [CanBeNull] public virtual int? MinAge { get; protected set; }
     [CanBeNull] public virtual int? MaxAge { get; protected set; }
     [CanBeNull] public virtual EnumGender? AllowedGender { get; protected set; }
@@ -30,7 +33,7 @@ public class Restriction : FullAuditedAggregateRoot<Guid>
         MedicalServiceId = Guid.Empty;
     }
 
-    public Restriction(Guid id, Guid medicalServiceId, Guid departmentId, Guid doctorId,
+    public Restriction(Guid id, Guid medicalServiceId, Guid departmentId, Guid? doctorId,
         int? minAge, int? maxAge, EnumGender? allowedGender)
     {
         Id = id;
@@ -54,31 +57,37 @@ public class Restriction : FullAuditedAggregateRoot<Guid>
         DepartmentId = departmentId;
     }
 
-    public void SetDoctorId(Guid doctorId)
+    public void SetDoctorId(Guid? doctorId = null)
     {
-        Check.NotNull(doctorId, nameof(doctorId));
         DoctorId = doctorId;
     }
 
-    public void SetMinAge(int? minAge)
+    public void SetMinAge(int? minAge = null)
     {
-        Check.NotNull(minAge, nameof(minAge));
-        Check.Range((int)minAge, nameof(minAge), RestrictionConsts.AgeMinValue, RestrictionConsts.AgeMaxValue);
+        HealthCareGlobalException.ThrowIf(
+            HealthCareDomainErrorKeyValuePairs.ValueExceedLimit,
+            minAge is > RestrictionConsts.AgeMaxValue or < RestrictionConsts.AgeMinValue
+        );
         MinAge = minAge;
     }
 
-    public void SetMaxAge(int? maxAge)
+    public void SetMaxAge(int? maxAge = null)
     {
-        Check.NotNull(maxAge, nameof(maxAge));
-        Check.Range((int)maxAge, nameof(maxAge), RestrictionConsts.AgeMinValue, RestrictionConsts.AgeMaxValue);
+        HealthCareGlobalException.ThrowIf(
+            HealthCareDomainErrorKeyValuePairs.ValueExceedLimit,
+            maxAge is > RestrictionConsts.AgeMaxValue or < RestrictionConsts.AgeMinValue
+        );
         MaxAge = maxAge;
     }
 
-    public void SetAllowedGender(EnumGender? allowedGender)
+    public void SetAllowedGender(EnumGender? allowedGender = null)
     {
-        Check.NotNull(allowedGender, nameof(allowedGender));
-        Check.Range((int)allowedGender, nameof(allowedGender), RestrictionConsts.GenderMinValue,
-            RestrictionConsts.GenderMaxValue);
+        HealthCareGlobalException.ThrowIf(
+            HealthCareDomainErrorKeyValuePairs.GenderNotValid,
+            allowedGender != null &&
+            ((int)allowedGender > RestrictionConsts.GenderMaxValue ||
+             (int)allowedGender < RestrictionConsts.GenderMinValue)
+        );
         AllowedGender = allowedGender;
     }
 }

@@ -111,14 +111,7 @@ public class HealthCareDbContext :
         : base(options)
     {
     }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        base.OnConfiguring(optionsBuilder);
-        // Lazy loading enable 
-        //  optionsBuilder.UseLazyLoadingProxies();
-    }
-
+    
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -404,15 +397,15 @@ public class HealthCareDbContext :
                 b.HasKey(a => a.Id);
 
                 b.Property(a => a.MinAge)
-                    .IsRequired()
+                    .IsRequired(false)
                     .HasColumnName(nameof(Restriction.MinAge));
 
                 b.Property(a => a.MaxAge)
-                    .IsRequired()
+                    .IsRequired(false)
                     .HasColumnName(nameof(Restriction.MaxAge));
 
                 b.Property(a => a.AllowedGender)
-                    .IsRequired()
+                    .IsRequired(false)
                     .HasColumnName(nameof(Restriction.AllowedGender));
 
                 b.HasOne(a => a.Doctor)

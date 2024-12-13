@@ -46,6 +46,21 @@ public class MedicalServicesAppService(
         };
     }
 
+    public virtual async Task<PagedResultDto<MedicalServiceDto>> GetMedicalServiceByDepartmentIdAsync(
+        GetServiceByDepartmentInput input)
+    {
+        
+        var items = await medicalServiceRepository.GetMedicalServiceListByDepartmentIdAsync(input.DepartmentId,
+            input.Sorting,
+            input.MaxResultCount, input.SkipCount);
+
+        return new PagedResultDto<MedicalServiceDto>
+        {
+            TotalCount = items.Count,
+            Items = ObjectMapper.Map<List<MedicalService>, List<MedicalServiceDto>>(items)
+        };
+    }
+
     public async Task<PagedResultDto<MedicalServiceWithDepartmentsDto>> GetMedicalServiceWithDepartmentsAsync(
         GetMedicalServiceInput input)
     {
@@ -67,7 +82,9 @@ public class MedicalServicesAppService(
     public virtual async Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(
         GetMedicalServiceInput input)
     {
-        var result = await medicalServiceRepository.GetMedicalServiceWithDoctorsAsync(input.MedicalServiceId, input.Name,
+        var result = await medicalServiceRepository.GetMedicalServiceWithDoctorsAsync(input.MedicalServiceId,
+            input.DepartmentId,
+            input.Name,
             input.CostMin, input.CostMax, input.ServiceDateMin, input.ServiceDateMax, input.Sorting,
             input.MaxResultCount, input.SkipCount);
 

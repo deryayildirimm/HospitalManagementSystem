@@ -12,7 +12,7 @@ public interface IRestrictionManager
     Task<Restriction> CreateAsync(
         Guid medicalServiceId, 
         Guid departmentId,
-        Guid doctorId,
+        Guid? doctorId,
         int? minAge,
         int? maxAge,
         EnumGender? allowedGender

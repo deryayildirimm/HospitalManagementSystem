@@ -15,6 +15,15 @@ public static class HealthCareDomainErrorKeyValuePairs
     public static KeyValuePair<string, string> DateNotValid =
         KeyValuePair.Create(HealthCareDomainErrorCodes.DateNotInPastException, "Not valid date.");
     
+    public static KeyValuePair<string, string> GenderNotValid =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.GenderNotValid, "Gender not valid.");
+
+    public static KeyValuePair<string, string> ValueExceedLimit =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.ValueExceedLimit, "Value exceed limit.");
+    
+    public static KeyValuePair<string, string> GenderNotFound =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.GenderNotValid, "Gender not valid.");
+    
     public static KeyValuePair<string, string> TextLenghtExceeded =
         KeyValuePair.Create(HealthCareDomainErrorCodes.TextLenghtExceeded, "Text lenght exceeded. Max lenght is 1000 characters.");
     
