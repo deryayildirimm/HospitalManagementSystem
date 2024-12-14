@@ -23,8 +23,14 @@ public class PatientCreateDto
     [StringLength(PatientConsts.NameMaxLength, MinimumLength = PatientConsts.NameMinLength)]
     public string? FathersName { get; set; }
 
-    [IdentityNumberValidator]
-    public string IdentityAndPassportNumber { get; set; } = null!;
+    [Required(ErrorMessage = "Identity number is required.")]
+    [MinLength(PatientConsts.IdentityNumberMinLength, ErrorMessage = "Identity number is too short.")]
+    [MaxLength(PatientConsts.IdentityNumberLength, ErrorMessage = "Identity number is too long.")]
+    public string IdentityNumber { get; set; } = null!;
+
+    [MinLength(PatientConsts.PassportNumberMinLength, ErrorMessage = "Passport number is too short.")]
+    [MaxLength(PatientConsts.PassportNumberMaxLength, ErrorMessage = "Passport number is too long.")]
+    public string? PassportNumber { get; set; }
 
     public string? Nationality { get; set; }
 

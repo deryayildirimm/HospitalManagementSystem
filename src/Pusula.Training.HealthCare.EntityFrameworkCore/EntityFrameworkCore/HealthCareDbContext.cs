@@ -148,8 +148,9 @@ public class HealthCareDbContext :
                     .HasMaxLength(PatientConsts.NameMaxLength);
                 b.Property(x => x.FathersName).HasColumnName(nameof(Patient.FathersName))
                     .HasMaxLength(PatientConsts.NameMaxLength);
-                b.Property(x => x.IdentityAndPassportNumber).HasColumnName(nameof(Patient.IdentityAndPassportNumber))
-                    .IsRequired();
+                b.Property(x => x.IdentityNumber).HasColumnName(nameof(Patient.IdentityNumber))
+                    .HasMaxLength(PatientConsts.IdentityNumberLength).IsRequired();
+                b.Property(x => x.PassportNumber).HasColumnName(nameof(Patient.PassportNumber)).HasMaxLength(PatientConsts.PassportNumberMaxLength);
                 b.Property(x => x.Nationality).HasColumnName(nameof(Patient.Nationality));
                 b.Property(x => x.BirthDate).HasColumnName(nameof(Patient.BirthDate)).IsRequired();
                 b.Property(x => x.EmailAddress).HasColumnName(nameof(Patient.EmailAddress))

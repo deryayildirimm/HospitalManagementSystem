@@ -272,7 +272,7 @@
                                     <GridColumns>
                                         <GridColumn HeaderText="@L["IdentityNumber"]" Width="auto">
                                             <Template Context="context">
-                                                @($"{((PatientDto)context).IdentityAndPassportNumber}")
+                                                @($"{((PatientDto)context).IdentityNumber}")
                                             </Template>
                                         </GridColumn>
                                         <GridColumn HeaderText="@L["Number"]" Width="auto">
@@ -320,8 +320,8 @@
                                     <div class="form-row">
                                         <div class="form-group col-6">
                                             <h6 class="text-black">@L["IdentityNumber"]</h6>
-                                            <SfTextBox @bind-Value="@NewPatient.IdentityAndPassportNumber" Placeholder="@L["IdentityNumber"]"></SfTextBox>
-                                            <ValidationMessage For="@(() => NewPatient.IdentityAndPassportNumber)"></ValidationMessage>
+                                            <SfTextBox @bind-Value="@NewPatient.IdentityNumber" Placeholder="@L["IdentityNumber"]"></SfTextBox>
+                                            <ValidationMessage For="@(() => NewPatient.IdentityNumber)"></ValidationMessage>
                                         </div>
                                         <div class="form-group col-6">
                                             <h6 class="text-black">@L["FirstName"]</h6>

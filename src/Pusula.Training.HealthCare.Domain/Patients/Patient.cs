@@ -17,7 +17,9 @@ namespace Pusula.Training.HealthCare.Patients
 
         [CanBeNull] public virtual string? FathersName { get; private set; }
 
-        [NotNull] public virtual string IdentityAndPassportNumber { get; private set; } = string.Empty;
+        [NotNull] public virtual string IdentityNumber { get; private set; } = string.Empty;
+
+        [CanBeNull] public virtual string? PassportNumber { get; private set; } 
 
         [CanBeNull] public virtual string? Nationality { get; private set; }
 
@@ -39,8 +41,6 @@ namespace Pusula.Training.HealthCare.Patients
 
         [NotNull] public virtual EnumGender Gender { get; private set; }
 
-        // isAlive
-
         protected Patient()
         {
             PatientNumber = 0;
@@ -48,7 +48,7 @@ namespace Pusula.Training.HealthCare.Patients
             Gender = EnumGender.FEMALE;
         }
 
-        public Patient(Guid id, int patientNumber, string firstName, string lastName, EnumGender gender, DateTime birthDate, string identityAndPassportNumber, 
+        public Patient(Guid id, int patientNumber, string firstName, string lastName, EnumGender gender, DateTime birthDate, string identityNumber, string? passportNumber,
             string? nationality = null, string? mobilePhoneNumber = null, EnumPatientTypes? patientType = null, string? mothersName = null, string? fathersName = null, 
             string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
         {
@@ -58,7 +58,8 @@ namespace Pusula.Training.HealthCare.Patients
             SetLastName(lastName);
             SetMothersName(mothersName);
             SetFathersName(fathersName);
-            SetIdentityAndPassportNumber(identityAndPassportNumber);
+            SetIdentityNumber(identityNumber);
+            SetPassportNumber(passportNumber);
             SetNationality(nationality);
             SetBirthDate(birthDate);
             SetEmailAddress(emailAddress);
@@ -101,10 +102,15 @@ namespace Pusula.Training.HealthCare.Patients
         {
             Gender = gender;
         }
-        public void SetIdentityAndPassportNumber(string identityAndPassportNumber)
+        public void SetIdentityNumber(string identityNumber)
         {
-            Check.NotNullOrWhiteSpace(identityAndPassportNumber, nameof(identityAndPassportNumber));
-            IdentityAndPassportNumber = identityAndPassportNumber;
+            Check.NotNullOrWhiteSpace(identityNumber, nameof(identityNumber));
+            IdentityNumber = identityNumber;
+        }
+
+        public void SetPassportNumber(string? passportNumber)
+        {
+            PassportNumber = passportNumber;
         }
 
         public void SetMothersName(string? mothersName)
