@@ -143,7 +143,7 @@ public partial class AppointmentList : HealthCareComponentBase
         }
         catch (Exception e)
         {
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
     }
 

@@ -7,13 +7,13 @@ namespace Pusula.Training.HealthCare.DoctorWorkingHours;
 
 public class DoctorWorkingHour : FullAuditedEntity<Guid>
 {
-    [NotNull] public virtual Guid DoctorId { get; protected set; }
+    [NotNull] public virtual Guid DoctorId { get; private set; }
 
-    [NotNull] public virtual DayOfWeek DayOfWeek { get; protected set; }
+    [NotNull] public virtual DayOfWeek DayOfWeek { get; private set; }
 
-    [NotNull] public virtual TimeSpan StartHour { get; protected set; }
+    [NotNull] public virtual TimeSpan StartHour { get; private set; }
 
-    [NotNull] public virtual TimeSpan EndHour { get; protected set; }
+    [NotNull] public virtual TimeSpan EndHour { get; private set; }
 
     protected DoctorWorkingHour()
     {

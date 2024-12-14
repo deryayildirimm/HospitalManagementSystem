@@ -10,11 +10,11 @@ namespace Pusula.Training.HealthCare.Departments;
 
 public class Department : FullAuditedAggregateRoot<Guid>
 {
-    [NotNull] public virtual string Name { get; protected set; }
-    
-    public virtual ICollection<Doctor> Doctors { get; protected set; }
+    [NotNull] public virtual string Name { get; protected set; } = null!;
 
-    public virtual ICollection<DepartmentMedicalService> DepartmentMedicalServices { get; protected set; }
+    public virtual ICollection<Doctor> Doctors { get; protected set; } = null!;
+
+    public virtual ICollection<DepartmentMedicalService> DepartmentMedicalServices { get; protected set; } = null!;
 
     protected Department()
     {

@@ -15,57 +15,56 @@ namespace Pusula.Training.HealthCare.Appointments;
 public class Appointment : FullAuditedAggregateRoot<Guid>
 {
     [NotNull]
-    public virtual Guid DoctorId { get; protected set; }
+    public virtual Guid DoctorId { get; private set; }
 
     [NotNull] 
-    public virtual Guid PatientId { get; protected set; }
+    public virtual Guid PatientId { get; private set; }
 
     [NotNull]
-    public virtual Guid MedicalServiceId { get; protected set; }
+    public virtual Guid MedicalServiceId { get; private set; }
     
     [NotNull]
-    public virtual Guid AppointmentTypeId { get; protected set; }
+    public virtual Guid AppointmentTypeId { get; private set; }
     
     [NotNull]
-    public virtual Guid DepartmentId { get; protected set; }
+    public virtual Guid DepartmentId { get; private set; }
     
-    public virtual Doctor Doctor { get; protected set; }
-    
-    public virtual Patient Patient { get; protected set; }
-    
-    public virtual MedicalService MedicalService { get; protected set; }
-    
-    public virtual AppointmentType AppointmentType { get; protected set; }
-    
-    public virtual Department Department { get; protected set; }
+    public virtual Doctor Doctor { get; private set; } = null!;
+
+    public virtual Patient Patient { get; private set; } = null!;
+
+    public virtual MedicalService MedicalService { get; private set; } = null!;
+
+    public virtual AppointmentType AppointmentType { get; private set; } = null!;
+
+    public virtual Department Department { get; private set; } = null!;
 
     [NotNull]
-    public virtual DateTime AppointmentDate { get; protected set; }
+    public virtual DateTime AppointmentDate { get; private set; }
     
     [NotNull]
-    public virtual DateTime StartTime { get; protected set; }
+    public virtual DateTime StartTime { get; private set; }
 
     [NotNull]
-    public virtual DateTime EndTime { get; protected  set; } 
+    public virtual DateTime EndTime { get; private  set; } 
 
     [NotNull]
-    public virtual EnumAppointmentStatus Status { get; protected set; }
+    public virtual EnumAppointmentStatus Status { get; private set; }
 
     [CanBeNull]
-    public virtual string? Notes { get; protected set; } = string.Empty;
+    public virtual string? Notes { get; private set; } = string.Empty;
 
     [NotNull]
-    public virtual bool ReminderSent { get; protected set; }
+    public virtual bool ReminderSent { get; private set; }
 
     [NotNull] 
-    public virtual double Amount { get; protected set; }
+    public virtual double Amount { get; private set; }
 
     protected Appointment()
     {
         Amount = 0.0;
         ReminderSent = false;
         Status = EnumAppointmentStatus.Scheduled;
-        
     }
 
     public Appointment(Guid id, Guid doctorId, Guid patientId, Guid medicalServiceId, Guid appointmentTypeId, Guid departmentId, DateTime appointmentDate,

@@ -392,8 +392,7 @@ namespace Pusula.Training.HealthCare
                 medicalServiceIndex++;
             }
         }
-
-
+        
         private async Task SeedProtocolMedicalService()
         {
             if (await medicalServiceRepository.GetCountAsync() == 0

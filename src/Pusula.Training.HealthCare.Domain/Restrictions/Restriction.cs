@@ -12,15 +12,15 @@ namespace Pusula.Training.HealthCare.Restrictions;
 
 public class Restriction : FullAuditedAggregateRoot<Guid>
 {
-    [NotNull] public virtual MedicalService MedicalService { get; protected set; }
-    [NotNull] public virtual Guid MedicalServiceId { get; protected set; }
-    [NotNull] public virtual Department Department { get; protected set; }
-    [NotNull] public virtual Guid DepartmentId { get; protected set; }
-    [CanBeNull] public virtual Doctor? Doctor { get; protected set; }
-    [CanBeNull] public virtual Guid? DoctorId { get; protected set; }
-    [CanBeNull] public virtual int? MinAge { get; protected set; }
-    [CanBeNull] public virtual int? MaxAge { get; protected set; }
-    [NotNull] public virtual EnumGender AllowedGender { get; protected set; }
+    [NotNull] public virtual MedicalService MedicalService { get; private set; } = null!;
+    [NotNull] public virtual Guid MedicalServiceId { get; private set; }
+    [NotNull] public virtual Department Department { get; private set; } = null!;
+    [NotNull] public virtual Guid DepartmentId { get; private set; }
+    [CanBeNull] public virtual Doctor? Doctor { get; private set; }
+    [CanBeNull] public virtual Guid? DoctorId { get; private set; }
+    [CanBeNull] public virtual int? MinAge { get; private set; }
+    [CanBeNull] public virtual int? MaxAge { get; private set; }
+    [NotNull] public virtual EnumGender AllowedGender { get; private set; }
 
     protected Restriction()
     {
