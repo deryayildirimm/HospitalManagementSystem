@@ -276,7 +276,8 @@ public partial class MedicalServices : HealthCareComponentBase
         catch (Exception e)
         {
             await UiMessageService.Error(e.Message);
-        }finally
+        }
+        finally
         {
             EditingMedicalService.DepartmentNames.Clear();
             SelectedDepartments.Clear();

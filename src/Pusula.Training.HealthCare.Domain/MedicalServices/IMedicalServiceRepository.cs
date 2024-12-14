@@ -16,6 +16,11 @@ public interface IMedicalServiceRepository : IRepository<MedicalService, Guid>
         DateTime? serviceDateMax = null,
         CancellationToken cancellationToken = default
     );
+    
+    Task<MedicalService?> GetWithDetailsAsync(
+        Guid departmentId,
+        CancellationToken cancellationToken = default
+    );
 
     Task<List<MedicalService>> GetListAsync(
         string? name = null,
