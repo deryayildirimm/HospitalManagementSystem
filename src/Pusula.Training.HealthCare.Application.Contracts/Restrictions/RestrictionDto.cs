@@ -17,5 +17,5 @@ public class RestrictionDto : FullAuditedEntityDto<Guid>
     public virtual Guid DoctorId { get; protected set; }
     public virtual int? MinAge { get; protected set; }
     public virtual int? MaxAge { get; protected set; }
-    public virtual EnumGender? AllowedGender { get; protected set; }
+    public virtual EnumGender AllowedGender { get; protected set; }
 }

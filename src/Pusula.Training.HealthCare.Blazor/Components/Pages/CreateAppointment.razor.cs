@@ -55,12 +55,10 @@ public partial class CreateAppointment : HealthCareComponentBase
     private PatientCreateDto NewPatient { get; set; }
     private List<KeyValuePair<string, EnumGender>> GendersCollection { get; set; }
     private SfSchedule<AppointmentCustomData> ScheduleObj { get; set; }
-
-    //
+    
     private GetAppointmentsLookupInput DaysLookupFilter { get; set; }
     private int LoadCount { get; set; } = 14;
     private List<AppointmentDayItemLookupDto> DaysLookupList { get; set; }
-    //
 
     private bool IsCreateAppointmentOpen { get; set; }
     private SfToast ToastObj { get; set; }

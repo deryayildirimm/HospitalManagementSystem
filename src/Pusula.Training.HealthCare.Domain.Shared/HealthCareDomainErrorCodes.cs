@@ -16,7 +16,8 @@ public static class HealthCareDomainErrorCodes
     public const string GenderNotValid = "HealthCareError:GenderNotValid";
     public const string ValueExceedLimit = "HealthCareError:ValueExceedLimit";
     
-    
+    public const string RestrictionAlreadyExists = "HealthCareError:RestrictionAlreadyExists";
+    public const string DoctorRestrictionAlreadyExists = "HealthCareError:DoctorRestrictionAlreadyExists";
     public const string AppointmentAlreadyTaken = "HealthCareError:AppointmentAlreadyTaken";
     public const string AppointmentDateNotValid = "HealthCareError:AppointmentDateNotValid";
     public const string AlreadyHaveAppointmentExactTime = "HealthCareError:AlreadyHaveAppointmentExactTime";

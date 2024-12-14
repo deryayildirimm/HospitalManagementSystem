@@ -20,10 +20,12 @@ public class RestrictionCreateDto
     public virtual Guid? DoctorId { get; set; }
     
     [Range(RestrictionConsts.AgeMinValue, RestrictionConsts.AgeMaxValue)]
-    public virtual int? MinAge { get;  set; }
+    public virtual int? MinAge { get; set; }
     
     [Range(RestrictionConsts.AgeMinValue, RestrictionConsts.AgeMaxValue)]
-    public virtual int? MaxAge { get;  set; }
+    public virtual int? MaxAge { get; set; }
     
-    public virtual EnumGender? AllowedGender { get;  set; }
+    [Required]
+    [Range(RestrictionConsts.GenderMinValue, RestrictionConsts.GenderMaxValue)]
+    public virtual EnumGender AllowedGender { get; set; }
 }

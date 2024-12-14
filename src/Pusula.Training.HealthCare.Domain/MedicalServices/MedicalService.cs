@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using JetBrains.Annotations;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Protocols;
 using Volo.Abp;
@@ -11,18 +12,21 @@ namespace Pusula.Training.HealthCare.MedicalServices;
 
 public class MedicalService : FullAuditedAggregateRoot<Guid>
 {
+    [NotNull]
     public virtual string Name { get; protected set; }
 
+    [NotNull]
     public virtual double Cost { get; protected set; }
 
+    [NotNull]
     public virtual int Duration { get; protected set; }
 
+    [NotNull]
     public virtual DateTime ServiceCreatedAt { get; protected set; }
 
-    public virtual ICollection<DepartmentMedicalService> DepartmentMedicalServices { get; set; }
+    public virtual ICollection<DepartmentMedicalService> DepartmentMedicalServices { get; protected set; }
 
-    public virtual IList<ProtocolMedicalService> ProtocolMedicalServices { get; set; } =
-        new List<ProtocolMedicalService>();
+    public virtual IList<ProtocolMedicalService> ProtocolMedicalServices { get; protected set; }
     
     protected MedicalService()
     {
@@ -31,6 +35,7 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
         ServiceCreatedAt = DateTime.Now;
         Duration = 0;
         DepartmentMedicalServices = new Collection<DepartmentMedicalService>();
+        ProtocolMedicalServices = new List<ProtocolMedicalService>();
     }
 
     public MedicalService(Guid id, string name, double cost, int duration, DateTime serviceCreatedAt)

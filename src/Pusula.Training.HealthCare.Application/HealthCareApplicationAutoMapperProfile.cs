@@ -161,6 +161,21 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<BloodTestResultWithNavigationProperties, BloodTestResultWithNavigationPropertiesDto>();
 
         CreateMap<Restriction, RestrictionDto>();
+        CreateMap<Restriction, RestrictionUpdateDto>();
+        CreateMap<RestrictionDto, RestrictionUpdateDto>();
+        CreateMap<Restriction, RestrictionExcelDto>()
+            .ForMember(dest => dest.DoctorName,
+                opt => opt.MapFrom(src => 
+                    src.Doctor != null 
+                        ? src.Doctor.FirstName + " " + src.Doctor.LastName 
+                        : string.Empty))
+            .ForMember(dest => dest.ServiceName,
+                opt => opt.MapFrom(src => src.MedicalService.Name))
+            .ForMember(dest => dest.DepartmentName, opt => opt.MapFrom(src => src.Department.Name))
+            .ForMember(dest => dest.MaxAge, opt => opt.MapFrom(src => src.MaxAge))
+            .ForMember(dest => dest.MinAge, opt => opt.MapFrom(src => src.MinAge))
+            .ForMember(dest => dest.Gender,
+                opt => opt.MapFrom(src => src.AllowedGender.ToString()));
 
         CreateMap<Test, TestDto>();
         CreateMap<TestWithNavigationProperties, TestWithNavigationPropertiesDto>();

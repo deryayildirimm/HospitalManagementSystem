@@ -19,6 +19,7 @@ using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.ProtocolTypes;
+using Pusula.Training.HealthCare.Restrictions;
 using Pusula.Training.HealthCare.Titles;
 using Pusula.Training.HealthCare.Treatment.Examinations;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
@@ -385,8 +386,6 @@ namespace Pusula.Training.HealthCare
                 }
 
                 var service = medicalServices[medicalServiceIndex];
-
-                service.DepartmentMedicalServices = new Collection<DepartmentMedicalService>();
 
                 service.AddDepartment(department.Id);
                 await medicalServiceRepository.UpdateAsync(service, true);

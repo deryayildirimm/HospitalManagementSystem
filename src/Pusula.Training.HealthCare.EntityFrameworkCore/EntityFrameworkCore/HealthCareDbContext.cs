@@ -405,7 +405,7 @@ public class HealthCareDbContext :
                     .HasColumnName(nameof(Restriction.MaxAge));
 
                 b.Property(a => a.AllowedGender)
-                    .IsRequired(false)
+                    .IsRequired()
                     .HasColumnName(nameof(Restriction.AllowedGender));
 
                 b.HasOne(a => a.Doctor)

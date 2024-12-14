@@ -1,12 +1,10 @@
 using System;
 using JetBrains.Annotations;
-using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Patients;
-using Pusula.Training.HealthCare.Protocols;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -16,15 +14,13 @@ public class Restriction : FullAuditedAggregateRoot<Guid>
 {
     [NotNull] public virtual MedicalService MedicalService { get; protected set; }
     [NotNull] public virtual Guid MedicalServiceId { get; protected set; }
-
     [NotNull] public virtual Department Department { get; protected set; }
     [NotNull] public virtual Guid DepartmentId { get; protected set; }
-
     [CanBeNull] public virtual Doctor? Doctor { get; protected set; }
     [CanBeNull] public virtual Guid? DoctorId { get; protected set; }
     [CanBeNull] public virtual int? MinAge { get; protected set; }
     [CanBeNull] public virtual int? MaxAge { get; protected set; }
-    [CanBeNull] public virtual EnumGender? AllowedGender { get; protected set; }
+    [NotNull] public virtual EnumGender AllowedGender { get; protected set; }
 
     protected Restriction()
     {
@@ -34,7 +30,7 @@ public class Restriction : FullAuditedAggregateRoot<Guid>
     }
 
     public Restriction(Guid id, Guid medicalServiceId, Guid departmentId, Guid? doctorId,
-        int? minAge, int? maxAge, EnumGender? allowedGender)
+        int? minAge, int? maxAge, EnumGender allowedGender)
     {
         Id = id;
         SetMedicalServiceId(medicalServiceId);
@@ -80,11 +76,10 @@ public class Restriction : FullAuditedAggregateRoot<Guid>
         MaxAge = maxAge;
     }
 
-    public void SetAllowedGender(EnumGender? allowedGender = null)
+    public void SetAllowedGender(EnumGender allowedGender)
     {
         HealthCareGlobalException.ThrowIf(
             HealthCareDomainErrorKeyValuePairs.GenderNotValid,
-            allowedGender != null &&
             ((int)allowedGender > RestrictionConsts.GenderMaxValue ||
              (int)allowedGender < RestrictionConsts.GenderMinValue)
         );

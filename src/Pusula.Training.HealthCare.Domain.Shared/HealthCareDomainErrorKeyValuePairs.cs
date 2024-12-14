@@ -17,6 +17,12 @@ public static class HealthCareDomainErrorKeyValuePairs
     
     public static KeyValuePair<string, string> GenderNotValid =
         KeyValuePair.Create(HealthCareDomainErrorCodes.GenderNotValid, "Gender not valid.");
+    
+    public static KeyValuePair<string, string> DoctorRestrictionAlreadyExists =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.DoctorRestrictionAlreadyExists, "Doctor's restriction already exists.");
+    
+    public static KeyValuePair<string, string> RestrictionAlreadyExists =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.RestrictionAlreadyExists, "Restriction already exists.");
 
     public static KeyValuePair<string, string> ValueExceedLimit =
         KeyValuePair.Create(HealthCareDomainErrorCodes.ValueExceedLimit, "Value exceed limit.");

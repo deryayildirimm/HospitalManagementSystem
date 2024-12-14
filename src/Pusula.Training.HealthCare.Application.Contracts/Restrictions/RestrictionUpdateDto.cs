@@ -11,20 +11,22 @@ public class RestrictionUpdateDto
 {
     [Required]
     [GuidValidator]
-    public virtual Guid MedicalServiceId { get; protected set; }
+    public virtual Guid MedicalServiceId { get; set; }
     
     [Required]
     [GuidValidator]
-    public virtual Guid DepartmentId { get; protected set; }
+    public virtual Guid DepartmentId { get; set; }
     
     [GuidValidator]
-    public virtual Guid DoctorId { get; protected set; }
+    public virtual Guid? DoctorId { get; set; }
     
     [Range(RestrictionConsts.AgeMinValue, RestrictionConsts.AgeMaxValue)]
-    public virtual int? MinAge { get; protected set; }
+    public virtual int? MinAge { get; set; }
     
     [Range(RestrictionConsts.AgeMinValue, RestrictionConsts.AgeMaxValue)]
-    public virtual int? MaxAge { get; protected set; }
+    public virtual int? MaxAge { get; set; }
     
-    public virtual EnumGender? AllowedGender { get; protected set; }
+    [Required]
+    [Range(RestrictionConsts.GenderMinValue, RestrictionConsts.GenderMaxValue)]
+    public virtual EnumGender AllowedGender { get; set; }
 }

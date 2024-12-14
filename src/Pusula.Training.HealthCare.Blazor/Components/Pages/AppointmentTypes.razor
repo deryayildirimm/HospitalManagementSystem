@@ -43,8 +43,8 @@
             TValue="AppointmentTypeDto"
             AllowPaging="true"
             AllowSorting="true"
-            Toolbar="@(new List<string>() { "Search", "Delete"})"
-            SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
+            Toolbar="@(new List<string>() { "Search", "Delete"})">
+            <GridSelectionSettings Type="SelectionType.Multiple"></GridSelectionSettings>
             <SfDataManager 
                 AdaptorInstance="@typeof(AppointmentTypeAdaptor)"
                 Adaptor="Adaptors.CustomAdaptor">

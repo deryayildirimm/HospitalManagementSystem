@@ -4,11 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Pusula.Training.HealthCare.DoctorWorkingHours;
-using Pusula.Training.HealthCare.Exceptions;
 using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.MedicalServices;
 using Volo.Abp;
-using Volo.Abp.Data;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Domain.Services;
 

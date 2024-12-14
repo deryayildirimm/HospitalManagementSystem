@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Patients;
-using Pusula.Training.HealthCare.Restrictions;
 
-namespace Pusula.Training.HealthCare.MedicalServices;
+namespace Pusula.Training.HealthCare.Restrictions;
 
 public interface IRestrictionManager
 {
@@ -15,17 +12,17 @@ public interface IRestrictionManager
         Guid? doctorId,
         int? minAge,
         int? maxAge,
-        EnumGender? allowedGender
+        EnumGender allowedGender
     );
     
     Task<Restriction> UpdateAsync(
         Guid id,
         Guid medicalServiceId, 
         Guid departmentId,
-        Guid doctorId,
+        Guid? doctorId,
         int? minAge,
         int? maxAge,
-        EnumGender? allowedGender,
+        EnumGender allowedGender,
         string? concurrencyStamp = null
     );
 }

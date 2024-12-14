@@ -2,10 +2,8 @@
 
 @attribute [Authorize(HealthCarePermissions.MedicalServices.Default)]
 
-
-@using Pusula.Training.HealthCare.Appointments
-@using Pusula.Training.HealthCare.Departments
 @using Pusula.Training.HealthCare.Doctors
+@using Pusula.Training.HealthCare.Localization
 @using Pusula.Training.HealthCare.MedicalServices
 @using Pusula.Training.HealthCare.Patients
 @using Pusula.Training.HealthCare.Permissions
@@ -14,14 +12,18 @@
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 @using Volo.Abp.AspNetCore.Components.Messages
 @using SelectionType = Syncfusion.Blazor.Grids.SelectionType
+@using Volo.Abp.Http.Client
+@using Volo.Abp.AspNetCore.Components.Web
 @using Syncfusion.Blazor.Buttons
 @inherits HealthCareComponentBase
 
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> Lh
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject IUiMessageService UiMessageService
-@inject IAppointmentAppService AppointmentAppService
 @inject ILookupAppService LookupAppService
 @inject IMedicalServicesAppService MedicalServicesAppService
 @inject IRestrictionAppService RestrictionAppService
+@inject NavigationManager NavigationManager
 
 <SfBreadcrumb>
     <BreadcrumbItems>
@@ -36,22 +38,19 @@
 <div class="row p-4 border-1 bg-white rounded-1">
     <div class="card">
 
-        <h5 class="fw-bold">@L["ServiceInformation"]</h5>
+        <h4 class="fw-bold">@L["ServiceInformation"]</h4>
 
         <div class="d-flex align-items-center gap-2">
-            <h6>@L["Name"]: @MedicalService.Name</h6>
+            <h5>@L["Name"]: @MedicalService.Name</h5>
         </div>
         <div class="d-flex align-items-center  gap-2">
-            <h6>@L["Status"]: @MedicalService.Cost</h6>
+            <h5>@L["Cost"]: @MedicalService.Cost @L["USD"]</h5>
         </div>
         <div class="d-flex align-items-center  gap-2">
-            <h6>@L["Cost"]: @MedicalService.Cost</h6>
+            <h5>@L["Duration"]: @MedicalService.Duration @L["Minutes"]</h5>
         </div>
         <div class="d-flex align-items-center  gap-2">
-            <h6>@L["Duration"]: @MedicalService.Duration</h6>
-        </div>
-        <div class="d-flex align-items-center  gap-2">
-            <h6>@L["CreatedAt"]: @MedicalService.CreationTime.ToShortDateString()</h6>
+            <h5>@L["ServiceCreatedAt"]: @MedicalService.CreationTime.ToShortDateString()</h5>
         </div>
     </div>
 </div>
@@ -69,8 +68,8 @@
                         <SfGrid TItem="DoctorDto"
                                 DataSource="DoctorCollection"
                                 AllowPaging="true"
-                                AllowSorting="true"
-                                SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
+                                AllowSorting="true">
+                            <GridSelectionSettings Type="SelectionType.Multiple"></GridSelectionSettings>
                             <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
                             <GridColumns>
                                 <GridColumn HeaderText="@L["Doctor"]" width="260px">
@@ -108,18 +107,20 @@
                         <SfGrid
                             @ref="RestrictionGrid"
                             TItem="RestrictionDto"
+                            AllowPdfExport="true"
+                            AllowExcelExport="true"
                             DataSource="@RestrictionCollection"
                             AllowPaging="true"
                             AllowSorting="true"
-                            Toolbar="@Toolbaritems"
-                            SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
+                            Toolbar="@ToolbarItems">
+                            <GridSelectionSettings EnableSimpleMultiRowSelection="false" AllowDragSelection="false" Type="SelectionType.Single"></GridSelectionSettings>
                             <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
-                            <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true"></GridEditSettings>
-                            <GridEvents OnToolbarClick="ToolbarClickHandler" TValue="RestrictionDto"></GridEvents>
+                            <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="@CanDeleteRestriction"></GridEditSettings>
+                            <GridEvents RowSelected="RowSelectHandler" OnToolbarClick="ToolbarClickHandler" TValue="RestrictionDto"></GridEvents>
                             <GridColumns>
                                 <GridColumn HeaderText="@L["Doctor"]" width="145px">
                                     <Template Context="context">
-                                        @($"{((RestrictionDto)context)?.Doctor?.FirstName} {((RestrictionDto)context)?.Doctor?.LastName}")
+                                        @($"{((RestrictionDto)context).Doctor?.FirstName} {((RestrictionDto)context).Doctor?.LastName}")
                                     </Template>
                                 </GridColumn>
 
@@ -141,13 +142,13 @@
 </div>
 
 @* Create Modal *@
-<SfDialog Width="550px" CssClass="p-3" IsModal="true" Header="@L["NewRestriction"]"
+<SfDialog @ref="CreateDialog" Width="550px" CssClass="p-3" IsModal="true" Header="@L["NewRestriction"]"
           ShowCloseIcon="true" Visible="@IsAddModalVisible">
-
+    <DialogEvents OnClose="@CloseCreateRestrictionModal"></DialogEvents>
     <EditForm Model="@NewRestriction" OnValidSubmit="CreateRestrictionAsync">
         <DataAnnotationsValidator/>
         <div class="form-group">
-            <h6>@L["Departments"]</h6>
+            <h6>@L["Departments"] *</h6>
             <SfDropDownList
                 ShowClearButton="true"
                 TValue="Guid"
@@ -162,7 +163,7 @@
             </SfDropDownList>
         </div>
         <div class="form-group">
-            <h6>@L["MedicalServices"]</h6>
+            <h6>@L["MedicalServices"] *</h6>
             <SfDropDownList
                 ShowClearButton="true"
                 TValue="Guid"
@@ -190,8 +191,8 @@
             </SfDropDownList>
         </div>
         <div class="form-group">
-            <h6 class="text-black">@L["Gender"]</h6>
-            <SfDropDownList DataSource="@GendersCollection" @bind-Value="@NewRestriction.AllowedGender" TItem="KeyValuePair<string, EnumGender>" TValue="EnumGender?">
+            <h6 class="text-black">@L["Gender"] *</h6>
+            <SfDropDownList DataSource="@GendersCollection" @bind-Value="@NewRestriction.AllowedGender" TItem="KeyValuePair<string, EnumGender>" TValue="EnumGender">
                 <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
             </SfDropDownList>
             <ValidationMessage For="@(() => NewRestriction.AllowedGender)"></ValidationMessage>
@@ -206,6 +207,77 @@
         </div>
         <div class="form-group">
             <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="true" @onclick="CloseCreateRestrictionModal"/>
+            <SfButton Type="submit" CssClass="e-success e-outline" Content="@L["Save"]" IsPrimary="true"/>
+        </div>
+    </EditForm>
+</SfDialog>
+
+@* CreateEdit Modal *@
+<SfDialog @ref="EditDialog" Width="550px" CssClass="p-3" IsModal="true" Header="@L["EditRestriction"]"
+          ShowCloseIcon="true" Visible="@IsEditModalVisible">
+    <DialogEvents OnClose="@CloseUpdateRestrictionModal"></DialogEvents>
+    <EditForm Model="@UpdateRestriction" OnValidSubmit="UpdateRestrictionAsync">
+        <DataAnnotationsValidator/>
+        <div class="form-group">
+            <h6>@L["Departments"] *</h6>
+            <SfDropDownList
+                ShowClearButton="true"
+                TValue="Guid"
+                TItem="LookupDto<Guid>"
+                Placeholder="@L["Select"]"
+                AllowFiltering="true"
+                DataSource="@DepartmentsCollection"
+                @bind-Value="UpdateRestriction.DepartmentId"
+                Width="100%">
+                <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@OnDepartmentChange"></DropDownListEvents>
+                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+        <div class="form-group">
+            <h6>@L["MedicalServices"] *</h6>
+            <SfDropDownList
+                ShowClearButton="true"
+                TValue="Guid"
+                TItem="LookupDto<Guid>"
+                Placeholder="@L["Select"]"
+                @bind-Value="UpdateRestriction.MedicalServiceId"
+                DataSource="@MedicalServiceCollection"
+                AllowFiltering="true">
+                <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@OnServiceChange"></DropDownListEvents>
+                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+        <div class="form-group">
+            <h6>@L["Doctors"]</h6>
+            <SfDropDownList
+                ShowClearButton="true"
+                TValue="Guid?"
+                TItem="LookupDto<Guid>"
+                Placeholder="@L["Select"]"
+                @bind-Value="UpdateRestriction.DoctorId"
+                DataSource="@DoctorDepartmentCollection"
+                AllowFiltering="true">
+                <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid?"></DropDownListEvents>
+                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+        <div class="form-group">
+            <h6 class="text-black">@L["Gender"] *</h6>
+            <SfDropDownList DataSource="@GendersCollection" @bind-Value="@UpdateRestriction.AllowedGender" TItem="KeyValuePair<string, EnumGender>" TValue="EnumGender">
+                <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+            </SfDropDownList>
+            <ValidationMessage For="@(() => UpdateRestriction.AllowedGender)"></ValidationMessage>
+        </div>
+        <div class="form-group">
+            <h6>@L["MinAge"]</h6>
+            <SfNumericTextBox TValue="int?" @bind-Value="@UpdateRestriction.MinAge" Placeholder="@L["MinAge"]" Min="RestrictionConsts.AgeMinValue" Max="RestrictionConsts.AgeMaxValue"></SfNumericTextBox>
+        </div>
+        <div class="form-group">
+            <h6>@L["MaxAge"]</h6>
+            <SfNumericTextBox TValue="int?" @bind-Value="@UpdateRestriction.MaxAge" Placeholder="@L["MaxAge"]" Min="RestrictionConsts.AgeMinValue" Max="RestrictionConsts.AgeMaxValue"></SfNumericTextBox>
+        </div>
+        <div class="form-group">
+            <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="true" @onclick="CloseUpdateRestrictionModal"/>
             <SfButton Type="submit" CssClass="e-success e-outline" Content="@L["Save"]" IsPrimary="true"/>
         </div>
     </EditForm>

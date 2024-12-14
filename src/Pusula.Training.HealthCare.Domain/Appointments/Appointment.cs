@@ -64,6 +64,8 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
     {
         Amount = 0.0;
         ReminderSent = false;
+        Status = EnumAppointmentStatus.Scheduled;
+        
     }
 
     public Appointment(Guid id, Guid doctorId, Guid patientId, Guid medicalServiceId, Guid appointmentTypeId, Guid departmentId, DateTime appointmentDate,

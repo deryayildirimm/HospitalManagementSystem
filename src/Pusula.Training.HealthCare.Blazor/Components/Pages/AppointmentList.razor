@@ -132,8 +132,8 @@
             AllowPaging="true"
             AllowSorting="true"
             Toolbar="@(new List<string>() { "Delete" })"
-            SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }"
             Query="@FilterQuery">
+            <GridSelectionSettings Type="SelectionType.Multiple"></GridSelectionSettings>
             <SfDataManager
                 AdaptorInstance="@typeof(AppointmentAdaptor)"
                 Adaptor="Adaptors.CustomAdaptor">
