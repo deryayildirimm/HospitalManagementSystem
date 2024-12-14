@@ -1,8 +1,7 @@
-using System;
+using Pusula.Training.HealthCare.Shared;
 
 namespace Pusula.Training.HealthCare.Patients;
 
-public class PatientDownloadTokenCacheItem
+public class PatientDownloadTokenCacheItem : BaseTokenCacheItem
 {
-    public string Token { get; set; } = null!;
 }

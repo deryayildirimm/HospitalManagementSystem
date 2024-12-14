@@ -68,7 +68,13 @@
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["IdentityNumber"]</FieldLabel>
-                        <TextEdit Text="@Filter.IdentityAndPassportNumber" TextChanged="@OnIdentityAndPassportNumberChangedAsync" />
+                        <TextEdit Text="@Filter.IdentityNumber" TextChanged="@OnIdentityNumberChangedAsync" />
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is3">
+                    <Field>
+                        <FieldLabel>@L["PassportNumber"]</FieldLabel>
+                        <TextEdit Text="@Filter.PassportNumber" TextChanged="@OnPassportNumberChangedAsync" />
                     </Field>
                 </Column>
                 <Column ColumnSize="ColumnSize.Is3">
@@ -216,8 +222,13 @@
                 </DataGridColumn>
 
                 <DataGridColumn TItem="PatientDto"
-                                Field="IdentityAndPassportNumber"
+                                Field="IdentityNumber"
                                 Caption="@L["IdentityNumber"]">
+                </DataGridColumn>
+
+                <DataGridColumn TItem="PatientDto"
+                                Field="PassportNumber"
+                                Caption="@L["PassportNumber"]">
                 </DataGridColumn>
 
                 <DataGridColumn TItem="PatientDto"
@@ -249,7 +260,7 @@
                             <Icon Name="@IconName.Edit" />
                         </Button>
                     </DisplayTemplate>
-                </DataGridColumn> 
+                </DataGridColumn>
 
 
                 <!-- Detail Page Column -->
@@ -311,7 +322,7 @@
                              ValidateOnLoad="false">
 
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -328,15 +339,15 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
 
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
                                         <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
-                                        @L["IdentityNumber/PassportNumber"]
+                                        @L["IdentityNumber"]
                                     </FieldLabel>
-                                    <TextEdit @bind-Text="@NewPatient.IdentityAndPassportNumber" MaxLength="PatientConsts.IdentityNumberLength">
+                                    <TextEdit @bind-Text="@NewPatient.IdentityNumber" MaxLength="PatientConsts.IdentityNumberLength">
                                         <Feedback>
                                             <ValidationError />
                                         </Feedback>
@@ -344,24 +355,24 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is2">
+                        <Column ColumnSize="ColumnSize.Is4">
+
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
-                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
-                                        @L["BirthDate"]
+                                        @L["PassportNumber"]
                                     </FieldLabel>
-                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewPatient.BirthDate">
+                                    <TextEdit @bind-Text="@NewPatient.PassportNumber" MaxLength="PatientConsts.PassportNumberMaxLength">
                                         <Feedback>
                                             <ValidationError />
                                         </Feedback>
-                                    </DateEdit>
+                                    </TextEdit>
                                 </Field>
                             </Validation>
                         </Column>
                     </Row>
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -376,7 +387,7 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -391,7 +402,7 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is2">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -406,6 +417,57 @@
                                             </SelectItem>
                                         }
                                     </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                    </Row>
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        @L["PatientType"]
+                                    </FieldLabel>
+                                    <Select TValue="EnumPatientTypes" @bind-SelectedValue="@NewPatient.PatientType" style="text-overflow: ellipsis;">
+                                        @foreach (var item in PationTypes)
+                                        {
+                                            <SelectItem TValue="EnumPatientTypes" Value="@(Enum.Parse<EnumPatientTypes>(item.Key.ToString()))">
+                                                @item.Value
+                                            </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>
+                                        @L["DiscountGroup"]
+                                    </FieldLabel>
+                                    <Select TValue="EnumDiscountGroup" @bind-SelectedValue="@NewPatient.DiscountGroup" style="text-overflow: ellipsis;">
+                                        @foreach (var item in DiscountGroups)
+                                        {
+                                            <SelectItem TValue="EnumDiscountGroup" Value="@(Enum.Parse<EnumDiscountGroup>(item.Key.ToString()))">
+                                                @item.Value
+                                            </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["BirthDate"]
+                                    </FieldLabel>
+                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewPatient.BirthDate">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </DateEdit>
                                 </Field>
                             </Validation>
                         </Column>
@@ -527,42 +589,6 @@
                         </Column>
                     </Row>
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is4">
-                            <Validation MessageLocalizer="@LH.Localize">
-                                <Field>
-                                    <FieldLabel style="display: inline-flex; align-items: center;">
-                                        @L["PatientType"]
-                                    </FieldLabel>
-                                    <Select TValue="EnumPatientTypes" @bind-SelectedValue="@NewPatient.PatientType" style="text-overflow: ellipsis;">
-                                        @foreach (var item in PationTypes)
-                                        {
-                                            <SelectItem TValue="EnumPatientTypes" Value="@(Enum.Parse<EnumPatientTypes>(item.Key.ToString()))">
-                                                @item.Value
-                                            </SelectItem>
-                                        }
-                                    </Select>
-                                </Field>
-                            </Validation>
-                        </Column>
-                        <Column ColumnSize="ColumnSize.Is4">
-                            <Validation MessageLocalizer="@LH.Localize">
-                                <Field>
-                                    <FieldLabel>
-                                        @L["DiscountGroup"]
-                                    </FieldLabel>
-                                    <Select TValue="EnumDiscountGroup" @bind-SelectedValue="@NewPatient.DiscountGroup" style="text-overflow: ellipsis;">
-                                        @foreach (var item in DiscountGroups)
-                                        {
-                                            <SelectItem TValue="EnumDiscountGroup" Value="@(Enum.Parse<EnumDiscountGroup>(item.Key.ToString()))">
-                                                @item.Value
-                                            </SelectItem>
-                                        }
-                                    </Select>
-                                </Field>
-                            </Validation>
-                        </Column>
-                    </Row>
-                    <Row>
                         <Column ColumnSize="ColumnSize.Is12">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
@@ -577,7 +603,6 @@
                                 </Field>
                             </Validation>
                         </Column>
-
                     </Row>
                 </Validations>
             </ModalBody>
@@ -627,7 +652,7 @@
                              ValidateOnLoad="false">
 
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -644,14 +669,14 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
                                         <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
-                                        @L["IdentityNumber/PassportNumber"]
+                                        @L["IdentityNumber"]
                                     </FieldLabel>
-                                    <TextEdit @bind-Text="@EditingPatient.IdentityAndPassportNumber" MaxLength="PatientConsts.IdentityNumberLength">
+                                    <TextEdit @bind-Text="@EditingPatient.IdentityNumber" MaxLength="PatientConsts.IdentityNumberLength">
                                         <Feedback>
                                             <ValidationError />
                                         </Feedback>
@@ -659,24 +684,24 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is2">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
                                         <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
-                                        @L["BirthDate"]
+                                        @L["PassportNumber"]
                                     </FieldLabel>
-                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingPatient.BirthDate">
+                                    <TextEdit @bind-Text="@EditingPatient.PassportNumber" MaxLength="PatientConsts.PassportNumberMaxLength">
                                         <Feedback>
                                             <ValidationError />
                                         </Feedback>
-                                    </DateEdit>
+                                    </TextEdit>
                                 </Field>
                             </Validation>
                         </Column>
                     </Row>
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -691,7 +716,7 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -706,7 +731,7 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is2">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -721,6 +746,57 @@
                                             </SelectItem>
                                         }
                                     </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                    </Row>
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        @L["PatientType"]
+                                    </FieldLabel>
+                                    <Select TValue="EnumPatientTypes" @bind-SelectedValue="@EditingPatient.PatientType" style="text-overflow: ellipsis;">
+                                        @foreach (var item in PationTypes)
+                                        {
+                                            <SelectItem TValue="EnumPatientTypes" Value="@(Enum.Parse<EnumPatientTypes>(item.Key.ToString()))">
+                                                @item.Value
+                                            </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>
+                                        @L["DiscountGroup"]
+                                    </FieldLabel>
+                                    <Select TValue="EnumDiscountGroup" @bind-SelectedValue="@EditingPatient.DiscountGroup" style="text-overflow: ellipsis;">
+                                        @foreach (var item in DiscountGroups)
+                                        {
+                                            <SelectItem TValue="EnumDiscountGroup" Value="@(Enum.Parse<EnumDiscountGroup>(item.Key.ToString()))">
+                                                @item.Value
+                                            </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["BirthDate"]
+                                    </FieldLabel>
+                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingPatient.BirthDate">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </DateEdit>
                                 </Field>
                             </Validation>
                         </Column>
@@ -806,42 +882,6 @@
                                             <ValidationError />
                                         </Feedback>
                                     </TextEdit>
-                                </Field>
-                            </Validation>
-                        </Column>
-                    </Row>
-                    <Row>
-                        <Column ColumnSize="ColumnSize.Is4">
-                            <Validation MessageLocalizer="@LH.Localize">
-                                <Field>
-                                    <FieldLabel style="display: inline-flex; align-items: center;">
-                                        @L["PatientType"]
-                                    </FieldLabel>
-                                    <Select TValue="EnumPatientTypes" @bind-SelectedValue="@EditingPatient.PatientType" style="text-overflow: ellipsis;">
-                                        @foreach (var item in PationTypes)
-                                        {
-                                            <SelectItem TValue="EnumPatientTypes" Value="@(Enum.Parse<EnumPatientTypes>(item.Key.ToString()))">
-                                                @item.Value
-                                            </SelectItem>
-                                        }
-                                    </Select>
-                                </Field>
-                            </Validation>
-                        </Column>
-                        <Column ColumnSize="ColumnSize.Is4">
-                            <Validation MessageLocalizer="@LH.Localize">
-                                <Field>
-                                    <FieldLabel>
-                                        @L["DiscountGroup"]
-                                    </FieldLabel>
-                                    <Select TValue="EnumDiscountGroup" @bind-SelectedValue="@EditingPatient.DiscountGroup" style="text-overflow: ellipsis;">
-                                        @foreach (var item in DiscountGroups)
-                                        {
-                                            <SelectItem TValue="EnumDiscountGroup" Value="@(Enum.Parse<EnumDiscountGroup>(item.Key.ToString()))">
-                                                @item.Value
-                                            </SelectItem>
-                                        }
-                                    </Select>
                                 </Field>
                             </Validation>
                         </Column>

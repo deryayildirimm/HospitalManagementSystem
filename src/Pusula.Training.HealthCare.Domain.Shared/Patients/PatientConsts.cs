@@ -29,6 +29,7 @@ namespace Pusula.Training.HealthCare.Patients
         public const int NationalityMinLength = 0;
         public const int NationalMinLength = 128;
         public const int NameMinLength = 2;
+        public const int IdentityNumberMinLength = 7;
         public const int LastNameMinLength = 2;
         public const int PassportNumberMinLength = 6;
         public const int GenderMinValue = 1;
