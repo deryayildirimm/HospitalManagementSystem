@@ -274,6 +274,7 @@
     "EditRestriction": "Edit Restriction",
     "ServiceCreatedAt": "Service Created At",
     "Minutes": "Minutes",
-    "USD": "USD"
+    "USD": "USD",
+    "GuidEmpty": "Guid cannot be empty"
   }
 }

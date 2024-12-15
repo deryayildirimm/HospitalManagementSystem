@@ -581,10 +581,11 @@ public partial class Appointments : HealthCareComponentBase
             IsFinalResultSuccess = true;
             await OnNextStep();
         }
-        catch (Exception)
+        catch (Exception e)
         {
             IsFinalResultSuccess = false;
             await OnNextStep();
+            await UiMessageService.Error(e.Message);
         }
     }
 

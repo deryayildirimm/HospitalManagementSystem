@@ -990,8 +990,8 @@ namespace Pusula.Training.HealthCare
             {
                 for (var day = (int)DayOfWeek.Monday; day <= (int)DayOfWeek.Friday; day++)
                 {
-                    var startHour = new TimeSpan(8, 0, 0);
-                    var endHour = new TimeSpan(17, 0, 0);
+                    var startHour = new TimeOnly(8, 0);
+                    var endHour = new TimeOnly(17, 0);
 
                     var doctorWorkingHour = new DoctorWorkingHour(doctor.Id, (DayOfWeek)day, startHour, endHour);
                     await doctorWorkingHourRepository.InsertAsync(doctorWorkingHour);

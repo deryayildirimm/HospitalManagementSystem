@@ -2,7 +2,6 @@
 
 @attribute [Authorize(HealthCarePermissions.Appointments.Default)]
 
-
 @using Pusula.Training.HealthCare.Appointments
 @using Pusula.Training.HealthCare.Blazor.Services
 @using Syncfusion.Blazor.Charts
@@ -19,7 +18,6 @@
 @inject IUiMessageService UiMessageService
 @inject IAppointmentAppService AppointmentAppService
 @inject ILookupAppService LookupAppService
-@inject AppointmentStatisticsAdaptor AppointmentStatisticsAdaptor
 
 <SfBreadcrumb>
     <BreadcrumbItems>

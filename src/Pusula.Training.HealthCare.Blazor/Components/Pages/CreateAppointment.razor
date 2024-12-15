@@ -16,7 +16,6 @@
 @using Syncfusion.Blazor.SplitButtons
 @inherits HealthCareComponentBase
 
-@inject PatientAdaptor PatientAdaptor
 @inject IAppointmentAppService AppointmentAppService
 @inject IDoctorsAppService DoctorsAppService
 @inject IUiMessageService UiMessageService
@@ -85,14 +84,14 @@
                     <SfDropDownList
                         Readonly="@(!IsDoctorsEnabled)"
                         TValue="Guid"
-                        TItem="DoctorLookupDto<Guid>"
+                        TItem="DoctorLookupDto"
                         Placeholder="@L["Select"]"
                         AllowFiltering="true"
                         DataSource="@DoctorsCollection"
                         @bind-Value="NewAppointment.DoctorId"
                         Width="100%">
                         <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
-                        <DropDownListEvents TItem="DoctorLookupDto<Guid>" TValue="Guid" OnValueSelect="@OnDoctorChange"></DropDownListEvents>
+                        <DropDownListEvents TItem="DoctorLookupDto" TValue="Guid" OnValueSelect="@OnDoctorChange"></DropDownListEvents>
                     </SfDropDownList>
                 </div>
                 <div>

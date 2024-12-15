@@ -25,7 +25,7 @@ public partial class CreateAppointment : HealthCareComponentBase
     private GetDoctorsWithDepartmentIdsInput DoctorsWithDepartmentIdsInput { get; set; }
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
     private IReadOnlyList<MedicalServiceDto> MedicalServiceCollection { get; set; }
-    private List<DoctorLookupDto<Guid>> DoctorsCollection { get; set; }
+    private List<DoctorLookupDto> DoctorsCollection { get; set; }
     private IReadOnlyList<AppointmentCustomData> SlotItems { get; set; }
     private IReadOnlyList<PatientDto> PatientCollection { get; set; }
     private SfGrid<PatientDto> PatientGrid { get; set; }
@@ -164,7 +164,7 @@ public partial class CreateAppointment : HealthCareComponentBase
         }
         catch (Exception e)
         {
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
     }
 
@@ -194,7 +194,7 @@ public partial class CreateAppointment : HealthCareComponentBase
         {
             MedicalServiceCollection = [];
             MedicalServiceWithDepartmentsList = [];
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
     }
 
@@ -221,7 +221,7 @@ public partial class CreateAppointment : HealthCareComponentBase
             IsDoctorsEnabled = true;
 
             DoctorsCollection =
-                ObjectMapper.Map<List<DoctorWithNavigationPropertiesDto>, List<DoctorLookupDto<Guid>>>(doctors);
+                ObjectMapper.Map<List<DoctorWithNavigationPropertiesDto>, List<DoctorLookupDto>>(doctors);
         }
         catch (Exception e)
         {
@@ -248,11 +248,11 @@ public partial class CreateAppointment : HealthCareComponentBase
         }
         catch (Exception e)
         {
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
     }
 
-    private async void OnDoctorChange(SelectEventArgs<DoctorLookupDto<Guid>> args)
+    private async void OnDoctorChange(SelectEventArgs<DoctorLookupDto> args)
     {
         try
         {
@@ -263,7 +263,7 @@ public partial class CreateAppointment : HealthCareComponentBase
         }
         catch (Exception e)
         {
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
     }
 

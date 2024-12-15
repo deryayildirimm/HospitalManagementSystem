@@ -85,7 +85,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<DoctorLeave, DoctorLeaveDto>();
         CreateMap<DoctorLeave, DoctorLeaveExcelDto>();
         CreateMap<DoctorLeaveDto, DoctorLeaveUpdateDto>();
-        CreateMap<DoctorWithNavigationPropertiesDto, DoctorLookupDto<Guid>>()
+        CreateMap<DoctorWithNavigationPropertiesDto, DoctorLookupDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Doctor.Id))
             .ForMember(dest => dest.DepartmentId, opt => opt.MapFrom(src => src.Doctor.DepartmentId))
             .ForMember(dest => dest.DisplayName,

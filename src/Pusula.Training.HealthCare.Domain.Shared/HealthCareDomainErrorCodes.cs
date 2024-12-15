@@ -11,6 +11,7 @@ public static class HealthCareDomainErrorCodes
     public const string DoctorNotWorking = "HealthCareError:DoctorNotWorking";
     public const string MedicalServiceNotFound = "HealthCareError:MedicalServiceNotFound";
     
+    public const string GuidEmpty = "HealthCareError:GuidEmpty";
     public const string NameExists = "HealthCareError:NameAlreadyExist";
     public const string GroupNameNotValid = "HealthCareError:GroupNameNotValid";
     

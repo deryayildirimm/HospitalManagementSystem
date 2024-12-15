@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading;
@@ -264,14 +265,14 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             .WhereIf(appointmentTypeId.HasValue, e => e.AppointmentTypeId == appointmentTypeId)
             .WhereIf(departmentId.HasValue, x => x.DepartmentId == departmentId)
             .WhereIf(!string.IsNullOrWhiteSpace(patientName), x =>
-                x.Patient.FirstName.ToLower().Contains(patientName!.ToLower()) ||
-                x.Patient.LastName.ToLower().Contains(patientName!.ToLower()))
+                EF.Functions.ILike(x.Patient.FirstName, $"%{patientName}%") ||
+                EF.Functions.ILike(x.Patient.LastName, $"%{patientName}%"))
             .WhereIf(!string.IsNullOrWhiteSpace(doctorName), x =>
-                x.Doctor.FirstName.ToLower().Contains(doctorName!.ToLower()) ||
-                x.Doctor.LastName.ToLower().Contains(doctorName!.ToLower()))
+                EF.Functions.ILike(x.Doctor.FirstName, $"%{doctorName}%") ||
+                EF.Functions.ILike(x.Doctor.LastName, $"%{doctorName}%"))
             .WhereIf(!string.IsNullOrWhiteSpace(serviceName), x =>
-                x.MedicalService.Name.ToLower().Contains(serviceName!.ToLower()) ||
-                x.MedicalService.Name.ToLower().Contains(serviceName!.ToLower()))
+                EF.Functions.ILike(x.MedicalService.Name, $"%{serviceName}%") ||
+                EF.Functions.ILike(x.Doctor.LastName, $"%{serviceName}%"))
             .WhereIf(patientNumber.HasValue, x => x.Patient.PatientNumber == patientNumber)
             .WhereIf(patientType.HasValue, x => x.Patient.PatientType == patientType)
             .WhereIf(appointmentMinDate.HasValue,
@@ -291,7 +292,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
 
     #region DynamicGroupByQuery
 
-    private IQueryable<GroupedAppointmentCount> ApplyDynamicGrouping(IQueryable<Appointment> query, string groupByField)
+    private static IQueryable<GroupedAppointmentCount> ApplyDynamicGrouping(IQueryable<Appointment> query, string groupByField)
     {
         if (groupByField == "Department")
         {
@@ -321,8 +322,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             return query.GroupBy(a => a.AppointmentDate.Date)
                 .Select(g => new GroupedAppointmentCount
                 {
-                    GroupKey = g.Key.ToString(),
-                    GroupName = g.Key.ToString(),
+                    GroupKey = g.Key.ToString(CultureInfo.CurrentCulture),
+                    GroupName = g.Key.ToString(CultureInfo.CurrentCulture),
                     AppointmentCount = g.Count()
                 });
         }

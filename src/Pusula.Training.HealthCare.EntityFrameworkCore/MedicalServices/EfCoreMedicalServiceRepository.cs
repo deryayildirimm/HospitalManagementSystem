@@ -181,7 +181,7 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         DateTime? serviceDateMax = null)
     {
         return query
-            .WhereIf(!string.IsNullOrWhiteSpace(name), e => e.Name!.Contains(name!))
+            .WhereIf(!string.IsNullOrWhiteSpace(name), e => e.Name.Contains(name!))
             .WhereIf(costMin.HasValue,
                 e => e.Cost >= costMin!.Value)
             .WhereIf(costMax.HasValue,

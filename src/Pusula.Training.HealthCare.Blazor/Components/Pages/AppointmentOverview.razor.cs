@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Blazorise.DeepCloner;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Shared;
