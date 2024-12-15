@@ -11,8 +11,8 @@ using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.Buttons;
 using Syncfusion.Blazor.Data;
-using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Popups;
+using Syncfusion.Blazor.Grids;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 

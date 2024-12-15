@@ -211,7 +211,8 @@ public class HealthCareMenuContributor : IMenuContributor
             new ApplicationMenuItem(
                     name: HealthCareMenus.Treatment,
                     displayName: l["Menu:Treatment"],
-                    icon: "fa-solid fa-medkit"
+                    icon: "fa-solid fa-medkit",
+                    requiredPermissionName: HealthCarePermissions.Treatment.Default
                 )
                 .AddItem(
                     new ApplicationMenuItem(

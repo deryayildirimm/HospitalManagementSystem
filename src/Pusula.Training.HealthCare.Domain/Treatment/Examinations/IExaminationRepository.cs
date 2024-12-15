@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Pusula.Training.HealthCare.Treatment.Icds;
 using Volo.Abp.Domain.Repositories;
 
 namespace Pusula.Training.HealthCare.Treatment.Examinations;
@@ -39,6 +40,11 @@ public interface IExaminationRepository : IRepository<Examination, Guid>
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
+        CancellationToken cancellationToken = default);
+
+    Task<List<IcdReportDto>> GetIcdReportAsync(
+        DateTime startDate,
+        DateTime? endDate = null,
         CancellationToken cancellationToken = default);
 
     Task<Examination?> GetWithNavigationPropertiesAsync(

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
+using Pusula.Training.HealthCare.Treatment.Icds;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 
@@ -41,6 +43,11 @@ public class ExaminationsAppService(IExaminationRepository examinationRepository
         var examination = await examinationRepository.GetByProtocolIdAsync(protocolId);
         if (examination == null) return null;
         return ObjectMapper.Map<Examination, ExaminationDto>(examination);
+    }
+    
+    public async Task<List<IcdReportDto>> GetIcdReportAsync(DateTime startDate, DateTime? endDate)
+    {
+        return await examinationRepository.GetIcdReportAsync(startDate, endDate);
     }
 
     [Authorize(HealthCarePermissions.Examinations.Delete)]

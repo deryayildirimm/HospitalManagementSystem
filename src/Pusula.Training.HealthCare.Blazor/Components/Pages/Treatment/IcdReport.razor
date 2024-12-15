@@ -1,0 +1,26 @@
+﻿@page "/icd-report"
+@using Pusula.Training.HealthCare.Treatment.Examinations
+@inject IExaminationsAppService ExaminationsAppService
+
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
+
+
+<SfDatePicker TValue="DateTime" Placeholder="Select Start Date" @bind-Value="StartDate" />
+<SfDatePicker TValue="DateTime" Placeholder="Select End Date" @bind-Value="EndDate" />
+<SfButton CssClass="e-primary" Content="Generate Report" OnClick="FetchReport" />
+
+@if (IcdReportList != null && IcdReportList.Any())
+{
+    <SfGrid DataSource="@IcdReportList" AllowPaging="true">
+        <GridColumns>
+            <GridColumn Field="CodeNumber" HeaderText="ICD Code" Width="150" />
+            <GridColumn Field="Detail" HeaderText="Detail" Width="300" />
+            <GridColumn Field="Quantity" HeaderText="Quantity" Width="100" TextAlign="TextAlign.Center" />
+        </GridColumns>
+    </SfGrid>
+}
+else if (IcdReportList != null)
+{
+    <p>No data found for the selected time range.</p>
+}

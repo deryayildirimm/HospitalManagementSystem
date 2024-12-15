@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Pusula.Training.HealthCare.Treatment.Examinations;
+using Pusula.Training.HealthCare.Treatment.Icds;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 
@@ -23,7 +24,11 @@ public class ExaminationController(IExaminationsAppService examinationsAppServic
     
     [HttpGet("withProtocolId/{protocolId}")]
     public Task<ExaminationDto?> GetByProtocolIdAsync(Guid? protocolId) => examinationsAppService.GetByProtocolIdAsync(protocolId);
-    
+
+    [HttpGet("icdReport")]
+    public Task<List<IcdReportDto>> GetIcdReportAsync(DateTime startDate, DateTime? endDate) => 
+        examinationsAppService.GetIcdReportAsync(startDate, endDate);
+
     [HttpPost]
     public Task<ExaminationDto> CreateAsync(ExaminationCreateDto input) => examinationsAppService.CreateAsync(input);
     [HttpPut]

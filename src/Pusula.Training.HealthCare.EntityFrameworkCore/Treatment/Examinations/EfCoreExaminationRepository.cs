@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
+using Pusula.Training.HealthCare.Treatment.Icds;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
 
@@ -38,13 +40,15 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         string? story = null,
         Guid? protocolId = null, 
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetQueryableAsync()).Include(e => e.Background)
             .Include(e => e.FamilyHistory)
             .Include(e => e.Protocol), filterText, dateMin, dateMax, complaint, story, protocolId);
+        query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? ExaminationConsts.GetDefaultSorting(false) : sorting);
+
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 
@@ -56,13 +60,38 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         string? story = null,
         Guid? protocolId = null, 
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetDbSetAsync()), filterText, dateMin, dateMax, complaint, story, protocolId);
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
+    
+    public virtual async Task<List<IcdReportDto>> GetIcdReportAsync(
+        DateTime startDate, 
+        DateTime? endDate = null, 
+        CancellationToken cancellationToken = default)
+    {
+        var query = (await GetQueryableAsync())
+            .Include(e => e.ExaminationIcd);
+
+        var report = await query
+            .Where(e => e.Date >= startDate && e.Date <= endDate)
+            .SelectMany(e => e.ExaminationIcd)
+            .GroupBy(icd => new { icd.Icd.CodeNumber, icd.Icd.Detail })
+            .Select(group => new IcdReportDto
+            {
+                CodeNumber = group.Key.CodeNumber,
+                Detail = group.Key.Detail,
+                Quantity = group.Count()
+            })
+            .OrderByDescending(r => r.Quantity)
+            .ToListAsync(cancellationToken);
+
+        return report;
+    }
+
 
     public virtual async Task<Examination?> GetWithNavigationPropertiesAsync(
         Guid id,

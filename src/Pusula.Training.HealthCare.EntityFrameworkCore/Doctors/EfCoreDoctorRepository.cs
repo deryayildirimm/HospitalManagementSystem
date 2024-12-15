@@ -83,9 +83,6 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
         var query = await GetQueryForNavigationPropertiesAsync();
         query = ApplyFilter(query, filterText, firstName, lastName, identityNumber, birthDateMin, birthDateMax, gender, email, phoneNumber, yearOfExperienceMin, cityId, districtId, titleId, departmentId);
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? DoctorConsts.GetDefaultSorting(true) : sorting);
-
-        var tmp = query.PageBy(skipCount, maxResultCount).ToQueryString();
-
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 
