@@ -10,7 +10,8 @@ public class PatientExcelDownloadDto
     public int? PatientNumber { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
-    public string? IdentityAndPassportNumber { get; set; }
+    public string? IdentityNumber { get; set; }
+    public string? PassportNumber { get; set; }
     public string? Nationality { get; set; }
     public DateTime? BirthDateMin { get; set; }
     public DateTime? BirthDateMax { get; set; }

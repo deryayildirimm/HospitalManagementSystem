@@ -146,7 +146,10 @@ public partial class Patients
             culture = "&culture=" + culture;
         }
         await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/patients/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&FirstName={HttpUtility.UrlEncode(Filter.FirstName)}&LastName={HttpUtility.UrlEncode(Filter.LastName)}&BirthDateMin={Filter.BirthDateMin?.ToString("O")}&BirthDateMax={Filter.BirthDateMax?.ToString("O")}&IdentityNumber={HttpUtility.UrlEncode(Filter.IdentityAndPassportNumber)}&EmailAddress={HttpUtility.UrlEncode(Filter.EmailAddress)}&MobilePhoneNumber={HttpUtility.UrlEncode(Filter.MobilePhoneNumber)}&Gender={Filter.Gender}", forceLoad: true);
+        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/patients/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}" +
+            $"{culture}&FirstName={HttpUtility.UrlEncode(Filter.FirstName)}&LastName={HttpUtility.UrlEncode(Filter.LastName)}&BirthDateMin={Filter.BirthDateMin?.ToString("O")}" +
+            $"&BirthDateMax={Filter.BirthDateMax?.ToString("O")}&IdentityNumber={HttpUtility.UrlEncode(Filter.IdentityNumber)}&PassportNumber={HttpUtility.UrlEncode(Filter.PassportNumber)}" +
+            $"&EmailAddress={HttpUtility.UrlEncode(Filter.EmailAddress)}" +$"&MobilePhoneNumber={HttpUtility.UrlEncode(Filter.MobilePhoneNumber)}&Gender={Filter.Gender}", forceLoad: true);
     }
 
     private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<PatientDto> e)
@@ -291,9 +294,15 @@ public partial class Patients
         await SearchAsync();
     }
 
-    protected virtual async Task OnIdentityAndPassportNumberChangedAsync(string? identityAndPassportNumber)
+    protected virtual async Task OnIdentityNumberChangedAsync(string? identityNumber)
     {
-        Filter.IdentityAndPassportNumber = identityAndPassportNumber;
+        Filter.IdentityNumber = identityNumber;
+        await SearchAsync();
+    }
+
+    protected virtual async Task OnPassportNumberChangedAsync(string? passportNumber)
+    {
+        Filter.PassportNumber = passportNumber;
         await SearchAsync();
     }
 

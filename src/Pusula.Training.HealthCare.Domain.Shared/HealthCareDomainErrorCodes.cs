@@ -4,6 +4,8 @@ public static class HealthCareDomainErrorCodes
 {
     /* You can add your business exception error codes here, as constants */
     
+    public const string PatientAlreadyExist = "HealthCareError:PatientAlreadyExist";
+
     public const string DoctorNotFound = "HealthCareError:DoctorNotFound";
     public const string DoctorWorkingHourNotFound = "HealthCareError:DoctorWorkingHourNotFound";
     public const string DoctorNotWorking = "HealthCareError:DoctorNotWorking";

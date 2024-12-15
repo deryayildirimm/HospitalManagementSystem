@@ -53,4 +53,11 @@ public static class HealthCareDomainErrorKeyValuePairs
 
     public static KeyValuePair<string, string> DepartmentNotFound =
         KeyValuePair.Create(HealthCareDomainErrorCodes.DepartmentsNotFound, "Department not found.");
+
+    public static KeyValuePair<string, string> PatientAlreadyExist =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.PatientAlreadyExist, "A patient with the same Identity Number already exists.");
+
+    public static KeyValuePair<string, string> InvalidDownloadToken =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.InvalidDownloadToken_CODE, "The provided download token is invalid.");
+
 }
