@@ -143,7 +143,6 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             reminderSent,
             minAmount, maxAmount);
         
-
         var groupedQuery = ApplyDynamicGrouping(query, groupByField);
 
         return await groupedQuery.LongCountAsync(cancellationToken);
@@ -185,7 +184,9 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         var groupedQuery = ApplyDynamicGrouping(query, groupByField);
 
         return await groupedQuery
-            .OrderBy(d => d.GroupName)
+            .OrderBy(string.IsNullOrWhiteSpace(sorting)
+                ? AppointmentConsts.GetGroupDefaultSorting(false)
+                : sorting)
             .PageBy(skipCount, maxResultCount)
             .ToListAsync(cancellationToken);
     }
@@ -292,7 +293,9 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
 
     #region DynamicGroupByQuery
 
-    private static IQueryable<GroupedAppointmentCount> ApplyDynamicGrouping(IQueryable<Appointment> query, string groupByField)
+    private static IQueryable<GroupedAppointmentCount> ApplyDynamicGrouping(
+        IQueryable<Appointment> query,
+        string groupByField)
     {
         if (groupByField == "Department")
         {
@@ -322,8 +325,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             return query.GroupBy(a => a.AppointmentDate.Date)
                 .Select(g => new GroupedAppointmentCount
                 {
-                    GroupKey = g.Key.ToString(CultureInfo.CurrentCulture),
-                    GroupName = g.Key.ToString(CultureInfo.CurrentCulture),
+                    GroupKey = g.Key.ToString(),
+                    GroupName = g.Key.ToString(),
                     AppointmentCount = g.Count()
                 });
         }

@@ -26,13 +26,13 @@ public static class HealthCareDomainErrorCodes
     public const string AlreadyHaveAppointmentExactTime = "HealthCareError:AlreadyHaveAppointmentExactTime";
     
     public const string RestrictionNotFound = "HealthCareError:RestrictionNotFound";
-
+    public const string DoctorHasLeave = "HealthCareError:DoctorHasLeave";
     
     public const string InvalidDepartments = "HealthCareError:InvalidDepartments";
     public const string DepartmentsNotFound = "HealthCareError:DepartmentsNotFound";
 
     public const string DateNotInPastException = "HealthCareError:DateNotInPast";
-    
+    public const string PatientNotFound = "HealthCareError:PatientNotFound";
    
     /*  ERROR MESSAGES */
     public const string InvalidDateRange_MESSAGE = "InvalidDateRange";

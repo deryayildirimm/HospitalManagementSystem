@@ -21,7 +21,7 @@ public partial class AppointmentOverview : HealthCareComponentBase
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private GetAppointmentsInput Filter { get; set; }
     private GetAppointmentsInput FilterDepartmentChart { get; set; }
-
+    private IReadOnlyList<string> GroupByOptions { get; set; }
     private GetAppointmentsInput FilterDateChart { get; set; }
     private List<KeyValuePair<string, EnumPatientTypes>> PatientTypeCollection { get; set; }
     private List<KeyValuePair<string, EnumAppointmentStatus>> StatusCollection { get; set; }
@@ -36,9 +36,13 @@ public partial class AppointmentOverview : HealthCareComponentBase
     private int PageSize { get; } = 5;
     private int LookupPageSize { get; } = 100;
     private int CurrentPage { get; set; } = 1;
+    private string GroupByField { get; set; }
+    
 
     public AppointmentOverview()
     {
+        GroupByOptions = ["Department", "Date", "Doctor"];
+        GroupByField = AppointmentConsts.DefaultGroupBy;
         FilterQuery = new Query();
         AccumulationChart = new SfAccumulationChart();
         Grid = new SfGrid<GroupedAppointmentCountDto>();
@@ -51,7 +55,7 @@ public partial class AppointmentOverview : HealthCareComponentBase
 
         FilterDepartmentChart = new GetAppointmentsInput
         {
-            GroupByField = "Department",
+            GroupByField =AppointmentConsts.DefaultGroupBy,
             MaxResultCount = PageSize,
             SkipCount = 0
         };

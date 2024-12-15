@@ -171,6 +171,7 @@ public class AppointmentAppService(
 
     public virtual async Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
     {
+        
         var appointment = await appointmentManager.CreateAsync(
             input.DoctorId,
             input.PatientId,

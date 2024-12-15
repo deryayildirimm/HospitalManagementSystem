@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.MedicalServices;
+using Pusula.Training.HealthCare.Patients;
+using Pusula.Training.HealthCare.Restrictions;
 using Volo.Abp;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Domain.Services;
@@ -14,8 +17,11 @@ namespace Pusula.Training.HealthCare.Appointments;
 
 public class AppointmentManager(
     IAppointmentRepository appointmentRepository,
-    IRepository<DoctorWorkingHour> doctorWorkingHourRepository,
-    IMedicalServiceRepository medicalServiceRepository) : DomainService, IAppointmentManager
+    IDoctorWorkingHourRepository doctorWorkingHourRepository,
+    IMedicalServiceRepository medicalServiceRepository,
+    IDoctorLeaveRepository doctorLeaveRepository,
+    IRestrictionRepository restrictionRepository,
+    IPatientRepository patientRepository) : DomainService, IAppointmentManager
 {
     public virtual async Task<List<AppointmentSlotDto>> GetAppointmentSlotsAsync(
         Guid doctorId,
@@ -45,9 +51,10 @@ public class AppointmentManager(
             Date = date,
             StartTime = slot.StartTime,
             EndTime = slot.EndTime,
-            AvailabilityValue = !doctorAppointmentTimes.Any(appointment =>
-                appointment.StartTime < TimeSpan.Parse(slot.EndTime) &&
-                appointment.EndTime > TimeSpan.Parse(slot.StartTime))
+            AvailabilityValue = slot.Date > DateTime.Now.Date &&
+                                !doctorAppointmentTimes.Any(appointment =>
+                                    appointment.StartTime < TimeSpan.Parse(slot.EndTime) &&
+                                    appointment.EndTime > TimeSpan.Parse(slot.StartTime))
         }).ToList();
     }
 
@@ -81,7 +88,7 @@ public class AppointmentManager(
                     : 0;
 
                 var availableSlots = totalSlots - bookedSlots;
-                
+
                 //If the day is weekend then AvailabilityValue must be false
                 return new AppointmentDayLookupDto
                 {
@@ -118,23 +125,23 @@ public class AppointmentManager(
         Check.NotNull(amount, nameof(amount));
         Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
 
-        var alreadyHaveAppointment = await appointmentRepository.FirstOrDefaultAsync(
-            x => x.PatientId == patientId
-                 && x.AppointmentDate.Date == appointmentDate.Date
-                 && x.StartTime >= startTime
-                 && x.EndTime <= endTime) is not null;
-        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.AlreadyHaveAppointmentExactTime,
-            alreadyHaveAppointment);
-
         var appointmentDateIsValid = startTime < DateTime.Now || endTime < DateTime.Now || startTime >= endTime;
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DateNotValid, appointmentDateIsValid);
 
-        var isAppointmentTaken = await appointmentRepository.FirstOrDefaultAsync(
-            x => x.DoctorId == doctorId
-                 && x.AppointmentDate.Date == appointmentDate.Date
-                 && x.StartTime == startTime);
-        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.AppointmentAlreadyTaken,
-            isAppointmentTaken is not null);
+        //Check all restrictions for the service
+        await CheckServiceRestriction(patientId: patientId, doctorId: doctorId, departmentId: departmentId,
+            medicalServiceId: medicalServiceId);
+
+        //Check if doctor has a leave
+        await CheckDoctorLeaves(doctorId: doctorId, appointmentDate: appointmentDate);
+
+        //Check if patient has another appointment from another doctor at the same time
+        await CheckIfPatientHasAnotherAppointment(patientId: patientId, appointmentDate: appointmentDate,
+            startTime: startTime,
+            endTime: endTime);
+
+        //Check if appointment slot is occupied or not
+        await CheckAppointmentStatus(doctorId: doctorId, appointmentDate: appointmentDate, startTime: startTime);
 
         var appointment = new Appointment(
             id: GuidGenerator.Create(),
@@ -239,6 +246,81 @@ public class AppointmentManager(
             )
             .GroupBy(slot => slot.Date) // Group by date
             .ToDictionary(g => g.Key, g => g.ToList());
+    }
+
+    private async Task CheckServiceRestriction(
+        Guid patientId,
+        Guid doctorId,
+        Guid departmentId,
+        Guid medicalServiceId)
+    {
+        var patient = await patientRepository.FirstOrDefaultAsync(x => x.Id == patientId);
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.PatientNotFound, patient is null);
+
+        //Get restriction for the service
+        var restriction = await restrictionRepository.FirstOrDefaultAsync(x =>
+            x.MedicalServiceId == medicalServiceId
+            && x.DepartmentId == departmentId
+            && (x.DoctorId == null || x.DoctorId == doctorId));
+
+        if (restriction == null)
+        {
+            return;
+        }
+
+        //Calculate patient age
+        var currentDate = DateTime.Now;
+        var patientAge = currentDate.Year - patient!.BirthDate.Year;
+
+        //Throw error if patient not in the constraints
+        HealthCareGlobalException.ThrowIf(
+            HealthCareDomainErrorKeyValuePairs.ServiceAgeRestriction,
+            (restriction.MinAge.HasValue && patientAge < restriction.MinAge) ||
+            (restriction.MaxAge.HasValue && patientAge > restriction.MaxAge));
+
+        //Throw error if patient gender doesn't match the restriction 
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.ServiceGenderRestrictionViolation,
+            restriction.AllowedGender != EnumGender.NONE && restriction.AllowedGender != patient.Gender);
+    }
+
+    private async Task CheckIfPatientHasAnotherAppointment(
+        Guid patientId,
+        DateTime appointmentDate,
+        DateTime startTime,
+        DateTime endTime)
+    {
+        var alreadyHaveAppointment = await appointmentRepository.FirstOrDefaultAsync(
+            x => x.PatientId == patientId
+                 && x.AppointmentDate.Date == appointmentDate.Date
+                 && x.StartTime >= startTime
+                 && x.EndTime <= endTime) is not null;
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.AlreadyHaveAppointmentExactTime,
+            alreadyHaveAppointment);
+    }
+
+    private async Task CheckAppointmentStatus(
+        Guid doctorId,
+        DateTime appointmentDate,
+        DateTime startTime)
+    {
+        var isAppointmentTaken = await appointmentRepository.FirstOrDefaultAsync(
+            x => x.DoctorId == doctorId
+                 && x.AppointmentDate.Date == appointmentDate.Date
+                 && x.StartTime == startTime);
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.AppointmentAlreadyTaken,
+            isAppointmentTaken is not null);
+    }
+
+    private async Task CheckDoctorLeaves(
+        Guid doctorId,
+        DateTime appointmentDate)
+    {
+        var doctorHasLeave = await doctorLeaveRepository.FirstOrDefaultAsync(
+            x => x.DoctorId == doctorId
+                 && x.StartDate.Date <= appointmentDate.Date
+                 && x.EndDate.Date >= appointmentDate.Date);
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorHasLeave,
+            doctorHasLeave is not null);
     }
 
     private async Task<List<DoctorWorkingHour>> GetWorkingHoursAsync(Guid doctorId)

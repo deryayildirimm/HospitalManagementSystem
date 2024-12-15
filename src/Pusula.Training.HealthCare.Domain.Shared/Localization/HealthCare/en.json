@@ -275,6 +275,8 @@
     "ServiceCreatedAt": "Service Created At",
     "Minutes": "Minutes",
     "USD": "USD",
-    "GuidEmpty": "Guid cannot be empty"
+    "GuidEmpty": "Guid cannot be empty",
+    "AppointmentCountBy":  "Appointment Count By",
+    "StatisticsAndInfoGraphics": "Statistics And Infographics"
   }
 }

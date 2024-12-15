@@ -84,6 +84,7 @@ public partial class Appointments : HealthCareComponentBase
     private bool SlotDaysLoading { get; set; }
     private bool IsUserNavigatingReverse { get; set; }
     private bool IsCurrentStepValid { get; set; }
+    private string FailureMessage { get; set; }
 
     private bool IsFirstStepValid =>
         !string.IsNullOrEmpty(StepperModel.MedicalServiceName) &&
@@ -106,6 +107,7 @@ public partial class Appointments : HealthCareComponentBase
 
     public Appointments()
     {
+        FailureMessage = "";
         Patient = new PatientDto();
         GetAppointmentSlotFilter = new GetAppointmentSlotInput();
         StepperModel = new AppointmentStepperModel();
@@ -586,6 +588,7 @@ public partial class Appointments : HealthCareComponentBase
             IsFinalResultSuccess = false;
             await OnNextStep();
             await UiMessageService.Error(e.Message);
+            FailureMessage = e.Message;
         }
     }
 

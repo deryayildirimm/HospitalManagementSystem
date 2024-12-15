@@ -23,15 +23,21 @@
 @inject IMedicalServicesAppService MedicalServicesAppService
 @inject IPatientsAppService PatientsAppService
 
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home"/>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["NewAppointment"]/>
+    </BreadcrumbItems>
+</SfBreadcrumb>
+
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["NewAppointment"]">
     <link href="../Components/Pages/CreateAppointment.razor.css" rel="stylesheet"/>
     <link href="../Components/Pages/Appointments.razor.css" rel="stylesheet"/>
-
 </PageHeader>
 
-<div class="row py-3">
-    <div class="col-sm-12 col-md-3 p-2">
+<div class="row p-2 px-1">
+    <div class="col-sm-12 col-md-3">
         <div class="card border-1 border-black py-4 px-3 d-flex flex-column gap-1">
             <div>
                 <div class="d-flex justify-content-between align-items-end mb-3">
@@ -54,7 +60,11 @@
                         <hr class="m-0"/>
                         <h6 class="m-0">@L["Gender"]: @(SelectedPatient.Gender)</h6>
                         <hr class="m-0"/>
-                        <h6 class="m-0">@L["Birthdate"]: @(SelectedPatient.BirthDate.ToString("yyyy/MM/dd"))</h6>
+                        <h6 class="m-0">
+                            @L["Birthdate"]: @(SelectedPatient.BirthDate.ToString("yyyy/MM/dd"))
+                        </h6>
+                        <hr class="m-0"/>
+                        <h6 class="m-0">@L["Age"]: @(DateTime.Now.Year - SelectedPatient.BirthDate.Year)</h6>
                         <hr class="m-0"/>
                         <h6 class="m-0">@L["PatientType"]: @(SelectedPatient.PatientType)</h6>
                     </div>
@@ -109,7 +119,7 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-12 col-md-9 p-2">
+    <div class="col-sm-12 col-md-9">
         <div class="card border-1 border-black p-4">
             <h5>@L["AppointmentSchedule"]</h5>
             @if (IsSlotSearchAvailable)
