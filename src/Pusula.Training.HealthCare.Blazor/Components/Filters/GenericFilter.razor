@@ -1,0 +1,73 @@
+﻿@typeparam TFilter
+
+@using Syncfusion.Blazor
+@using Microsoft.AspNetCore.Components
+
+
+<SfToolbar>
+    <ToolbarItems>
+        <ToolbarItem>
+            <input type="text" class="form-control" placeholder="Search"  @bind-value="SearchValue" />
+        </ToolbarItem>
+        <ToolbarItem>
+            <button class="btn btn-primary" @onclick="OnSearchClicked">Search</button>
+        </ToolbarItem>
+        <ToolbarItem>
+            <button class="btn btn-link" @onclick="() => ShowAdvancedFilters = !ShowAdvancedFilters">
+                @(!ShowAdvancedFilters ? "See Advanced Filters" : "Hide Advanced Filters")
+            </button>
+        </ToolbarItem>
+    </ToolbarItems>
+</SfToolbar>
+
+@if (ShowAdvancedFilters)
+{
+    @ChildContent
+}
+
+@code {
+    [Parameter] public TFilter Filter { get; set; } = default!;
+    [Parameter] public EventCallback<TFilter> OnFilterChanged { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public Func<TFilter, string>? GetSearchValue { get; set; }
+    [Parameter] public Action<TFilter, string>? SetSearchValue { get; set; }
+
+    private bool ShowAdvancedFilters = false;
+
+    /*
+    private async Task OnSearchChanged(Microsoft.AspNetCore.Components.ChangeEventArgs e )
+    {
+        if (OnFilterChanged.HasDelegate)
+        {
+            await OnFilterChanged.InvokeAsync(Filter);
+        }
+    }
+    */
+    private async Task OnSearchClicked()
+    {
+        if (OnFilterChanged.HasDelegate)
+        {
+            await OnFilterChanged.InvokeAsync(Filter);
+        }
+    }
+
+    private string SearchValue
+    {
+        get => GetSearchValue.Invoke(Filter);
+        set => SetSearchValue.Invoke(Filter, value);
+    }
+
+    /*
+    *
+    * 
+    * 
+    private async Task OnSearchChanged()
+        {
+        if (OnFilterChanged.HasDelegate)
+            {
+            await OnFilterChanged.InvokeAsync(Filter);
+      }
+    }
+    */
+}
