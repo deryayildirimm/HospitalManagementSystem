@@ -277,6 +277,12 @@
     "USD": "USD",
     "GuidEmpty": "Guid cannot be empty",
     "AppointmentCountBy":  "Appointment Count By",
-    "StatisticsAndInfoGraphics": "Statistics And Infographics"
+    "StatisticsAndInfoGraphics": "Statistics And Infographics",
+    "AppointmentsByStatus": "Appointments By Status",
+    "RevenueByServices": "Revenue By Services",
+    "RevenueByDepartments": "Revenue By Departments",
+    "AppointmentsByGender": "Appointments By Gender",
+    "AppointmentsByType": "Appointments By Type",
+    "ChooseARange": "Choose a Range"
   }
 }
