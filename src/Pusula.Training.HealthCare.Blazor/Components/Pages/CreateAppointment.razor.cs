@@ -41,7 +41,6 @@ public partial class CreateAppointment : HealthCareComponentBase
     private int ServicePageSize { get; } = 50;
     private int ServiceCurrentPage { get; set; } = 1;
     private string ServiceCurrentSorting { get; set; } = string.Empty;
-    private int TypePageSize { get; } = 50;
     private int DoctorPageSize { get; } = 50;
     private int DoctorCurrentPage { get; set; } = 1;
     private string DoctorCurrentSorting { get; set; } = string.Empty;

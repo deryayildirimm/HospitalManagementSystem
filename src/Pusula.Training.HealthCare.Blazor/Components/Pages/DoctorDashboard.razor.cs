@@ -94,8 +94,8 @@ public partial class DoctorDashboard : ComponentBase
             DataSource = items.Select(x => new AppointmentCustomData
             {
                 Id = x.Id,
-                PatientName = x.Patient.FirstName + " " + x.Patient.LastName,
-                DoctorName = x.Doctor.FirstName + " " + x.Doctor.LastName,
+                PatientName = $"{x.Patient.FirstName} {x.Patient.LastName}",
+                DoctorName = $"{x.Doctor.FirstName} {x.Doctor.LastName}",
                 StartTime = x.StartTime,
                 EndTime = x.EndTime,
                 ServiceName = x.MedicalService.Name

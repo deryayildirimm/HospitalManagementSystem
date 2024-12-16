@@ -440,7 +440,7 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
                 {
                     var exportProperties = new PdfExportProperties
                     {
-                        IncludeTemplateColumn = true
+                        IncludeTemplateColumn = true,
                     };
                     await RestrictionGrid.ExportToPdfAsync(exportProperties);
                     break;

@@ -250,16 +250,24 @@
                             <TabHeader IconCss="e-search" Text="@L["SearchPatients"]"></TabHeader>
                         </ChildContent>
                         <ContentTemplate>
-                            <div class="row d-flex gap-2 align-bottom align-items-end mt-3">
-                                <div class="col-4">
+                            <div class="row d-flex align-bottom align-items-end mt-3">
+                                <div class="col-2">
+                                    <h6 class="text-black">@L["IdentityNumber"]</h6>
+                                    <SfTextBox @bind-Value="@GetPatientsInput.IdentityNumber" Placeholder="@L["IdentityNumber"]"></SfTextBox>
+                                </div>
+                                <div class="col-2">
+                                    <h6 class="text-black">@L["PatientNumber"]</h6>
+                                    <SfNumericTextBox @bind-Value="@GetPatientsInput.PatientNumber" Min="PatientConsts.PatientNumberMinValue" Max="PatientConsts.PatientNumberMaxValue" Placeholder="@L["PatientNumber"]"></SfNumericTextBox>
+                                </div>
+                                <div class="col-2">
                                     <h6 class="text-black">@L["FirstName"]</h6>
                                     <SfTextBox @bind-Value="@GetPatientsInput.FirstName" Placeholder="@L["FirstName"]"></SfTextBox>
                                 </div>
-                                <div class="col-4">
+                                <div class="col-3">
                                     <h6 class="text-black">@L["LastName"]</h6>
                                     <SfTextBox @bind-Value="@GetPatientsInput.LastName" Placeholder="@L["LastName"]"></SfTextBox>
                                 </div>
-                                <div class="col-2">
+                                <div class="col-1">
                                     <SfButton CssClass="e-primary" OnClick="GetPatients">
                                         <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
                                     </SfButton>

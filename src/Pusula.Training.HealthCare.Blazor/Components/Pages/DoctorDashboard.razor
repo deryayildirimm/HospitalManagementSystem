@@ -19,7 +19,7 @@
 @inject IUiMessageService UiMessageService
 
 @* ************************* PAGE HEADER ************************* *@
-<PageHeader Title=@L["AppointmentOverview"]>
+<PageHeader Title=@L["DoctorsAppointments"]>
 
 </PageHeader>
 
@@ -71,9 +71,13 @@
 
             </div>
 
-            <SfSchedule TValue="AppointmentCustomData" Height="650px" @bind-SelectedDate="@CurrentDate">
-                <ScheduleEventSettings EnableTooltip="true" DataSource="@DataSource">
-
+            <SfSchedule
+                AllowDragAndDrop="false"
+                AllowMultiCellSelection="false"
+                AllowMultiRowSelection="false"
+                AllowMultiDrag="false"
+                TValue="AppointmentCustomData" Height="650px" @bind-SelectedDate="@CurrentDate">
+                <ScheduleEventSettings AllowEditing="false" AllowAdding="false" AllowDeleting="false" EnableTooltip="true" DataSource="@DataSource">
                     <Template>
                         <div>@(((context as AppointmentCustomData)!).DoctorName) - @(((context as AppointmentCustomData)!).PatientName) (@(((context as AppointmentCustomData)!).StartTime) - @(((context as AppointmentCustomData)!).EndTime))</div>
                         <div></div>

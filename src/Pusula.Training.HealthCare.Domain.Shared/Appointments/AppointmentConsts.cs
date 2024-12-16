@@ -10,7 +10,7 @@ public static class AppointmentConsts
     
     public static string GetDefaultSorting(bool withEntityName)
     {
-        return string.Format(DefaultGroupBySorting, withEntityName ? "Appointment." : string.Empty);
+        return string.Format(DefaultSorting, withEntityName ? "Appointment." : string.Empty);
     }
     
     public static string GetGroupDefaultSorting(bool withEntityName)

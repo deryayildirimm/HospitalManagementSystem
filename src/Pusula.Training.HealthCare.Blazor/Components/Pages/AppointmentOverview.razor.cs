@@ -128,8 +128,6 @@ public partial class AppointmentOverview : HealthCareComponentBase
 
     protected override async Task OnInitializedAsync()
     {
-        await SetBreadcrumbItemsAsync();
-        await SetToolbarItemsAsync();
         await SetLookupsAsync();
         await SetDatas();
         await GetGraphStatistics();
@@ -143,16 +141,6 @@ public partial class AppointmentOverview : HealthCareComponentBase
         {
             await InvokeAsync(StateHasChanged);
         }
-    }
-
-    protected virtual ValueTask SetBreadcrumbItemsAsync()
-    {
-        return ValueTask.CompletedTask;
-    }
-
-    protected virtual ValueTask SetToolbarItemsAsync()
-    {
-        return ValueTask.CompletedTask;
     }
 
     private async Task SetLookupsAsync()
