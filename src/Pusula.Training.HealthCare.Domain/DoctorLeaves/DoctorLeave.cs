@@ -1,5 +1,6 @@
 ﻿using System;
 using JetBrains.Annotations;
+using Pusula.Training.HealthCare.Doctors;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -9,6 +10,9 @@ public class DoctorLeave : FullAuditedAggregateRoot<Guid>
 {
     [NotNull]
     public virtual Guid DoctorId { get; private set; }
+
+    public virtual Doctor Doctor { get; private set; } = null!;
+    
     [NotNull]
     public virtual DateTime StartDate { get; private set; }
     [NotNull]
@@ -32,13 +36,12 @@ public class DoctorLeave : FullAuditedAggregateRoot<Guid>
         SetStartDate(startDate);
         SetEndDate(endDate);
         SetReason(reason);
-
     }
     
     public void SetDoctorId(Guid id)
     {
         Check.NotNull(id, nameof(id));
-        Id = id;
+        DoctorId = id;
     }
 
     private void SetId(Guid id)

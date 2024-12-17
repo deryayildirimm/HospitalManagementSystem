@@ -1,0 +1,86 @@
+@page "/doctor-leaves"
+
+@attribute [Authorize(HealthCarePermissions.DoctorLeaves.Default)]
+@using Microsoft.AspNetCore.Components
+@using Pusula.Training.HealthCare.AppointmentTypes
+@using Pusula.Training.HealthCare.Blazor.Services
+@using Pusula.Training.HealthCare.Departments
+@using Pusula.Training.HealthCare.DoctorLeaves
+
+@using Pusula.Training.HealthCare.Localization
+@using Pusula.Training.HealthCare.Permissions
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Volo.Abp.Http.Client
+@using SelectionType = Syncfusion.Blazor.Grids.SelectionType
+@inherits HealthCareComponentBase
+@inject IDepartmentsAppService DepartmentsAppService
+@inject IDoctorLeaveAppService DoctorLeaveAppService
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+@using Syncfusion.Blazor.Buttons
+
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home"/>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["DoctorLeaves"]/>
+    </BreadcrumbItems>
+</SfBreadcrumb>
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["DoctorLeaves"]">
+</PageHeader>
+
+@* ************************* GRID ************************* *@
+<div class="row py-3 px-2">
+    <div class="col-12 border-1 bg-white rounded-1 p-4">
+        <SfGrid
+            @ref="Grid"
+            TValue="DoctorLeaveDto"
+            AllowPaging="true"
+            AllowSorting="true"
+            Toolbar="@ToolbarItems">
+            <GridSelectionSettings Type="SelectionType.Multiple"></GridSelectionSettings>
+            <SfDataManager
+                AdaptorInstance="@typeof(DoctorLeaveAdaptor)"
+                Adaptor="Adaptors.CustomAdaptor">
+            </SfDataManager>
+            <GridEvents
+                TValue="DoctorLeaveDto">
+            </GridEvents>
+            <GridPageSettings PageSize="@PageSize"></GridPageSettings>
+            <GridColumns>
+                <GridColumn Format="dd/MM/yyyy" HeaderText="@L["Name"]" TextAlign="TextAlign.Left" Width="120">
+                    <Template>
+                        @{
+                            var leaveDto = (context as DoctorLeaveDto);
+                            <div>@($"{leaveDto?.Doctor.Title.TitleName} {leaveDto?.Doctor.FirstName} {leaveDto?.Doctor.LastName}")</div>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Format="dd/MM/yyyy" HeaderText="@L["Department"]" TextAlign="TextAlign.Left" Width="120">
+                    <Template>
+                        @{
+                        var leaveDto = (context as DoctorLeaveDto);
+                        <div>@(leaveDto?.Doctor.Department.Name)</div>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="StartDate" Format="dd/MM/yyyy" HeaderText="@L["StartDate"]" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                <GridColumn Field="EndDate" Format="dd/MM/yyyy" HeaderText="@L["EndDate"]" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                <GridColumn Field="Reason" HeaderText="@L["Reason"]" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                <GridColumn HeaderText="@L["Actions"]" Width="150">
+                    <Template Context="context">
+                        <SfButton IconCss="e-icons e-edit" CssClass="e-primary" OnClick="@(() => OpenEditDialog((DoctorLeaveDto)context))">
+                        </SfButton>
+                        <SfButton IconCss="e-icons e-delete" CssClass="e-danger" OnClick="@(() => DeleteTypeAsync((DoctorLeaveDto)context))">
+                        </SfButton>
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>

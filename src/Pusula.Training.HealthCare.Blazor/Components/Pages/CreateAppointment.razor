@@ -160,8 +160,8 @@
             }
 
 
-            <SfSchedule @ref="ScheduleObj" TValue="AppointmentCustomData" Height="650px" AllowDragAndDrop="false" AllowMultiDrag="false" @bind-SelectedDate="@CurrentDate">
-                <ScheduleEvents TValue="AppointmentCustomData" Navigating="@OnNavigateDate" OnPopupOpen="@OnPopupOpen"></ScheduleEvents>
+            <SfSchedule @ref="ScheduleObj" TValue="AppointmentCustomData" Height="650px" AllowDragAndDrop="true"  AllowMultiDrag="false" @bind-SelectedDate="@CurrentDate">
+                <ScheduleEvents TValue="AppointmentCustomData" Dragged="OnDragged" OnDragStart="OnDragStart" Navigating="@OnNavigateDate" OnPopupOpen="@OnPopupOpen"></ScheduleEvents>
 
                 <ScheduleQuickInfoTemplates>
                     <HeaderTemplate>
@@ -380,6 +380,7 @@
 
 @* Create Appointment Modal *@
 <SfDialog CssClass="p-2" Visible="@IsCreateAppointmentOpen" IsModal="true" Width="575px" ShowCloseIcon="true">
+    
     <DialogTemplates>
         <Header>
             <div>@L["NewAppointment"]</div>
@@ -417,7 +418,7 @@
                         <td class="e-textlabel my-2">@L["Cost"]</td>
                         <td class="mx-1" colspan="4">
                             <h6 class="m-0">
-                                @(NewAppointment.Amount) @L["TL"]
+                                @(NewAppointment.Amount) @L["USD"]
                             </h6>
                         </td>
                     </tr>
@@ -460,6 +461,105 @@
                         <td colspan="4">
                             <SfTextBox @bind-Value="@NewAppointment.Notes"></SfTextBox>
                             <ValidationMessage For="@(() => NewAppointment.Notes)"/>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <SfProgressButton CssClass="e-success e-outline e-custom" Content="Submit">
+                    <ProgressButtonSpinSettings Position="SpinPosition.Right" Width="20">
+                        <SpinTemplate>
+                            <div class="template"></div>
+                        </SpinTemplate>
+                    </ProgressButtonSpinSettings>
+                </SfProgressButton>
+            </EditForm>
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@* Create Appointment Modal *@
+<SfDialog CssClass="p-2" Visible="@IsEditAppointmentOpen" IsModal="true" Width="575px" ShowCloseIcon="true">
+    <DialogEvents Closed="@CloseEditAppointmentModal"></DialogEvents>
+    <DialogTemplates>
+        <Header>
+            <div>@L["EditAppointment"]</div>
+        </Header>
+        <Content>
+            <EditForm Model="@EditingAppointment" OnValidSubmit="@UpdateAppointmentAsync">
+                <DataAnnotationsValidator/>
+                <table class="custom-event-editor p-2" style="min-height: 380px; min-width: 300px;">
+                    <tbody>
+                    <tr>
+                        <td class="my-2">@L["Patient"]</td>
+                        <td class="mx-1" colspan="4">
+                            <h6 class="m-0">
+                                @(SelectedPatient?.FirstName + " " + SelectedPatient?.LastName)
+                            </h6>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="e-textlabel my-2">@L["Doctor"]</td>
+                        <td class="mx-1" colspan="4">
+                            <h6 class="m-0">
+                                @(DoctorNameInfo)
+                            </h6>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="e-textlabel my-2">@L["MedicalService"]</td>
+                        <td class="mx-1" colspan="4">
+                            <h6 class="m-0">
+                                @(MedicalServiceNameInfo)
+                            </h6>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="e-textlabel my-2">@L["Cost"]</td>
+                        <td class="mx-1" colspan="4">
+                            <h6 class="m-0">
+                                @(EditingAppointment.Amount) @L["USD"]
+                            </h6>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="e-textlabel my-2">@L["AppointmentType"]</td>
+                        <td class="mx-1" colspan="4">
+                            <SfDropDownList
+                                TValue="Guid"
+                                TItem="LookupDto<Guid>"
+                                ID="EventType"
+                                DataSource="@AppointmentTypesCollection"
+                                @bind-Value="@(EditingAppointment.AppointmentTypeId)"
+                                Placeholder="@L["Select"]">
+                                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                            </SfDropDownList>
+                            <ValidationMessage For="() => (EditingAppointment.AppointmentTypeId)"/>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="e-textlabel my-2">@L["From"]</td>
+                        <td class="mx-1" colspan="4">
+                            <SfDateTimePicker Enabled="false" @bind-Value="@(EditingAppointment.StartTime)"></SfDateTimePicker>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="e-textlabel my-2">@L["To"]</td>
+                        <td colspan="4">
+                            <SfDateTimePicker Enabled="false" @bind-Value="@(EditingAppointment.EndTime)"></SfDateTimePicker>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="e-textlabel my-2">@L["SendReminder"]</td>
+                        <td class="mx-1">
+                            <SfSwitch @bind-Checked="@EditingAppointment.ReminderSent"></SfSwitch>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="e-textlabel">@L["Notes"]</td>
+                        <td colspan="4">
+                            <SfTextBox @bind-Value="@EditingAppointment.Notes"></SfTextBox>
+                            <ValidationMessage For="@(() => EditingAppointment.Notes)"/>
                         </td>
                     </tr>
                     </tbody>

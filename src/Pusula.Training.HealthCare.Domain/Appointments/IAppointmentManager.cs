@@ -35,13 +35,15 @@ public interface IAppointmentManager
     
     Task<Appointment> UpdateAsync(
         Guid id,
+        Guid doctorId,
         DateTime appointmentDate,
         DateTime startTime,
         DateTime endTime,
         EnumAppointmentStatus status,
         bool reminderSent,
         double amount,
-        string? notes = null
+        string? notes = null,
+        string? cancellationNotes = null
     );
     
 }

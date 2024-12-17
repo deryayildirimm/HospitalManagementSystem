@@ -111,7 +111,7 @@ public class HealthCareDbContext :
         : base(options)
     {
     }
-    
+
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
@@ -145,7 +145,8 @@ public class HealthCareDbContext :
                     .HasMaxLength(PatientConsts.NameMaxLength);
                 b.Property(x => x.IdentityNumber).HasColumnName(nameof(Patient.IdentityNumber))
                     .HasMaxLength(PatientConsts.IdentityNumberLength).IsRequired();
-                b.Property(x => x.PassportNumber).HasColumnName(nameof(Patient.PassportNumber)).HasMaxLength(PatientConsts.PassportNumberMaxLength);
+                b.Property(x => x.PassportNumber).HasColumnName(nameof(Patient.PassportNumber))
+                    .HasMaxLength(PatientConsts.PassportNumberMaxLength);
                 b.Property(x => x.Nationality).HasColumnName(nameof(Patient.Nationality));
                 b.Property(x => x.BirthDate).HasColumnName(nameof(Patient.BirthDate)).IsRequired();
                 b.Property(x => x.EmailAddress).HasColumnName(nameof(Patient.EmailAddress))
@@ -172,7 +173,7 @@ public class HealthCareDbContext :
                 b.HasMany(x => x.DepartmentMedicalServices)
                     .WithOne(e => e.Department)
                     .HasForeignKey(e => e.DepartmentId);
-                
+
                 b.HasMany(x => x.Doctors)
                     .WithOne(d => d.Department)
                     .HasForeignKey(d => d.DepartmentId)
@@ -301,7 +302,7 @@ public class HealthCareDbContext :
                     .OnDelete(DeleteBehavior.NoAction);
                 b.HasOne(d => d.Title).WithMany().IsRequired().HasForeignKey(x => x.TitleId)
                     .OnDelete(DeleteBehavior.NoAction);
-                
+
                 b.HasOne(x => x.Department)
                     .WithMany(d => d.Doctors)
                     .HasForeignKey(x => x.DepartmentId)
@@ -352,6 +353,10 @@ public class HealthCareDbContext :
                     .IsRequired()
                     .HasColumnName(nameof(Appointment.Amount));
 
+                b.Property(a => a.CancellationNotes)
+                    .IsRequired(false)
+                    .HasColumnName(nameof(Appointment.CancellationNotes));
+
                 b.HasOne(a => a.Doctor)
                     .WithMany()
                     .IsRequired()
@@ -390,7 +395,7 @@ public class HealthCareDbContext :
                 b.Property(x => x.Name).HasColumnName(nameof(AppointmentType.Name)).IsRequired()
                     .HasMaxLength(AppointmentTypeConsts.NameMaxLength);
             });
-            
+
             builder.Entity<Restriction>(b =>
             {
                 b.ToTable(HealthCareConsts.DbTablePrefix + "Restrictions", HealthCareConsts.DbSchema);
@@ -449,8 +454,11 @@ public class HealthCareDbContext :
                 b.Property(x => x.StartDate).HasColumnName(nameof(DoctorLeave.StartDate)).IsRequired();
                 b.Property(x => x.EndDate).HasColumnName(nameof(DoctorLeave.EndDate)).IsRequired();
                 b.Property(x => x.Reason).HasColumnName(nameof(DoctorLeave.Reason)).HasMaxLength(200);
-                b.HasOne<Doctor>().WithMany().IsRequired().HasForeignKey(x => x.DoctorId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(x => x.Doctor)
+                    .WithMany()
+                    .HasForeignKey(x => x.DoctorId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
 
             builder.Entity<MedicalStaff>(b =>

@@ -10,6 +10,7 @@ using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Tests;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Districts;
+using Pusula.Training.HealthCare.DoctorLeaves;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.MedicalPersonnel;
@@ -59,6 +60,7 @@ namespace Pusula.Training.HealthCare
         IMedicalStaffRepository medicalStaffRepository,
         IInsuranceRepository insuranceRepository,
         IRestrictionManager restrictionManager,
+        IDoctorLeaveRepository leaveRepository,
         IRepository<Test, Guid> testRepository) : IDataSeedContributor, ITransientDependency
     {
         public async Task SeedAsync(DataSeedContext context)
@@ -75,6 +77,7 @@ namespace Pusula.Training.HealthCare
             await SeedDoctorRecords();
             await SeedMedicalStaffRecords();
             await SeedDoctorWorkingHours();
+            //await SeedDoctorLeaves();
             await SeedAppointments();
             await SeedProtocolType();
             await SeedProtocols();
@@ -119,7 +122,9 @@ namespace Pusula.Training.HealthCare
             if (await departmentRepository.GetCountAsync() == 0
                 || await cityRepository.GetCountAsync() == 0
                 || await districtRepository.GetCountAsync() == 0)
+            {
                 return;
+            }
 
             var departments = await departmentRepository.GetListAsync();
             var cityTitles = await cityRepository.GetListAsync();
@@ -328,7 +333,7 @@ namespace Pusula.Training.HealthCare
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Oncology"), true);
             await departmentRepository.InsertAsync(new Department(Guid.NewGuid(), "Neurology"), true);
         }
-        
+
         private async Task SeedMedicalServiceRestrictions()
         {
             if (await medicalServiceRepository.GetCountAsync() == 0
@@ -337,24 +342,24 @@ namespace Pusula.Training.HealthCare
             {
                 return;
             }
-            
+
             var medicalServices = await medicalServiceRepository.GetListAsync(includeDetails: true);
             var departments = await departmentRepository.GetListAsync(includeDetails: true);
             var doctors = await doctorRepository.GetListAsync(includeDetails: true);
             var medicalServiceIndex = 0;
-            
+
             foreach (var doctor in doctors)
             {
                 if (medicalServiceIndex + 1 > medicalServices.Count)
                     return;
-                
+
                 var medicalService = medicalServices[medicalServiceIndex++];
-                
+
                 if (medicalService == null)
                 {
                     continue;
                 }
-                
+
                 await restrictionManager.CreateAsync(
                     medicalService.Id,
                     doctor.Department.Id,
@@ -392,7 +397,7 @@ namespace Pusula.Training.HealthCare
                 medicalServiceIndex++;
             }
         }
-        
+
         private async Task SeedProtocolMedicalService()
         {
             if (await medicalServiceRepository.GetCountAsync() == 0
@@ -411,9 +416,9 @@ namespace Pusula.Training.HealthCare
                 var randomServices = medicalServices
                     .OrderBy(ms => random.Next())
                     .Distinct()
-                    .Take(2) 
+                    .Take(2)
                     .ToList();
-                
+
                 foreach (var service in randomServices)
                 {
                     var protocolMedicalService = new ProtocolMedicalService
@@ -507,7 +512,9 @@ namespace Pusula.Training.HealthCare
         private async Task SeedTestCategoryRecords()
         {
             if (await testCategoryRepository.GetCountAsync() > 0)
+            {
                 return;
+            }
 
             await testCategoryRepository.InsertAsync(
                 new TestCategory(Guid.NewGuid(), "Hematological Tests",
@@ -527,7 +534,9 @@ namespace Pusula.Training.HealthCare
         {
             var testCount = await testRepository.CountAsync();
             if (testCount > 0)
+            {
                 return;
+            }
 
             var hematologicalCategory =
                 await testCategoryRepository.FirstOrDefaultAsync(tc => tc.Name == "Hematological Tests");
@@ -610,7 +619,9 @@ namespace Pusula.Training.HealthCare
                 || await departmentRepository.GetCountAsync() == 0
                 || await cityRepository.GetCountAsync() == 0
                 || await districtRepository.GetCountAsync() == 0)
+            {
                 return;
+            }
 
             var titles = await titleRepository.GetListAsync();
             var departments = await departmentRepository.GetListAsync();
@@ -774,7 +785,7 @@ namespace Pusula.Training.HealthCare
             await doctorRepository.InsertAsync(d8, true);
             await doctorRepository.InsertAsync(d9, true);
         }
-        
+
         private async Task SeedProtocols()
         {
             // Doktorlar, hastalar, protokol türleri ve departmanlar kontrol ediliyor
@@ -831,16 +842,35 @@ namespace Pusula.Training.HealthCare
             await protocolRepository.InsertManyAsync(protocols, autoSave: true); // Protokoller veri tabanına ekleniyor
         }
 
+        private async Task SeedDoctorLeaves()
+        {
+            if (await doctorRepository.GetCountAsync() == 0)
+            {
+                return;
+            }
+
+            var doctors = await doctorRepository.GetListAsync();
+
+            var leave1 = new DoctorLeave(guidGenerator.Create(), doctors[0].Id, DateTime.Today.AddDays(1),
+                DateTime.Today.AddDays(7));
+            
+            var leave2 = new DoctorLeave(guidGenerator.Create(), doctors[1].Id, DateTime.Today.AddDays(7),
+                DateTime.Today.AddDays(27));
+
+            await leaveRepository.InsertAsync(leave1, true);
+            await leaveRepository.InsertAsync(leave2, true);
+        }
+
 
         private async Task SeedRoleRecords()
         {
-            var doctor = new IdentityRole(guidGenerator.Create(), "doctor", null)
+            var doctor = new IdentityRole(id: guidGenerator.Create(), name: "doctor")
             {
                 IsPublic = true,
                 IsDefault = false
             };
 
-            var staff = new IdentityRole(guidGenerator.Create(), "staff", null)
+            var staff = new IdentityRole(id: guidGenerator.Create(), name: "staff")
             {
                 IsPublic = true,
                 IsDefault = false
@@ -864,13 +894,12 @@ namespace Pusula.Training.HealthCare
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Departments.Create, true);
             await permissionManager.SetForRoleAsync(doctor.Name, HealthCarePermissions.Departments.Delete, true);
 
-
-            //Patiens permissions
+            //Patients permissions
             await permissionManager.SetForRoleAsync(staff.Name, HealthCarePermissions.Patients.Default, true);
             await permissionManager.SetForRoleAsync(staff.Name, HealthCarePermissions.Patients.Create, true);
             await permissionManager.SetForRoleAsync(staff.Name, HealthCarePermissions.Patients.Delete, true);
 
-            //Departments permissions
+            //MedicalServices permissions
             await permissionManager.SetForRoleAsync(staff.Name, HealthCarePermissions.MedicalServices.Default, true);
             await permissionManager.SetForRoleAsync(staff.Name, HealthCarePermissions.MedicalServices.Create, true);
             await permissionManager.SetForRoleAsync(staff.Name, HealthCarePermissions.MedicalServices.Delete, true);
@@ -945,6 +974,7 @@ namespace Pusula.Training.HealthCare
                             appointmentDate + appointmentTime + serviceDuration,
                             (EnumAppointmentStatus)random.Next(0, Enum.GetValues(typeof(EnumAppointmentStatus)).Length),
                             random.NextDouble() > 0.5 ? "Some notes for this appointment" : null,
+                            cancellationNotes: null,
                             random.NextDouble() > 0.5,
                             medicalService.Cost
                         );
@@ -957,7 +987,7 @@ namespace Pusula.Training.HealthCare
                             $"Skipping appointment for patient {patient.Id} on {appointmentDate.Add(appointmentTime)}. Error: {ex.Message}");
                     }
 
-                    // Her hasta için 10 farklı randevu saati olmalı
+                    // Her hasta için 4 farklı randevu saati olmalı
                     if (patientAppointments.Count >= 4)
                     {
                         break;
@@ -982,7 +1012,9 @@ namespace Pusula.Training.HealthCare
         private async Task SeedDoctorWorkingHours()
         {
             if (await doctorRepository.GetCountAsync() == 0)
+            {
                 return;
+            }
 
             var doctors = await doctorRepository.GetListAsync();
 
@@ -1038,7 +1070,9 @@ namespace Pusula.Training.HealthCare
         private async Task SeedExaminations()
         {
             if (await protocolRepository.GetCountAsync() == 0)
+            {
                 return;
+            }
 
             var protocols = await protocolRepository.GetListAsync();
 
@@ -1074,7 +1108,9 @@ namespace Pusula.Training.HealthCare
         private async Task SeedFamilyHistory()
         {
             if (await examinationRepository.GetCountAsync() == 0)
+            {
                 return;
+            }
 
             var examinations = await examinationRepository.GetListAsync();
 
@@ -1115,7 +1151,9 @@ namespace Pusula.Training.HealthCare
         private async Task SeedBackground()
         {
             if (await examinationRepository.GetCountAsync() == 0)
+            {
                 return;
+            }
 
             var examinations = await examinationRepository.GetListAsync();
 

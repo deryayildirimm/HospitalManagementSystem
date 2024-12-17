@@ -25,6 +25,14 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         double? maxAmount = null,
         CancellationToken cancellationToken = default);
     
+    Task<Appointment> GetByDateAsync(
+        Guid doctorId,
+        Guid medicalServiceId,
+        DateTime startTime,
+        DateTime endTime,
+        DateTime appointmentDate,
+        CancellationToken cancellationToken = default);
+    
     Task<List<Appointment>> GetListAsync(
         Guid? doctorId = null,
         Guid? patientId = null,

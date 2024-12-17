@@ -284,6 +284,9 @@
     "AppointmentsByGender": "Appointments By Gender",
     "AppointmentsByType": "Appointments By Type",
     "ChooseARange": "Choose a Range",
-    "DoctorsAppointments":  "Doctor's Appointments"
+    "DoctorsAppointments":  "Doctor's Appointments",
+    "UpdateAppointment": "Update Appointment",
+    "CancellationNotes": "Cancellation Notes",
+    "AppointmentsBy": "Appointments By"
   }
 }

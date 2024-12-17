@@ -19,8 +19,7 @@ public class DoctorLeaveController(IDoctorLeaveAppService leaveService) : Health
 {
     [HttpGet]
     public virtual Task<PagedResultDto<DoctorLeaveDto>> GetListAsync(GetDoctorLeaveInput input) => leaveService.GetListAsync(input);
-
-
+    
     [HttpGet]
     [Route("{id}")]
     public virtual Task<DoctorLeaveDto> GetAsync(Guid id) => leaveService.GetAsync(id);

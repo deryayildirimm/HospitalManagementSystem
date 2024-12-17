@@ -33,7 +33,6 @@ public partial class AppointmentList : HealthCareComponentBase
     private bool IsEditDialogVisible { get; set; }
     private bool IsCreateDialogVisible { get; set; }
     private GetAppointmentsInput Filter { get; set; }
-    private AppointmentTypeUpdateDto EditingType { get; set; }
     private AppointmentTypeCreateDto NewType { get; set; }
     private bool IsDeleteDialogVisible { get; set; }
     private SfDialog DeleteConfirmDialog { get; set; }
@@ -44,17 +43,20 @@ public partial class AppointmentList : HealthCareComponentBase
     private List<KeyValuePair<string, EnumPatientTypes>> PatientTypeCollection { get; set; }
     private List<KeyValuePair<string, EnumAppointmentStatus>> StatusCollection { get; set; }
 
+    private AppointmentUpdateDto EditingAppointment { get; set; }
+    private Guid EditingAppointmentId { get; set; } = default;
+
     public AppointmentList()
     {
         Grid = new SfGrid<AppointmentDto>();
-        DeleteConfirmDialog = new SfDialog();;
+        DeleteConfirmDialog = new SfDialog();
+        ;
         NewType = new AppointmentTypeCreateDto();
         Filter = new GetAppointmentsInput
         {
             MaxResultCount = PageSize,
             SkipCount = 0
         };
-        EditingType = new AppointmentTypeUpdateDto();
         IsEditDialogVisible = false;
         IsCreateDialogVisible = false;
         IsDeleteDialogVisible = false;
@@ -65,6 +67,7 @@ public partial class AppointmentList : HealthCareComponentBase
         MedicalServiceCollection = [];
         StatusCollection = [];
         FilterQuery = new Query();
+        EditingAppointment = new AppointmentUpdateDto();
     }
 
     protected override async Task OnInitializedAsync()
@@ -81,7 +84,7 @@ public partial class AppointmentList : HealthCareComponentBase
         FilterQuery.Queries.Params = new Dictionary<string, object>();
         FilterQuery.Queries.Params.Add("Filter", Filter);
     }
-    
+
     private void SetStatus()
     {
         StatusCollection = Enum.GetValues(typeof(EnumAppointmentStatus))
@@ -152,7 +155,7 @@ public partial class AppointmentList : HealthCareComponentBase
         Filter.MaxResultCount = PageSize;
         Filter.SkipCount = (CurrentPage - 1) * PageSize;
         Filter.Sorting = CurrentSorting;
-        
+
         SetFilters();
         await Refresh();
     }
@@ -181,12 +184,11 @@ public partial class AppointmentList : HealthCareComponentBase
 
     public async void OnActionBegin(ActionEventArgs<AppointmentDto> args)
     {
-        
         if (args.RequestType.ToString() != "Delete" || !IsDeleteDialogVisible)
         {
             return;
         }
-        
+
         if (args.RequestType.ToString() == "Paging")
         {
             return;
@@ -318,12 +320,44 @@ public partial class AppointmentList : HealthCareComponentBase
         }
     }
 
+    private async Task UpdateAppointmentAsync()
+    {
+        try
+        {
+            await AppointmentAppService.UpdateAsync(EditingAppointmentId, EditingAppointment);
+            CloseEditAppointmentModal();
+        }
+        catch (Exception ex)
+        {
+            await HandleErrorAsync(ex);
+        }
+        finally
+        {
+            CloseEditAppointmentModal();
+            await Refresh();
+        }
+    }
+
+    private void OpenEditDialog(AppointmentDto input)
+    {
+        EditingAppointment = ObjectMapper.Map<AppointmentDto, AppointmentUpdateDto>(input);
+        EditingAppointmentId = input.Id;
+        IsEditDialogVisible = true;
+    }
+
+    private void CloseEditAppointmentModal()
+    {
+        EditingAppointment = new AppointmentUpdateDto();
+        EditingAppointmentId = Guid.Empty;
+        IsEditDialogVisible = false;
+    }
+
     private async Task Refresh()
     {
         await Grid.Refresh();
     }
-    
-    private string GetStatusClass(string status)
+
+    private static string GetStatusClass(string status)
     {
         return status switch
         {
@@ -334,6 +368,5 @@ public partial class AppointmentList : HealthCareComponentBase
             "Missed" => "missed",
             _ => string.Empty,
         };
-
     }
 }

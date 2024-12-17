@@ -112,10 +112,25 @@
                             AllowPaging="true"
                             AllowSorting="true"
                             Toolbar="@ToolbarItems">
-                            <GridSelectionSettings EnableSimpleMultiRowSelection="false" AllowDragSelection="false" Type="SelectionType.Single"></GridSelectionSettings>
-                            <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
-                            <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="@CanDeleteRestriction"></GridEditSettings>
-                            <GridEvents RowSelected="RowSelectHandler" OnToolbarClick="ToolbarClickHandler" TValue="RestrictionDto"></GridEvents>
+                            <GridSelectionSettings
+                                EnableSimpleMultiRowSelection="false"
+                                AllowDragSelection="false"
+                                Type="SelectionType.Single">
+                            </GridSelectionSettings>
+                            <GridPageSettings
+                                PageSize="@PageSize"
+                                CurrentPage="@CurrentPage">
+                            </GridPageSettings>
+                            <GridEditSettings
+                                AllowAdding="true"
+                                AllowEditing="true"
+                                AllowDeleting="@CanDeleteRestriction">
+                            </GridEditSettings>
+                            <GridEvents
+                                RowSelected="RowSelectHandler"
+                                OnToolbarClick="ToolbarClickHandler"
+                                TValue="RestrictionDto">
+                            </GridEvents>
                             <GridColumns>
                                 <GridColumn HeaderText="@L["Doctor"]" width="145px">
                                     <Template Context="context">

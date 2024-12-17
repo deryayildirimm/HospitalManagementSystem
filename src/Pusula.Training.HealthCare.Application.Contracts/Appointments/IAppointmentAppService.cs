@@ -20,6 +20,8 @@ public interface IAppointmentAppService : IApplicationService
     Task<PagedResultDto<GroupedAppointmentCountDto>> GetCountByGroupAsync(GetAppointmentsInput input);
 
     Task<AppointmentDto> GetAsync(Guid id);
+    
+    Task<AppointmentDto> GetByDateAsync(GetAppointmentByDateInput input);
 
     Task DeleteAsync(Guid id);
 

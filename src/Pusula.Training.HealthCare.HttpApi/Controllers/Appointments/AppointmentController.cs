@@ -43,6 +43,11 @@ public class AppointmentController(IAppointmentAppService appointmentAppService)
     public virtual Task<AppointmentDto> GetAsync(Guid id)
         => appointmentAppService.GetAsync(id);
 
+    [HttpGet]
+    [Route("{by-date}")]
+    public Task<AppointmentDto> GetByDateAsync(GetAppointmentByDateInput input)
+     => appointmentAppService.GetByDateAsync(input);
+
     [HttpPost]
     public virtual Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
         => appointmentAppService.CreateAsync(input);

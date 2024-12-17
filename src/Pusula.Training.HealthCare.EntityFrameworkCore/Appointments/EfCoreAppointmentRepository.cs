@@ -53,6 +53,26 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
     }
 
+    public virtual async Task<Appointment> GetByDateAsync(
+        Guid doctorId,
+        Guid medicalServiceId,
+        DateTime startTime,
+        DateTime endTime,
+        DateTime appointmentDate,
+        CancellationToken cancellationToken = default)
+    {
+        var query = ApplyFilter((await GetQueryForNavigationPropertiesAsync()),
+            doctorId: doctorId,
+            medicalServiceId: medicalServiceId,
+            appointmentDate:appointmentDate,
+            startTime:startTime,
+            endTime: endTime);
+
+        var appointment = await query.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.AppointmentNotFound, appointment is null);
+        return appointment!;
+    }
+
     public virtual async Task<List<Appointment>> GetListAsync(
         Guid? doctorId = null,
         Guid? patientId = null,
@@ -208,6 +228,19 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
     #endregion
 
     #region ApplyFilter
+
+    protected virtual IQueryable<Appointment> ApplyFilter(
+        IQueryable<Appointment> query,
+        Guid doctorId,
+        Guid medicalServiceId,
+        DateTime startTime,
+        DateTime endTime,
+        DateTime appointmentDate) =>
+        query
+            .Where(x => x.DoctorId == doctorId)
+            .Where(x => x.MedicalServiceId == medicalServiceId)
+            .Where(x => x.AppointmentDate.Date == appointmentDate.Date)
+            .Where(x => x.StartTime >= startTime && x.EndTime <= endTime);
 
     protected virtual IQueryable<Appointment> ApplyFilter(
         IQueryable<Appointment> query,

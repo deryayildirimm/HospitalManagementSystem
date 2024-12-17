@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Pusula.Training.HealthCare.Doctors;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Domain.Entities;
 
@@ -11,6 +12,8 @@ public class DoctorLeaveDto : FullAuditedEntityDto<Guid>, IHasConcurrencyStamp
 
     [Required]
     public Guid DoctorId { get; set; } = Guid.Empty;
+
+    public DoctorDto Doctor { get; set; } = null!;
     [Required]
     public virtual DateTime StartDate { get; set; } = DateTime.Today;
     [Required]

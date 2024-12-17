@@ -14,21 +14,21 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Pusula.Training.HealthCare.DoctorLeaves;
 
 public class EfCoreDoctorLeaveRepository(IDbContextProvider<HealthCareDbContext> dbContextProvider)
-  : EfCoreRepository<HealthCareDbContext, DoctorLeave, Guid>(dbContextProvider), IDoctorLeaveRepository
+    : EfCoreRepository<HealthCareDbContext, DoctorLeave, Guid>(dbContextProvider), IDoctorLeaveRepository
 {
-        public virtual async Task DeleteAllAsync(
-            string? filterText = null,
-            Guid? doctorId = null,
-            DateTime? startDateMin = null,
-            DateTime? startDateMax = null,
-            DateTime? endDateMin = null,
-            DateTime? endDateMax = null,
-            string? reason = null,
-            CancellationToken cancellationToken = default)
+    public virtual async Task DeleteAllAsync(
+        string? filterText = null,
+        Guid? doctorId = null,
+        DateTime? startDateMin = null,
+        DateTime? startDateMax = null,
+        DateTime? endDateMin = null,
+        DateTime? endDateMax = null,
+        string? reason = null,
+        CancellationToken cancellationToken = default)
     {
         var query = await GetQueryableAsync();
 
-        query = ApplyFilter(query, filterText , doctorId, startDateMin, startDateMax, endDateMin, endDateMax, reason);
+        query = ApplyFilter(query, filterText, doctorId, startDateMin, startDateMax, endDateMin, endDateMax, reason);
 
         var ids = query.Select(x => x.Id);
         await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
@@ -47,8 +47,12 @@ public class EfCoreDoctorLeaveRepository(IDbContextProvider<HealthCareDbContext>
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), filterText,doctorId, startDateMin, startDateMax, endDateMin, endDateMax, reason);
-      //  query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? PatientConsts.GetDefaultSorting(false) : sorting);
+        var query = ApplyFilter((await GetQueryForNavigationPropertiesAsync()), filterText, doctorId, startDateMin,
+            startDateMax,
+            endDateMin, endDateMax, reason);
+        query = query.OrderBy(string.IsNullOrWhiteSpace(sorting)
+            ? DoctorLeaveConsts.GetDefaultSorting(false)
+            : sorting);
         return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
     }
 
@@ -62,10 +66,23 @@ public class EfCoreDoctorLeaveRepository(IDbContextProvider<HealthCareDbContext>
         string? reason = null,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetDbSetAsync()), filterText,doctorId, startDateMin, startDateMax, endDateMin, endDateMax, reason );
+        var query = ApplyFilter((await GetQueryForNavigationPropertiesAsync()), filterText, doctorId, startDateMin,
+            startDateMax, endDateMin,
+            endDateMax, reason);
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
-    
+
+    #region NavigationQueryCreator
+
+    protected virtual async Task<IQueryable<DoctorLeave>> GetQueryForNavigationPropertiesAsync()
+        =>
+            (await GetQueryableAsync())
+            .Include(leave => leave.Doctor)
+            .Include(leave => leave.Doctor.Department)
+            .Include(leave => leave.Doctor.Title);
+
+    #endregion
+
     protected virtual IQueryable<DoctorLeave> ApplyFilter(
         IQueryable<DoctorLeave> query,
         string? filterText = null,
@@ -75,14 +92,13 @@ public class EfCoreDoctorLeaveRepository(IDbContextProvider<HealthCareDbContext>
         DateTime? endDateMin = null,
         DateTime? endDateMax = null,
         string? reason = null) => query
-            .WhereIf(!string.IsNullOrWhiteSpace(filterText),
-                e => e.Reason!.Contains(filterText!))
-            .WhereIf(!string.IsNullOrWhiteSpace(reason), e => e.Reason!.ToLower().Contains(reason!.ToLower()))
-            .WhereIf(startDateMin.HasValue, e => e.StartDate >= startDateMin!.Value)
-            .WhereIf(startDateMax.HasValue, e => e.StartDate <= startDateMax!.Value)
-            .WhereIf(endDateMin.HasValue, e => e.EndDate >= endDateMin!.Value)
-            .WhereIf(endDateMax.HasValue, e => e.EndDate <= endDateMax!.Value)
-            .WhereIf(doctorId.HasValue, e => e.DoctorId == doctorId);
-
-    
+        .WhereIf(!string.IsNullOrWhiteSpace(filterText),
+            e => e.Reason!.Contains(filterText!))
+        .WhereIf(!string.IsNullOrWhiteSpace(reason), x =>
+            x.Reason != null && EF.Functions.ILike(x.Reason, $"%{reason}%"))
+        .WhereIf(startDateMin.HasValue, e => e.StartDate >= startDateMin!.Value)
+        .WhereIf(startDateMax.HasValue, e => e.StartDate <= startDateMax!.Value)
+        .WhereIf(endDateMin.HasValue, e => e.EndDate >= endDateMin!.Value)
+        .WhereIf(endDateMax.HasValue, e => e.EndDate <= endDateMax!.Value)
+        .WhereIf(doctorId.HasValue, e => e.DoctorId == doctorId);
 }

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
@@ -160,6 +159,21 @@ public class AppointmentAppService(
         return ObjectMapper.Map<Appointment, AppointmentDto>(await appointmentRepository.GetAsync(id));
     }
 
+    public virtual async Task<AppointmentDto> GetByDateAsync(GetAppointmentByDateInput input)
+    {
+        var item = await appointmentRepository.GetByDateAsync(
+            input.DoctorId,
+            input.MedicalServiceId,
+            input.StartTime,
+            input.EndTime,
+            input.AppointmentDate);
+
+        await distributedEventBus.PublishAsync(new AppointmentsViewedEto { Id = item.Id, ViewedAt = Clock.Now },
+            onUnitOfWorkComplete: false);
+
+        return ObjectMapper.Map<Appointment, AppointmentDto>(item);
+    }
+
     [Authorize(HealthCarePermissions.Appointments.Delete)]
     public virtual async Task DeleteAsync(Guid id)
     {
@@ -171,7 +185,6 @@ public class AppointmentAppService(
 
     public virtual async Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
     {
-        
         var appointment = await appointmentManager.CreateAsync(
             input.DoctorId,
             input.PatientId,
@@ -197,13 +210,15 @@ public class AppointmentAppService(
     {
         var appointment = await appointmentManager.UpdateAsync(
             id,
+            input.DoctorId,
             input.AppointmentDate,
             input.StartTime,
             input.EndTime,
             input.Status,
             input.ReminderSent,
             input.Amount,
-            input.Notes
+            input.Notes,
+            input.CancellationNotes
         );
 
         await distributedEventBus.PublishAsync(new ApointmentUpdatedEto { Id = appointment.Id, UpdatedAt = Clock.Now },

@@ -41,6 +41,9 @@ public static class HealthCareDomainErrorKeyValuePairs
 
     public static KeyValuePair<string, string> AppointmentAlreadyTaken =
         KeyValuePair.Create(HealthCareDomainErrorCodes.AppointmentAlreadyTaken, "Selected appointment already taken.");
+    
+    public static KeyValuePair<string, string> AppointmentNotFound =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.AppointmentNotFound, "Appointment not found.");
 
     public static KeyValuePair<string, string> DoctorHasLeave =
         KeyValuePair.Create(HealthCareDomainErrorCodes.AppointmentAlreadyTaken,

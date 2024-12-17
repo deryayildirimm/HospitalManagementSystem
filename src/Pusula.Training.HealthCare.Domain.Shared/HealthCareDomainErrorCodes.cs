@@ -22,6 +22,7 @@ public static class HealthCareDomainErrorCodes
     public const string RestrictionAlreadyExists = "HealthCareError:RestrictionAlreadyExists";
     public const string DoctorRestrictionAlreadyExists = "HealthCareError:DoctorRestrictionAlreadyExists";
     public const string AppointmentAlreadyTaken = "HealthCareError:AppointmentAlreadyTaken";
+    public const string AppointmentNotFound = "HealthCareError:AppointmentNotFound";
     public const string AppointmentDateNotValid = "HealthCareError:AppointmentDateNotValid";
     public const string AlreadyHaveAppointmentExactTime = "HealthCareError:AlreadyHaveAppointmentExactTime";
     

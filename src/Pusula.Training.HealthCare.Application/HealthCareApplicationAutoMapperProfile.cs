@@ -136,11 +136,23 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<ExaminationIcdDto, ExaminationIcd>();
 
         CreateMap<Appointment, AppointmentDto>();
+        //CreateMap<AppointmentDto, AppointmentUpdateDto>();
         CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();
         CreateMap<GroupedAppointmentCount, GroupedAppointmentCountDto>();
-
         CreateMap<AppointmentDayLookupDto, AppointmentDayItemLookupDto>()
             .ForMember(dest => dest.IsSelected, opt => opt.MapFrom(src => false));
+        
+        CreateMap<AppointmentDto, AppointmentUpdateDto>()
+            .ForMember(dest => dest.DoctorId, opt => opt.MapFrom(src => src.Doctor.Id))
+            .ForMember(dest => dest.PatientId, opt => opt.MapFrom(src => src.Patient.Id))
+            .ForMember(dest => dest.MedicalServiceId, opt => opt.MapFrom(src => src.MedicalService.Id))
+            .ForMember(dest => dest.AppointmentTypeId, opt => opt.MapFrom(src => src.AppointmentType.Id))
+            .ForMember(dest => dest.AppointmentDate, opt => opt.MapFrom(src => src.AppointmentDate))
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.StartTime))
+            .ForMember(dest => dest.EndTime, opt => opt.MapFrom(src => src.EndTime))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+            .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Amount))
+            .ForMember(dest => dest.Notes, opt => opt.MapFrom(src => src.Notes));
 
         CreateMap<Appointment, AppointmentExcelDto>()
             .ForMember(dest => dest.DoctorName,

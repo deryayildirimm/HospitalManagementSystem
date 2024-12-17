@@ -43,7 +43,7 @@ public class AppointmentManager(
             durationMinutes: medicalService.Duration,
             date: date,
             skipPastSlots: true);
-
+        
         return slots.Select(slot => new AppointmentSlotDto
         {
             DoctorId = doctorId,
@@ -51,8 +51,7 @@ public class AppointmentManager(
             Date = date,
             StartTime = slot.StartTime,
             EndTime = slot.EndTime,
-            AvailabilityValue = slot.Date > DateTime.Now.Date &&
-                                !doctorAppointmentTimes.Any(appointment =>
+            AvailabilityValue = !doctorAppointmentTimes.Any(appointment =>
                                     appointment.StartTime < TimeSpan.Parse(slot.EndTime) &&
                                     appointment.EndTime > TimeSpan.Parse(slot.StartTime))
         }).ToList();
@@ -67,13 +66,16 @@ public class AppointmentManager(
         var medicalService = await GetMedicalServiceAsync(medicalServiceId);
         var duration = medicalService.Duration;
 
+        //Get the doctor's appointments between selected dates as a dictionary
         var appointments = (await GetAppointmentsAsync(doctorId, startDate, offset))
             .GroupBy(a => a.AppointmentDate.Date)
             .ToDictionary(g => g.Key, g => g.ToList());
 
+        //Get the doctor's working hours between selected dates
         var workingHours = (await GetWorkingHoursAsync(doctorId))
             .ToDictionary(wh => wh.DayOfWeek, wh => wh);
 
+        //Get the doctor's all slots for all days as a dictionary
         var slotsByDate = GetAppointmentSlotsByDate(workingHours, startDate, offset, duration);
 
         return slotsByDate
@@ -123,7 +125,7 @@ public class AppointmentManager(
         Check.NotNull(endTime, nameof(endTime));
         Check.NotNull(reminderSent, nameof(reminderSent));
         Check.NotNull(amount, nameof(amount));
-        Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
+        Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue);
 
         var appointmentDateIsValid = startTime < DateTime.Now || endTime < DateTime.Now || startTime >= endTime;
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DateNotValid, appointmentDateIsValid);
@@ -155,6 +157,7 @@ public class AppointmentManager(
             endTime: endTime,
             status: EnumAppointmentStatus.Scheduled,
             notes: notes,
+            cancellationNotes: null,
             reminderSent: reminderSent,
             amount: amount
         );
@@ -164,20 +167,26 @@ public class AppointmentManager(
 
     public virtual async Task<Appointment> UpdateAsync(
         Guid id,
+        Guid doctorId,
         DateTime appointmentDate,
         DateTime startTime,
         DateTime endTime,
         EnumAppointmentStatus status,
-        bool reminderSent, double amount,
-        [CanBeNull] string? notes = null)
+        bool reminderSent, 
+        double amount,
+        [CanBeNull] string? notes = null,
+        [CanBeNull] string? cancellationNotes = null)
     {
         Check.NotNull(appointmentDate, nameof(appointmentDate));
         Check.NotNull(startTime, nameof(startTime));
         Check.NotNull(endTime, nameof(endTime));
         Check.NotNull(reminderSent, nameof(reminderSent));
         Check.NotNull(amount, nameof(amount));
-        Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue, MedicalServiceConsts.CostMaxValue);
+        Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue);
         Check.Range((int)status, nameof(status), AppointmentConsts.StatusMinValue, AppointmentConsts.StatusMaxValue);
+        
+        //Check if appointment slot is occupied or not
+        await CheckAppointmentStatus(doctorId: doctorId, appointmentDate: appointmentDate, startTime: startTime);
 
         var appointment = await appointmentRepository.GetAsync(id);
 
@@ -188,6 +197,7 @@ public class AppointmentManager(
         appointment.SetNotes(notes);
         appointment.SetReminderSent(reminderSent);
         appointment.SetAmount(amount);
+        appointment.SetCancellationNote(cancellationNotes);
 
         return await appointmentRepository.UpdateAsync(appointment);
     }

@@ -156,49 +156,49 @@
     <CardBody>
         @if (SelectedDoctors.Any())
         {
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            @if (AllDoctorsSelected)
-            {
-            <p class="lead mb-0">
-                @L["AllItemsAreSelected", TotalCount]
-            </p>
-            }
-            else
-            {
-            <p class="lead mb-0">
-                @if (SelectedDoctors.Count > 1)
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                @if (AllDoctorsSelected)
                 {
-                @L["NumberOfItemsOnThisPageAreSelected", SelectedDoctors.Count]
+                    <p class="lead mb-0">
+                        @L["AllItemsAreSelected", TotalCount]
+                    </p>
                 }
                 else
                 {
-                @L["OneItemOnThisPageIsSelected"]
-                }
-            </p>
-            }
-
-            <div>
-                @if ((SelectedDoctors.Count == PageSize || SelectedDoctors.Count == DoctorList.Count) && TotalCount > SelectedDoctors.Count)
-                {
-                if (!AllDoctorsSelected)
-                {
-                <SfButton OnClick="SelectAllItems" CssClass="mx-1 btn-outline-secondary">@L["SelectAllItems", TotalCount]</SfButton>
-                }
-                else
-                {
-                <SfButton OnClick="ClearSelection" CssClass="mx-1 btn-outline-secondary">@L["ClearSelection"]</SfButton>
-                }
+                    <p class="lead mb-0">
+                        @if (SelectedDoctors.Count > 1)
+                        {
+                            @L["NumberOfItemsOnThisPageAreSelected", SelectedDoctors.Count]
+                        }
+                        else
+                        {
+                            @L["OneItemOnThisPageIsSelected"]
+                        }
+                    </p>
                 }
 
+                <div>
+                    @if ((SelectedDoctors.Count == PageSize || SelectedDoctors.Count == DoctorList.Count) && TotalCount > SelectedDoctors.Count)
+                    {
+                        if (!AllDoctorsSelected)
+                        {
+                            <SfButton OnClick="SelectAllItems" CssClass="mx-1 btn-outline-secondary">@L["SelectAllItems", TotalCount]</SfButton>
+                        }
+                        else
+                        {
+                            <SfButton OnClick="ClearSelection" CssClass="mx-1 btn-outline-secondary">@L["ClearSelection"]</SfButton>
+                        }
+                    }
 
-                <SfButton CssClass="e-danger" OnClick="DeleteSelectedDoctorsAsync">@L["Delete"]</SfButton>
-                @*<Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedDoctorsAsync">
+
+                    <SfButton CssClass="e-danger" OnClick="DeleteSelectedDoctorsAsync">@L["Delete"]</SfButton>
+                    @*<Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedDoctorsAsync">
                         <Icon Name="@IconName.Delete" /> @L["Delete"] 
                     </Button>*@
+                </div>
             </div>
-        </div>
 
-        <hr class="my-1 mx-0" />
+            <hr class="my-1 mx-0"/>
         }
 
         <SfGrid TItem="DoctorWithNavigationPropertiesDto"
@@ -211,14 +211,14 @@
             <GridColumns>
                 @if (CanDeleteDoctor && DoctorList.Any())
                 {
-                <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+                    <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
                 }
 
                 <GridColumn HeaderText="@L["Title"]" width="80px">
                     <Template>
                         @{
-                        var doctor = (context as DoctorWithNavigationPropertiesDto);
-                        var title = doctor?.Title?.TitleName ?? "No Data";
+                            var doctor = (context as DoctorWithNavigationPropertiesDto);
+                            var title = doctor?.Title?.TitleName ?? "No Data";
                         }
                         @title
                     </Template>
@@ -227,8 +227,8 @@
                 <GridColumn HeaderText="@L["First Name"]">
                     <Template>
                         @{
-                        var doctor = (context as DoctorWithNavigationPropertiesDto);
-                        var firstName = doctor?.Doctor?.FirstName ?? "No Data";
+                            var doctor = (context as DoctorWithNavigationPropertiesDto);
+                            var firstName = doctor?.Doctor?.FirstName ?? "No Data";
                         }
                         @firstName
                     </Template>
@@ -237,8 +237,8 @@
                 <GridColumn HeaderText="@L["Last Name"]">
                     <Template>
                         @{
-                        var doctor = (context as DoctorWithNavigationPropertiesDto);
-                        var lastName = doctor?.Doctor?.LastName ?? "No Data";
+                            var doctor = (context as DoctorWithNavigationPropertiesDto);
+                            var lastName = doctor?.Doctor?.LastName ?? "No Data";
                         }
                         @lastName
                     </Template>
@@ -247,9 +247,9 @@
                 <GridColumn HeaderText="@L["Location"]">
                     <Template>
                         @{
-                        var doctor = (context as DoctorWithNavigationPropertiesDto);
-                        var city = doctor?.Doctor.City?.Name ?? "";
-                        var district = doctor?.District?.Name ?? "";
+                            var doctor = (context as DoctorWithNavigationPropertiesDto);
+                            var city = doctor?.Doctor.City?.Name ?? "";
+                            var district = doctor?.District?.Name ?? "";
                         }
                         @city - @district
                     </Template>
@@ -258,8 +258,8 @@
                 <GridColumn HeaderText="@L["Department"]">
                     <Template>
                         @{
-                        var doctor = (context as DoctorWithNavigationPropertiesDto);
-                        var department = doctor?.Department?.Name ?? "No Data";
+                            var doctor = (context as DoctorWithNavigationPropertiesDto);
+                            var department = doctor?.Department?.Name ?? "No Data";
                         }
                         @department
                     </Template>
@@ -268,8 +268,8 @@
                 <GridColumn HeaderText="@L["Email"]">
                     <Template>
                         @{
-                        var doctor = (context as DoctorWithNavigationPropertiesDto);
-                        var email = doctor?.Doctor?.Email ?? "No Data";
+                            var doctor = (context as DoctorWithNavigationPropertiesDto);
+                            var email = doctor?.Doctor?.Email ?? "No Data";
                         }
                         @email
                     </Template>
@@ -278,9 +278,9 @@
                 <GridColumn HeaderText="@L["YearsOfExperience"]" width="40px">
                     <Template>
                         @{
-                        var doctor = (context as DoctorWithNavigationPropertiesDto);
-                        int yearsOfExperience = DateTime.Now.Year - doctor.Doctor.StartDate.Year -
-                        (DateTime.Now.DayOfYear < doctor.Doctor.StartDate.DayOfYear ? 1 : 0);
+                            var doctor = (context as DoctorWithNavigationPropertiesDto);
+                            int yearsOfExperience = DateTime.Now.Year - doctor.Doctor.StartDate.Year -
+                                                    (DateTime.Now.DayOfYear < doctor.Doctor.StartDate.DayOfYear ? 1 : 0);
                         }
                         @yearsOfExperience
                     </Template>
@@ -289,8 +289,8 @@
                 <GridColumn HeaderText="@L["Gender"]" width="40px">
                     <Template>
                         @{
-                        var doctor = (context as DoctorWithNavigationPropertiesDto);
-                        var gender = doctor.Doctor.Gender.ToString().First();
+                            var doctor = (context as DoctorWithNavigationPropertiesDto);
+                            var gender = doctor.Doctor.Gender.ToString().First();
                         }
                         @gender
                     </Template>
@@ -304,7 +304,7 @@
                 <GridColumn HeaderText="@L["Actions"]" Width="150">
                     <Template>
                         @{
-                        var doctor = (context as DoctorWithNavigationPropertiesDto);
+                            var doctor = (context as DoctorWithNavigationPropertiesDto);
                         }
                         <div class="d-flex justify-content-around">
                             <SfButton CssClass="e-primary" OnClick="@(args => OpenEditModal(doctor))">
@@ -325,7 +325,7 @@
 @* ************************* CREATE MODAL ************************* *@
 <SfDialog Width="800px" IsModal="true" Header="@L["CreateDoctor"]"
           ShowCloseIcon="true" @bind-Visible="@IsVisibleCreate">
-    <DialogEvents Closed="@CloseCreateDoctorModal" ></DialogEvents>
+    <DialogEvents Closed="@CloseCreateDoctorModal"></DialogEvents>
     <DialogTemplates>
         <Header>
             <div style="display: inline-flex; align-items: center;">
@@ -342,13 +342,13 @@
                     <label>@L["IdentityNumber"]</label>
                     <SfTextBox TValue="string" @bind-Value="@NewDoctor.IdentityNumber" Placeholder="@L["EnterIdentityNumber"]"
                                MaxLength="DoctorConsts.IdentityNumberLength">
-                        <TextBoxEvents OnInput="() => ValidateField('IdentityNumber')" />
+                        <TextBoxEvents OnInput="() => ValidateField('IdentityNumber')"/>
                     </SfTextBox>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>@L["BirthDate"]</label>
-                    <SfDatePicker TValue="DateTime" @bind-Value="@NewDoctor.BirthDate" Placeholder="@L["SelectBirthDate"]" />
+                    <SfDatePicker TValue="DateTime" @bind-Value="@NewDoctor.BirthDate" Placeholder="@L["SelectBirthDate"]"/>
                 </div>
             </div>
 
@@ -363,7 +363,7 @@
 
                 <div class="col-md-6 mb-3">
                     <label>@L["StartDate"]</label>
-                    <SfDatePicker TValue="DateTime" @bind-Value="@NewDoctor.StartDate" Placeholder="@L["SelectStartDate"]" />
+                    <SfDatePicker TValue="DateTime" @bind-Value="@NewDoctor.StartDate" Placeholder="@L["SelectStartDate"]"/>
                 </div>
             </div>
 
@@ -371,13 +371,13 @@
                 <div class="col-md-6 mb-3">
                     <label>@L["FirstName"]</label>
                     <SfTextBox TValue="string" @bind-Value="@NewDoctor.FirstName" Placeholder="@L["EnterFirstName"]"
-                               MaxLength="DoctorConsts.FirstNameMaxLength" />
+                               MaxLength="DoctorConsts.FirstNameMaxLength"/>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>@L["LastName"]</label>
                     <SfTextBox TValue="string" @bind-Value="@NewDoctor.LastName" Placeholder="@L["EnterLastName"]"
-                               MaxLength="DoctorConsts.LastNameMaxLength" />
+                               MaxLength="DoctorConsts.LastNameMaxLength"/>
                 </div>
             </div>
 
@@ -421,21 +421,21 @@
                 <div class="col-md-6 mb-3">
                     <label>@L["PhoneNumber"]</label>
                     <SfTextBox TValue="string" @bind-Value="@PhoneNumber" Placeholder="@L["EnterPhoneNumber"]"
-                               MaxLength="DoctorConsts.PhoneNumberMaxLength" />
+                               MaxLength="DoctorConsts.PhoneNumberMaxLength"/>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>@L["Email"]</label>
                     <SfTextBox TValue="string" @bind-Value="@NewDoctor.Email" Placeholder="@L["EnterEmail"]"
-                               MaxLength="DoctorConsts.EmailMaxLength" InputType="InputType.Email" />
+                               MaxLength="DoctorConsts.EmailMaxLength" InputType="InputType.Email"/>
                 </div>
             </div>
         </SfForm>
     </EditForm>
 
     <DialogFooter>
-        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseCreateDoctorModal" />
-        <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="CreateDoctorAsync" />
+        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseCreateDoctorModal"/>
+        <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="CreateDoctorAsync"/>
     </DialogFooter>
 </SfDialog>
 
@@ -443,7 +443,7 @@
 
 <SfDialog Width="800px" IsModal="true" Header="@L["UpdateDoctor"]"
           ShowCloseIcon="true" Visible="@IsVisibleEdit">
-    <DialogEvents Closed="@CloseEditDoctorModal" ></DialogEvents>
+    <DialogEvents Closed="@CloseEditDoctorModal"></DialogEvents>
     <DialogTemplates>
         <Header>
             <div style="display: inline-flex; align-items: center;">
@@ -459,12 +459,12 @@
                 <div class="col-md-6 mb-3">
                     <label>@L["IdentityNumber"]</label>
                     <SfTextBox TValue="string" @bind-Value="@EditingDoctor.IdentityNumber" Placeholder="@L["EnterIdentityNumber"]"
-                               MaxLength="DoctorConsts.IdentityNumberLength" />
+                               MaxLength="DoctorConsts.IdentityNumberLength"/>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>@L["BirthDate"]</label>
-                    <SfDatePicker TValue="DateTime" @bind-Value="@EditingDoctor.BirthDate" Placeholder="@L["SelectBirthDate"]" />
+                    <SfDatePicker TValue="DateTime" @bind-Value="@EditingDoctor.BirthDate" Placeholder="@L["SelectBirthDate"]"/>
                 </div>
             </div>
 
@@ -479,7 +479,7 @@
 
                 <div class="col-md-6 mb-3">
                     <label>@L["StartDate"]</label>
-                    <SfDatePicker TValue="DateTime" @bind-Value="@EditingDoctor.StartDate" Placeholder="@L["SelectStartDate"]" />
+                    <SfDatePicker TValue="DateTime" @bind-Value="@EditingDoctor.StartDate" Placeholder="@L["SelectStartDate"]"/>
                 </div>
             </div>
 
@@ -487,13 +487,13 @@
                 <div class="col-md-6 mb-3">
                     <label>@L["FirstName"]</label>
                     <SfTextBox TValue="string" @bind-Value="@EditingDoctor.FirstName" Placeholder="@L["EnterFirstName"]"
-                               MaxLength="DoctorConsts.FirstNameMaxLength" />
+                               MaxLength="DoctorConsts.FirstNameMaxLength"/>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>@L["LastName"]</label>
                     <SfTextBox TValue="string" @bind-Value="@EditingDoctor.LastName" Placeholder="@L["EnterLastName"]"
-                               MaxLength="DoctorConsts.LastNameMaxLength" />
+                               MaxLength="DoctorConsts.LastNameMaxLength"/>
                 </div>
             </div>
 
@@ -537,20 +537,20 @@
                 <div class="col-md-6 mb-3">
                     <label>@L["PhoneNumber"]</label>
                     <SfTextBox TValue="string" @bind-Value="@EditingDoctor.PhoneNumber" Placeholder="@L["EnterPhoneNumber"]"
-                               MaxLength="DoctorConsts.PhoneNumberMaxLength" />
+                               MaxLength="DoctorConsts.PhoneNumberMaxLength"/>
                 </div>
 
                 <div class="col-md-6 mb-3">
                     <label>@L["Email"]</label>
                     <SfTextBox TValue="string" @bind-Value="@EditingDoctor.Email" Placeholder="@L["EnterEmail"]"
-                               MaxLength="DoctorConsts.EmailMaxLength" InputType="InputType.Email" />
+                               MaxLength="DoctorConsts.EmailMaxLength" InputType="InputType.Email"/>
                 </div>
             </div>
         </SfForm>
     </EditForm>
 
     <DialogFooter>
-        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseEditDoctorModal" />
-        <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="UpdateDoctorAsync" />
+        <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseEditDoctorModal"/>
+        <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="UpdateDoctorAsync"/>
     </DialogFooter>
 </SfDialog>

@@ -22,6 +22,7 @@ public class AppointmentDto : FullAuditedEntityDto<Guid>
     public EnumAppointmentStatus Status { get; set; }
     public string? Notes { get; set; }
     public bool ReminderSent { get; set; }
+    public string? CancellationNotes { get; set; } = string.Empty;
     public double Amount { get; set; }
  
 }

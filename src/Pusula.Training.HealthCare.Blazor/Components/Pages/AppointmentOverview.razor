@@ -125,7 +125,7 @@
         @* ************************* Graphs ************************* *@
         <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
             <div class="w-50">
-                <SfAccumulationChart @ref="AccumulationChart" Width="100%" Height="380px" Title="@L["AppointmentsByDepartments"]">
+                <SfAccumulationChart @ref="AccumulationChart" Width="100%" Height="380px" Title="@($"{L["AppointmentsBy"]} {L[Filter.GroupByField]}")">
                     <AccumulationChartSeriesCollection >
                         <AccumulationChartSeries DataSource="@AppointmentByDepartmentCollection" XName="GroupName" YName="AppointmentCount">
                         </AccumulationChartSeries>

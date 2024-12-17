@@ -35,7 +35,7 @@
 <PageHeader Title="@L["AppointmentTypes"]" Toolbar="Toolbar">
 </PageHeader>
 
-@* ************************* SEARCH ************************* *@
+@* ************************* GRID ************************* *@
 <div class="row py-3 px-2">
     <div class="col-12 border-1 bg-white rounded-1 p-4">
         <SfGrid
@@ -63,7 +63,7 @@
                 {
                     <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
                 }
-                <GridColumn Field="@nameof(AppointmentTypeDto.Name)" HeaderText="Name" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                <GridColumn Field="@nameof(AppointmentTypeDto.Name)" HeaderText="@L["Name"]" TextAlign="TextAlign.Left" Width="120"></GridColumn>
                 <GridColumn HeaderText="@L["Actions"]" Width="150">
                     <Template Context="context">
                         <SfButton IconCss="e-icons e-edit" CssClass="e-primary" OnClick="@(() => OpenEditDialog((AppointmentTypeDto)context))">
