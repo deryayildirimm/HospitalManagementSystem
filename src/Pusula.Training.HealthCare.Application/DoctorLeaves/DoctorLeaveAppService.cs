@@ -57,7 +57,8 @@ public class DoctorLeaveAppService(
     [Authorize(HealthCarePermissions.DoctorLeaves.Create)]
     public virtual async Task<DoctorLeaveDto> CreateAsync(DoctorLeaveCreateDto input)
     {
-        var leave = await doctorLeaveManager.CreateAsync(input.DoctorId, input.StartDate, input.EndDate, input.Reason);
+        var leave = await doctorLeaveManager.CreateAsync(input.DoctorId, input.StartDate, input.EndDate,
+            input.EnumLeaveType, input.Reason);
         return ObjectMapper.Map<DoctorLeave, DoctorLeaveDto>(leave);
     }
 
@@ -65,7 +66,7 @@ public class DoctorLeaveAppService(
     public virtual async Task<DoctorLeaveDto> UpdateAsync(Guid id, DoctorLeaveUpdateDto input)
     {
         var leave = await doctorLeaveManager.UpdateAsync(id, input.DoctorId, input.StartDate, input.EndDate,
-            input.Reason, input.ConcurrencyStamp);
+            input.EnumLeaveType, input.Reason, input.ConcurrencyStamp);
 
         return ObjectMapper.Map<DoctorLeave, DoctorLeaveDto>(leave);
     }

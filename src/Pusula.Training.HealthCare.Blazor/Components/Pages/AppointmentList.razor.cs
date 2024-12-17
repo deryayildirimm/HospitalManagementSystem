@@ -50,7 +50,6 @@ public partial class AppointmentList : HealthCareComponentBase
     {
         Grid = new SfGrid<AppointmentDto>();
         DeleteConfirmDialog = new SfDialog();
-        ;
         NewType = new AppointmentTypeCreateDto();
         Filter = new GetAppointmentsInput
         {

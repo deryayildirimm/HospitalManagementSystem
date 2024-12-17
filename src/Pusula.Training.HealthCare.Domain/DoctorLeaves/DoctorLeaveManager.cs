@@ -12,28 +12,35 @@ namespace Pusula.Training.HealthCare.DoctorLeaves;
 public class DoctorLeaveManager(IDoctorLeaveRepository doctorLeaveRepository) : DomainService, IDoctorLeaveManager
 {
     public virtual async Task<DoctorLeave> CreateAsync(Guid doctorId, DateTime startDate, DateTime endDate,
-        string? reason = null)
+        EnumLeaveType enumLeaveType, string? reason = null)
     {
         Check.NotNull(doctorId, nameof(doctorId));
         Check.NotNull(startDate, nameof(startDate));
         Check.NotNull(endDate, nameof(endDate));
+        Check.NotNull(enumLeaveType, nameof(enumLeaveType));
 
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidDateRange_MESSAGE,
             HealthCareDomainErrorCodes.InvalidDateRange_CODE,
             startDate > endDate);
 
         var leaves = new DoctorLeave(
-            GuidGenerator.Create(), doctorId, startDate, endDate, reason);
+            GuidGenerator.Create(),
+            doctorId,
+            startDate,
+            endDate,
+            enumLeaveType,
+            reason);
 
         return await doctorLeaveRepository.InsertAsync(leaves);
     }
 
     public virtual async Task<DoctorLeave> UpdateAsync(Guid id, Guid doctorId,
-        DateTime startDate, DateTime endDate, string? reason = null, [CanBeNull] string? concurrencyStamp = null)
+        DateTime startDate, DateTime endDate, EnumLeaveType enumLeaveType, string? reason = null, [CanBeNull] string? concurrencyStamp = null)
     {
         Check.NotNull(doctorId, nameof(doctorId));
         Check.NotNull(startDate, nameof(startDate));
         Check.NotNull(endDate, nameof(endDate));
+        Check.NotNull(enumLeaveType, nameof(enumLeaveType));
 
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidDateRange_MESSAGE,
             HealthCareDomainErrorCodes.InvalidDateRange_CODE,
@@ -45,6 +52,7 @@ public class DoctorLeaveManager(IDoctorLeaveRepository doctorLeaveRepository) : 
         leaves.SetStartDate(startDate);
         leaves.SetEndDate(endDate);
         leaves.SetReason(reason);
+        leaves.SetType(enumLeaveType);
 
         leaves.SetConcurrencyStampIfNotNull(concurrencyStamp);
         return await doctorLeaveRepository.UpdateAsync(leaves);

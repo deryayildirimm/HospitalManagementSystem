@@ -9,6 +9,7 @@
 
 @using Pusula.Training.HealthCare.Localization
 @using Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.Shared
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
@@ -20,8 +21,11 @@
 @inject IUiMessageService UiMessageService
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+
+@inject ILookupAppService LookupAppService
 @inject NavigationManager NavigationManager
 @using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
 
 <SfBreadcrumb>
     <BreadcrumbItems>
@@ -34,6 +38,57 @@
 <PageHeader Title="@L["DoctorLeaves"]">
 </PageHeader>
 
+
+@* ************************* SEARCH ************************* *@
+<div class="row py-3 px-2">
+    <div class="col-12 border-1 bg-white rounded-1 p-4">
+        <div class="row">
+            <div class="col-3 my-1">
+                <h6>@L["DoctorName"]</h6>
+
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["MinDate"]</h6>
+                <SfDatePicker TValue="DateTime?" @bind-Value="@InputFilter.StartDateMin" Placeholder="@L["MinDate"]"></SfDatePicker>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["MaxDate"]</h6>
+                <SfDatePicker TValue="DateTime?" @bind-Value="@InputFilter.EndDateMax" Placeholder="@L["MaxDate"]"></SfDatePicker>
+            </div>
+            <div class="col-3 my-1">
+                <div>
+                    <h6>@L["Departments"]</h6>
+                    <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+
+                                    DataSource="@DepartmentsCollection">
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+            <div class="col-3 my-1">
+                <div>
+                    <h6>@L["LeaveType"]</h6>
+                    <SfDropDownList TItem="KeyValuePair<string, EnumLeaveType>"
+                                    TValue="EnumLeaveType?"
+                                    @bind-Value="InputFilter.LeaveType"
+                                    DataSource="@LeaveTypeCollection">
+                        <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+        </div>
+        <div>
+            <SfButton CssClass="e-primary" OnClick="GetAppointmentsAsync">
+                <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
+            </SfButton>
+            <SfButton CssClass="e-danger" OnClick="ClearFilters">
+                <SfIcon IconCss="e-icons e-filter-clear"></SfIcon> @L["ClearFilters"]
+            </SfButton>
+        </div>
+
+    </div>
+</div>
+
 @* ************************* GRID ************************* *@
 <div class="row py-3 px-2">
     <div class="col-12 border-1 bg-white rounded-1 p-4">
@@ -42,6 +97,7 @@
             TValue="DoctorLeaveDto"
             AllowPaging="true"
             AllowSorting="true"
+            Query="@FilterQuery"
             Toolbar="@ToolbarItems">
             <GridSelectionSettings Type="SelectionType.Multiple"></GridSelectionSettings>
             <SfDataManager
@@ -64,8 +120,8 @@
                 <GridColumn Format="dd/MM/yyyy" HeaderText="@L["Department"]" TextAlign="TextAlign.Left" Width="120">
                     <Template>
                         @{
-                        var leaveDto = (context as DoctorLeaveDto);
-                        <div>@(leaveDto?.Doctor.Department.Name)</div>
+                            var leaveDto = (context as DoctorLeaveDto);
+                            <div>@(leaveDto?.Doctor.Department.Name)</div>
                         }
                     </Template>
                 </GridColumn>

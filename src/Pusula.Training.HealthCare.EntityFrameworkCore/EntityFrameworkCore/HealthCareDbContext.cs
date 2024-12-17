@@ -453,6 +453,7 @@ public class HealthCareDbContext :
                 b.ConfigureByConvention();
                 b.Property(x => x.StartDate).HasColumnName(nameof(DoctorLeave.StartDate)).IsRequired();
                 b.Property(x => x.EndDate).HasColumnName(nameof(DoctorLeave.EndDate)).IsRequired();
+                b.Property(x => x.LeaveType).HasColumnName(nameof(DoctorLeave.LeaveType)).IsRequired();
                 b.Property(x => x.Reason).HasColumnName(nameof(DoctorLeave.Reason)).HasMaxLength(200);
                 b.HasOne(x => x.Doctor)
                     .WithMany()

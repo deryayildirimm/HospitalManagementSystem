@@ -12,6 +12,7 @@ public class GetDoctorLeaveInput :PagedAndSortedResultRequestDto
     public DateTime? StartDateMax { get; set; }
     public DateTime? EndDateMin { get; set; }
     public DateTime? EndDateMax { get; set; }
+    public EnumLeaveType? LeaveType { get; set; }
     public string? Reason { get; set; }
 
     public GetDoctorLeaveInput()

@@ -77,7 +77,7 @@ namespace Pusula.Training.HealthCare
             await SeedDoctorRecords();
             await SeedMedicalStaffRecords();
             await SeedDoctorWorkingHours();
-            //await SeedDoctorLeaves();
+            await SeedDoctorLeaves();
             await SeedAppointments();
             await SeedProtocolType();
             await SeedProtocols();
@@ -852,10 +852,10 @@ namespace Pusula.Training.HealthCare
             var doctors = await doctorRepository.GetListAsync();
 
             var leave1 = new DoctorLeave(guidGenerator.Create(), doctors[0].Id, DateTime.Today.AddDays(1),
-                DateTime.Today.AddDays(7));
-            
+                DateTime.Today.AddDays(7), EnumLeaveType.Normal);
+
             var leave2 = new DoctorLeave(guidGenerator.Create(), doctors[1].Id, DateTime.Today.AddDays(7),
-                DateTime.Today.AddDays(27));
+                DateTime.Today.AddDays(27), EnumLeaveType.Annual);
 
             await leaveRepository.InsertAsync(leave1, true);
             await leaveRepository.InsertAsync(leave2, true);
