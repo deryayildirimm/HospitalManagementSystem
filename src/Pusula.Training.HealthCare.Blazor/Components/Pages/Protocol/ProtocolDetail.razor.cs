@@ -13,7 +13,7 @@ using Pusula.Training.HealthCare.Blazor.Models;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Protocol;
 
 public partial class ProtocolDetail
 {

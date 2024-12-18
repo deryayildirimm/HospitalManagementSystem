@@ -1,0 +1,86 @@
+﻿@page "/protocol-types"
+
+@attribute [Authorize(HealthCarePermissions.ProtocolTypes.Default)]
+@using Pusula.Training.HealthCare.Localization
+
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+
+
+@using Pusula.Training.HealthCare.Blazor.Components.Grids
+@using Pusula.Training.HealthCare.Blazor.Components.Modals
+@using Pusula.Training.HealthCare.Blazor.Components.Filters
+@using Pusula.Training.HealthCare.Permissions
+@using Volo.Abp.AspNetCore.Components.Web
+
+@using Pusula.Training.HealthCare.ProtocolTypes
+@using Volo.Abp.Http.Client
+@using Pusula.Training.HealthCare.Blazor.Services
+@inherits HealthCareComponentBase
+@inject IProtocolTypesAppService ProtocolTypesAppService
+
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["Protocol Types"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
+
+</PageHeader>
+<!--
+
+
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home" />
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["Protocol Type"] />
+    </BreadcrumbItems>
+</SfBreadcrumb>
+-->
+@* ************************* SEARCH ************************* *@
+
+<div class="row py-3 px-2">
+    <div class="col-12 border-1 bg-white rounded-1 p-4">
+
+        <GenericFilter TFilter="GetProtocolTypeInput"
+                       Filter="@Filter"
+                       GetSearchValue="filter => filter?.FilterText ?? string.Empty"
+                       SetSearchValue="(filter, value) => filter.FilterText = value"
+                       OnFilterChanged="HandleFilterChanged" />
+    </div>
+</div>
+
+@if (SpinnerVisible)
+{
+<SfSpinner  Label="Loading..." Type="SpinnerType.Material" CssClass="e-spinner" Visible="SpinnerVisible" />
+}
+else
+{
+<GenericGrid TModel="ProtocolTypeDto"
+             @ref="GridRef"
+             Columns="@Columns"
+             OnEdit="OpenEditModal"
+             PageSize="11"
+             Query="@FilterQuery"
+             OnDelete="DeleteProtocolTypeAsync"
+             AdaptorInstance="@typeof(ProtocolTypeAdaptor)"
+             AdaptorType="Adaptors.CustomAdaptor"></GenericGrid>
+}
+
+<GenericModal TModel="ProtocolTypeCreateDto" @ref="CreateModal" Title="Add Protocol Type" Model="@newProtocol" OnSaveCallback="CreateProtocolTypeAsync">
+    <div>
+        <label>Name:</label>
+        <SfTextBox @bind-Value="@newProtocol.Name" Placeholder="Enter name"></SfTextBox>
+        <ValidationMessage For="@(() => newProtocol.Name)"></ValidationMessage>
+    </div>
+</GenericModal>
+
+<GenericModal TModel="ProtocolTypeUpdateDto" @ref="EditModal" Title="Edit Protocol Type" Model="@SelectedProtocolType" OnSaveCallback="UpdateProtocolTypeAsync">
+    <div>
+        <label>Name:</label>
+        <SfTextBox @bind-Value="@SelectedProtocolType.Name" Placeholder="Enter name"></SfTextBox>
+        <ValidationMessage For="@(() => SelectedProtocolType.Name)"></ValidationMessage>
+    </div>
+</GenericModal>

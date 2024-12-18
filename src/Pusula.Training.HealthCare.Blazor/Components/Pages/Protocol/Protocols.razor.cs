@@ -20,7 +20,7 @@ using Volo.Abp.BlazoriseUI.Components;
 using Volo.Abp.Domain.Entities;
 
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Protocol;
 
 public partial class Protocols
 {
