@@ -274,9 +274,7 @@ else if (ActiveStep == 1)
                         else
                         {
                             <div class="d-flex align-items-center justify-content-center rounded-1 px-2 py-1 light-red">
-                                <Text class="fs-6 text-white" TextWeight="TextWeight.SemiBold">
-                                    @StepperModel.DoctorName @L["DoctorNotAvailable"]
-                                </Text>
+                                <h6 class="fs-6 fw-semibold text-white">@StepperModel.DoctorName @L[SlotErrorMessage]</h6>
                             </div>
                         }
 
@@ -287,7 +285,6 @@ else if (ActiveStep == 1)
         </div>
     </Div>
 }
-
 @* Step 3 - Confirmation *@
 else if (ActiveStep == 2)
 {

@@ -4,12 +4,9 @@ namespace Pusula.Training.HealthCare.DoctorLeaves;
 
 public class DoctorLeaveExcelDto
 {
- 
-    public Guid DoctorId { get; set; } = Guid.Empty;
-   
-    public virtual DateTime StartDate { get; set; } = DateTime.Today;
-    
-    public virtual DateTime EndDate { get; set; } = DateTime.Today;
-   
+    public string DoctorName { get; set; } = string.Empty;
+    public string StartDate { get; set; } = string.Empty;
+    public string EndDate { get; set; } = string.Empty;
+    public virtual EnumLeaveType LeaveType { get; set; }
     public virtual string? Reason { get; set; }
 }

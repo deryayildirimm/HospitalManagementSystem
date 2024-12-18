@@ -65,6 +65,7 @@
     "DownloadSelectedFile": "Download selected file",
     "RemoveSelectedFile": "Remove selected file",
     "FileUploading": "File uploading...",
+    "Menu:DoctorLeaves": "Doctor Leaves",
     "Menu:Patients": "Patients",
     "Menu:HealthCare": "Health Care",
     "Menu:MedicalServices": "Medical Services",
@@ -83,6 +84,7 @@
     "Protocols": "Protocols",
     "MinStartTime": "Min Start Time",
     "MaxStartTime": "Max Start Time",
+    
     "NewProtocol": "New Protocol",
     "Menu:Protocols": "Protocols",
     "Permission:Departments": "Departments",
@@ -287,6 +289,14 @@
     "DoctorsAppointments":  "Doctor's Appointments",
     "UpdateAppointment": "Update Appointment",
     "CancellationNotes": "Cancellation Notes",
-    "AppointmentsBy": "Appointments By"
+    "AppointmentsBy": "Appointments By",
+    "LeaveType": "Leave Type",
+    "DoctorLeaves":  "Doctor Leaves",
+    "Error:DoctorRequired": "You must select a doctor.",
+    "Error:GuidRequired": "GUID required.",
+    "FillRequiredFields": "Please fill in the all required fields.",
+    "LeaveCreated":  "Leave Created",
+    "LeaveCreatedSuccess": "Leave created for the doctor successfully" 
+    
   }
 }

@@ -14,7 +14,7 @@ namespace Pusula.Training.HealthCare.Controllers.DoctorLeaves;
 [RemoteService]
 [Area("app")]
 [ControllerName("DoctorLeave")]
-[Route("api/app/doctorleave")]
+[Route("api/app/doctor-leave")]
 public class DoctorLeaveController(IDoctorLeaveAppService leaveService) : HealthCareController, IDoctorLeaveAppService
 {
     [HttpGet]

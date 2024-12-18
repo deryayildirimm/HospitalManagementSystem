@@ -25,23 +25,23 @@
     cursor:pointer;
 }
 
-.in-progress {
+.orange-bg {
     background: #FFA500;
 }
 
-.scheduled {
+.blue-bg {
     background: #0094ff;
 }
 
-.completed {
+.green-bg {
     background:#32CD32;
 }
 
-.canceled {
+.red-bg {
     background: rgba(248, 20, 78, 0.67);
 }
 
-.missed {
+.purple-bg {
     background: rgba(178, 0, 255, 0.66);
 }
 

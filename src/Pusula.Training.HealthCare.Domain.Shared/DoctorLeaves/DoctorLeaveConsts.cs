@@ -9,4 +9,8 @@ public class DoctorLeaveConsts
         return string.Format(DefaultSorting, withEntityName ? "DoctorLeave." : string.Empty);
     }
     
+    public const int TypeMaxValue = 4;
+    public const int TypeMinValue = 0;
+    public const int TextMaxLength = 128;
+    public const int TextMinLength = 0;
 }

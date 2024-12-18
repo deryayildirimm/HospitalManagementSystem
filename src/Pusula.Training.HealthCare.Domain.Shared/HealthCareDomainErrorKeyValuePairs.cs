@@ -5,6 +5,12 @@ namespace Pusula.Training.HealthCare;
 public static class HealthCareDomainErrorKeyValuePairs
 {
     /* You can add your business exception error message here, as constants */
+    
+    public static KeyValuePair<string, string> GuidRequired =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.GuidRequired, "GUID is required.");
+    
+    public static KeyValuePair<string, string> GuidNotValid =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.NameExists, "GUID not valid.");
 
     public static KeyValuePair<string, string> GroupNameNotValid =
         KeyValuePair.Create(HealthCareDomainErrorCodes.NameExists, "Group name not valid.");
@@ -45,12 +51,19 @@ public static class HealthCareDomainErrorKeyValuePairs
     public static KeyValuePair<string, string> AppointmentNotFound =
         KeyValuePair.Create(HealthCareDomainErrorCodes.AppointmentNotFound, "Appointment not found.");
 
+    public static KeyValuePair<string, string> DoctorAlreadyHasLeave =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.DoctorAlreadyHasLeave,
+            "Selected doctor already has a leave between selected dates.");
+    
     public static KeyValuePair<string, string> DoctorHasLeave =
-        KeyValuePair.Create(HealthCareDomainErrorCodes.AppointmentAlreadyTaken,
-            "Selected doctor has leave at these dates.");
+        KeyValuePair.Create(HealthCareDomainErrorCodes.DoctorHasLeave,
+            " Has leave at these dates.");
 
     public static KeyValuePair<string, string> DoctorNotWorking =
         KeyValuePair.Create(HealthCareDomainErrorCodes.DoctorNotWorking, "Doctor doesnt work at these times.");
+    
+    public static KeyValuePair<string, string> DoctorRequired =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.DoctorRequired, "Doctor is required field.");
 
     public static KeyValuePair<string, string> DoctorWorkingHourNotFound =
         KeyValuePair.Create(HealthCareDomainErrorCodes.DoctorWorkingHourNotFound, "Doctor doesnt work at these dates.");

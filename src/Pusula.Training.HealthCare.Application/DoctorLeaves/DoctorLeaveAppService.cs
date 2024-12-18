@@ -25,10 +25,12 @@ public class DoctorLeaveAppService(
 {
     public virtual async Task<PagedResultDto<DoctorLeaveDto>> GetListAsync(GetDoctorLeaveInput input)
     {
-        var totalCount = await doctorLeaveRepository.GetCountAsync(input.FilterText, input.DoctorId, input.StartDateMin,
-            input.StartDateMax, input.EndDateMin, input.EndDateMax, input.Reason);
-        var items = await doctorLeaveRepository.GetListAsync(input.FilterText, input.DoctorId, input.StartDateMin,
-            input.StartDateMax, input.EndDateMin, input.EndDateMax, input.Reason, input.Sorting, input.MaxResultCount,
+        var totalCount = await doctorLeaveRepository.GetCountAsync(input.FilterText, input.DepartmentId, input.DoctorId,
+            input.StartDate,
+            input.EndDate, input.LeaveType);
+        var items = await doctorLeaveRepository.GetListAsync(input.FilterText, input.DepartmentId, input.DoctorId,
+            input.StartDate,
+            input.EndDate, input.LeaveType, input.Sorting, input.MaxResultCount,
             input.SkipCount);
 
         return new PagedResultDto<DoctorLeaveDto>
@@ -80,8 +82,10 @@ public class DoctorLeaveAppService(
             HealthCareDomainErrorCodes.InvalidDownloadToken_CODE,
             downloadToken == null || input.DownloadToken != downloadToken.Token);
 
-        var items = await doctorLeaveRepository.GetListAsync(input.FilterText, input.DoctorId, input.StartDateMin,
-            input.StartDateMax, input.EndDateMin, input.EndDateMax, input.Reason);
+        var items = await doctorLeaveRepository.GetListAsync(input.FilterText, input.DepartmentId, input.DoctorId,
+            input.StartDate,
+            input.EndDate, input.LeaveType, input.Sorting, input.MaxResultCount,
+            input.SkipCount);
 
         var memoryStream = new MemoryStream();
         await memoryStream.SaveAsAsync(ObjectMapper.Map<List<DoctorLeave>, List<DoctorLeaveExcelDto>>(items));
@@ -100,9 +104,9 @@ public class DoctorLeaveAppService(
     [Authorize(HealthCarePermissions.DoctorLeaves.Delete)]
     public virtual async Task DeleteAllAsync(GetDoctorLeaveInput input)
     {
-        await doctorLeaveRepository.DeleteAllAsync(input.FilterText, input.DoctorId, input.StartDateMin,
-            input.StartDateMax, input.EndDateMin, input.EndDateMax,
-            input.Reason);
+        await doctorLeaveRepository.DeleteAllAsync(input.FilterText, input.DepartmentId, input.DoctorId,
+            input.StartDate,
+            input.EndDate, input.LeaveType);
     }
 
     public virtual async Task<Shared.DownloadTokenResultDto> GetDownloadTokenAsync()

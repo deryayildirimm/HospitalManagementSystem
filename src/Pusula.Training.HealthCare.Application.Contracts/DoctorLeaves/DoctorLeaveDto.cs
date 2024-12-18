@@ -18,6 +18,8 @@ public class DoctorLeaveDto : FullAuditedEntityDto<Guid>, IHasConcurrencyStamp
     public virtual DateTime StartDate { get; set; } = DateTime.Today;
     [Required]
     public virtual DateTime EndDate { get; set; } = DateTime.Today;
+    
+    public virtual EnumLeaveType LeaveType { get; set; }
    
     public virtual string? Reason { get; set; }
     

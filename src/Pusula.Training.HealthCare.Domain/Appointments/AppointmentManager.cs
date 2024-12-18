@@ -28,6 +28,9 @@ public class AppointmentManager(
         Guid medicalServiceId,
         DateTime date)
     {
+        //Check if doctor has a leave
+        await CheckDoctorLeaves(doctorId: doctorId, appointmentDate: date);
+
         //Check if working hours exist
         var workingHour = await GetDoctorWorkingHourAsync(doctorId, date);
 
@@ -43,7 +46,7 @@ public class AppointmentManager(
             durationMinutes: medicalService.Duration,
             date: date,
             skipPastSlots: true);
-        
+
         return slots.Select(slot => new AppointmentSlotDto
         {
             DoctorId = doctorId,
@@ -52,8 +55,8 @@ public class AppointmentManager(
             StartTime = slot.StartTime,
             EndTime = slot.EndTime,
             AvailabilityValue = !doctorAppointmentTimes.Any(appointment =>
-                                    appointment.StartTime < TimeSpan.Parse(slot.EndTime) &&
-                                    appointment.EndTime > TimeSpan.Parse(slot.StartTime))
+                appointment.StartTime < TimeSpan.Parse(slot.EndTime) &&
+                appointment.EndTime > TimeSpan.Parse(slot.StartTime))
         }).ToList();
     }
 
@@ -65,6 +68,10 @@ public class AppointmentManager(
     {
         var medicalService = await GetMedicalServiceAsync(medicalServiceId);
         var duration = medicalService.Duration;
+
+        //Get the doctor's working hours between selected dates
+        var doctorLeaves =
+            (await GetDoctorLeaves(doctorId: doctorId, startDate: startDate, endDate: startDate.AddDays(offset)));
 
         //Get the doctor's appointments between selected dates as a dictionary
         var appointments = (await GetAppointmentsAsync(doctorId, startDate, offset))
@@ -84,6 +91,10 @@ public class AppointmentManager(
                 var totalSlots = item.Value.Count;
                 var isWeekend = item.Key.DayOfWeek.IsWeekend();
 
+                // Check if there is a leave on this date
+                var hasLeave = doctorLeaves.Any(dl =>
+                    dl.StartDate.Date <= item.Key && dl.EndDate.Date >= item.Key);
+
                 //Calculate booked slot count
                 var bookedSlots = appointments.TryGetValue(item.Key, out var value)
                     ? value.Count
@@ -95,8 +106,8 @@ public class AppointmentManager(
                 return new AppointmentDayLookupDto
                 {
                     Date = item.Key,
-                    AvailableSlotCount = isWeekend ? 0 : availableSlots,
-                    AvailabilityValue = !isWeekend && availableSlots > 0
+                    AvailableSlotCount = (isWeekend || hasLeave) ? 0 : availableSlots,
+                    AvailabilityValue = !(isWeekend || hasLeave) && availableSlots > 0
                 };
             })
             .ToList();
@@ -172,7 +183,7 @@ public class AppointmentManager(
         DateTime startTime,
         DateTime endTime,
         EnumAppointmentStatus status,
-        bool reminderSent, 
+        bool reminderSent,
         double amount,
         [CanBeNull] string? notes = null,
         [CanBeNull] string? cancellationNotes = null)
@@ -184,7 +195,7 @@ public class AppointmentManager(
         Check.NotNull(amount, nameof(amount));
         Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue);
         Check.Range((int)status, nameof(status), AppointmentConsts.StatusMinValue, AppointmentConsts.StatusMaxValue);
-        
+
         //Check if appointment slot is occupied or not
         await CheckAppointmentStatus(doctorId: doctorId, appointmentDate: appointmentDate, startTime: startTime);
 
@@ -319,6 +330,17 @@ public class AppointmentManager(
                  && x.StartTime == startTime);
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.AppointmentAlreadyTaken,
             isAppointmentTaken is not null);
+    }
+
+    private async Task<List<DoctorLeave>> GetDoctorLeaves(
+        Guid doctorId,
+        DateTime startDate,
+        DateTime endDate)
+    {
+        return (await doctorLeaveRepository.GetListAsync(
+            x => x.DoctorId == doctorId &&
+                 x.StartDate.Date <= endDate.Date &&
+                 x.EndDate.Date >= startDate.Date));
     }
 
     private async Task CheckDoctorLeaves(
