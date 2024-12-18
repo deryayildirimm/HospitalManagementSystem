@@ -23,6 +23,9 @@ public static class HealthCareDomainErrorCodes
 
     public const string DateNotInPastException = "HealthCareError:DateNotInPast";
     
+    //Examination
+    public const string ExaminationIcdExists = "HealthCareError:ExaminationIcdAlreadyExist";
+    public const string ExaminationIcdNotFound = "HealthCareError:ExaminationIcdNotFound";
    
     /*  ERROR MESSAGES */
     public const string InvalidDateRange_MESSAGE = "InvalidDateRange";

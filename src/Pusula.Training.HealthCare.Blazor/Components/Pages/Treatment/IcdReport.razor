@@ -1,26 +1,96 @@
 ﻿@page "/icd-report"
+
+@attribute [Authorize(HealthCarePermissions.Icds.Default)]
+
 @using Pusula.Training.HealthCare.Treatment.Examinations
-@inject IExaminationsAppService ExaminationsAppService
 
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Calendars
+@using Pusula.Training.HealthCare.Blazor.Services.Treatment
+@using Pusula.Training.HealthCare.Localization
+@using Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.Treatment.Icds
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Volo.Abp.Http.Client
+@using Syncfusion.Blazor.Buttons
+@using SelectionType = Syncfusion.Blazor.Grids.SelectionType
+@using Syncfusion.Blazor.Calendars
+@inherits HealthCareComponentBase
 
+@inject IExaminationsAppService ExaminationsAppService
+@inject ILookupAppService LookupAppService
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
 
-<SfDatePicker TValue="DateTime" Placeholder="Select Start Date" @bind-Value="StartDate" />
-<SfDatePicker TValue="DateTime" Placeholder="Select End Date" @bind-Value="EndDate" />
-<SfButton CssClass="e-primary" Content="Generate Report" OnClick="FetchReport" />
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home"/>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["IcdReport"]/>
+    </BreadcrumbItems>
+</SfBreadcrumb>
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["IcdReport"]" Toolbar="Toolbar">
+</PageHeader>
 
-@if (IcdReportList != null && IcdReportList.Any())
-{
-    <SfGrid DataSource="@IcdReportList" AllowPaging="true">
-        <GridColumns>
-            <GridColumn Field="CodeNumber" HeaderText="ICD Code" Width="150" />
-            <GridColumn Field="Detail" HeaderText="Detail" Width="300" />
-            <GridColumn Field="Quantity" HeaderText="Quantity" Width="100" TextAlign="TextAlign.Center" />
-        </GridColumns>
-    </SfGrid>
-}
-else if (IcdReportList != null)
-{
-    <p>No data found for the selected time range.</p>
-}
+@* ************************* SEARCH ************************* *@
+<div class="row py-3 px-2">
+    <div class="col-12 border-1 bg-white rounded-1 p-4">
+        <div class="row">
+            <div class="col-3 my-1">
+                <h6>@L["StartDate"]</h6>
+                <SfDatePicker TValue="DateTime" @bind-Value="@Filter.StartDate" Placeholder="@L["StartDate"]"></SfDatePicker>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["EndDate"]</h6>
+                <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.EndDate" Placeholder="@L["EndDate"]"></SfDatePicker>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["CodeNumber"]</h6>
+                <SfTextBox @bind-Value="@Filter.CodeNumber" Placeholder="@L["CodeNumber"]"></SfTextBox>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["Detail"]</h6>
+                <SfTextBox @bind-Value="@Filter.Detail" Placeholder="@L["Detail"]"></SfTextBox>
+            </div>
+        </div>
+        <div>
+            <SfButton CssClass="e-primary" OnClick="GetIcdReportAsync">
+                <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
+            </SfButton>
+            <SfButton CssClass="e-danger" OnClick="ClearFilters">
+                <SfIcon IconCss="e-icons e-filter-clear"></SfIcon> @L["ClearFilters"]
+            </SfButton>
+        </div>
+
+    </div>
+</div>
+
+@* ************************* GRID ************************* *@
+<div class="row py-3 px-2">
+    <div class="col-12 border-1 bg-white rounded-1 p-4">
+        <SfGrid
+            @ref="Grid"
+            TValue="IcdReportDto"
+            AllowPaging="true"
+            AllowSorting="true"
+            Query="@FilterQuery">
+            <SfDataManager
+                AdaptorInstance="@typeof(IcdReportAdaptor)"
+                Adaptor="Adaptors.CustomAdaptor">
+            </SfDataManager>
+            <GridEvents
+                TValue="IcdReportDto">
+            </GridEvents>
+            <GridPageSettings PageSize="@PageSize"></GridPageSettings>
+            <GridColumns>
+                <GridColumn Field="CodeNumber" HeaderText="ICD Code" Width="150" />
+                <GridColumn Field="Detail" HeaderText="Detail" Width="300" />
+                <GridColumn Field="Quantity" HeaderText="Quantity" Width="100" TextAlign="TextAlign.Center" />
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
@@ -59,5 +61,20 @@ public class Examination : FullAuditedAggregateRoot<Guid>
     {
         Check.NotNullOrWhiteSpace(protocolId.ToString(), nameof(protocolId));
         ProtocolId = protocolId;
+    }
+    
+    public void AddIcd(ExaminationIcd icd)
+    {
+        Check.NotNull(icd, nameof(icd));
+        HealthCareGlobalException.ThrowIf("ExaminationIcdAlreadyExists",
+            ExaminationIcd.Any(e => e.IcdId == icd.IcdId) );
+        ExaminationIcd.Add(icd);
+    }
+
+    public void RemoveIcd(Guid icdId)
+    {
+        var icd = ExaminationIcd.FirstOrDefault(e => e.IcdId == icdId);
+        HealthCareGlobalException.ThrowIf("ExaminationIcdNotFound", icd == null);
+        ExaminationIcd.Remove(icd!);
     }
 }

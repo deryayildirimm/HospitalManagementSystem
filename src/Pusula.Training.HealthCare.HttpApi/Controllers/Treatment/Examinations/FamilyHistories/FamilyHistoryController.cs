@@ -25,13 +25,4 @@ public class FamilyHistoryController(IFamilyHistoriesAppService familyHistoriesA
     public Task<FamilyHistoryDto> CreateAsync(FamilyHistoryCreateDto input) => familyHistoriesAppService.CreateAsync(input);
     [HttpPut]
     public Task<FamilyHistoryDto> UpdateAsync(FamilyHistoryUpdateDto input) => familyHistoriesAppService.UpdateAsync(input);
-    [HttpDelete]
-    [Route("{id}")]
-    public void DeleteAsync(Guid id) => familyHistoriesAppService.DeleteAsync(id);
-    [HttpDelete]
-    [Route("all")]
-    public Task DeleteAllAsync(GetFamilyHistoriesInput input) => familyHistoriesAppService.DeleteAllAsync(input);
-    [HttpDelete]
-    [Route("")]
-    public Task DeleteByIdsAsync(List<Guid> familyHistoryIds) => familyHistoriesAppService.DeleteByIdsAsync(familyHistoryIds);
 }

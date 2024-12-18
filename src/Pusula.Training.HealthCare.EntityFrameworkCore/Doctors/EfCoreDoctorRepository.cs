@@ -101,7 +101,7 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
         Guid? titleId = null, 
         Guid? departmentId = null, 
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
@@ -180,15 +180,18 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
             Guid? departmentId = null,
             List<Guid>? departmentIds = null) =>
             query
-                .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.FirstName!.ToLower().Contains(filterText!.ToLower()) || e.LastName!.ToLower().Contains(filterText!.ToLower()) || e.PhoneNumber!.Contains(filterText!))
-                .WhereIf(!string.IsNullOrWhiteSpace(firstName), e => e.FirstName!.ToLower().Contains(firstName!.ToLower()))
-                .WhereIf(!string.IsNullOrWhiteSpace(lastName), e => e.LastName!.ToLower().Contains(lastName!.ToLower()))
-                .WhereIf(!string.IsNullOrWhiteSpace(identityNumber), e => e.IdentityNumber!.Contains(identityNumber!))
+                .Where(e => EF.Functions.ILike(e.FirstName, $"%{filterText}%")
+                    || EF.Functions.ILike(e.LastName, $"%{filterText}%") 
+                    || EF.Functions.ILike(e.IdentityNumber, $"%{filterText}%")
+                    || EF.Functions.ILike(e.Email!, $"%{filterText}%"))
+                .Where(e => EF.Functions.ILike(e.FirstName, $"%{firstName}%"))
+                .Where(e => EF.Functions.ILike(e.LastName, $"%{lastName}%"))
+                .Where(e => EF.Functions.ILike(e.IdentityNumber, $"%{identityNumber}%"))
                 .WhereIf(birthDateMin.HasValue, e => e.BirthDate >= birthDateMin!.Value)
                 .WhereIf(birthDateMax.HasValue, e => e.BirthDate <= birthDateMax!.Value)
                 .WhereIf(gender.HasValue, e => e.Gender == gender)
-                .WhereIf(!string.IsNullOrWhiteSpace(email), e => e.Email!.Contains(email!))
-                .WhereIf(!string.IsNullOrWhiteSpace(phoneNumber), e => e.PhoneNumber!.Contains(phoneNumber!))
+                .Where(e => EF.Functions.ILike(e.Email!, $"%{email}%"))
+                .Where(e => EF.Functions.ILike(e.PhoneNumber!, $"%{phoneNumber}%"))
                 .WhereIf(yearOfExperienceMin.HasValue, e => e.StartDate <= DateTime.Now.AddYears(-yearOfExperienceMin!.Value))
                 .WhereIf(cityId.HasValue, e => e.CityId == cityId)
                 .WhereIf(districtId.HasValue, e => e.DistrictId == districtId)
@@ -234,19 +237,18 @@ public class EfCoreDoctorRepository(IDbContextProvider<HealthCareDbContext> dbCo
             Guid? departmentId = null,
             List<Guid>? departmentIds = null) =>
                 query
-                    .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Doctor.FirstName!.ToLower().Contains(filterText!.ToLower()) 
-                                                                          || e.Doctor.LastName!.ToLower().Contains(filterText!.ToLower()) 
-                                                                          || e.Doctor.PhoneNumber!.Contains(filterText!) 
-                                                                          || filterText!.ToLower().Contains(e.Doctor.LastName!.ToLower()) 
-                                                                          || filterText!.ToLower().Contains(e.Doctor.FirstName!.ToLower()))
-                    .WhereIf(!string.IsNullOrWhiteSpace(firstName), e => e.Doctor.FirstName!.ToLower().Contains(firstName!.ToLower()))
-                    .WhereIf(!string.IsNullOrWhiteSpace(lastName), e => e.Doctor.LastName!.ToLower().Contains(lastName!.ToLower()))
-                    .WhereIf(!string.IsNullOrWhiteSpace(identityNumber), e => e.Doctor.IdentityNumber!.Contains(identityNumber!))
+                    .Where(e => EF.Functions.ILike(e.Doctor.FirstName, $"%{filterText}%")
+                                || EF.Functions.ILike(e.Doctor.LastName, $"%{filterText}%") 
+                                || EF.Functions.ILike(e.Doctor.IdentityNumber, $"%{filterText}%")
+                                || EF.Functions.ILike(e.Doctor.Email!, $"%{filterText}%"))
+                    .Where(e => EF.Functions.ILike(e.Doctor.FirstName, $"%{firstName}%"))
+                    .Where(e => EF.Functions.ILike(e.Doctor.LastName, $"%{lastName}%"))
+                    .Where(e => EF.Functions.ILike(e.Doctor.IdentityNumber, $"%{identityNumber}%"))
                     .WhereIf(birthDateMin.HasValue, e => e.Doctor.BirthDate >= birthDateMin!.Value)
                     .WhereIf(birthDateMax.HasValue, e => e.Doctor.BirthDate <= birthDateMax!.Value)
                     .WhereIf(gender.HasValue, e => e.Doctor.Gender == gender)
-                    .WhereIf(!string.IsNullOrWhiteSpace(email), e => e.Doctor.Email!.Contains(email!))
-                    .WhereIf(!string.IsNullOrWhiteSpace(phoneNumber), e => e.Doctor.PhoneNumber!.Contains(phoneNumber!))
+                    .Where(e => EF.Functions.ILike(e.Doctor.Email!, $"%{email}%"))
+                    .Where(e => EF.Functions.ILike(e.Doctor.PhoneNumber!, $"%{phoneNumber}%"))
                     .WhereIf(yearOfExperienceMin.HasValue, e => e.Doctor.StartDate <= DateTime.Now.AddYears(-yearOfExperienceMin!.Value))
                     .WhereIf(cityId.HasValue, e => e.Doctor.CityId == cityId)
                     .WhereIf(districtId.HasValue, e => e.Doctor.DistrictId == districtId)

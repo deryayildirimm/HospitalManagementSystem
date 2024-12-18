@@ -27,7 +27,7 @@ public class TitleController(ITitlesAppService titlesAppService) : HealthCareCon
     public Task<TitleDto> UpdateAsync(TitleUpdateDto input) => titlesAppService.UpdateAsync(input);
     [HttpDelete]
     [Route("{id}")]
-    public void DeleteAsync(Guid id) => titlesAppService.DeleteAsync(id);
+    public Task DeleteAsync(Guid id) => titlesAppService.DeleteAsync(id);
     [HttpDelete]
     [Route("all")]
     public Task DeleteAllAsync(GetTitlesInput input) => titlesAppService.DeleteAllAsync(input);

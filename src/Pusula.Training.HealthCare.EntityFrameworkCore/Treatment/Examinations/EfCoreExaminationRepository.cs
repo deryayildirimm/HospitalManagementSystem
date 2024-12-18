@@ -15,23 +15,6 @@ namespace Pusula.Training.HealthCare.Treatment.Examinations;
 public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext> dbContextProvider)
     : EfCoreRepository<HealthCareDbContext, Examination, Guid>(dbContextProvider), IExaminationRepository
 {
-    public virtual async Task DeleteAllAsync(
-        string? filterText = null,
-        DateTime? dateMin = null,
-        DateTime? dateMax = null,
-        string? complaint = null,
-        string? story = null,
-        Guid? protocolId = null,
-        CancellationToken cancellationToken = default)
-    {
-        var query = await GetQueryableAsync();
-        
-        query = ApplyFilter(query, filterText, dateMin, dateMax, complaint, story, protocolId);
-        
-        var ids = query.Select(x => x.Id).ToList();
-        await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
-    }
-
     public virtual async Task<List<Examination>> GetListAsync(
         string? filterText = null,
         DateTime? dateMin = null,
@@ -44,12 +27,14 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()).Include(e => e.Background)
-            .Include(e => e.FamilyHistory)
-            .Include(e => e.Protocol), filterText, dateMin, dateMax, complaint, story, protocolId);
+        var query = ApplyFilter(await GetQueryForNavigationPropertiesAsync(
+            true, 
+            true, 
+            true,
+            true), filterText, dateMin, dateMax, complaint, story, protocolId);
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? ExaminationConsts.GetDefaultSorting(false) : sorting);
 
-        return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
+        return await query.PageBy(skipCount, maxResultCount).ToListAsync(GetCancellationToken(cancellationToken));
     }
 
     public virtual async Task<long> GetCountAsync(
@@ -68,28 +53,53 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
     
-    public virtual async Task<List<IcdReportDto>> GetIcdReportAsync(
+    public virtual async Task<long> GetIcdReportCountAsync(
         DateTime startDate, 
         DateTime? endDate = null, 
+        string? filterText = null,
+        string? codeNumber = null,
+        string? detail = null,
         CancellationToken cancellationToken = default)
     {
-        var query = (await GetQueryableAsync())
-            .Include(e => e.ExaminationIcd);
-
+        var query = (await GetQueryForNavigationPropertiesAsync(includeExaminationIcd: true))
+            .SelectMany(e => e.ExaminationIcd);
+        
+        query = ApplyFilterForExaminationIcd(query, startDate, endDate, filterText, codeNumber, detail);
+            
         var report = await query
-            .Where(e => e.Date >= startDate && e.Date <= endDate)
-            .SelectMany(e => e.ExaminationIcd)
             .GroupBy(icd => new { icd.Icd.CodeNumber, icd.Icd.Detail })
-            .Select(group => new IcdReportDto
-            {
-                CodeNumber = group.Key.CodeNumber,
-                Detail = group.Key.Detail,
-                Quantity = group.Count()
-            })
-            .OrderByDescending(r => r.Quantity)
-            .ToListAsync(cancellationToken);
-
+            .Select(group => new IcdReport(
+                group.Key.CodeNumber, 
+                group.Key.Detail,
+                group.Count()))
+            .LongCountAsync(GetCancellationToken(cancellationToken));
         return report;
+    }
+    
+    public virtual async Task<List<IcdReport>> GetIcdReportAsync(
+        DateTime startDate,
+        DateTime? endDate = null,
+        string? filterText = null,
+        string? codeNumber = null,
+        string? detail = null,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default)
+    {
+        var query = (await GetQueryForNavigationPropertiesAsync(includeExaminationIcd: true))
+            .SelectMany(e => e.ExaminationIcd);
+
+        query = ApplyFilterForExaminationIcd(query, startDate, endDate, filterText, codeNumber, detail);
+            
+        var report = query
+            .GroupBy(icd => new { icd.Icd.CodeNumber, icd.Icd.Detail })
+            .Select(group => new IcdReport(
+                group.Key.CodeNumber, 
+                group.Key.Detail,
+                group.Count()));
+        
+        return await report.PageBy(skipCount, maxResultCount).ToListAsync(GetCancellationToken(cancellationToken));
     }
 
 
@@ -97,26 +107,45 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        var query = (await GetQueryableAsync())
-            .Include(e => e.Background)
-            .Include(e => e.FamilyHistory)
-            .Include(e => e.Protocol);
+        var query = await GetQueryForNavigationPropertiesAsync(
+            includeProtocol: true,
+            includeFamilyHistory: true,
+            includeBackground: true,
+            includeExaminationIcd: true);
 
-        return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+        return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken: GetCancellationToken(cancellationToken));
     }
 
     public virtual async Task<Examination?> GetByProtocolIdAsync(
         Guid? protocolId, 
         CancellationToken cancellationToken = default)
     {
-        if (protocolId == null) return null;
-        
-        var query = ApplyFilter((await GetQueryableAsync()).Include(e => e.Background)
-            .Include(e => e.FamilyHistory)
-            .Include(e => e.Protocol), protocolId: protocolId);
-        return await query.FirstOrDefaultAsync(cancellationToken);
+        var query = ApplyFilter(await GetQueryForNavigationPropertiesAsync(
+            includeProtocol: true,
+            includeFamilyHistory: true,
+            includeBackground: true), protocolId: protocolId);
+        return await query.FirstOrDefaultAsync(GetCancellationToken(cancellationToken));
     }
+    
+    #region NavigationQueryCreator
 
+    protected virtual async Task<IQueryable<Examination>> GetQueryForNavigationPropertiesAsync(
+        bool includeProtocol = false,
+        bool includeFamilyHistory = false,
+        bool includeBackground = false,
+        bool includeExaminationIcd = false
+        )
+        =>
+            (await GetQueryableAsync())
+            .IncludeIf(includeProtocol, examination => examination.Protocol)
+            .IncludeIf(includeFamilyHistory, examination => examination.FamilyHistory)
+            .IncludeIf(includeBackground, examination => examination.Background)
+            .IncludeIf(includeExaminationIcd, examination => examination.ExaminationIcd);
+
+    #endregion
+
+    
+    #region ApplyFilter
     protected virtual IQueryable<Examination> ApplyFilter(
         IQueryable<Examination> query,
         string? filterText = null,
@@ -126,11 +155,29 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         string? story = null,
         Guid? protocolId = null)
     => query
-            .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Complaint!.ToLower().Contains(filterText!.ToLower())
-                                                                  || e.Story!.ToLower().Contains(filterText!.ToLower()))
+            .Where(e => EF.Functions.ILike(e.Complaint, $"%{filterText}%")
+                || EF.Functions.ILike(e.Story!, $"%{filterText}%"))
             .WhereIf(dateMin.HasValue, e => e.Date >= dateMin!.Value)
             .WhereIf(dateMax.HasValue, e => e.Date <= dateMax!.Value)
-            .WhereIf(!string.IsNullOrWhiteSpace(complaint), e => e.Complaint!.ToLower().Contains(complaint!.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(story), e => e.Story!.ToLower().Contains(story!.ToLower()))
+            .Where(e => EF.Functions.ILike(e.Complaint, $"%{complaint}%"))
+            .Where(e => EF.Functions.ILike(e.Story!, $"%{story}%"))
             .WhereIf(protocolId.HasValue, e => e.ProtocolId == protocolId);
+    
+    protected virtual IQueryable<ExaminationIcd> ApplyFilterForExaminationIcd(
+        IQueryable<ExaminationIcd> query,
+        DateTime startDate,
+        DateTime? endDate = null,
+        string? filterText = null,
+        string? codeNumber = null,
+        string? detail = null)
+        => query
+            .Where(icd => icd.Examination.Date >= startDate)
+            .WhereIf(endDate.HasValue, icd => icd.Examination.Date <= endDate!.Value)
+            .Where(icd => EF.Functions.ILike(icd.Icd.CodeNumber, $"%{filterText}%") 
+                          || EF.Functions.ILike(icd.Icd.Detail, $"%{filterText}%") )
+            .Where(icd => EF.Functions.ILike(icd.Icd.CodeNumber, $"%{codeNumber}%") )
+            .Where(icd => EF.Functions.ILike(icd.Icd.Detail, $"%{detail}%") );
+
+    
+    #endregion
 }

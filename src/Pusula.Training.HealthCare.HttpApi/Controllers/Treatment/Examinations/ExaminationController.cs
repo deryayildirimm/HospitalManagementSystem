@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
@@ -26,22 +25,11 @@ public class ExaminationController(IExaminationsAppService examinationsAppServic
     public Task<ExaminationDto?> GetByProtocolIdAsync(Guid? protocolId) => examinationsAppService.GetByProtocolIdAsync(protocolId);
 
     [HttpGet("icdReport")]
-    public Task<List<IcdReportDto>> GetIcdReportAsync(DateTime startDate, DateTime? endDate) => 
-        examinationsAppService.GetIcdReportAsync(startDate, endDate);
+    public Task<PagedResultDto<IcdReportDto>> GetIcdReportAsync(GetIcdReportInput input) => 
+        examinationsAppService.GetIcdReportAsync(input);
 
     [HttpPost]
     public Task<ExaminationDto> CreateAsync(ExaminationCreateDto input) => examinationsAppService.CreateAsync(input);
     [HttpPut]
     public Task<ExaminationDto> UpdateAsync(ExaminationUpdateDto input) => examinationsAppService.UpdateAsync(input);
-    [HttpDelete]
-    [Route("{id}")]
-    public void DeleteAsync(Guid id) => examinationsAppService.DeleteAsync(id);
-    [HttpDelete]
-    [Route("all")]
-    public Task DeleteAllAsync(GetExaminationsInput examinationInput) => 
-        examinationsAppService.DeleteAllAsync(examinationInput);
-    [HttpDelete]
-    [Route("")]
-    public Task DeleteByIdsAsync(List<Guid> examinationIds) => 
-        examinationsAppService.DeleteByIdsAsync(examinationIds);
 }

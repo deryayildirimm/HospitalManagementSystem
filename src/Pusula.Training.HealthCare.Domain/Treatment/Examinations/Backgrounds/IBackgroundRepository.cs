@@ -8,14 +8,6 @@ namespace Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 
 public interface IBackgroundRepository : IRepository<Background, Guid>
 {
-    Task DeleteAllAsync(
-        string? filterText = null,
-        string? allergies = null,
-        string? medications = null,
-        string? habits = null,
-        Guid? examinationId = null,
-        CancellationToken cancellationToken = default);
-
     Task<List<Background>> GetListAsync(
         string? filterText = null,
         string? allergies = null,

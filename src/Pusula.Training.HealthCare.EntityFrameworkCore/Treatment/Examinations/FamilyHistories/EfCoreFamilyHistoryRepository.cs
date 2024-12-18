@@ -13,24 +13,6 @@ namespace Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
 public class EfCoreFamilyHistoryRepository(IDbContextProvider<HealthCareDbContext> dbContextProvider)
     : EfCoreRepository<HealthCareDbContext, FamilyHistory, Guid>(dbContextProvider), IFamilyHistoryRepository
 {
-    public virtual async Task DeleteAllAsync(
-        string? filterText = null,
-        string? motherDisease = null,
-        string? fatherDisease = null,
-        string? sisterDisease = null,
-        string? brotherDisease = null,
-        bool? areParentsRelated = null,
-        Guid? examinationId = null,
-        CancellationToken cancellationToken = default)
-    {
-        var query = await GetQueryableAsync();
-        
-        query = ApplyFilter(query, filterText, motherDisease, fatherDisease, sisterDisease, brotherDisease, areParentsRelated, examinationId);
-        
-        var ids = query.Select(x => x.Id).ToList();
-        await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
-    }
-
     public virtual async Task<List<FamilyHistory>> GetListAsync(
         string? filterText = null,
         string? motherDisease = null,
@@ -40,13 +22,13 @@ public class EfCoreFamilyHistoryRepository(IDbContextProvider<HealthCareDbContex
         bool? areParentsRelated = null,
         Guid? examinationId = null, 
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetQueryableAsync()).Include(e => e.Examination), 
             filterText, motherDisease, fatherDisease, sisterDisease, brotherDisease, areParentsRelated, examinationId);
-        return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
+        return await query.PageBy(skipCount, maxResultCount).ToListAsync(GetCancellationToken(cancellationToken));
     }
 
     public virtual async Task<long> GetCountAsync(
@@ -58,7 +40,7 @@ public class EfCoreFamilyHistoryRepository(IDbContextProvider<HealthCareDbContex
         bool? areParentsRelated = null,
         Guid? examinationId = null, 
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
@@ -77,14 +59,15 @@ public class EfCoreFamilyHistoryRepository(IDbContextProvider<HealthCareDbContex
         Guid? examinationId = null)
     {
         return query
-            .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.MotherDisease!.ToLower().Contains(filterText!.ToLower())
-                                || e.FatherDisease!.ToLower().Contains(filterText!.ToLower())
-                                || e.SisterDisease!.ToLower().Contains(filterText!.ToLower())
-                                || e.BrotherDisease!.ToLower().Contains(filterText!.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(motherDisease), e => e.MotherDisease!.ToLower().Contains(motherDisease!.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(fatherDisease), e => e.FatherDisease!.ToLower().Contains(fatherDisease!.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(sisterDisease), e => e.SisterDisease!.ToLower().Contains(sisterDisease!.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(brotherDisease), e => e.BrotherDisease!.ToLower().Contains(brotherDisease!.ToLower()))
-            .WhereIf(examinationId.HasValue, e => e.ExaminationId == examinationId);
+            .Where(f => EF.Functions.ILike(f.MotherDisease!, $"%{filterText}%")
+                    || EF.Functions.ILike(f.FatherDisease!, $"%{filterText}%")
+                    || EF.Functions.ILike(f.SisterDisease!, $"%{filterText}%")
+                    || EF.Functions.ILike(f.BrotherDisease!, $"%{filterText}%"))
+            .Where(f => EF.Functions.ILike(f.MotherDisease!, $"%{motherDisease}%"))
+            .Where(f => EF.Functions.ILike(f.FatherDisease!, $"%{fatherDisease}%"))
+            .Where(f => EF.Functions.ILike(f.SisterDisease!, $"%{sisterDisease}%"))
+            .Where(f => EF.Functions.ILike(f.BrotherDisease!, $"%{brotherDisease}%"))
+            .WhereIf(examinationId.HasValue, e => e.ExaminationId == examinationId)
+            .WhereIf(areParentsRelated.HasValue, f => f.AreParentsRelated == areParentsRelated);
     }
 }
