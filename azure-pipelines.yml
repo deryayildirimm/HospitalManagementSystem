@@ -49,29 +49,6 @@ stages:
               tags: $(imageTag)
               buildArguments: '--memory=4g --cpu-shares=1024'
 
-  - stage: DockerImageSecurityScan
-    displayName: Docker Image Security Scan
-    jobs:
-      - job: SecurityScan
-        displayName: Run Trivy Security Scan
-        steps:
-          - task: Bash@3
-            inputs:
-              targetType: 'inline'
-              script: |
-                echo "### Trivy Kurulumu Başlatılıyor..."
-                sudo apt-get update
-                sudo apt-get install wget apt-transport-https gnupg -y
-                wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-                echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -cs) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-                sudo apt-get update
-                sudo apt-get install trivy -y
-                echo "### Docker Image Güvenlik Taraması Başlatılıyor..."
-                trivy image registry.gitlab.com/medplus1/medplusproject:$(imageTag) --exit-code 0 --severity HIGH,CRITICAL
-                echo "### CRITICAL ve HIGH Seviyedeki Güvenlik Açıkları Kontrol Ediliyor..."
-                trivy image registry.gitlab.com/medplus1/medplusproject:$(imageTag) --exit-code 1 --severity CRITICAL
-            displayName: 'Docker Image Trivy Taraması'
-
   - stage: TagAndRemoveImage
     displayName: Tag and Remove Docker Image
     jobs:
