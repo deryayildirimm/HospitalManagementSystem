@@ -25,8 +25,9 @@ public interface IProtocolsAppService : IApplicationService
     Task<PagedResultDto<LookupDto<Guid>>> GetInsuranceLookUpAsync(LookupRequestDto input);
     
     Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookUpAsync(LookupRequestDto input);
-    
 
+    Task<PagedResultDto<DepartmentStatisticDto>> GetDepartmentPatientStatisticsAsync(GetProtocolsInput input);
+    
     Task DeleteAsync(Guid id);
 
     Task<ProtocolDto> CreateAsync(ProtocolCreateDto input);

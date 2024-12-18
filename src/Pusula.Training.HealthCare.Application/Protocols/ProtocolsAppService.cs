@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
+using AutoMapper.Configuration.Annotations;
 using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.Insurances;
 using Volo.Abp;
@@ -56,6 +57,48 @@ namespace Pusula.Training.HealthCare.Protocols
             
             return ObjectMapper.Map<Protocol, ProtocolDto>(protocol);
         }
+
+
+        public virtual async Task<PagedResultDto<DepartmentStatisticDto>> GetDepartmentPatientStatisticsAsync(
+            GetProtocolsInput input)
+        {
+
+            var count = await protocolRepository.GetGroupCountByDepartmentPatientAsync(
+                departmentName: input.DepartmentName,
+                patientId: input.PatientId,
+                departmentId: input.DepartmentId,
+                protocolTypeId: input.ProtocolTypeId,
+                doctorId: input.DoctorId,
+                insuranceId: input.InsuranceId,
+                startTimeMin: input.StartTimeMin,
+                startTimeMax: input.StartTimeMax,
+                endTimeMin: input.EndTimeMin,
+                endTimeMax: input.EndTimeMax);
+
+            var items = await protocolRepository.GetGroupByDepartmentPatientAsync(
+                departmentName: input.DepartmentName,
+                patientId: input.PatientId,
+                departmentId: input.DepartmentId,
+                protocolTypeId: input.ProtocolTypeId,
+                doctorId: input.DoctorId,
+                insuranceId: input.InsuranceId,
+                startTimeMin: input.StartTimeMin,
+                startTimeMax: input.StartTimeMax,
+                endTimeMin: input.EndTimeMin,
+                endTimeMax: input.EndTimeMax
+            );
+            
+            return new PagedResultDto<DepartmentStatisticDto>
+            {
+                TotalCount = count,
+                Items = ObjectMapper.Map<List<DepartmentStatistic>, List<DepartmentStatisticDto>>(items)
+            };
+
+
+
+        }
+        
+        
 
         public virtual async Task<PagedResultDto<LookupDto<Guid>>> GetPatientLookupAsync(LookupRequestDto input)
         {
@@ -134,10 +177,8 @@ namespace Pusula.Training.HealthCare.Protocols
         }
 
         [Authorize(HealthCarePermissions.Protocols.Delete)]
-        public virtual async Task DeleteAsync(Guid id)
-        {
-            await protocolRepository.DeleteAsync(id);
-        }
+        public virtual async Task DeleteAsync(Guid id) =>  await protocolRepository.DeleteAsync(id);
+        
 
         [Authorize(HealthCarePermissions.Protocols.Create)]
         public virtual async Task<ProtocolDto> CreateAsync(ProtocolCreateDto input)

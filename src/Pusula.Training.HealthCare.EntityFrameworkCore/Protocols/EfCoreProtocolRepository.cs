@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
+using Pusula.Training.HealthCare.Permissions;
 
 namespace Pusula.Training.HealthCare.Protocols;
 
@@ -163,6 +164,68 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         throw new NotImplementedException();
     }
 
+    #region Department-Patient Report 
+   
+    public virtual async Task<long> GetGroupCountByDepartmentPatientAsync(
+        string? departmentName = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        CancellationToken cancellationToken = default 
+        )
+    {
+        
+        var query = (await GetQueryableAsync());
+        query = ApplyFilterr(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId,  startTimeMin, startTimeMax, endTimeMin, endTimeMax);
+        
+        return await query
+            .GroupBy(a => a.Department.Id)
+            .LongCountAsync(cancellationToken);
+            
+       
+    }
+
+    // case -> departman bazlı kaç kişi gelmiş 
+    public virtual async Task<List<DepartmentStatistic>> GetGroupByDepartmentPatientAsync(
+        string? departmentName = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var query = (await GetQueryableAsync());
+        query = ApplyFilterr(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId, startTimeMin, startTimeMax, endTimeMin, endTimeMax);
+        
+        // bu departmana kaç kişi gelmiş -> benzersiz olarak düşünmek lazım , bu nedenle distinct eklemek mantıklı 
+        return await query
+            .GroupBy(a => a.Department.Id)
+            .Select(g => new DepartmentStatistic
+            {
+                DepartmentId = g.Key,
+                DepartmentName = g.First().Department.Name,
+                PatientCount = g.Select(p => p.PatientId).Distinct().Count(), // benzersiz hasta sayısını elde edebilmek içim 
+            })
+            .OrderBy(d => d.DepartmentName)
+            .PageBy(skipCount, maxResultCount)
+            .ToListAsync(cancellationToken);
+    }
+    #endregion
 
     public virtual async Task<long> GetCountAsync(
         string? filterText = null,
@@ -199,4 +262,37 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         .WhereIf(startTimeMax.HasValue, e => e.StartTime <= startTimeMax!.Value)
         .WhereIf(endTimeMin.HasValue, e => e.EndTime >= endTimeMin!.Value)
         .WhereIf(endTimeMax.HasValue, e => e.EndTime <= endTimeMax!.Value);
+
+
+    #region For department filter part
+    
+    protected virtual IQueryable<Protocol> ApplyFilterr(
+        IQueryable<Protocol> query,
+        string? departmentName = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null) => query
+        .WhereIf(startTimeMin.HasValue, e => e.StartTime >= startTimeMin!.Value)
+        .WhereIf(startTimeMax.HasValue, e => e.StartTime <= startTimeMax!.Value)
+        .WhereIf(endTimeMin.HasValue, e => e.EndTime >= endTimeMin!.Value)
+        .WhereIf(endTimeMax.HasValue, e => e.EndTime <= endTimeMax!.Value)
+        .WhereIf(patientId.HasValue && patientId != Guid.Empty, e => e.Patient != null && e.Patient.Id == patientId)
+        .WhereIf(insuranceId.HasValue && insuranceId != Guid.Empty,
+            e => e.Insurance != null && e.Insurance.Id == insuranceId)
+        .WhereIf(protocolTypeId.HasValue && protocolTypeId != Guid.Empty,
+            e => e.ProtocolType != null && e.ProtocolType.Id == protocolTypeId)
+        .WhereIf(doctorId.HasValue && doctorId != Guid.Empty, e => e.Doctor != null && e.Doctor.Id == doctorId)
+        .WhereIf(!string.IsNullOrWhiteSpace(departmentName), x =>
+            x.Department.Name.ToLower().Contains(departmentName!.ToLower()) )
+        .WhereIf(departmentId.HasValue && departmentId != Guid.Empty,
+            e => e.Department != null && e.Department.Id == departmentId);
+    
+    #endregion
+    
 }

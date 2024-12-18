@@ -83,4 +83,38 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
         Guid? doctorId = null,
         Guid? insuranceId = null,
         CancellationToken cancellationToken = default);
+
+    Task<List<DepartmentStatistic>> GetGroupByDepartmentPatientAsync(
+        string? departmentName = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default 
+    );
+
+    Task<long> GetGroupCountByDepartmentPatientAsync(
+        string? departmentName = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        CancellationToken cancellationToken = default 
+    );
 }
+
+    
+
