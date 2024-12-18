@@ -28,6 +28,8 @@ public interface IProtocolsAppService : IApplicationService
 
     Task<PagedResultDto<DepartmentStatisticDto>> GetDepartmentPatientStatisticsAsync(GetProtocolsInput input);
     
+    Task<PagedResultDto<DoctorStatisticDto>> GetDoctorPatientStatisticsAsync(GetProtocolsInput input);
+    
     Task DeleteAsync(Guid id);
 
     Task<ProtocolDto> CreateAsync(ProtocolCreateDto input);

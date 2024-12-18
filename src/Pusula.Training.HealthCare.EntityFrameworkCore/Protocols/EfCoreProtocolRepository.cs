@@ -182,7 +182,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
     {
         
         var query = (await GetQueryableAsync());
-        query = ApplyFilterr(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId,  startTimeMin, startTimeMax, endTimeMin, endTimeMax);
+        query = ApplyFilterForReports(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId,  startTimeMin, startTimeMax, endTimeMin, endTimeMax);
         
         return await query
             .GroupBy(a => a.Department.Id)
@@ -210,23 +210,83 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
     )
     {
         var query = (await GetQueryableAsync());
-        query = ApplyFilterr(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId, startTimeMin, startTimeMax, endTimeMin, endTimeMax);
+        query = ApplyFilterForReports(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId, startTimeMin, startTimeMax, endTimeMin, endTimeMax);
         
         // bu departmana kaç kişi gelmiş -> benzersiz olarak düşünmek lazım , bu nedenle distinct eklemek mantıklı 
+        // kaldırdım distinct i kaç kişi gelmiş diyor yani kaç protokol açılmış işte 
         return await query
             .GroupBy(a => a.Department.Id)
             .Select(g => new DepartmentStatistic
             {
                 DepartmentId = g.Key,
                 DepartmentName = g.First().Department.Name,
-                PatientCount = g.Select(p => p.PatientId).Distinct().Count(), // benzersiz hasta sayısını elde edebilmek içim 
+                PatientCount = g.Select(p => p.PatientId).Count(), // benzersiz hasta sayısını elde edebilmek içim
             })
             .OrderBy(d => d.DepartmentName)
             .PageBy(skipCount, maxResultCount)
             .ToListAsync(cancellationToken);
     }
     #endregion
-
+    
+    #region Doctor-Patient Report 
+    public virtual async Task<long> GetGroupCountByDoctorPatientAsync(
+        string? departmentName = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        CancellationToken cancellationToken = default 
+    )
+    {
+        
+        var query = (await GetQueryableAsync());
+        query = ApplyFilterForReports(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId,  startTimeMin, startTimeMax, endTimeMin, endTimeMax);
+        
+        return await query
+            .GroupBy(a => a.Doctor.Id)
+            .LongCountAsync(cancellationToken);
+        
+    }
+    
+    public virtual async Task<List<DoctorStatistics>> GetGroupByDoctorPatientAsync(
+        string? departmentName = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var query = (await GetQueryableAsync());
+        query = ApplyFilterForReports(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId, startTimeMin, startTimeMax, endTimeMin, endTimeMax);
+        
+        return await query
+            .GroupBy(a => a.Doctor.Id)
+            .Select(g => new DoctorStatistics
+            {
+                DoctorId = g.Key,
+                DoctorName = g.First().Doctor.FirstName + "  " + g.First().Doctor.LastName,
+                PatientCount = g.Select(p => p.PatientId).Count(), 
+                
+            })
+            .OrderBy(d => d.DoctorName)
+            .PageBy(skipCount, maxResultCount)
+            .ToListAsync(cancellationToken);
+    }
+    #endregion
     public virtual async Task<long> GetCountAsync(
         string? filterText = null,
         string? note = null,
@@ -266,7 +326,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
 
     #region For department filter part
     
-    protected virtual IQueryable<Protocol> ApplyFilterr(
+    protected virtual IQueryable<Protocol> ApplyFilterForReports(
         IQueryable<Protocol> query,
         string? departmentName = null,
         Guid? patientId = null,
