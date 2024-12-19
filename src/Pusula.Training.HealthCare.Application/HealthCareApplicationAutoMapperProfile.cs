@@ -120,9 +120,10 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<IcdDto, IcdUpdateDto>();
         CreateMap<Icd, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
-        CreateMap<Icd, LookupDto<Guid>>()
-            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
-
+        CreateMap<Icd, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
+        
+        CreateMap<IcdReport, IcdReportDto>();
+        
         CreateMap<FamilyHistory, FamilyHistoryDto>();
         CreateMap<FamilyHistoryDto, FamilyHistoryUpdateDto>();
         CreateMap<FamilyHistory, LookupDto<Guid>>()

@@ -15,33 +15,35 @@ namespace Pusula.Training.HealthCare.Doctors;
 public class Doctor : FullAuditedAggregateRoot<Guid>
 {
     [NotNull]
-    public virtual string FirstName { get; protected set; }
+    public virtual string FirstName { get; private set; } = null!;
     [NotNull]
-    public virtual string LastName { get; protected set; }
+    public virtual string LastName { get; private set; } = null!;
     [NotNull]
-    public virtual string IdentityNumber { get; protected set; }
+    public virtual string IdentityNumber { get; private set; } = null!;
     [NotNull]
-    public virtual DateTime BirthDate { get; protected set; }
+    public virtual DateTime BirthDate { get; private set; }
     [NotNull]
-    public virtual EnumGender Gender { get; protected set; }
+    public virtual EnumGender Gender { get; private set; }
     [CanBeNull]
-    public virtual string? Email { get; protected set; }
+    public virtual string? Email { get; private set; }
     [CanBeNull]
-    public virtual string? PhoneNumber { get; protected set; }
+    public virtual string? PhoneNumber { get; private set; }
     [NotNull]
-    public virtual DateTime StartDate { get; protected set; }
+    public virtual DateTime StartDate { get; private set; }
     [NotNull]
-    public virtual Guid CityId { get; protected set; }
-    public virtual City City { get; protected set; }
+    public virtual Guid CityId { get; private set; }
+
+    public virtual City City { get; private set; } = null!;
     [NotNull]
-    public virtual Guid DistrictId { get; protected set; }
-    public virtual District District { get; protected set; }
+    public virtual Guid DistrictId { get; private set; }
+
+    public virtual District District { get; private set; } = null!;
     [NotNull]
-    public virtual Guid DepartmentId { get; protected set; }
-    public virtual Department Department { get; protected set; }
+    public virtual Guid DepartmentId { get; private set; }
+    public virtual Department Department { get; private set; } = null!;
     [NotNull]
-    public virtual Guid TitleId { get; protected set; }
-    public virtual Title Title { get; protected set; }
+    public virtual Guid TitleId { get; private set; }
+    public virtual Title Title { get; private set; } = null!;
 
     protected Doctor()
     {

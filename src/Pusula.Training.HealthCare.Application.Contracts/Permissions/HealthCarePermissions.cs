@@ -142,6 +142,11 @@ public static class HealthCarePermissions
         public const string Delete = Default + ".Delete";
     }
 
+    public static class Treatment
+    {
+        public const string Default = GroupName + ".Treatment";
+    }
+
     public static class Icds
     {
         public const string Default = GroupName + ".Icds";

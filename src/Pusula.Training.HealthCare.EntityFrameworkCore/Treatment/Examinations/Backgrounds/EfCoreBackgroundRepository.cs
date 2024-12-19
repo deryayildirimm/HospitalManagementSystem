@@ -13,22 +13,6 @@ namespace Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 public class EfCoreBackgroundRepository(IDbContextProvider<HealthCareDbContext> dbContextProvider)
     : EfCoreRepository<HealthCareDbContext, Background, Guid>(dbContextProvider), IBackgroundRepository
 {
-    public virtual async Task DeleteAllAsync(
-        string? filterText = null,
-        string? allergies = null,
-        string? medications = null,
-        string? habits = null,
-        Guid? examinationId = null,
-        CancellationToken cancellationToken = default)
-    {
-        var query = await GetQueryableAsync();
-        
-        query = ApplyFilter(query, filterText, allergies, medications, habits, examinationId);
-        
-        var ids = query.Select(x => x.Id).ToList();
-        await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
-    }
-
     public virtual async Task<List<Background>> GetListAsync(
         string? filterText = null,
         string? allergies = null,
@@ -36,12 +20,12 @@ public class EfCoreBackgroundRepository(IDbContextProvider<HealthCareDbContext> 
         string? habits = null,
         Guid? examinationId = null, 
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetQueryableAsync()), filterText, allergies, medications, habits, examinationId);
-        return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
+        return await query.PageBy(skipCount, maxResultCount).ToListAsync(GetCancellationToken(cancellationToken));
     }
 
     public virtual async Task<long> GetCountAsync(
@@ -51,7 +35,7 @@ public class EfCoreBackgroundRepository(IDbContextProvider<HealthCareDbContext> 
         string? habits = null,
         Guid? examinationId = null, 
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {

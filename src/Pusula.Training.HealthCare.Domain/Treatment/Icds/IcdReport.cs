@@ -1,30 +1,29 @@
-﻿using System;
-using JetBrains.Annotations;
+﻿using System.Diagnostics.CodeAnalysis;
 using Volo.Abp;
-using Volo.Abp.Domain.Entities.Auditing;
 
 namespace Pusula.Training.HealthCare.Treatment.Icds;
 
-public class Icd : FullAuditedAggregateRoot<Guid>
+public class IcdReport
 {
-    
     [NotNull]
-    public virtual string CodeNumber { get; private set; } = null!;
-    
+    public string CodeNumber { get; private set; } = null!;
     [NotNull]
-    public virtual string Detail { get; private set; } = null!;
+    public string Detail { get; private set; } = null!;
+    [NotNull]
+    public int Quantity { get; private set; }
 
-    protected Icd()
+    protected IcdReport()
     {
         CodeNumber = string.Empty;
         Detail = string.Empty;
+        Quantity = 0;
     }
-
-    public Icd(Guid id, string codeNumber, string detail)
+    
+    public IcdReport(string codeNumber, string detail, int quantity)
     {
-        Id = id;
         SetCodeNumber(codeNumber);
         SetDetail(detail);
+        SetQuantity(quantity);
     }
 
     public void SetCodeNumber(string codeNumber)
@@ -37,5 +36,11 @@ public class Icd : FullAuditedAggregateRoot<Guid>
     {
         Check.NotNullOrWhiteSpace(detail, nameof(detail), IcdConsts.DetailMaxLength, IcdConsts.DetailMinLength);
         Detail = detail;
+    }
+
+    public void SetQuantity(int quantity)
+    {
+        Check.Range(quantity, nameof(quantity), 0);
+        Quantity = quantity;
     }
 }
