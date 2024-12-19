@@ -25,7 +25,6 @@ namespace Pusula.Training.HealthCare.MedicalServices;
 [Authorize(HealthCarePermissions.MedicalServices.Default)]
 public class MedicalServicesAppService(
     IMedicalServiceRepository medicalServiceRepository,
-    IDepartmentRepository departmentRepository,
     MedicalServiceManager medicalServiceManager,
     IDistributedCache<MedicalServiceDownloadTokenCacheItem, string> downloadCache
 ) : HealthCareAppService, IMedicalServicesAppService
@@ -47,6 +46,21 @@ public class MedicalServicesAppService(
         };
     }
 
+    public virtual async Task<PagedResultDto<MedicalServiceDto>> GetMedicalServiceByDepartmentIdAsync(
+        GetServiceByDepartmentInput input)
+    {
+        
+        var items = await medicalServiceRepository.GetMedicalServiceListByDepartmentIdAsync(input.DepartmentId,
+            input.Sorting,
+            input.MaxResultCount, input.SkipCount);
+
+        return new PagedResultDto<MedicalServiceDto>
+        {
+            TotalCount = items.Count,
+            Items = ObjectMapper.Map<List<MedicalService>, List<MedicalServiceDto>>(items)
+        };
+    }
+
     public async Task<PagedResultDto<MedicalServiceWithDepartmentsDto>> GetMedicalServiceWithDepartmentsAsync(
         GetMedicalServiceInput input)
     {
@@ -64,6 +78,19 @@ public class MedicalServicesAppService(
             Items = ObjectMapper.Map<List<MedicalServiceWithDepartments>, List<MedicalServiceWithDepartmentsDto>>(items)
         };
     }
+
+    public virtual async Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(
+        GetMedicalServiceInput input)
+    {
+        var result = await medicalServiceRepository.GetMedicalServiceWithDoctorsAsync(input.MedicalServiceId,
+            input.DepartmentId,
+            input.Name,
+            input.CostMin, input.CostMax, input.ServiceDateMin, input.ServiceDateMax, input.Sorting,
+            input.MaxResultCount, input.SkipCount);
+
+        return ObjectMapper.Map<MedicalServiceWithDoctors, MedicalServiceWithDoctorsDto>(result);
+    }
+
 
     public virtual async Task<MedicalServiceDto> GetAsync(Guid id)
     {
@@ -97,7 +124,7 @@ public class MedicalServicesAppService(
     [Authorize(HealthCarePermissions.MedicalServices.Edit)]
     public virtual async Task<MedicalServiceDto> UpdateAsync(Guid id, MedicalServiceUpdateDto input)
     {
-         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorNotWorking,
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorNotWorking,
             await medicalServiceRepository.FirstOrDefaultAsync(x => x.Name == input.Name && x.Id != id) is not null);
 
         var medicalService = await medicalServiceManager.UpdateAsync(

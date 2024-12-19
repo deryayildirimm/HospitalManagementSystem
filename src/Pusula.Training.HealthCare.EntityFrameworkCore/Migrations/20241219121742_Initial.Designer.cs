@@ -13,7 +13,7 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Pusula.Training.HealthCare.Migrations
 {
     [DbContext(typeof(HealthCareDbContext))]
-    [Migration("20241209234438_Initial")]
+    [Migration("20241219121742_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -100,6 +100,10 @@ namespace Pusula.Training.HealthCare.Migrations
 
                     b.Property<Guid>("AppointmentTypeId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("CancellationNotes")
+                        .HasColumnType("text")
+                        .HasColumnName("CancellationNotes");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -704,6 +708,10 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("LastModifierId");
 
+                    b.Property<int>("LeaveType")
+                        .HasColumnType("integer")
+                        .HasColumnName("LeaveType");
+
                     b.Property<string>("Reason")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)")
@@ -749,8 +757,8 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("DoctorId");
 
-                    b.Property<TimeSpan>("EndHour")
-                        .HasColumnType("interval")
+                    b.Property<TimeOnly>("EndHour")
+                        .HasColumnType("time without time zone")
                         .HasColumnName("EndHour");
 
                     b.Property<bool>("IsDeleted")
@@ -767,8 +775,8 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("LastModifierId");
 
-                    b.Property<TimeSpan>("StartHour")
-                        .HasColumnType("interval")
+                    b.Property<TimeOnly>("StartHour")
+                        .HasColumnType("time without time zone")
                         .HasColumnName("StartHour");
 
                     b.HasKey("Id");
@@ -1145,9 +1153,6 @@ namespace Pusula.Training.HealthCare.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.ToTable("AppMedicalServices", (string)null);
                 });
 
@@ -1217,10 +1222,11 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("Gender");
 
-                    b.Property<string>("IdentityAndPassportNumber")
+                    b.Property<string>("IdentityNumber")
                         .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("IdentityAndPassportNumber");
+                        .HasMaxLength(11)
+                        .HasColumnType("character varying(11)")
+                        .HasColumnName("IdentityNumber");
 
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
@@ -1255,6 +1261,11 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.Property<string>("Nationality")
                         .HasColumnType("text")
                         .HasColumnName("Nationality");
+
+                    b.Property<string>("PassportNumber")
+                        .HasMaxLength(9)
+                        .HasColumnType("character varying(9)")
+                        .HasColumnName("PassportNumber");
 
                     b.Property<int>("PatientNumber")
                         .HasColumnType("integer")
@@ -1428,6 +1439,85 @@ namespace Pusula.Training.HealthCare.Migrations
                         .IsUnique();
 
                     b.ToTable("AppProtocolMedicalServices", (string)null);
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.Restrictions.Restriction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("AllowedGender")
+                        .HasColumnType("integer")
+                        .HasColumnName("AllowedGender");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<Guid>("DepartmentId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("DoctorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ExtraProperties")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("LastModifierId");
+
+                    b.Property<int?>("MaxAge")
+                        .HasColumnType("integer")
+                        .HasColumnName("MaxAge");
+
+                    b.Property<Guid>("MedicalServiceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int?>("MinAge")
+                        .HasColumnType("integer")
+                        .HasColumnName("MinAge");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("DoctorId");
+
+                    b.HasIndex("MedicalServiceId");
+
+                    b.ToTable("AppRestrictions", (string)null);
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Titles.Title", b =>
@@ -2577,13 +2667,6 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("text")
                         .HasColumnName("ExtraProperties");
 
-                    b.Property<string>("IdentificationNumber")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(11)
-                        .HasColumnType("character varying(11)")
-                        .HasDefaultValue("");
-
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("IsActive");
@@ -3711,11 +3794,12 @@ namespace Pusula.Training.HealthCare.Migrations
 
             modelBuilder.Entity("Pusula.Training.HealthCare.DoctorLeaves.DoctorLeave", b =>
                 {
-                    b.HasOne("Pusula.Training.HealthCare.Doctors.Doctor", null)
+                    b.HasOne("Pusula.Training.HealthCare.Doctors.Doctor", "Doctor")
                         .WithMany()
                         .HasForeignKey("DoctorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Doctor");
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Doctors.Doctor", b =>
@@ -3727,10 +3811,9 @@ namespace Pusula.Training.HealthCare.Migrations
                         .IsRequired();
 
                     b.HasOne("Pusula.Training.HealthCare.Departments.Department", "Department")
-                        .WithMany()
+                        .WithMany("Doctors")
                         .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Pusula.Training.HealthCare.Districts.District", "District")
                         .WithMany()
@@ -3836,6 +3919,30 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.Navigation("MedicalService");
 
                     b.Navigation("Protocol");
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.Restrictions.Restriction", b =>
+                {
+                    b.HasOne("Pusula.Training.HealthCare.Departments.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pusula.Training.HealthCare.Doctors.Doctor", "Doctor")
+                        .WithMany()
+                        .HasForeignKey("DoctorId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pusula.Training.HealthCare.MedicalServices.MedicalService", "MedicalService")
+                        .WithMany()
+                        .HasForeignKey("MedicalServiceId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Doctor");
+
+                    b.Navigation("MedicalService");
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds.Background", b =>
@@ -4031,6 +4138,8 @@ namespace Pusula.Training.HealthCare.Migrations
             modelBuilder.Entity("Pusula.Training.HealthCare.Departments.Department", b =>
                 {
                     b.Navigation("DepartmentMedicalServices");
+
+                    b.Navigation("Doctors");
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.MedicalServices.MedicalService", b =>

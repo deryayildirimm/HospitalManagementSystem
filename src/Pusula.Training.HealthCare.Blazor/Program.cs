@@ -66,8 +66,11 @@ public class Program
             builder.Services.AddScoped<AppointmentTypeAdaptor>();
             builder.Services.AddScoped<AppointmentStatisticsAdaptor>();
             builder.Services.AddScoped<AppointmentAdaptor>();
+            builder.Services.AddScoped<DoctorLeaveAdaptor>();
             builder.Services.AddScoped<IcdAdaptor>();
             builder.Services.AddScoped<IcdReportAdaptor>();
+            builder.Services.AddScoped<DoctorAdaptor>();
+            builder.Services.AddScoped<MedicalStaffAdaptor>();
 
             // Serilog ve diğer ayarları ekleme
             builder.Host.AddAppSettingsSecretsJson()

@@ -63,7 +63,6 @@ public partial class Appointments : HealthCareComponentBase
     #region AppointmentFilters
 
     private GetAppointmentSlotInput GetAppointmentSlotFilter { get; set; }
-
     #endregion
 
     private PatientDto Patient { get; set; }
@@ -74,6 +73,7 @@ public partial class Appointments : HealthCareComponentBase
     private List<AppointmentSlotItem> AppointmentSlots { get; set; }
     private List<AppointmentDayItemLookupDto> DaysLookupList { get; set; }
     private GetAppointmentsLookupInput DaysLookupFilter { get; set; }
+    private string SlotErrorMessage { get; set; }
     private int LoadCount { get; set; } = 14;
     private double ScreenWidth { get; set; }
     private int AvailableSlotCount { get; set; }
@@ -84,6 +84,7 @@ public partial class Appointments : HealthCareComponentBase
     private bool SlotDaysLoading { get; set; }
     private bool IsUserNavigatingReverse { get; set; }
     private bool IsCurrentStepValid { get; set; }
+    private string FailureMessage { get; set; }
 
     private bool IsFirstStepValid =>
         !string.IsNullOrEmpty(StepperModel.MedicalServiceName) &&
@@ -106,6 +107,8 @@ public partial class Appointments : HealthCareComponentBase
 
     public Appointments()
     {
+        SlotErrorMessage = "";
+        FailureMessage = "";
         Patient = new PatientDto();
         GetAppointmentSlotFilter = new GetAppointmentSlotInput();
         StepperModel = new AppointmentStepperModel();
@@ -182,8 +185,8 @@ public partial class Appointments : HealthCareComponentBase
         {
             SlotDaysLoading = true;
             DaysLookupList.Clear();
-            
-            var days = 
+
+            var days =
                 (await AppointmentAppService.GetAvailableDaysLookupAsync(DaysLookupFilter))
                 .Items
                 .ToList();
@@ -414,8 +417,9 @@ public partial class Appointments : HealthCareComponentBase
 
             AvailableSlotCount = AppointmentSlots.Count(e => e.AvailabilityValue);
         }
-        catch (BusinessException)
+        catch (BusinessException e)
         {
+            SlotErrorMessage = e.Message;
             AppointmentSlots = [];
             AvailableSlotCount = 0;
         }
@@ -581,10 +585,12 @@ public partial class Appointments : HealthCareComponentBase
             IsFinalResultSuccess = true;
             await OnNextStep();
         }
-        catch (Exception)
+        catch (Exception e)
         {
             IsFinalResultSuccess = false;
             await OnNextStep();
+            await UiMessageService.Error(e.Message);
+            FailureMessage = e.Message;
         }
     }
 
@@ -661,6 +667,10 @@ public partial class Appointments : HealthCareComponentBase
                 if (ActiveStep == 1)
                 {
                     await GetAppointmentDays();
+                    if (DaysLookupList.Count != 0)
+                    {
+                        await OnSelectAppointmentDay(DaysLookupList.First());
+                    }
                 }
             }
         }

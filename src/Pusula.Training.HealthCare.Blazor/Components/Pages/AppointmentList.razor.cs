@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.AppointmentTypes;
+using Pusula.Training.HealthCare.Blazor.Models;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.Buttons;
+using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor.Popups;
 using Syncfusion.Blazor.Grids;
@@ -23,46 +25,62 @@ public partial class AppointmentList : HealthCareComponentBase
     private Query FilterQuery { get; set; }
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private SfGrid<AppointmentDto> Grid { get; set; }
+    private List<SlotDropdownItem> AppointmentSlots { get; set; }
     private int PageSize { get; } = 5;
     private int LookupPageSize { get; } = 100;
     private int CurrentPage { get; set; } = 1;
     private string CurrentSorting { get; set; } = string.Empty;
-    private bool CanCreateType { get; set; }
-    private bool CanEditType { get; set; }
-    private bool CanDeleteType { get; set; }
+    private bool CanCreateAppointment { get; set; }
+    private bool CanEditAppointment { get; set; }
+    private bool CanDeleteAppointment { get; set; }
     private bool IsEditDialogVisible { get; set; }
     private bool IsCreateDialogVisible { get; set; }
     private GetAppointmentsInput Filter { get; set; }
-    private AppointmentTypeUpdateDto EditingType { get; set; }
+    private GetAppointmentSlotInput GetAppointmentSlotFilter { get; set; }
     private AppointmentTypeCreateDto NewType { get; set; }
     private bool IsDeleteDialogVisible { get; set; }
+    private bool IsSlotAvailable { get; set; }
     private SfDialog DeleteConfirmDialog { get; set; }
     private bool Flag { get; set; }
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> MedicalServiceCollection { get; set; }
     private List<KeyValuePair<string, EnumPatientTypes>> PatientTypeCollection { get; set; }
+    private List<KeyValuePair<string, EnumAppointmentStatus>> StatusCollection { get; set; }
+    private string[] ToolbarItems { get; set; }
+    private AppointmentUpdateDto EditingAppointment { get; set; }
+    private Guid EditingAppointmentId { get; set; } = default;
+    private bool IsEditingAppointmentDate { get; set; }
+    private DateTime? SelectedAppointmentDate { get; set; }
+    private SlotDropdownItem SelectedSlot { get; set; }
 
     public AppointmentList()
     {
+        ToolbarItems = ["Add", "Delete", "Edit", "ExcelExport"];
+        SelectedSlot = new SlotDropdownItem();
         Grid = new SfGrid<AppointmentDto>();
-        DeleteConfirmDialog = new SfDialog();;
+        DeleteConfirmDialog = new SfDialog();
         NewType = new AppointmentTypeCreateDto();
+        GetAppointmentSlotFilter = new GetAppointmentSlotInput();
         Filter = new GetAppointmentsInput
         {
             MaxResultCount = PageSize,
             SkipCount = 0
         };
-        EditingType = new AppointmentTypeUpdateDto();
         IsEditDialogVisible = false;
         IsCreateDialogVisible = false;
         IsDeleteDialogVisible = false;
+        IsEditingAppointmentDate = false;
+        IsSlotAvailable = false;
         Flag = false;
         AppointmentTypesCollection = [];
         DepartmentsCollection = [];
         PatientTypeCollection = [];
         MedicalServiceCollection = [];
+        StatusCollection = [];
+        AppointmentSlots = [];
         FilterQuery = new Query();
+        EditingAppointment = new AppointmentUpdateDto();
     }
 
     protected override async Task OnInitializedAsync()
@@ -71,12 +89,21 @@ public partial class AppointmentList : HealthCareComponentBase
         await SetLookupsAsync();
         SetPatientTypes();
         SetFilters();
+        SetStatus();
     }
 
     private void SetFilters()
     {
         FilterQuery.Queries.Params = new Dictionary<string, object>();
         FilterQuery.Queries.Params.Add("Filter", Filter);
+    }
+
+    private void SetStatus()
+    {
+        StatusCollection = Enum.GetValues(typeof(EnumAppointmentStatus))
+            .Cast<EnumAppointmentStatus>()
+            .Select(e => new KeyValuePair<string, EnumAppointmentStatus>(e.ToString(), e))
+            .ToList();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -104,12 +131,12 @@ public partial class AppointmentList : HealthCareComponentBase
 
     private async Task SetPermissionsAsync()
     {
-        CanCreateType = await AuthorizationService
-            .IsGrantedAsync(HealthCarePermissions.AppointmentTypes.Create);
-        CanEditType = await AuthorizationService
-            .IsGrantedAsync(HealthCarePermissions.AppointmentTypes.Edit);
-        CanDeleteType = await AuthorizationService
-            .IsGrantedAsync(HealthCarePermissions.AppointmentTypes.Delete);
+        CanCreateAppointment = await AuthorizationService
+            .IsGrantedAsync(HealthCarePermissions.Appointments.Create);
+        CanEditAppointment = await AuthorizationService
+            .IsGrantedAsync(HealthCarePermissions.Appointments.Edit);
+        CanDeleteAppointment = await AuthorizationService
+            .IsGrantedAsync(HealthCarePermissions.Appointments.Delete);
     }
 
     private async Task SetLookupsAsync()
@@ -132,7 +159,7 @@ public partial class AppointmentList : HealthCareComponentBase
         }
         catch (Exception e)
         {
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
     }
 
@@ -141,7 +168,7 @@ public partial class AppointmentList : HealthCareComponentBase
         Filter.MaxResultCount = PageSize;
         Filter.SkipCount = (CurrentPage - 1) * PageSize;
         Filter.Sorting = CurrentSorting;
-        
+
         SetFilters();
         await Refresh();
     }
@@ -152,6 +179,11 @@ public partial class AppointmentList : HealthCareComponentBase
             .Cast<EnumPatientTypes>()
             .Select(e => new KeyValuePair<string, EnumPatientTypes>(e.ToString(), e))
             .ToList();
+    }
+
+    private void ToggleAppointmentEdit()
+    {
+        IsEditingAppointmentDate = !IsEditingAppointmentDate;
     }
 
     private async Task ClearFilters()
@@ -170,12 +202,11 @@ public partial class AppointmentList : HealthCareComponentBase
 
     public async void OnActionBegin(ActionEventArgs<AppointmentDto> args)
     {
-        
         if (args.RequestType.ToString() != "Delete" || !IsDeleteDialogVisible)
         {
             return;
         }
-        
+
         if (args.RequestType.ToString() == "Paging")
         {
             return;
@@ -210,30 +241,58 @@ public partial class AppointmentList : HealthCareComponentBase
         }
     }
 
+    public void RowEditingHandler(RowEditingEventArgs<AppointmentDto> args)
+    {
+        args.Cancel = true;
+    }
+
+    private async Task GetAppointmentAsync()
+    {
+        try
+        {
+            var selectedRecord = Grid.GetSelectedRecordsAsync().Result;
+
+            if (selectedRecord == null || selectedRecord.Count == 0)
+            {
+                return;
+            }
+
+            EditingAppointmentId = selectedRecord.First().Id;
+
+            EditingAppointment =
+                ObjectMapper.Map<AppointmentDto, AppointmentUpdateDto>(
+                    await AppointmentAppService.GetAsync(EditingAppointmentId));
+
+            IsEditDialogVisible = true;
+        }
+        catch (Exception e)
+        {
+            await UiMessageService.Error(e.Message);
+            CloseEditAppointmentModal();
+        }
+    }
+
     public async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
     {
         try
         {
             switch (args.Item.Text)
             {
+                case "Add":
+                {
+                    args.Cancel = true;
+                    NavigationManager.NavigateTo("/appointments/operations/create");
+                    break;
+                }
+                case "Edit":
+                {
+                    args.Cancel = true;
+                    await GetAppointmentAsync();
+                    break;
+                }
                 case "Delete":
                 {
-                    var selectedRecord = Grid.GetSelectedRecordsAsync().Result;
-
-                    if (selectedRecord == null || selectedRecord.Count == 0)
-                    {
-                        return;
-                    }
-
-                    var ids = selectedRecord.Select(x => x.Id).ToList();
-
-                    var confirmed = await UiMessageService.Confirm(@L["DeleteSelectedRecords", ids.Count]);
-                    if (!confirmed)
-                    {
-                        return;
-                    }
-
-                    await AppointmentAppService.DeleteByIdsAsync(ids);
+                    await DeleteAppointmentsAsync();
                     break;
                 }
                 case "Excel Export":
@@ -285,21 +344,30 @@ public partial class AppointmentList : HealthCareComponentBase
             forceLoad: true);
     }
 
-    private async Task DeleteAppointmentAsync(AppointmentDto input)
+    private async Task DeleteAppointmentsAsync()
     {
         try
         {
-            var confirmed = await UiMessageService.Confirm(@L["DeleteConfirmationMessage"]);
+            var selectedRecord = Grid.GetSelectedRecordsAsync().Result;
+
+            if (selectedRecord == null || selectedRecord.Count == 0)
+            {
+                return;
+            }
+
+            var ids = selectedRecord.Select(x => x.Id).ToList();
+
+            var confirmed = await UiMessageService.Confirm(@L["DeleteSelectedRecords", ids.Count]);
             if (!confirmed)
             {
                 return;
             }
 
-            await AppointmentAppService.DeleteAsync(input.Id);
+            await AppointmentAppService.DeleteByIdsAsync(ids);
         }
         catch (Exception e)
         {
-            throw new UserFriendlyException(e.Message);
+            await UiMessageService.Error(e.Message);
         }
         finally
         {
@@ -307,8 +375,94 @@ public partial class AppointmentList : HealthCareComponentBase
         }
     }
 
+    private async Task UpdateAppointmentAsync()
+    {
+        try
+        {
+            await AppointmentAppService.UpdateAsync(EditingAppointmentId, EditingAppointment);
+            CloseEditAppointmentModal();
+        }
+        catch (Exception ex)
+        {
+            await HandleErrorAsync(ex);
+        }
+        finally
+        {
+            CloseEditAppointmentModal();
+            await Refresh();
+        }
+    }
+
+    private async Task OnEditDateChange(ChangedEventArgs<DateTime> args)
+    {
+        GetAppointmentSlotFilter.MedicalServiceId = EditingAppointment.MedicalServiceId;
+        GetAppointmentSlotFilter.DoctorId = EditingAppointment.DoctorId;
+        await GetAvailableSlots();
+    }
+
+    private async Task GetAvailableSlots()
+    {
+        try
+        {
+            var slots =
+                (await AppointmentAppService.GetAvailableSlotsAsync(GetAppointmentSlotFilter)).Items;
+
+            if (!slots.Any())
+            {
+                AppointmentSlots = [];
+                return;
+            }
+
+            AppointmentSlots = slots
+                .Where(x => x.AvailabilityValue)
+                .Select(x => new SlotDropdownItem
+                {
+                    Id = Guid.NewGuid(),
+                    DoctorId = x.DoctorId,
+                    MedicalServiceId = x.MedicalServiceId,
+                    Date = x.Date,
+                    StartTime = x.StartTime,
+                    EndTime = x.EndTime,
+                    DisplayText = $"{x.StartTime}-{x.EndTime}"
+                })
+                .ToList();
+
+            IsSlotAvailable = AppointmentSlots.Count > 0;
+        }
+        catch (BusinessException e)
+        {
+            IsSlotAvailable = false;
+            AppointmentSlots = [];
+            await UiMessageService.Error(e.Message);
+        }
+    }
+
+    private void CloseEditAppointmentModal()
+    {
+        EditingAppointment = new AppointmentUpdateDto();
+        EditingAppointmentId = Guid.Empty;
+        IsEditDialogVisible = false;
+        IsSlotAvailable = false;
+        IsEditingAppointmentDate = false;
+        AppointmentSlots = [];
+        SelectedSlot = new SlotDropdownItem();
+    }
+
     private async Task Refresh()
     {
         await Grid.Refresh();
+    }
+
+    private static string GetStatusClass(string status)
+    {
+        return status switch
+        {
+            "InProgress" => "orange-bg",
+            "Scheduled" => "blue-bg",
+            "Completed" => "green-bg",
+            "Cancelled" => "red-bg",
+            "Missed" => "purple-bg",
+            _ => string.Empty,
+        };
     }
 }

@@ -191,7 +191,15 @@
                         @context.ServiceCreatedAt.ToShortDateString()
                     </DisplayTemplate>
                 </DataGridColumn>
-
+                
+                <DataGridColumn Caption="@L["ServiceDetail"]" TItem="MedicalServiceDto">
+                    <DisplayTemplate>
+                        <Button Color="Color.Primary" @onclick="() => NavigateToDetail(context)">
+                            <Icon Name="@IconName.ExternalLinkSquareAlt" />
+                        </Button>
+                    </DisplayTemplate>
+                </DataGridColumn>
+                
                 <DataGridEntityActionsColumn TItem="MedicalServiceDto" @ref="@EntityActionsColumn">
                     <DisplayTemplate>
                         <EntityActions TItem="MedicalServiceDto" EntityActionsColumn="@EntityActionsColumn">

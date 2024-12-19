@@ -144,11 +144,6 @@ public partial class MedicalServices : HealthCareComponentBase
         var remoteService =
             await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ??
             await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        var culture = CultureInfo.CurrentUICulture.Name;
-        if (!culture.IsNullOrEmpty())
-        {
-            culture = "&culture=" + culture;
-        }
 
         await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
         NavigationManager.NavigateTo(
@@ -281,7 +276,8 @@ public partial class MedicalServices : HealthCareComponentBase
         catch (Exception e)
         {
             await UiMessageService.Error(e.Message);
-        }finally
+        }
+        finally
         {
             EditingMedicalService.DepartmentNames.Clear();
             SelectedDepartments.Clear();
@@ -381,6 +377,11 @@ public partial class MedicalServices : HealthCareComponentBase
         AllMedicalServicesSelected = false;
 
         await GetMedicalServicesAsync();
+    }
+    
+    private void NavigateToDetail(MedicalServiceDto service)
+    {
+        NavigationManager.NavigateTo($"/appointments/definitions/medical-service/{service.Id}");
     }
     
 }

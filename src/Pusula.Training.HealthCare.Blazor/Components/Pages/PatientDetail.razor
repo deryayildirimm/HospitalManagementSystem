@@ -35,7 +35,7 @@
     left: -9999px;
     width: 0;
     height: 0;
-    overflow: hidden;" >
+    overflow: hidden;">
     <PageHeader Title="@L["Patient Detail"]" BreadcrumbItems="BreadcrumbItems">
     </PageHeader>
 </div>
@@ -57,140 +57,142 @@
             <li><a href="">Contact</a></li>
             <li><a href="">Pricing</a></li>
             <li><a href="">FAQ</a></li>
-            <li><a href="">Blog <i class="fa-solid fa-caret-down"></i> </a>
-              
+            <li>
+                <a href="">Blog <i class="fa-solid fa-caret-down"></i> </a>
+
             </li>
-            <li><a href="">Portfolio <i class="fa-solid fa-caret-down"></i> </a>
-               
+            <li>
+                <a href="">Portfolio <i class="fa-solid fa-caret-down"></i> </a>
+
             </li>
         </ul>
     </div>
 </header>
 
-<SfSpinner Size="40"  Type="@SpinnerType.Bootstrap" Visible="@VisibleProperty" Label="Loading...." /> 
+<SfSpinner Size="40" Type="@SpinnerType.Bootstrap" Visible="@VisibleProperty" Label="Loading...." />
 
 @if (!VisibleProperty)
 {
-    
-<div class="hero-section">
-    <div class="hero-wrapper" style="box-shadow:0 4px 8px rgba(0,0,0,0.2) ">
-        <div class="right-box">
-        
-                <Figure Size="FigureSize.Is256x256"  >
+
+    <div class="hero-section">
+        <div class="hero-wrapper" style="box-shadow:0 4px 8px rgba(0,0,0,0.2) ">
+            <div class="right-box">
+
+                <Figure Size="FigureSize.Is256x256">
                     <FigureImage Source="@GetAvatarUrl(PatientGender)" @onclick="async () => await OpenEditPatientModalAsync(patient)" AlternateText="empty-256x256" Style="border-radius: 50%; cursor: pointer; transition: transform 0.3s ease, all 0.3s ease;
                                height: auto; width: auto; overflow: auto "
                                  onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)';"
-                                 onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)';"/>
+                                 onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)';" />
                 </Figure>
 
-        </div>
-        <div class="left-box">
-            <div class="patient-card">
-                <div class="card-header">
-                    <h4 > <strong>@patient?.FirstName @patient?.LastName</strong> </h4>
-                    <h5> <strong>Identity Number :</strong>@patient?.IdentityAndPassportNumber      <span style="margin-left: 10px">@patient?.Gender</span>  </h5>
+            </div>
+            <div class="left-box">
+                <div class="patient-card">
+                    <div class="card-header">
+                        <h4> <strong>@patient?.FirstName @patient?.LastName</strong> </h4>
+                        <h5> <strong>Identity Number :</strong>@patient?.IdentityNumber      <span style="margin-left: 10px">@patient?.Gender</span>  </h5>
 
-                    <h5><strong>Birth Date:</strong> @patient?.BirthDate.ToString("dd.MM.yyyy") </h5>
-                    <h5><strong>Phone:</strong> @patient?.MobilePhoneNumber</h5>
-                    <h5><strong>Nationality:</strong> @patient?.Nationality</h5>
-                    <h5><strong>Patient Number:</strong> @patient?.PatientNumber</h5>
-                    <h5><strong>Address:</strong> @patient?.Address</h5>
+                        <h5><strong>Birth Date:</strong> @patient?.BirthDate.ToString("dd.MM.yyyy") </h5>
+                        <h5><strong>Phone:</strong> @patient?.MobilePhoneNumber</h5>
+                        <h5><strong>Nationality:</strong> @patient?.Nationality</h5>
+                        <h5><strong>Patient Number:</strong> @patient?.PatientNumber</h5>
+                        <h5><strong>Address:</strong> @patient?.Address</h5>
+                    </div>
+                    <div class="card-content">
+                        <h4 style="margin-top: 20px; box-shadow: none; padding : 5px">
+                            <strong>Latest Appointment</strong>
+                            <span style="margin : 12px 0 0 12px">
+                                <SfIcon Name="IconName.Clock" Size="IconSize.Large"> </SfIcon>
+                            </span>
+                        </h4>
+                        @if (AppointmentList != null && AppointmentList.Any())
+                        {
+                            <SfCard>
+                                <h5>@AppointmentList[0]?.Service</h5>
+                                <h5>Yrd. Doç. @AppointmentList[0]?.DoctorName</h5>
+                                <h5>ABC Hospital</h5>
+                                <h5>@AppointmentList[0]?.Date</h5>
+                            </SfCard>
+                        }
+                        else
+                        {
+                            <p>No appointment available.</p>
+                        }
+                    </div>
                 </div>
-                <div class="card-content">
-                    <h4 style="margin-top: 20px; box-shadow: none; padding : 5px"> <strong>Latest Appointment</strong>
-                        <span style="margin : 12px 0 0 12px">
-                            <SfIcon Name="IconName.Clock" Size="IconSize.Large" > </SfIcon>
-                        </span>
-                    </h4>
-                    @if (AppointmentList != null && AppointmentList.Any())
+                <div class="btn-wrapper">
+                    <a href="/patient/@patient?.PatientNumber/appointment"> + New Appointment</a>
+                    <a href=""> + Learn More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-section">
+        <div class="main-wrapper">
+
+            <div class="box">
+                <div class="header-wrapper">
+                    <ul class="active-mobile" style="float: left">
+                        <li><a @onclick="async () => await ScheduledApp()" style="cursor: pointer">Scheduled</a></li>
+                        <li><a @onclick="async () => await CompletedApp()" style="cursor: pointer">Completed</a></li>
+                        <li>
+                            <a @onclick="async () => await CancelledApp() " style="cursor: pointer">Cancelled  </a>
+                        </li>
+
+                    </ul>
+                </div>
+                <SfGrid TValue="AppointmentViewModel" DataSource="AppointmentList" AllowPaging="true">
+                    @if (AppointmentList == null || !AppointmentList.Any())
                     {
-                    <SfCard>
-                        <h5>@AppointmentList[0]?.Service</h5>
-                        <h5>Yrd. Doç. @AppointmentList[0]?.DoctorName</h5>
-                        <h5>ABC Hospital</h5>
-                        <h5>@AppointmentList[0]?.Date</h5>
-                    </SfCard>
+                        <p>Veri bulunamadı.</p>
                     }
                     else
                     {
-                    <p>No appointment available.</p>
+                        <h5>
+                            <strong>@_status</strong>
+                        </h5>
+
                     }
+                    <GridPageSettings PageSize="5"></GridPageSettings>
+                    <GridColumns>
+
+                        <GridColumn Field="@nameof(AppointmentViewModel.DoctorName)" HeaderText="Doctor Name"></GridColumn>
+                        <GridColumn Field="@nameof(AppointmentViewModel.Date)" HeaderText="Date"></GridColumn>
+                        <GridColumn Field="@nameof(AppointmentViewModel.Service)" HeaderText="Service"></GridColumn>
+                        <GridColumn Field="@nameof(AppointmentViewModel.Status)" HeaderText="Status"></GridColumn>
+
+                    </GridColumns>
+                </SfGrid>
+
+            </div>
+
+            <div class="box">
+
+                <div class="header-wrapper">
+                    <ul class="active-mobile" style="float: left">
+                        <li><a>Medical Conditions </a></li>
+                    </ul>
                 </div>
+                <SfGrid TValue="MedicalConditionViewModel" DataSource="MedicalConditions" AllowPaging="true" AllowSorting="true">
+                    <GridPageSettings PageSize="5"></GridPageSettings>
+                    <GridColumns>
+                        <GridColumn Field="@nameof(MedicalConditionViewModel.DiseaseName)" HeaderText="Disease Name" TextAlign="TextAlign.Left"></GridColumn>
+                        <GridColumn Field="@nameof(MedicalConditionViewModel.DiagnosisDate)" HeaderText="Diagnosis Date" TextAlign="TextAlign.Center" Format="dd.MM.yyyy"></GridColumn>
+                        <GridColumn Field="@nameof(MedicalConditionViewModel.TreatmentStatus)" HeaderText="Treatment Status" TextAlign="TextAlign.Center"></GridColumn>
+                        <GridColumn Field="@nameof(MedicalConditionViewModel.DoctorNotes)" HeaderText="Doctor's Notes" TextAlign="TextAlign.Left"></GridColumn>
+                    </GridColumns>
+                </SfGrid>
             </div>
-            <div class="btn-wrapper">
-                <a href="/patient/@patient?.PatientNumber/appointment"> + New Appointment</a>
-                <a href=""> + Learn More</a>
+
+            <div class="box">
             </div>
-        </div>
-    </div>
-</div>
 
-<div class="main-section">
-    <div class="main-wrapper">
-    
+
+        </div>
         <div class="box">
-            <div class="header-wrapper">
-                <ul class="active-mobile" style="float: left">
-                    <li><a @onclick="async () => await ScheduledApp()" style="cursor: pointer" >Scheduled</a></li>
-                    <li><a @onclick="async () => await CompletedApp()" style="cursor: pointer" >Completed</a></li>
-                    <li><a @onclick="async () => await CancelledApp() " style="cursor: pointer" >Cancelled  </a>
-                    </li>
-             
-                </ul>
-            </div>
-            <SfGrid TValue="AppointmentViewModel" DataSource="AppointmentList" AllowPaging="true">
-                @if (AppointmentList == null || !AppointmentList.Any())
-                {
-                    <p>Veri bulunamadı.</p>
-                }
-                else
-                {
-                    <h5>
-                        <strong>@_status</strong> 
-                    </h5>
-
-                }
-                <GridPageSettings PageSize="5"></GridPageSettings>
-                <GridColumns>
-                    
-                    <GridColumn Field="@nameof(AppointmentViewModel.DoctorName)" HeaderText="Doctor Name"></GridColumn>
-                    <GridColumn Field="@nameof(AppointmentViewModel.Date)" HeaderText="Date"></GridColumn>
-                    <GridColumn Field="@nameof(AppointmentViewModel.Service)" HeaderText="Service"></GridColumn>
-                    <GridColumn Field="@nameof(AppointmentViewModel.Status)" HeaderText="Status"></GridColumn>
-
-                </GridColumns>
-            </SfGrid>
-
-        </div>
-   
-        <div class="box">
-
-            <div class="header-wrapper">
-                <ul class="active-mobile" style="float: left">
-                    <li><a >Medical Conditions </a></li>
-                </ul>
-            </div>
-            <SfGrid TValue="MedicalConditionViewModel" DataSource="MedicalConditions" AllowPaging="true" AllowSorting="true">
-                <GridPageSettings PageSize="5"></GridPageSettings>
-                <GridColumns>
-                    <GridColumn Field="@nameof(MedicalConditionViewModel.DiseaseName)" HeaderText="Disease Name"  TextAlign="TextAlign.Left"></GridColumn>
-                    <GridColumn Field="@nameof(MedicalConditionViewModel.DiagnosisDate)" HeaderText="Diagnosis Date"  TextAlign="TextAlign.Center" Format="dd.MM.yyyy"></GridColumn>
-                    <GridColumn Field="@nameof(MedicalConditionViewModel.TreatmentStatus)" HeaderText="Treatment Status"  TextAlign="TextAlign.Center"></GridColumn>
-                    <GridColumn Field="@nameof(MedicalConditionViewModel.DoctorNotes)" HeaderText="Doctor's Notes"  TextAlign="TextAlign.Left"></GridColumn>
-                </GridColumns>
-            </SfGrid>
-        </div>
-     
-        <div class="box">
-           
         </div>
 
-
-    </div>
-        <div class="box">
-
-        </div>
-     
     </div>
 
 
@@ -204,7 +206,7 @@
 
             <ModalHeader>
                 <ModalTitle style="display: inline-flex; align-items: center;">
-                    <Icon Name="@("fa-arrows-rotate")"  Style="margin-right:5px;"></Icon>
+                    <Icon Name="@("fa-arrows-rotate")" Style="margin-right:5px;"></Icon>
                     <Heading Size="HeadingSize.Is1" style="margin: 0;">@L["UpdatePatient"] </Heading>
                 </ModalTitle>
                 <CloseButton Clicked=@(async()=>await CloseEditPatientModalAsync()) />
@@ -217,7 +219,7 @@
                              ValidateOnLoad="false">
 
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -234,14 +236,14 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
                                         <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
-                                        @L["IdentityNumber/PassportNumber"]
+                                        @L["IdentityNumber"]
                                     </FieldLabel>
-                                    <TextEdit @bind-Text="@EditingPatient.IdentityAndPassportNumber" MaxLength="PatientConsts.IdentityNumberLength">
+                                    <TextEdit @bind-Text="@EditingPatient.IdentityNumber" MaxLength="PatientConsts.IdentityNumberLength">
                                         <Feedback>
                                             <ValidationError />
                                         </Feedback>
@@ -249,24 +251,24 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is2">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
                                         <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
-                                        @L["BirthDate"]
+                                        @L["PassportNumber"]
                                     </FieldLabel>
-                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingPatient.BirthDate">
+                                    <TextEdit @bind-Text="@EditingPatient.PassportNumber" MaxLength="PatientConsts.PassportNumberMaxLength">
                                         <Feedback>
                                             <ValidationError />
                                         </Feedback>
-                                    </DateEdit>
+                                    </TextEdit>
                                 </Field>
                             </Validation>
                         </Column>
                     </Row>
                     <Row>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -281,7 +283,7 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is5">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -296,7 +298,7 @@
                                 </Field>
                             </Validation>
                         </Column>
-                        <Column ColumnSize="ColumnSize.Is2">
+                        <Column ColumnSize="ColumnSize.Is4">
                             <Validation MessageLocalizer="@LH.Localize">
                                 <Field>
                                     <FieldLabel style="display: inline-flex; align-items: center;">
@@ -311,6 +313,57 @@
                                             </SelectItem>
                                         }
                                     </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                    </Row>
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        @L["PatientType"]
+                                    </FieldLabel>
+                                    <Select TValue="EnumPatientTypes" @bind-SelectedValue="@EditingPatient.PatientType" style="text-overflow: ellipsis;">
+                                        @foreach (var item in PationTypes)
+                                        {
+                                            <SelectItem TValue="EnumPatientTypes" Value="@(Enum.Parse<EnumPatientTypes>(item.Key.ToString()))">
+                                                @item.Value
+                                            </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>
+                                        @L["DiscountGroup"]
+                                    </FieldLabel>
+                                    <Select TValue="EnumDiscountGroup" @bind-SelectedValue="@EditingPatient.DiscountGroup" style="text-overflow: ellipsis;">
+                                        @foreach (var item in DiscountGroups)
+                                        {
+                                            <SelectItem TValue="EnumDiscountGroup" Value="@(Enum.Parse<EnumDiscountGroup>(item.Key.ToString()))">
+                                                @item.Value
+                                            </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["BirthDate"]
+                                    </FieldLabel>
+                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingPatient.BirthDate">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </DateEdit>
                                 </Field>
                             </Validation>
                         </Column>
@@ -396,42 +449,6 @@
                                             <ValidationError />
                                         </Feedback>
                                     </TextEdit>
-                                </Field>
-                            </Validation>
-                        </Column>
-                    </Row>
-                    <Row>
-                        <Column ColumnSize="ColumnSize.Is4">
-                            <Validation MessageLocalizer="@LH.Localize">
-                                <Field>
-                                    <FieldLabel style="display: inline-flex; align-items: center;">
-                                        @L["PatientType"]
-                                    </FieldLabel>
-                                    <Select TValue="EnumPatientTypes" @bind-SelectedValue="@EditingPatient.PatientType" style="text-overflow: ellipsis;">
-                                        @foreach (var item in PationTypes)
-                                        {
-                                            <SelectItem TValue="EnumPatientTypes" Value="@(Enum.Parse<EnumPatientTypes>(item.Key.ToString()))">
-                                                @item.Value
-                                            </SelectItem>
-                                        }
-                                    </Select>
-                                </Field>
-                            </Validation>
-                        </Column>
-                        <Column ColumnSize="ColumnSize.Is4">
-                            <Validation MessageLocalizer="@LH.Localize">
-                                <Field>
-                                    <FieldLabel>
-                                        @L["DiscountGroup"]
-                                    </FieldLabel>
-                                    <Select TValue="EnumDiscountGroup" @bind-SelectedValue="@EditingPatient.DiscountGroup" style="text-overflow: ellipsis;">
-                                        @foreach (var item in DiscountGroups)
-                                        {
-                                            <SelectItem TValue="EnumDiscountGroup" Value="@(Enum.Parse<EnumDiscountGroup>(item.Key.ToString()))">
-                                                @item.Value
-                                            </SelectItem>
-                                        }
-                                    </Select>
                                 </Field>
                             </Validation>
                         </Column>

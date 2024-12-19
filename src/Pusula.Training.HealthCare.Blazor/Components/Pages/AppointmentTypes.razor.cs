@@ -62,17 +62,11 @@ public partial class AppointmentTypes : HealthCareComponentBase
     {
         if (firstRender)
         {
-            await SetBreadcrumbItemsAsync();
             await SetToolbarItemsAsync();
             await Grid.EnableToolbarItemsAsync(["Delete"], false);
             await Grid.Refresh();
             await InvokeAsync(StateHasChanged);
         }
-    }
-
-    protected virtual ValueTask SetBreadcrumbItemsAsync()
-    {
-        return ValueTask.CompletedTask;
     }
 
     protected virtual ValueTask SetToolbarItemsAsync()

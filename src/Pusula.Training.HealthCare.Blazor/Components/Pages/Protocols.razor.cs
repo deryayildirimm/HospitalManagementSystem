@@ -293,7 +293,7 @@ public partial class Protocols
             FoundPatientName = string.Empty;
             NewPatient = new PatientCreateDto
             {
-                IdentityAndPassportNumber = IdentityNumber // take the identitiy number 
+                IdentityNumber = IdentityNumber // take the identitiy number 
             };
             // warn the user 
             await UiMessageService.Warn("No patient found. Please fill in the patient details.");

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
+using JetBrains.Annotations;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Protocols;
 using Volo.Abp;
@@ -11,26 +11,26 @@ namespace Pusula.Training.HealthCare.MedicalServices;
 
 public class MedicalService : FullAuditedAggregateRoot<Guid>
 {
-    public virtual string Name { get; protected set; }
+    [NotNull] public virtual string Name { get; private set; } = null!;
 
-    public virtual double Cost { get; protected set; }
+    [NotNull] public virtual double Cost { get; private set; }
 
-    public virtual int Duration { get; protected set; }
+    [NotNull] public virtual int Duration { get; private set; }
 
-    public virtual DateTime ServiceCreatedAt { get; protected set; }
+    [NotNull] public virtual DateTime ServiceCreatedAt { get; private set; }
 
-    public virtual ICollection<DepartmentMedicalService> DepartmentMedicalServices { get; set; }
+    public virtual ICollection<DepartmentMedicalService> DepartmentMedicalServices { get; private set; } = null!;
 
-    public virtual IList<ProtocolMedicalService> ProtocolMedicalServices { get; set; } =
-        new List<ProtocolMedicalService>();
-    
+    public virtual ICollection<ProtocolMedicalService> ProtocolMedicalServices { get; private set; } = null!;
+
     protected MedicalService()
     {
         Name = string.Empty;
         Cost = 0;
         ServiceCreatedAt = DateTime.Now;
         Duration = 0;
-        DepartmentMedicalServices = new Collection<DepartmentMedicalService>();
+        DepartmentMedicalServices = new List<DepartmentMedicalService>();
+        ProtocolMedicalServices = new List<ProtocolMedicalService>();
     }
 
     public MedicalService(Guid id, string name, double cost, int duration, DateTime serviceCreatedAt)
@@ -40,8 +40,10 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
         SetCost(cost);
         SetServiceCreatedAt(serviceCreatedAt);
         SetDuration(duration);
+        DepartmentMedicalServices = new List<DepartmentMedicalService>();
+        ProtocolMedicalServices = new List<ProtocolMedicalService>();
     }
-    
+
     public void SetName(string name)
     {
         Check.NotNullOrWhiteSpace(name, nameof(name));
@@ -75,7 +77,10 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
         }
 
         DepartmentMedicalServices.Add(new DepartmentMedicalService
-            { DepartmentId = departmentId, MedicalServiceId = Id });
+        {
+            DepartmentId = departmentId,
+            MedicalServiceId = Id
+        });
     }
 
     private bool IsInDepartment(Guid departmentId)
@@ -86,10 +91,9 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
     public void RemoveAllDepartmentsExceptGivenIds(List<Guid> departmentIds)
     {
         Check.NotNullOrEmpty(departmentIds, nameof(departmentIds));
-
         DepartmentMedicalServices.RemoveAll(x => !departmentIds.Contains(x.DepartmentId));
     }
-    
+
     public void RemoveAllDepartments()
     {
         DepartmentMedicalServices.RemoveAll(x => x.MedicalServiceId == Id);

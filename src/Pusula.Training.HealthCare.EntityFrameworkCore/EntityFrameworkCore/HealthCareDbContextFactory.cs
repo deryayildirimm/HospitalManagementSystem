@@ -30,7 +30,7 @@ public class HealthCareDbContextFactory : IDesignTimeDbContextFactory<HealthCare
         var builder = new ConfigurationBuilder()
             .SetBasePath(Path.Combine(Directory.GetCurrentDirectory(), "../Pusula.Training.HealthCare.DbMigrator/"))
             .AddJsonFile("appsettings.json", optional: false);
-
+        
         return builder.Build();
     }
 }

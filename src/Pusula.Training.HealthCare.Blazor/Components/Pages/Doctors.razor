@@ -20,9 +20,16 @@
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
 
+@using Syncfusion.Blazor
 @using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Inputs
 @using SelectionType = Syncfusion.Blazor.Grids.SelectionType
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Popups;
+@using Syncfusion.Blazor.DropDowns;
+
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["Doctors"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
@@ -130,11 +137,6 @@
                     </Field>
                 </Column>
             </Row>
-            <div>
-                <SfButton CssClass="e-danger" OnClick="ClearFilters">
-                    <SfIcon IconCss="e-icons e-filter-clear"></SfIcon> @L["ClearFilters"]
-                </SfButton>
-            </div>
         </div>
     </CardBody>
 </Card>
@@ -272,7 +274,7 @@
 @* ************************* CREATE MODAL ************************* *@
 <SfDialog Width="800px" IsModal="true" Header="@L["CreateDoctor"]"
           ShowCloseIcon="true" @bind-Visible="@IsVisibleCreate">
-    <DialogEvents Closed="@CloseCreateDoctorModal" ></DialogEvents>
+    <DialogEvents Closed="@CloseCreateDoctorModal"></DialogEvents>
     <DialogTemplates>
         <Header>
             <div style="display: inline-flex; align-items: center;">
@@ -386,7 +388,7 @@
 
 <SfDialog Width="800px" IsModal="true" Header="@L["UpdateDoctor"]"
           ShowCloseIcon="true" Visible="@IsVisibleEdit">
-    <DialogEvents Closed="@CloseEditDoctorModal" ></DialogEvents>
+    <DialogEvents Closed="@CloseEditDoctorModal"></DialogEvents>
     <DialogTemplates>
         <Header>
             <div style="display: inline-flex; align-items: center;">
