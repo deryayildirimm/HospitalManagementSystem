@@ -99,10 +99,10 @@ public partial class Appointments : HealthCareComponentBase
     private bool IsThirdStepValid =>
         IsSecondStepValid &&
         !string.IsNullOrEmpty(StepperModel.PatientName) &&
-        IsAppointmentTypeIdValid(StepperModel.AppointmentTypeId) &&
+        IsGuidValid(StepperModel.AppointmentTypeId) &&
         !string.IsNullOrEmpty(StepperModel.HospitalName);
 
-    private static bool IsAppointmentTypeIdValid(Guid? appointmentTypeId) =>
+    private static bool IsGuidValid(Guid? appointmentTypeId) =>
         appointmentTypeId.HasValue && appointmentTypeId.Value != Guid.Empty;
 
     public Appointments()

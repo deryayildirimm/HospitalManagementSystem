@@ -125,7 +125,7 @@
         @* ************************* Graphs ************************* *@
         <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
             <div class="w-50">
-                <SfAccumulationChart @ref="AccumulationChart" Width="100%" Height="380px" Title="@($"{L["AppointmentsBy"]} {L[Filter.GroupByField]}")">
+                <SfAccumulationChart @ref="AccumulationChart" Width="100%" Height="380px" Title="@($"{L["AppointmentsBy"]} {L[Filter.GroupByField.ToString()]}")">
                     <AccumulationChartSeriesCollection >
                         <AccumulationChartSeries DataSource="@AppointmentByDepartmentCollection" XName="GroupName" YName="AppointmentCount">
                         </AccumulationChartSeries>
@@ -169,10 +169,15 @@
                     <h6 class="m-0">@L["AppointmentCountBy"] : </h6>
                     <SfDropDownList
                         Width="120px"
-                        TItem="string"
-                        TValue="string"
+                        TItem="EnumAppointmentGroupFilter"
+                        TValue="EnumAppointmentGroupFilter"
                         @bind-Value="Filter.GroupByField"
                         DataSource="@GroupByOptions">
+                        <DropDownListEvents
+                            TItem="EnumAppointmentGroupFilter"
+                            TValue="EnumAppointmentGroupFilter"
+                            OnValueSelect="@OnGroupByChange">
+                        </DropDownListEvents>
                     </SfDropDownList>
                 </div>
 
@@ -206,7 +211,7 @@
         <div class="row py-2 px-2">
             <div class="col-12 d-flex gap-3 border-1 bg-white rounded-1 p-4">
                 <SfDateRangePicker Width="250px" TValue="DateTime?" Placeholder="@L["ChooseARange"]" StartDate="@ChartMinDate" EndDate="@ChartMaxDate">
-                    <DateRangePickerEvents TValue="DateTime?" ValueChange="@OnChange"></DateRangePickerEvents>
+                    <DateRangePickerEvents TValue="DateTime?" ValueChange="@OnGraphicDateChange"></DateRangePickerEvents>
                     </SfDateRangePicker>
                 <SfButton CssClass="e-primary" OnClick="@GetGraphStatistics">
                     <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]

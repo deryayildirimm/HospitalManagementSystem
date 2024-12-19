@@ -73,11 +73,15 @@ public partial class CreateAppointment : HealthCareComponentBase
         IsIdValid(NewAppointment.MedicalServiceId) &&
         IsIdValid(NewAppointment.DoctorId);
 
-    private bool IsCreateAppointmentValid =>
+    private bool IsCreateAppointmentModelValid =>
         IsIdValid(NewAppointment.MedicalServiceId) &&
         IsIdValid(NewAppointment.DepartmentId) &&
         IsIdValid(NewAppointment.DoctorId) &&
         IsIdValid(NewAppointment.PatientId);
+    
+    private bool IsCreateAppointmentValid =>
+        IsCreateAppointmentModelValid &&
+        IsIdValid(NewAppointment.AppointmentTypeId);
 
     private bool IsSelectedPatientValid
         =>
@@ -366,6 +370,16 @@ public partial class CreateAppointment : HealthCareComponentBase
     {
         try
         {
+            if (!IsCreateAppointmentValid)
+            {
+                ToastContent = @L[$"FillRequiredFields"];
+                ToastTitle = @L["ValidationError"];
+                ToastCssClass = "e-toast-danger";
+                StateHasChanged();
+                await ShowOnClick();
+                return;
+            }
+            
             await AppointmentAppService.CreateAsync(NewAppointment);
 
             ToastContent = $"{@L[$"OperationSuccessful"]}\n{@L["AppointmentInformationWillBeSent"]}";
@@ -438,12 +452,13 @@ public partial class CreateAppointment : HealthCareComponentBase
             return;
         }
 
-        if (args.Type is PopupType.Editor or PopupType.QuickInfo && !IsCreateAppointmentValid)
+        if (args.Type is PopupType.Editor or PopupType.QuickInfo && !IsCreateAppointmentModelValid)
         {
             args.Cancel = true;
             ToastTitle = L["Error"];
             ToastContent = @L["PatientDoctorServiceError"];
             ToastCssClass = "e-toast-danger";
+            StateHasChanged();
             await ShowOnClick();
             return;
         }
@@ -556,7 +571,6 @@ public partial class CreateAppointment : HealthCareComponentBase
     private async void OnMoreDetailsClick(MouseEventArgs args, AppointmentCustomData data)
     {
         await ScheduleObj.CloseQuickInfoPopupAsync();
-
         await ScheduleObj.OpenEditorAsync(data, CurrentAction.Add);
     }
 

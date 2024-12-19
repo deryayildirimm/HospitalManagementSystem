@@ -13,6 +13,7 @@ using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.Buttons;
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Data;
+using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Popups;
 using Volo.Abp;
@@ -61,7 +62,10 @@ public partial class AppointmentList : HealthCareComponentBase
         Grid = new SfGrid<AppointmentDto>();
         DeleteConfirmDialog = new SfDialog();
         NewType = new AppointmentTypeCreateDto();
-        GetAppointmentSlotFilter = new GetAppointmentSlotInput();
+        GetAppointmentSlotFilter = new GetAppointmentSlotInput
+        {
+            ExcludeNotAvailable = true
+        };
         Filter = new GetAppointmentsInput
         {
             MaxResultCount = PageSize,
@@ -258,11 +262,11 @@ public partial class AppointmentList : HealthCareComponentBase
             }
 
             EditingAppointmentId = selectedRecord.First().Id;
-
+            
             EditingAppointment =
                 ObjectMapper.Map<AppointmentDto, AppointmentUpdateDto>(
                     await AppointmentAppService.GetAsync(EditingAppointmentId));
-
+            
             IsEditDialogVisible = true;
         }
         catch (Exception e)
@@ -332,7 +336,7 @@ public partial class AppointmentList : HealthCareComponentBase
         var remoteService =
             await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ??
             await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        var culture = CultureInfo.CurrentUICulture.Name ?? CultureInfo.CurrentCulture.Name;
+        var culture = CultureInfo.CurrentUICulture.Name;
         if (!culture.IsNullOrEmpty())
         {
             culture = "&culture=" + culture;
@@ -400,6 +404,43 @@ public partial class AppointmentList : HealthCareComponentBase
         await GetAvailableSlots();
     }
 
+    private async Task OnNewSlotChange(SelectEventArgs<SlotDropdownItem> args)
+    {
+        try
+        {
+            var itemData = args.ItemData;
+            if (itemData is null)
+                return;
+
+            var parsedStart = await GetParsedTimeAsync(itemData.StartTime);
+            var parsedEnd = await GetParsedTimeAsync(itemData.EndTime);
+
+            if (parsedStart is null || parsedEnd is null)
+                return;
+
+            EditingAppointment.AppointmentDate = itemData.Date;
+            EditingAppointment.StartTime =
+                itemData.Date.AddHours(parsedStart.Value.Hour).AddMinutes(parsedStart.Value.Minute);
+            EditingAppointment.EndTime =
+                itemData.Date.AddHours(parsedEnd.Value.Hour).AddMinutes(parsedEnd.Value.Minute);
+        }
+        catch (Exception e)
+        {
+            await UiMessageService.Error(e.Message);
+        }
+    }
+
+    private async Task<DateTime?> GetParsedTimeAsync(string time)
+    {
+        if (DateTime.TryParse(time, out var parsedTime))
+        {
+            return parsedTime;
+        }
+
+        await UiMessageService.Error(@L["InvalidTime"]);
+        return null;
+    }
+
     private async Task GetAvailableSlots()
     {
         try
@@ -414,7 +455,6 @@ public partial class AppointmentList : HealthCareComponentBase
             }
 
             AppointmentSlots = slots
-                .Where(x => x.AvailabilityValue)
                 .Select(x => new SlotDropdownItem
                 {
                     Id = Guid.NewGuid(),

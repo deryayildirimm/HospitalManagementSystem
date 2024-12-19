@@ -77,6 +77,7 @@ public class MedicalServiceManager(
     {
         if (departmentNames.Count == 0)
         {
+            service.RemoveAllDepartments();
             return;
         }
 

@@ -9,7 +9,8 @@ public interface IAppointmentManager
     Task<List<AppointmentSlotDto>> GetAppointmentSlotsAsync(
         Guid doctorId,
         Guid medicalServiceId,
-        DateTime date
+        DateTime date,
+        bool? excludeNotAvailable = false
     );
     
     Task<List<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(

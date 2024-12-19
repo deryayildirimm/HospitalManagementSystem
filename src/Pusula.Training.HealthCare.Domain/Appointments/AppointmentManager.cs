@@ -26,7 +26,8 @@ public class AppointmentManager(
     public virtual async Task<List<AppointmentSlotDto>> GetAppointmentSlotsAsync(
         Guid doctorId,
         Guid medicalServiceId,
-        DateTime date)
+        DateTime date,
+        bool? excludeNotAvailable = false)
     {
         //Check if doctor has a leave
         await CheckDoctorLeaves(doctorId: doctorId, appointmentDate: date);
@@ -48,16 +49,19 @@ public class AppointmentManager(
             skipPastSlots: true);
 
         return slots.Select(slot => new AppointmentSlotDto
-        {
-            DoctorId = doctorId,
-            MedicalServiceId = medicalService.Id,
-            Date = date,
-            StartTime = slot.StartTime,
-            EndTime = slot.EndTime,
-            AvailabilityValue = !doctorAppointmentTimes.Any(appointment =>
-                appointment.StartTime < TimeSpan.Parse(slot.EndTime) &&
-                appointment.EndTime > TimeSpan.Parse(slot.StartTime))
-        }).ToList();
+            {
+                DoctorId = doctorId,
+                MedicalServiceId = medicalService.Id,
+                Date = date,
+                StartTime = slot.StartTime,
+                EndTime = slot.EndTime,
+                AvailabilityValue = !doctorAppointmentTimes.Any(appointment =>
+                    appointment.StartTime < TimeSpan.Parse(slot.EndTime) &&
+                    appointment.EndTime > TimeSpan.Parse(slot.StartTime))
+            })
+            //If ExcludeNotAvailable is true then, get only the available slots
+            .WhereIf(excludeNotAvailable == true, x => x.AvailabilityValue)
+            .ToList();
     }
 
     public virtual async Task<List<AppointmentDayLookupDto>> GetAvailableDaysLookupAsync(

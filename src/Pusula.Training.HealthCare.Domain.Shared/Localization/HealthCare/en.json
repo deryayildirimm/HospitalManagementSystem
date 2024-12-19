@@ -297,7 +297,8 @@
     "FillRequiredFields": "Please fill in the all required fields.",
     "LeaveCreated":  "Leave Created",
     "LeaveCreatedSuccess": "Leave created for the doctor successfully",
-    "ChooseSlot": "Choose a Slot",
-    "ChooseDate": "Choose Date"
+    "ChooseSlot": "Choose an Available Slot",
+    "ChooseNewDate": "Choose New Date",
+    "ValidationError": "Validation Error"
   }
 }

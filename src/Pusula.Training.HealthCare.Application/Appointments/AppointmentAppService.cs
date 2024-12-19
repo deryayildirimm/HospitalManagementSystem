@@ -41,7 +41,7 @@ public class AppointmentAppService(
     public virtual async Task<PagedResultDto<AppointmentSlotDto>> GetAvailableSlotsAsync(GetAppointmentSlotInput input)
     {
         var availableSlots = await appointmentManager
-            .GetAppointmentSlotsAsync(input.DoctorId, input.MedicalServiceId, input.Date);
+            .GetAppointmentSlotsAsync(input.DoctorId, input.MedicalServiceId, input.Date, input.ExcludeNotAvailable);
 
         return new PagedResultDto<AppointmentSlotDto>(
             availableSlots.Count,

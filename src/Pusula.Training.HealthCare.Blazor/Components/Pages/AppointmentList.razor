@@ -228,13 +228,11 @@
         <div class="mx-3 mb-2">
             @if (EditingAppointment.Status == EnumAppointmentStatus.Cancelled)
             {
-                <tr>
-                    <td class="e-textlabel">@L["CancellationNotes"]</td>
-                    <td colspan="4">
-                        <SfTextBox @bind-Value="@EditingAppointment.CancellationNotes"></SfTextBox>
-                        <ValidationMessage For="@(() => EditingAppointment.CancellationNotes)"/>
-                    </td>
-                </tr>
+                <div class="mx-3 mb-2">
+                    <h6>@L["CancellationNotes"]</h6>
+                    <SfTextBox @bind-Value="@EditingAppointment.CancellationNotes"></SfTextBox>
+                    <ValidationMessage For="@(() => EditingAppointment.CancellationNotes)"/>
+                </div>
             }
         </div>
         <div class="mx-3 mb-2">
@@ -251,7 +249,7 @@
         @if (IsEditingAppointmentDate)
         {
             <div class="mx-3 mb-2">
-                <h6>@L["ChooseDate"]</h6>
+                <h6>@L["ChooseNewDate"]</h6>
                 <SfDatePicker @bind-Value="GetAppointmentSlotFilter.Date">
                     <DatePickerEvents TValue="DateTime" ValueChange="OnEditDateChange"></DatePickerEvents>
                 </SfDatePicker>
@@ -265,6 +263,7 @@
                     TValue="SlotDropdownItem"
                     @bind-Value="SelectedSlot"
                     DataSource="@AppointmentSlots">
+                    <DropDownListEvents TItem="SlotDropdownItem" TValue="SlotDropdownItem" OnValueSelect="@OnNewSlotChange"></DropDownListEvents>
                     <DropDownListFieldSettings Text="DisplayText" Value="Id"></DropDownListFieldSettings>
                 </SfDropDownList>
             </div>

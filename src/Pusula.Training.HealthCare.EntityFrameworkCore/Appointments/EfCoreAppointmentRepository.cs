@@ -64,8 +64,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         var query = ApplyFilter((await GetQueryForNavigationPropertiesAsync()),
             doctorId: doctorId,
             medicalServiceId: medicalServiceId,
-            appointmentDate:appointmentDate,
-            startTime:startTime,
+            appointmentDate: appointmentDate,
+            startTime: startTime,
             endTime: endTime);
 
         var appointment = await query.FirstOrDefaultAsync(cancellationToken: cancellationToken);
@@ -136,7 +136,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
     }
 
     public virtual async Task<long> GetGroupCountByAsync(
-        string groupByField,
+        EnumAppointmentGroupFilter groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
@@ -171,7 +171,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
     }
 
     public virtual async Task<List<GroupedAppointmentCount>> GetGroupByListAsync(
-        string groupByField,
+        EnumAppointmentGroupFilter groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
@@ -221,6 +221,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             (await GetQueryableAsync())
             .Include(appointment => appointment.AppointmentType)
             .Include(appointment => appointment.Doctor)
+            .Include(appointment => appointment.Doctor.Title)
             .Include(appointment => appointment.Patient)
             .Include(appointment => appointment.MedicalService)
             .Include(appointment => appointment.Department);
@@ -328,78 +329,58 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
 
     #region DynamicGroupByQuery
 
+    private static IQueryable<GroupedAppointmentCount> GroupAppointments(
+        IQueryable<Appointment> query,
+        Expression<Func<Appointment, object>> groupKey,
+        Func<Appointment, string> groupFunc,
+        bool appointmentCountSum = false)
+        => query
+            .GroupBy(groupKey)
+            .Select(g => new GroupedAppointmentCount
+            {
+                GroupKey = FormatKey(g.Key),
+                GroupName = groupFunc(g.FirstOrDefault()!),
+                AppointmentCount = appointmentCountSum ? (int)g.Sum(x => x.Amount) : g.Count()
+            });
+
+    private static string FormatKey<TKey>(TKey key) => (key switch
+    {
+        DateTime dateKey => dateKey.ToShortDateString(),
+        _ => key!.ToString()
+    })!;
+
+
     private static IQueryable<GroupedAppointmentCount> ApplyDynamicGrouping(
         IQueryable<Appointment> query,
-        string groupByField)
+        EnumAppointmentGroupFilter groupByField)
     {
         return groupByField switch
         {
-            "Department" => query.GroupBy(a => a.DepartmentId)
-                .Select(g => new GroupedAppointmentCount
-                {
-                    GroupKey = g.Key.ToString(), GroupName = g.First().Department.Name, AppointmentCount = g.Count()
-                }),
-            "Service" => query.GroupBy(a => a.MedicalServiceId)
-                .Select(g => new GroupedAppointmentCount
-                {
-                    GroupKey = g.Key.ToString(), GroupName = g.First().MedicalService.Name, AppointmentCount = g.Count()
-                }),
-            "Doctor" => query.GroupBy(a => a.DoctorId)
-                .Select(g => new GroupedAppointmentCount
-                {
-                    GroupKey = g.Key.ToString(),
-                    GroupName =
-                        $"{g.First().Doctor.Title.TitleName} {g.First().Doctor.FirstName} {g.First().Doctor.LastName}",
-                    AppointmentCount = g.Count()
-                }),
-            "Status" => query.GroupBy(a => a.DoctorId)
-                .Select(g => new GroupedAppointmentCount
-                {
-                    GroupKey = g.Key.ToString(),
-                    GroupName = g.First().Status.ToString(),
-                    AppointmentCount = g.Count()
-                }),
-            "Date" => query.GroupBy(a => a.AppointmentDate.Date)
-                .Select(g => new GroupedAppointmentCount
-                {
-                    GroupKey = g.Key.ToShortDateString(),
-                    GroupName = g.Key.ToShortDateString(),
-                    AppointmentCount = g.Count()
-                }),
-            "AppointmentType" => query.GroupBy(a => a.AppointmentTypeId)
-                .Select(g => new GroupedAppointmentCount
-                {
-                    GroupKey = g.Key.ToString(),
-                    GroupName = g.First().AppointmentType.Name,
-                    AppointmentCount = g.Count()
-                }),
-            "RevenueByService" => query.GroupBy(a => a.MedicalServiceId)
-                .Select(g => new GroupedAppointmentCount
-                {
-                    GroupKey = g.Key.ToString(),
-                    GroupName = g.First().MedicalService.Name,
-                    AppointmentCount = (int)g.Sum(x => x.Amount)
-                }),
-            "RevenueByDepartment" => query.GroupBy(a => a.DepartmentId)
-                .Select(g => new GroupedAppointmentCount
-                {
-                    GroupKey = g.Key.ToString(),
-                    GroupName = g.First().Department.Name,
-                    AppointmentCount = (int)g.Sum(x => x.Amount)
-                }),
-            "PatientGender" => query.GroupBy(a => a.Patient.DiscountGroup)
-                .Select(g => new GroupedAppointmentCount
-                {
-                    GroupKey = g.Key!.ToString(),
-                    GroupName = g.First().Patient.Gender.ToString(),
-                    AppointmentCount = g.Count()
-                }),
-            //Group by department by default
-            _ => query.GroupBy(a => a.DepartmentId)
-                .Select(g => new GroupedAppointmentCount
-                {
-                    GroupKey = g.Key.ToString(), GroupName = g.First().Department.Name, AppointmentCount = g.Count()
-                })
+            EnumAppointmentGroupFilter.Service => GroupAppointments(query, a => a.MedicalServiceId,
+                a => a.MedicalService.Name),
+
+            EnumAppointmentGroupFilter.Doctor => GroupAppointments(query, a => a.DoctorId,
+                a => $"{a.Doctor.Title.TitleName} {a.Doctor.FirstName} {a.Doctor.LastName}"),
+
+            EnumAppointmentGroupFilter.Status => GroupAppointments(query, a => a.Status,
+                a => a.Status.ToString()),
+
+            EnumAppointmentGroupFilter.Date => GroupAppointments(query, a => a.AppointmentDate.Date,
+                a => a.AppointmentDate.Date.ToShortDateString()),
+
+            EnumAppointmentGroupFilter.AppointmentType => GroupAppointments(query, a => a.AppointmentTypeId,
+                a => a.AppointmentType.Name),
+
+            EnumAppointmentGroupFilter.RevenueByService => GroupAppointments(query, a => a.Amount,
+                a => a.MedicalService.Name, true),
+
+            EnumAppointmentGroupFilter.RevenueByDepartment => GroupAppointments(query, a => a.Amount,
+                a => a.Department.Name, true),
+
+            EnumAppointmentGroupFilter.PatientGender => GroupAppointments(query, a => a.Patient.Gender,
+                a => a.Patient.Gender.ToString()),
+            _ => GroupAppointments(query, a => a.DepartmentId,
+                a => a.Department.Name),
         };
     }
 

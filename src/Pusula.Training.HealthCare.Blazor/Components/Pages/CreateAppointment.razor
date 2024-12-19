@@ -423,7 +423,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="e-textlabel my-2">@L["AppointmentType"]</td>
+                        <td class="e-textlabel my-2">@L["AppointmentType"] *</td>
                         <td class="mx-1" colspan="4">
                             <SfDropDownList
                                 TValue="Guid"
@@ -476,7 +476,7 @@
     </DialogTemplates>
 </SfDialog>
 
-@* Create Appointment Modal *@
+@* Edit Appointment Modal *@
 <SfDialog CssClass="p-2" Visible="@IsEditAppointmentOpen" IsModal="true" Width="575px" ShowCloseIcon="true">
     <DialogEvents Closed="@CloseEditAppointmentModal"></DialogEvents>
     <DialogTemplates>
@@ -521,7 +521,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="e-textlabel my-2">@L["AppointmentType"]</td>
+                        <td class="e-textlabel my-2">@L["AppointmentType"] *</td>
                         <td class="mx-1" colspan="4">
                             <SfDropDownList
                                 TValue="Guid"
@@ -533,7 +533,6 @@
                                 <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
                             </SfDropDownList>
                             <ValidationMessage For="() => (EditingAppointment.AppointmentTypeId)"/>
-
                         </td>
                     </tr>
                     <tr>

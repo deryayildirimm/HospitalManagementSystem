@@ -9,6 +9,7 @@ using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Charts;
 using Syncfusion.Blazor.Data;
+using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Volo.Abp;
 
@@ -25,10 +26,10 @@ public partial class AppointmentOverview : HealthCareComponentBase
     private GetAppointmentsInput FilterAppointmentByGender { get; set; }
     private GetAppointmentsInput FilterRevenueByDepartment { get; set; }
     private GetAppointmentsInput FilterAppointmentByType { get; set; }
-    private IReadOnlyList<string> GroupByOptions { get; set; }
+    private IReadOnlyList<EnumAppointmentGroupFilter> GroupByOptions { get; set; }
     private GetAppointmentsInput FilterDateChart { get; set; }
-    public DateTime? ChartMinDate {get;set;} = DateTime.Now;
-    public DateTime? ChartMaxDate {get;set;} = DateTime.Now;
+    private DateTime? ChartMinDate { get; set; }
+    private DateTime? ChartMaxDate { get; set; }
     private List<KeyValuePair<string, EnumPatientTypes>> PatientTypeCollection { get; set; }
     private List<KeyValuePair<string, EnumAppointmentStatus>> StatusCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
@@ -46,12 +47,20 @@ public partial class AppointmentOverview : HealthCareComponentBase
     private int PageSize { get; } = 5;
     private int LookupPageSize { get; } = 100;
     private int CurrentPage { get; set; } = 1;
-    private string GroupByField { get; set; }
+    private EnumAppointmentGroupFilter GroupByField { get; set; }
 
 
     public AppointmentOverview()
     {
-        GroupByOptions = ["Department", "Date", "Doctor", "Service"];
+        ChartMinDate = DateTime.Now.AddDays(-7);
+        ChartMaxDate = DateTime.Now.AddDays(14);
+        GroupByOptions =
+        [
+            EnumAppointmentGroupFilter.Department,
+            EnumAppointmentGroupFilter.Date,
+            EnumAppointmentGroupFilter.Doctor,
+            EnumAppointmentGroupFilter.Service
+        ];
         GroupByField = AppointmentConsts.DefaultGroupBy;
         FilterQuery = new Query();
         AccumulationChart = new SfAccumulationChart();
@@ -72,42 +81,42 @@ public partial class AppointmentOverview : HealthCareComponentBase
 
         FilterDateChart = new GetAppointmentsInput
         {
-            GroupByField = "Date",
+            GroupByField = EnumAppointmentGroupFilter.Date,
             MaxResultCount = PageSize,
             SkipCount = 0
         };
 
         FilterAppointmentByStatusChart = new GetAppointmentsInput
         {
-            GroupByField = "Status",
+            GroupByField = EnumAppointmentGroupFilter.Status,
             MaxResultCount = PageSize,
             SkipCount = 0
         };
-        
+
         FilterAppointmentByType = new GetAppointmentsInput
         {
-            GroupByField = "AppointmentType",
+            GroupByField = EnumAppointmentGroupFilter.AppointmentType,
             MaxResultCount = PageSize,
             SkipCount = 0
         };
 
         FilterRevenueByService = new GetAppointmentsInput
         {
-            GroupByField = "RevenueByService",
+            GroupByField = EnumAppointmentGroupFilter.RevenueByService,
             MaxResultCount = PageSize,
             SkipCount = 0
         };
 
         FilterRevenueByDepartment = new GetAppointmentsInput
         {
-            GroupByField = "RevenueByDepartment",
+            GroupByField = EnumAppointmentGroupFilter.Department,
             MaxResultCount = PageSize,
             SkipCount = 0
         };
 
         FilterAppointmentByGender = new GetAppointmentsInput
         {
-            GroupByField = "PatientGender",
+            GroupByField = EnumAppointmentGroupFilter.PatientGender,
             MaxResultCount = PageSize,
             SkipCount = 0
         };
@@ -193,10 +202,10 @@ public partial class AppointmentOverview : HealthCareComponentBase
 
     private async Task SetDatas()
     {
-        FilterDateChart.GroupByField = "Department";
+        FilterDateChart.GroupByField = EnumAppointmentGroupFilter.Department;
         AppointmentByDepartmentCollection = await GetAppointmentsStatistics(FilterDepartmentChart);
 
-        FilterDateChart.GroupByField = "Date";
+        FilterDateChart.GroupByField = EnumAppointmentGroupFilter.Date;
         AppointmentByDateCollection = await GetAppointmentsStatistics(FilterDateChart);
     }
 
@@ -257,40 +266,51 @@ public partial class AppointmentOverview : HealthCareComponentBase
 
     private async Task GetGraphStatistics()
     {
-        FilterAppointmentByStatusChart.GroupByField = "Status";
+        FilterAppointmentByStatusChart.GroupByField = EnumAppointmentGroupFilter.Status;
         FilterAppointmentByStatusChart.AppointmentMinDate = ChartMinDate;
         FilterAppointmentByStatusChart.AppointmentMaxDate = ChartMaxDate;
         AppointmentByStatusCollection = await GetAppointmentsStatistics(FilterAppointmentByStatusChart);
-        
-        FilterRevenueByService.GroupByField = "RevenueByService";
+
+        FilterRevenueByService.GroupByField = EnumAppointmentGroupFilter.RevenueByService;
         FilterRevenueByService.AppointmentMinDate = ChartMinDate;
         FilterRevenueByService.AppointmentMaxDate = ChartMaxDate;
         RevenuByServiceCollection = await GetAppointmentsStatistics(FilterRevenueByService);
-        
-        FilterAppointmentByGender.GroupByField = "PatientGender";
+
+        FilterAppointmentByGender.GroupByField = EnumAppointmentGroupFilter.PatientGender;
         FilterAppointmentByGender.AppointmentMinDate = ChartMinDate;
         FilterAppointmentByGender.AppointmentMaxDate = ChartMaxDate;
         AppointmentByGenderCollection = await GetAppointmentsStatistics(FilterAppointmentByGender);
-        
-        FilterRevenueByDepartment.GroupByField = "RevenueByDepartment";
+
+        FilterRevenueByDepartment.GroupByField = EnumAppointmentGroupFilter.RevenueByDepartment;
         FilterRevenueByDepartment.AppointmentMinDate = ChartMinDate;
         FilterRevenueByDepartment.AppointmentMaxDate = ChartMaxDate;
         RevenueByDepartmentCollection = await GetAppointmentsStatistics(FilterRevenueByDepartment);
-        
-        FilterAppointmentByType.GroupByField = "AppointmentType";
+
+        FilterAppointmentByType.GroupByField = EnumAppointmentGroupFilter.AppointmentType;
         FilterAppointmentByType.AppointmentMinDate = ChartMinDate;
         FilterAppointmentByType.AppointmentMaxDate = ChartMaxDate;
         AppointmentByTypeCollection = await GetAppointmentsStatistics(FilterAppointmentByType);
-        
     }
 
     #endregion
-    
-    private void OnChange(RangePickerEventArgs<DateTime?> args)
+
+    private void OnGraphicDateChange(RangePickerEventArgs<DateTime?> args)
     {
         ChartMinDate = args.StartDate;
         ChartMaxDate = args.EndDate;
         StateHasChanged();
     }
-    
+
+    private async Task OnGroupByChange(SelectEventArgs<EnumAppointmentGroupFilter> args)
+    {
+        try
+        {
+            Filter.GroupByField = args.ItemData;
+            await GetAppointmentsAsync();
+        }
+        catch (Exception e)
+        {
+            await UiMessageService.Error(e.Message);
+        }
+    }
 }

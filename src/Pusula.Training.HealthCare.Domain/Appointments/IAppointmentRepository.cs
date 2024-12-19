@@ -74,7 +74,7 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         CancellationToken cancellationToken = default);
     
     Task<long> GetGroupCountByAsync(
-        string groupByField,
+        EnumAppointmentGroupFilter groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
@@ -96,7 +96,7 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         CancellationToken cancellationToken = default);
     
     Task<List<GroupedAppointmentCount>> GetGroupByListAsync(
-        string groupByField,
+        EnumAppointmentGroupFilter groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
