@@ -1,6 +1,7 @@
 ﻿@page "/medical-staff"
 
 @attribute [Authorize(HealthCarePermissions.MedicalStaff.Default)]
+@using Pusula.Training.HealthCare.Blazor.Services
 @using Pusula.Training.HealthCare.MedicalPersonnel
 @using Pusula.Training.HealthCare.Localization
 @using Volo.Abp.AspNetCore.Components.Messages
@@ -19,15 +20,9 @@
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
 
-@using Syncfusion.Blazor
 @using Syncfusion.Blazor.Buttons
-@using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Calendars
-@using Syncfusion.Blazor.Inputs
 @using SelectionType = Syncfusion.Blazor.Grids.SelectionType
-@using Syncfusion.Blazor.Grids
-@using Syncfusion.Blazor.Popups;
-@using Syncfusion.Blazor.DropDowns;
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["MedicalStaff"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
@@ -86,16 +81,6 @@
                         <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.BirthDateMax" Placeholder="@L["MaxBirthDate"]"></SfDatePicker>
                     </Field>
                 </Column>
-                @*<Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["Gender"]</FieldLabel>
-                        <SfDropDownList TItem="EnumGender" TValue="EnumGender?"
-                                        @bind-Value="Filter.Gender"
-                                        DataSource="@GenderOptions">
-                            <DropDownListFieldSettings Text="Text" Value="Value"></DropDownListFieldSettings>
-                        </SfDropDownList>
-                    </Field>
-                </Column> *@
                 <Column ColumnSize="ColumnSize.Is3">
                     <Field>
                         <FieldLabel>@L["City"]</FieldLabel>
@@ -142,60 +127,25 @@
 
 <Card>
     <CardBody>
-        @if (SelectedMedicalStaff.Any())
-        {
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            @if (AllMedicalStaffSelected)
-            {
-            <p class="lead mb-0">
-                @L["AllItemsAreSelected", TotalCount]
-            </p>
-            }
-            else
-            {
-            <p class="lead mb-0">
-                @if (SelectedMedicalStaff.Count > 1)
-                {
-                @L["NumberOfItemsOnThisPageAreSelected", SelectedMedicalStaff.Count]
-                }
-                else
-                {
-                @L["OneItemOnThisPageIsSelected"]
-                }
-            </p>
-            }
-
-            <div>
-                @if ((SelectedMedicalStaff.Count == PageSize || SelectedMedicalStaff.Count == MedicalStaffList.Count) && TotalCount > SelectedMedicalStaff.Count)
-                {
-                if (!AllMedicalStaffSelected)
-                {
-                <SfButton OnClick="SelectAllItems" CssClass="mx-1 btn-outline-secondary">@L["SelectAllItems", TotalCount]</SfButton>
-                }
-                else
-                {
-                <SfButton OnClick="ClearSelection" CssClass="mx-1 btn-outline-secondary">@L["ClearSelection"]</SfButton>
-                }
-                }
-
-
-                <SfButton CssClass="e-danger" OnClick="DeleteSelectedMedicalStaffAsync">@L["Delete"]</SfButton>
-                @*<Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedMedicalStaffAsync">
-                        <Icon Name="@IconName.Delete" /> @L["Delete"] 
-                    </Button>*@
-            </div>
-        </div>
-
-        <hr class="my-1 mx-0" />
-        }
-
-        <SfGrid TItem="MedicalStaffWithNavigationPropertiesDto"
-                DataSource="MedicalStaffList"
+        <SfGrid @ref="Grid"
+                TValue="MedicalStaffWithNavigationPropertiesDto"
                 AllowPaging="true"
                 AllowSorting="true"
-                SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
-            <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
-            <GridEvents PageChanging="PageChangingHandler" PageChanged="PageChangedHandler" TValue="MedicalStaffWithNavigationPropertiesDto"></GridEvents>
+                Toolbar="@(new List<string>() { "Delete" })"
+                SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }"
+                Query="@FilterQuery">
+            <SfDataManager
+                AdaptorInstance="@typeof(MedicalStaffAdaptor)"
+                Adaptor="Adaptors.CustomAdaptor">
+            </SfDataManager>
+            <GridEvents
+                OnActionBegin="OnActionBegin"
+                RowSelected="RowSelectHandler"
+                OnToolbarClick="ToolbarClickHandler"
+                RowDeselected="RowDeselectHandler"
+                TValue="MedicalStaffWithNavigationPropertiesDto">
+            </GridEvents>
+            <GridPageSettings PageSize="@PageSize"></GridPageSettings>
             <GridColumns>
                 @if (CanDeleteMedicalStaff && MedicalStaffList.Any())
                 {
