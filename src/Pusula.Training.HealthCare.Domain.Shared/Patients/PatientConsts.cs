@@ -40,5 +40,8 @@ namespace Pusula.Training.HealthCare.Patients
         public const int InsuranceNumberMinLength = 8;
         public const int DiscountGroupMinValue = 0;
         public const int RelativeMinValue = 0;
+
+        public const int PatientNumberMinValue = 0;
+        public const int PatientNumberMaxValue = int.MaxValue;
     }
 }

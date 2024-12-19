@@ -396,7 +396,6 @@ namespace Pusula.Training.HealthCare.Migrations
                     ShouldChangePasswordOnNextLogin = table.Column<bool>(type: "boolean", nullable: false),
                     EntityVersion = table.Column<int>(type: "integer", nullable: false),
                     LastPasswordChangeTime = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    IdentificationNumber = table.Column<string>(type: "character varying(11)", maxLength: 11, nullable: false, defaultValue: ""),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -482,8 +481,8 @@ namespace Pusula.Training.HealthCare.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     DoctorId = table.Column<Guid>(type: "uuid", nullable: false),
                     DayOfWeek = table.Column<int>(type: "integer", nullable: false),
-                    StartHour = table.Column<TimeSpan>(type: "interval", nullable: false),
-                    EndHour = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    StartHour = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                    EndHour = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
                     CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
                     LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
@@ -580,7 +579,8 @@ namespace Pusula.Training.HealthCare.Migrations
                     LastName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     MothersName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
                     FathersName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
-                    IdentityAndPassportNumber = table.Column<string>(type: "text", nullable: false),
+                    IdentityNumber = table.Column<string>(type: "character varying(11)", maxLength: 11, nullable: false),
+                    PassportNumber = table.Column<string>(type: "character varying(9)", maxLength: 9, nullable: true),
                     Nationality = table.Column<string>(type: "text", nullable: true),
                     BirthDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     EmailAddress = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
@@ -1253,6 +1253,7 @@ namespace Pusula.Training.HealthCare.Migrations
                     Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     ReminderSent = table.Column<bool>(type: "boolean", nullable: false),
                     Amount = table.Column<double>(type: "double precision", nullable: false),
+                    CancellationNotes = table.Column<string>(type: "text", nullable: true),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -1340,6 +1341,7 @@ namespace Pusula.Training.HealthCare.Migrations
                     StartDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     EndDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
                     Reason = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    LeaveType = table.Column<int>(type: "integer", nullable: false),
                     ExtraProperties = table.Column<string>(type: "text", nullable: false),
                     ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
@@ -1357,8 +1359,7 @@ namespace Pusula.Training.HealthCare.Migrations
                         name: "FK_AppDoctorLeaves_AppDoctors_DoctorId",
                         column: x => x.DoctorId,
                         principalTable: "AppDoctors",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -1411,6 +1412,47 @@ namespace Pusula.Training.HealthCare.Migrations
                         name: "FK_AppProtocols_AppProtocolTypes_ProtocolTypeId",
                         column: x => x.ProtocolTypeId,
                         principalTable: "AppProtocolTypes",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AppRestrictions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    MedicalServiceId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DepartmentId = table.Column<Guid>(type: "uuid", nullable: false),
+                    DoctorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    MinAge = table.Column<int>(type: "integer", nullable: true),
+                    MaxAge = table.Column<int>(type: "integer", nullable: true),
+                    AllowedGender = table.Column<int>(type: "integer", nullable: false),
+                    ExtraProperties = table.Column<string>(type: "text", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppRestrictions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppRestrictions_AppDepartments_DepartmentId",
+                        column: x => x.DepartmentId,
+                        principalTable: "AppDepartments",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AppRestrictions_AppDoctors_DoctorId",
+                        column: x => x.DoctorId,
+                        principalTable: "AppDoctors",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AppRestrictions_AppMedicalServices_MedicalServiceId",
+                        column: x => x.MedicalServiceId,
+                        principalTable: "AppMedicalServices",
                         principalColumn: "Id");
                 });
 
@@ -1908,12 +1950,6 @@ namespace Pusula.Training.HealthCare.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AppMedicalServices_Name",
-                table: "AppMedicalServices",
-                column: "Name",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AppMedicalStaff_CityId",
                 table: "AppMedicalStaff",
                 column: "CityId");
@@ -1963,6 +1999,21 @@ namespace Pusula.Training.HealthCare.Migrations
                 name: "IX_AppProtocols_ProtocolTypeId",
                 table: "AppProtocols",
                 column: "ProtocolTypeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppRestrictions_DepartmentId",
+                table: "AppRestrictions",
+                column: "DepartmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppRestrictions_DoctorId",
+                table: "AppRestrictions",
+                column: "DoctorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AppRestrictions_MedicalServiceId",
+                table: "AppRestrictions",
+                column: "MedicalServiceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AppTests_TestCategoryId",
@@ -2104,6 +2155,9 @@ namespace Pusula.Training.HealthCare.Migrations
 
             migrationBuilder.DropTable(
                 name: "AppProtocolMedicalServices");
+
+            migrationBuilder.DropTable(
+                name: "AppRestrictions");
 
             migrationBuilder.DropTable(
                 name: "OpenIddictScopes");

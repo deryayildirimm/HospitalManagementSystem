@@ -274,9 +274,7 @@ else if (ActiveStep == 1)
                         else
                         {
                             <div class="d-flex align-items-center justify-content-center rounded-1 px-2 py-1 light-red">
-                                <Text class="fs-6 text-white" TextWeight="TextWeight.SemiBold">
-                                    @StepperModel.DoctorName @L["DoctorNotAvailable"]
-                                </Text>
+                                <h6 class="fs-6 fw-semibold text-white">@StepperModel.DoctorName @L[SlotErrorMessage]</h6>
                             </div>
                         }
 
@@ -411,7 +409,7 @@ else if (ActiveStep == 3)
                         <div class="text-center text-danger d-flex flex-column gap-2">
                             <Icon Name="IconName.TimesCircle" IconSize="IconSize.x6" TextColor="TextColor.Warning"></Icon>
                             <Text TextSize="TextSize.Heading4" TextWeight="TextWeight.Bold">@L["OperationFailed"]</Text>
-                            <Text TextSize="TextSize.Heading5" TextWeight="TextWeight.Bold">@L["FailureMessage"]</Text>
+                            <Text TextSize="TextSize.Heading5" TextWeight="TextWeight.Bold">@FailureMessage</Text>
                         </div>
                     }
                 </CardBody>

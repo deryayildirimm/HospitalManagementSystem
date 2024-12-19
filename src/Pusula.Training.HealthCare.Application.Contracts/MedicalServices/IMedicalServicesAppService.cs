@@ -12,7 +12,13 @@ public interface IMedicalServicesAppService : IApplicationService
 {
     Task<PagedResultDto<MedicalServiceDto>> GetListAsync(GetMedicalServiceInput input);
 
+    Task<PagedResultDto<MedicalServiceDto>> GetMedicalServiceByDepartmentIdAsync(
+        GetServiceByDepartmentInput input);
+    
     Task<PagedResultDto<MedicalServiceWithDepartmentsDto>> GetMedicalServiceWithDepartmentsAsync(
+        GetMedicalServiceInput input);
+    
+    Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(
         GetMedicalServiceInput input);
     
     Task<MedicalServiceDto> GetAsync(Guid id);

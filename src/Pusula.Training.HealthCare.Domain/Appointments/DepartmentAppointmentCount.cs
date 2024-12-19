@@ -1,5 +1,4 @@
 using System;
-using Pusula.Training.HealthCare.Departments;
 
 namespace Pusula.Training.HealthCare.Appointments;
 

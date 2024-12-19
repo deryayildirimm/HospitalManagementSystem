@@ -11,22 +11,20 @@ public interface IDoctorLeaveRepository : IRepository<DoctorLeave, Guid>
 {
         Task DeleteAllAsync(
         string? filterText = null,
+        Guid? departmentId = null,
         Guid? doctorId = null,
-        DateTime? startDateMin = null,
-        DateTime? startDateMax = null,
-        DateTime? endDateMin = null,
-        DateTime? endDateMax = null,
-        string? reason = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        EnumLeaveType? leaveType = null,
         CancellationToken cancellationToken = default);
 
     Task<List<DoctorLeave>> GetListAsync(
         string? filterText = null,
+        Guid? departmentId = null,
         Guid? doctorId = null,
-        DateTime? startDateMin = null,
-        DateTime? startDateMax = null,
-        DateTime? endDateMin = null,
-        DateTime? endDateMax = null,
-        string? reason = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        EnumLeaveType? leaveType = null,
         string? sorting = null,
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
@@ -34,12 +32,11 @@ public interface IDoctorLeaveRepository : IRepository<DoctorLeave, Guid>
 
     Task<long> GetCountAsync(
         string? filterText = null,
+        Guid? departmentId = null,
         Guid? doctorId = null,
-        DateTime? startDateMin = null,
-        DateTime? startDateMax = null,
-        DateTime? endDateMin = null,
-        DateTime? endDateMax = null,
-        string? reason = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        EnumLeaveType? leaveType = null,
         CancellationToken cancellationToken = default);
 
 }
