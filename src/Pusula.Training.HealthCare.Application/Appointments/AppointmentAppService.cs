@@ -155,7 +155,6 @@ public class AppointmentAppService(
     {
         await distributedEventBus.PublishAsync(new AppointmentsViewedEto { Id = id, ViewedAt = Clock.Now },
             onUnitOfWorkComplete: false);
-
         return ObjectMapper.Map<Appointment, AppointmentDto>(await appointmentRepository.GetAsync(id));
     }
 

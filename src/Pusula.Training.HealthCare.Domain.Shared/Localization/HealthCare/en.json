@@ -296,7 +296,8 @@
     "Error:GuidRequired": "GUID required.",
     "FillRequiredFields": "Please fill in the all required fields.",
     "LeaveCreated":  "Leave Created",
-    "LeaveCreatedSuccess": "Leave created for the doctor successfully" 
-    
+    "LeaveCreatedSuccess": "Leave created for the doctor successfully",
+    "ChooseSlot": "Choose a Slot",
+    "ChooseDate": "Choose Date"
   }
 }

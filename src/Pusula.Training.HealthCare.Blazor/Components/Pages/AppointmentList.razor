@@ -196,41 +196,36 @@
 </div>
 
 @* Edit Modal *@
-<SfDialog Width="450px" IsModal="true" Header="@L["UpdateAppointment"]"
+<SfDialog Width="450px" CssClass="p-1" IsModal="true" Header="@L["UpdateAppointment"]"
           ShowCloseIcon="true" Visible="@IsEditDialogVisible">
-
+    <DialogEvents Closed="CloseEditAppointmentModal"></DialogEvents>
     <EditForm Model="@EditingAppointment" OnValidSubmit="UpdateAppointmentAsync">
         <DataAnnotationsValidator/>
-        <table class="custom-event-editor p-2" style="min-height: 380px; min-width: 300px;">
-            <tbody>
-            <tr>
-                <td class="e-textlabel my-2">@L["AppointmentType"]</td>
-                <td class="mx-1" colspan="4">
-                    <SfDropDownList
-                        TValue="Guid"
-                        TItem="LookupDto<Guid>"
-                        ID="EventType"
-                        DataSource="@AppointmentTypesCollection"
-                        @bind-Value="@(EditingAppointment.AppointmentTypeId)"
-                        Placeholder="@L["Select"]">
-                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
-                    </SfDropDownList>
-                    <ValidationMessage For="() => (EditingAppointment.AppointmentTypeId)"/>
-                </td>
-            </tr>
-            <tr>
-                <td class="e-textlabel my-2">@L["Status"]</td>
-                <td class="mx-1" colspan="4">
-                    <SfDropDownList
-                        TItem="KeyValuePair<string, EnumAppointmentStatus>"
-                        TValue="EnumAppointmentStatus"
-                        @bind-Value="@(EditingAppointment.Status)"
-                        DataSource="@StatusCollection">
-                        <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
-                    </SfDropDownList>
-                    <ValidationMessage For="() => (EditingAppointment.Status)"/>
-                </td>
-            </tr>
+        <div class="mx-3 mb-2">
+            <h6>@L["AppointmentType"]</h6>
+            <SfDropDownList
+                TValue="Guid"
+                TItem="LookupDto<Guid>"
+                ID="EventType"
+                DataSource="@AppointmentTypesCollection"
+                @bind-Value="@(EditingAppointment.AppointmentTypeId)"
+                Placeholder="@L["Select"]">
+                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+            </SfDropDownList>
+            <ValidationMessage For="() => (EditingAppointment.AppointmentTypeId)"/>
+        </div>
+        <div class="mx-3 mb-2">
+            <h6>@L["Status"]</h6>
+            <SfDropDownList
+                TItem="KeyValuePair<string, EnumAppointmentStatus>"
+                TValue="EnumAppointmentStatus"
+                @bind-Value="@(EditingAppointment.Status)"
+                DataSource="@StatusCollection">
+                <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+            </SfDropDownList>
+            <ValidationMessage For="() => (EditingAppointment.Status)"/>
+        </div>
+        <div class="mx-3 mb-2">
             @if (EditingAppointment.Status == EnumAppointmentStatus.Cancelled)
             {
                 <tr>
@@ -241,34 +236,49 @@
                     </td>
                 </tr>
             }
-            <tr>
-                <td class="e-textlabel my-2">@L["From"]</td>
-                <td class="mx-1" colspan="4">
-                    <SfDateTimePicker Enabled="false" @bind-Value="@(EditingAppointment.StartTime)"></SfDateTimePicker>
-                </td>
-            </tr>
-            <tr>
-                <td class="e-textlabel my-2">@L["To"]</td>
-                <td colspan="4">
-                    <SfDateTimePicker Enabled="false" @bind-Value="@(EditingAppointment.EndTime)"></SfDateTimePicker>
-                </td>
-            </tr>
-            <tr>
-                <td class="e-textlabel my-2">@L["SendReminder"]</td>
-                <td class="mx-1">
-                    <SfSwitch @bind-Checked="@EditingAppointment.ReminderSent"></SfSwitch>
-                </td>
-            </tr>
-            <tr>
-                <td class="e-textlabel">@L["Notes"]</td>
-                <td colspan="4">
-                    <SfTextBox @bind-Value="@EditingAppointment.Notes"></SfTextBox>
-                    <ValidationMessage For="@(() => EditingAppointment.Notes)"/>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-        <div class="form-group">
+        </div>
+        <div class="mx-3 mb-2">
+            <div class="d-flex justify-content-between mb-1">
+                <h6>@L["From"]</h6>
+                <SfButton CssClass="e-success" Content="@L["Reschedule"]" IsPrimary="true" type="button" @onclick="ToggleAppointmentEdit"/>
+            </div>
+            <SfDateTimePicker Enabled="false" @bind-Value="@(EditingAppointment.StartTime)"></SfDateTimePicker>
+        </div>
+        <div class="mx-3 mb-2">
+            <h6>@L["To"]</h6>
+            <SfDateTimePicker Enabled="false" @bind-Value="@(EditingAppointment.EndTime)"></SfDateTimePicker>
+        </div>
+        @if (IsEditingAppointmentDate)
+        {
+            <div class="mx-3 mb-2">
+                <h6>@L["ChooseDate"]</h6>
+                <SfDatePicker @bind-Value="GetAppointmentSlotFilter.Date">
+                    <DatePickerEvents TValue="DateTime" ValueChange="OnEditDateChange"></DatePickerEvents>
+                </SfDatePicker>
+            </div>
+
+            <div class="mx-3 mb-2">
+                <h6>@L["ChooseSlot"]</h6>
+                <SfDropDownList
+                    Enabled="@(IsSlotAvailable)"
+                    TItem="SlotDropdownItem"
+                    TValue="SlotDropdownItem"
+                    @bind-Value="SelectedSlot"
+                    DataSource="@AppointmentSlots">
+                    <DropDownListFieldSettings Text="DisplayText" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
+            </div>
+        }
+        <div class="mx-3 mb-2">
+            <h6>@L["SendReminder"]</h6>
+            <SfSwitch @bind-Checked="@EditingAppointment.ReminderSent"></SfSwitch>
+        </div>
+        <div class="mx-3 mb-3">
+            <h6>@L["Notes"]</h6>
+            <SfTextBox @bind-Value="@EditingAppointment.Notes"></SfTextBox>
+            <ValidationMessage For="@(() => EditingAppointment.Notes)"/>
+        </div>
+        <div class="form-group mx-3 mt-2">
             <SfProgressButton type="Submit" CssClass="e-success e-outline e-custom" Content="Submit">
                 <ProgressButtonSpinSettings Position="SpinPosition.Right" Width="20">
                     <SpinTemplate>

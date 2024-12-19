@@ -11,6 +11,10 @@ namespace Pusula.Training.HealthCare.Appointments;
 public class AppointmentDto : FullAuditedEntityDto<Guid>
 {
 
+    public Guid DoctorId { get; set; }
+    public Guid PatientId { get; set; }
+    public Guid MedicalServiceId { get; set; }
+    public Guid AppointmentTypeId { get; set; }
     public DoctorDto Doctor { get; set; } = null!;
     public PatientDto Patient { get; set; } = null!;
     public MedicalServiceDto MedicalService { get; set; } = null!;

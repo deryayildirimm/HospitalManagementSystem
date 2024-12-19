@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.AppointmentTypes;
+using Pusula.Training.HealthCare.Blazor.Models;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.Buttons;
+using Syncfusion.Blazor.Calendars;
 using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Popups;
@@ -23,6 +25,7 @@ public partial class AppointmentList : HealthCareComponentBase
     private Query FilterQuery { get; set; }
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private SfGrid<AppointmentDto> Grid { get; set; }
+    private List<SlotDropdownItem> AppointmentSlots { get; set; }
     private int PageSize { get; } = 5;
     private int LookupPageSize { get; } = 100;
     private int CurrentPage { get; set; } = 1;
@@ -33,8 +36,10 @@ public partial class AppointmentList : HealthCareComponentBase
     private bool IsEditDialogVisible { get; set; }
     private bool IsCreateDialogVisible { get; set; }
     private GetAppointmentsInput Filter { get; set; }
+    private GetAppointmentSlotInput GetAppointmentSlotFilter { get; set; }
     private AppointmentTypeCreateDto NewType { get; set; }
     private bool IsDeleteDialogVisible { get; set; }
+    private bool IsSlotAvailable { get; set; }
     private SfDialog DeleteConfirmDialog { get; set; }
     private bool Flag { get; set; }
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
@@ -45,13 +50,18 @@ public partial class AppointmentList : HealthCareComponentBase
     private string[] ToolbarItems { get; set; }
     private AppointmentUpdateDto EditingAppointment { get; set; }
     private Guid EditingAppointmentId { get; set; } = default;
+    private bool IsEditingAppointmentDate { get; set; }
+    private DateTime? SelectedAppointmentDate { get; set; }
+    private SlotDropdownItem SelectedSlot { get; set; }
 
     public AppointmentList()
     {
         ToolbarItems = ["Add", "Delete", "Edit", "ExcelExport"];
+        SelectedSlot = new SlotDropdownItem();
         Grid = new SfGrid<AppointmentDto>();
         DeleteConfirmDialog = new SfDialog();
         NewType = new AppointmentTypeCreateDto();
+        GetAppointmentSlotFilter = new GetAppointmentSlotInput();
         Filter = new GetAppointmentsInput
         {
             MaxResultCount = PageSize,
@@ -60,12 +70,15 @@ public partial class AppointmentList : HealthCareComponentBase
         IsEditDialogVisible = false;
         IsCreateDialogVisible = false;
         IsDeleteDialogVisible = false;
+        IsEditingAppointmentDate = false;
+        IsSlotAvailable = false;
         Flag = false;
         AppointmentTypesCollection = [];
         DepartmentsCollection = [];
         PatientTypeCollection = [];
         MedicalServiceCollection = [];
         StatusCollection = [];
+        AppointmentSlots = [];
         FilterQuery = new Query();
         EditingAppointment = new AppointmentUpdateDto();
     }
@@ -166,6 +179,11 @@ public partial class AppointmentList : HealthCareComponentBase
             .Cast<EnumPatientTypes>()
             .Select(e => new KeyValuePair<string, EnumPatientTypes>(e.ToString(), e))
             .ToList();
+    }
+
+    private void ToggleAppointmentEdit()
+    {
+        IsEditingAppointmentDate = !IsEditingAppointmentDate;
     }
 
     private async Task ClearFilters()
@@ -375,11 +393,59 @@ public partial class AppointmentList : HealthCareComponentBase
         }
     }
 
+    private async Task OnEditDateChange(ChangedEventArgs<DateTime> args)
+    {
+        GetAppointmentSlotFilter.MedicalServiceId = EditingAppointment.MedicalServiceId;
+        GetAppointmentSlotFilter.DoctorId = EditingAppointment.DoctorId;
+        await GetAvailableSlots();
+    }
+
+    private async Task GetAvailableSlots()
+    {
+        try
+        {
+            var slots =
+                (await AppointmentAppService.GetAvailableSlotsAsync(GetAppointmentSlotFilter)).Items;
+
+            if (!slots.Any())
+            {
+                AppointmentSlots = [];
+                return;
+            }
+
+            AppointmentSlots = slots
+                .Where(x => x.AvailabilityValue)
+                .Select(x => new SlotDropdownItem
+                {
+                    Id = Guid.NewGuid(),
+                    DoctorId = x.DoctorId,
+                    MedicalServiceId = x.MedicalServiceId,
+                    Date = x.Date,
+                    StartTime = x.StartTime,
+                    EndTime = x.EndTime,
+                    DisplayText = $"{x.StartTime}-{x.EndTime}"
+                })
+                .ToList();
+
+            IsSlotAvailable = AppointmentSlots.Count > 0;
+        }
+        catch (BusinessException e)
+        {
+            IsSlotAvailable = false;
+            AppointmentSlots = [];
+            await UiMessageService.Error(e.Message);
+        }
+    }
+
     private void CloseEditAppointmentModal()
     {
         EditingAppointment = new AppointmentUpdateDto();
         EditingAppointmentId = Guid.Empty;
         IsEditDialogVisible = false;
+        IsSlotAvailable = false;
+        IsEditingAppointmentDate = false;
+        AppointmentSlots = [];
+        SelectedSlot = new SlotDropdownItem();
     }
 
     private async Task Refresh()

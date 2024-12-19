@@ -11,6 +11,7 @@ namespace Pusula.Training.HealthCare.Appointments;
 
 public class AppointmentUpdateDto
 {
+    [Required]
     public Guid DoctorId { get; set; }
     
     [Required]

@@ -63,7 +63,6 @@ public partial class Appointments : HealthCareComponentBase
     #region AppointmentFilters
 
     private GetAppointmentSlotInput GetAppointmentSlotFilter { get; set; }
-
     #endregion
 
     private PatientDto Patient { get; set; }
