@@ -29,7 +29,6 @@ public partial class CreateAppointment : HealthCareComponentBase
     private IReadOnlyList<PatientDto> PatientCollection { get; set; }
     private SfGrid<PatientDto> PatientGrid { get; set; }
     private PatientDto SelectedPatient { get; set; }
-    private IReadOnlyList<MedicalServiceWithDepartmentsDto> MedicalServiceWithDepartmentsList { get; set; }
     private GetAppointmentsInput AppointmentsFilter { get; set; }
     private GetMedicalServiceInput MedicalServiceFilter { get; set; }
     private GetAppointmentSlotInput GetAppointmentSlotFilter { get; set; }
@@ -77,7 +76,7 @@ public partial class CreateAppointment : HealthCareComponentBase
         IsIdValid(NewAppointment.DepartmentId) &&
         IsIdValid(NewAppointment.DoctorId) &&
         IsIdValid(NewAppointment.PatientId);
-    
+
     private bool IsCreateAppointmentValid =>
         IsCreateAppointmentModelValid &&
         IsIdValid(NewAppointment.AppointmentTypeId);
@@ -99,7 +98,6 @@ public partial class CreateAppointment : HealthCareComponentBase
         CurrentDate = DateTime.Now;
         AppointmentTypesCollection = [];
         MedicalServiceCollection = [];
-        MedicalServiceWithDepartmentsList = [];
         GendersCollection = [];
         SlotItems = [];
         DaysLookupList = [];
@@ -110,7 +108,7 @@ public partial class CreateAppointment : HealthCareComponentBase
         IsCreateAppointmentOpen = false;
         IsEditAppointmentOpen = false;
         ScheduleObj = new SfSchedule<AppointmentCustomData>();
-        
+
         MedicalServiceFilter = new GetMedicalServiceInput
         {
             Name = "",
@@ -133,7 +131,7 @@ public partial class CreateAppointment : HealthCareComponentBase
             MaxResultCount = PatientPageSize,
             SkipCount = (PatientCurrentPage - 1) * PatientPageSize,
         };
-        
+
         DoctorsFilter = new GetMedicalServiceInput
         {
             Name = string.Empty,
@@ -195,20 +193,11 @@ public partial class CreateAppointment : HealthCareComponentBase
     {
         try
         {
-            MedicalServiceWithDepartmentsList =
-                (await MedicalServicesAppService
-                    .GetMedicalServiceWithDepartmentsAsync(MedicalServiceFilter))
-                .Items
-                .ToList();
-
-            MedicalServiceCollection = MedicalServiceWithDepartmentsList
-                .Select(x => x.MedicalService)
-                .ToList();
+            MedicalServiceCollection = (await MedicalServicesAppService.GetListAsync(MedicalServiceFilter)).Items;
         }
         catch (Exception e)
         {
             MedicalServiceCollection = [];
-            MedicalServiceWithDepartmentsList = [];
             await UiMessageService.Error(e.Message);
         }
     }
@@ -218,8 +207,8 @@ public partial class CreateAppointment : HealthCareComponentBase
         try
         {
             DoctorsFilter.MedicalServiceId = NewAppointment.MedicalServiceId;
-            
-            var doctors = 
+
+            var doctors =
                 (await MedicalServicesAppService.GetMedicalServiceDoctorsAsync(DoctorsFilter))
                 .Items
                 .ToList();
@@ -228,6 +217,7 @@ public partial class CreateAppointment : HealthCareComponentBase
             {
                 DoctorsCollection = [];
                 DoctorsFilter = new GetMedicalServiceInput();
+                NewAppointment.DoctorId = Guid.Empty;
                 IsDoctorsEnabled = false;
                 return;
             }
@@ -378,7 +368,7 @@ public partial class CreateAppointment : HealthCareComponentBase
                 await ShowOnClick();
                 return;
             }
-            
+
             await AppointmentAppService.CreateAsync(NewAppointment);
 
             ToastContent = $"{@L[$"OperationSuccessful"]}\n{@L["AppointmentInformationWillBeSent"]}";
@@ -520,13 +510,6 @@ public partial class CreateAppointment : HealthCareComponentBase
     }
 
     #endregion
-
-    private List<Guid> GetRelevantDepartmentIds(Guid? medicalServiceId) =>
-        MedicalServiceWithDepartmentsList
-            .Where(x => x.MedicalService.Id == medicalServiceId)
-            .SelectMany(x => x.Departments)
-            .Select(dept => dept.Id)
-            .ToList();
 
     private async Task OnMedicalServiceChange(SelectEventArgs<MedicalServiceDto> args)
     {

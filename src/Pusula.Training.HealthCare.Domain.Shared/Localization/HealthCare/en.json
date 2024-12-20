@@ -302,6 +302,7 @@
     "ValidationError": "Validation Error",
     "ExportChartsAs":  "Export Charts As",
     "PrintCharts":  "Print Charts",
-    "Menu:ManageAppointment": "Manage Appointments"
+    "Menu:ManageAppointment": "Manage Appointments",
+    "NewLeave": "New Leave"
   }
 }

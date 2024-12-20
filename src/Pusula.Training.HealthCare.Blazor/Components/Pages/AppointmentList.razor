@@ -154,17 +154,13 @@
             </GridEditSettings>
             <GridPageSettings PageSize="@PageSize"></GridPageSettings>
             <GridColumns>
-                @if (CanDeleteAppointment)
-                {
-                    <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
-                }
-                <GridColumn Type="ColumnType.Date" Format="dd/MM/yyyy" Field="AppointmentDate" HeaderText="@L["Date"]" Width="130">
+                <GridColumn Type="ColumnType.Date" Format="dd/MM/yyyy" Field="AppointmentDate" HeaderText="@L["Date"]" Width="auto">
                 </GridColumn>
                 <GridColumn Type="ColumnType.Date" Format="HH:mm" Field="StartTime" HeaderText="@L["Start"]" Width="auto">
                 </GridColumn>
                 <GridColumn Type="ColumnType.Date" Format="HH:mm" Field="EndTime" HeaderText="@L["End"]" Width="auto">
                 </GridColumn>
-                <GridColumn HeaderText="@L["Status"]" Width="110">
+                <GridColumn HeaderText="@L["Status"]" Width="auto">
                     <Template Context="context">
                         @{
                             var cssClasses = "status-div text-white text-center ";
@@ -176,20 +172,20 @@
                         </div>
                     </Template>
                 </GridColumn>
-                <GridColumn HeaderText="@L["PatientName"]" Width="110">
+                <GridColumn HeaderText="@L["PatientName"]" Width="auto">
                     <Template Context="context">
                         @($"{((AppointmentDto)context).Patient?.FirstName} {((AppointmentDto)context).Patient?.LastName}")
                     </Template>
                 </GridColumn>
-                <GridColumn HeaderText="@L["DoctorName"]" Width="110">
+                <GridColumn HeaderText="@L["DoctorName"]" Width="auto">
                     <Template Context="context">
                         @($"{((AppointmentDto)context).Doctor?.FirstName} {((AppointmentDto)context).Doctor?.LastName}")
                     </Template>
                 </GridColumn>
-                <GridColumn Field="@nameof(AppointmentDto.Amount)" HeaderText="Cost" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field="Patient.PatientType" HeaderText="@L["PatientType"]" TextAlign="TextAlign.Left" Width="100"></GridColumn>
-                <GridColumn Field="Department.Name" HeaderText="@L["Department"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
-                <GridColumn Field="MedicalService.Name" HeaderText="@L["ServiceName"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+                <GridColumn Field="@nameof(AppointmentDto.Amount)" HeaderText="Cost" TextAlign="TextAlign.Left" Width="auto"></GridColumn>
+                <GridColumn Field="Patient.PatientType" HeaderText="@L["PatientType"]" TextAlign="TextAlign.Left" Width="auto"></GridColumn>
+                <GridColumn Field="Department.Name" HeaderText="@L["Department"]" TextAlign="TextAlign.Left" Width="auto"></GridColumn>
+                <GridColumn Field="MedicalService.Name" HeaderText="@L["ServiceName"]" TextAlign="TextAlign.Left" Width="auto"></GridColumn>
             </GridColumns>
         </SfGrid>
     </div>
@@ -228,7 +224,7 @@
         <div class="mx-3 mb-2">
             @if (EditingAppointment.Status == EnumAppointmentStatus.Cancelled)
             {
-                <div class="mx-3 mb-2">
+                <div class="mb-2">
                     <h6>@L["CancellationNotes"]</h6>
                     <SfTextBox @bind-Value="@EditingAppointment.CancellationNotes"></SfTextBox>
                     <ValidationMessage For="@(() => EditingAppointment.CancellationNotes)"/>

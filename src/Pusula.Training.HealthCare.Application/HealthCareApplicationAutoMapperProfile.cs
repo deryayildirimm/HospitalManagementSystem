@@ -88,6 +88,11 @@ public class HealthCareApplicationAutoMapperProfile : Profile
             .ForMember(dest => dest.DepartmentId, opt => opt.MapFrom(src => src.DepartmentId))
             .ForMember(dest => dest.DisplayName,
                 opt => opt.MapFrom(src => $"{src.TitleName} {src.FirstName} {src.LastName}"));
+        CreateMap<DoctorWithNavigationPropertiesDto, DoctorLookupDto>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Doctor.Id))
+            .ForMember(dest => dest.DepartmentId, opt => opt.MapFrom(src => src.Doctor.DepartmentId))
+            .ForMember(dest => dest.DisplayName,
+                opt => opt.MapFrom(src => $"{src.Doctor.FirstName} {src.Doctor.LastName}"));
         
         CreateMap<DoctorLeave, DoctorLeaveDto>();
         CreateMap<DoctorLeaveDto, DoctorLeaveUpdateDto>();
