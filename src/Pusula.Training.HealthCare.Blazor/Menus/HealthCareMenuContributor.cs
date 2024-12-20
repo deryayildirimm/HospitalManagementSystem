@@ -84,7 +84,7 @@ public class HealthCareMenuContributor : IMenuContributor
                         )
                         .AddItem(new ApplicationMenuItem(
                             name: HealthCareMenus.Appointments,
-                            displayName: l["Menu:Appointments"],
+                            displayName: l["Menu:ManageAppointment"],
                             url: "/appointments/operations/create",
                             icon: "fa-solid fa-calendar-check")
                         )

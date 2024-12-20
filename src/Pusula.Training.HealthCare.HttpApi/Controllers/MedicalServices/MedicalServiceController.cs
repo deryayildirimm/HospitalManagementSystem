@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.Shared;
 using Volo.Abp;
@@ -38,6 +39,11 @@ public class MedicalServiceController(IMedicalServicesAppService medicalServices
     [Route("with-doctors")]
     public virtual Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(GetMedicalServiceInput input)
         => medicalServicesAppService.GetMedicalServiceWithDoctorsAsync(input);
+    
+    [HttpGet]
+    [Route("doctors")]
+    public Task<PagedResultDto<DoctorWithDetailsDto>> GetMedicalServiceDoctorsAsync(GetMedicalServiceInput input)
+        => medicalServicesAppService.GetMedicalServiceDoctorsAsync(input);
 
     [HttpGet]
     [Route("{id}")]

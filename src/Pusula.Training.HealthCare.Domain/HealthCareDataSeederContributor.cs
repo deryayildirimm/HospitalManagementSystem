@@ -45,6 +45,7 @@ namespace Pusula.Training.HealthCare
         IAppointmentTypeRepository appointmentTypeRepository,
         ITitleRepository titleRepository,
         IMedicalServiceRepository medicalServiceRepository,
+        IMedicalServiceManager medicalServiceManager,
         IRepository<Doctor> doctorRepository,
         IRepository<DoctorWorkingHour> doctorWorkingHourRepository,
         ICityRepository cityRepository,
@@ -351,14 +352,11 @@ namespace Pusula.Training.HealthCare
             foreach (var doctor in doctors)
             {
                 if (medicalServiceIndex + 1 > medicalServices.Count)
+                {
                     return;
+                }
 
                 var medicalService = medicalServices[medicalServiceIndex++];
-
-                if (medicalService == null)
-                {
-                    continue;
-                }
 
                 await restrictionManager.CreateAsync(
                     medicalService.Id,
@@ -381,21 +379,55 @@ namespace Pusula.Training.HealthCare
             var medicalServices = await medicalServiceRepository.GetListAsync(includeDetails: true);
             var departments = await departmentRepository.GetListAsync(includeDetails: true);
 
-            var medicalServiceIndex = 0;
+            var cardiology = departments.First(d => d.Name == "Cardiology");
+            var radiology = departments.First(d => d.Name == "Radiology");
+            var emergency = departments.First(d => d.Name == "Emergency");
+            var orthopedics = departments.First(d => d.Name == "Orthopedics");
+            var pediatrics = departments.First(d => d.Name == "Pediatrics");
 
-            foreach (var department in departments)
-            {
-                if (medicalServiceIndex >= medicalServices.Count)
-                {
-                    medicalServiceIndex = 0;
-                }
+            var cardiologyConsult = medicalServices.First(ms => ms.Name == "Cardiology Consultation");
+            var xray = medicalServices.First(ms => ms.Name == "X-Ray");
+            var roomVisit = medicalServices.First(ms => ms.Name == "Emergency Room Visit");
+            var physical = medicalServices.First(ms => ms.Name == "Physical Therapy Assessment");
+            var ultrasound = medicalServices.First(ms => ms.Name == "Obstetrics Ultrasound");
+            var radiologyReview = medicalServices.First(ms => ms.Name == "Radiology Review");
+            var nutrition = medicalServices.First(ms => ms.Name == "Nutrition Consultation");
+            var examination = medicalServices.First(ms => ms.Name == "Examination");
 
-                var service = medicalServices[medicalServiceIndex];
+            //cardiologyConsultation
+            await medicalServiceManager.UpdateAsync(cardiologyConsult.Id, cardiologyConsult.Name,
+                cardiologyConsult.Cost,
+                cardiologyConsult.Duration, cardiologyConsult.ServiceCreatedAt, [cardiology.Name]);
 
-                service.AddDepartment(department.Id);
-                await medicalServiceRepository.UpdateAsync(service, true);
-                medicalServiceIndex++;
-            }
+            //Xray
+            await medicalServiceManager.UpdateAsync(xray.Id, xray.Name, xray.Cost,
+                xray.Duration, xray.ServiceCreatedAt, [radiology.Name, emergency.Name]);
+
+            //roomVisit
+            await medicalServiceManager.UpdateAsync(roomVisit.Id, roomVisit.Name, roomVisit.Cost,
+                roomVisit.Duration, roomVisit.ServiceCreatedAt, [emergency.Name]);
+
+            //physicalTherapy
+            await medicalServiceManager.UpdateAsync(physical.Id, physical.Name, physical.Cost,
+                physical.Duration, physical.ServiceCreatedAt, [orthopedics.Name, emergency.Name]);
+
+            //ultrasound
+            await medicalServiceManager.UpdateAsync(ultrasound.Id, ultrasound.Name, ultrasound.Cost,
+                ultrasound.Duration, ultrasound.ServiceCreatedAt, [radiology.Name, emergency.Name, cardiology.Name]);
+
+            //radiologyReview
+            await medicalServiceManager.UpdateAsync(radiologyReview.Id, radiologyReview.Name, radiologyReview.Cost,
+                radiologyReview.Duration, radiologyReview.ServiceCreatedAt,
+                [radiology.Name, emergency.Name, cardiology.Name]);
+
+            //nutrition
+            await medicalServiceManager.UpdateAsync(nutrition.Id, nutrition.Name, nutrition.Cost,
+                nutrition.Duration, nutrition.ServiceCreatedAt, [emergency.Name, cardiology.Name]);
+
+            //examination
+            await medicalServiceManager.UpdateAsync(examination.Id, examination.Name, examination.Cost,
+                examination.Duration, examination.ServiceCreatedAt,
+                [emergency.Name, cardiology.Name, pediatrics.Name, orthopedics.Name, radiology.Name]);
         }
 
         private async Task SeedProtocolMedicalService()

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Blazor.Models;

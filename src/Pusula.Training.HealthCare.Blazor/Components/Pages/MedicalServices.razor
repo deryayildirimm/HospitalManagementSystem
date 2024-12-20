@@ -276,9 +276,9 @@
 
                     <Field>
                         <FieldLabel>@L["Department"]</FieldLabel>
-                        <SfMultiSelect @ref="CreateDepartmentDropdown" TValue="string[]" TItem="SelectionItem" PopupHeight="350px" PopupWidth="350px" Placeholder="@L["SelectDepartment"]" DataSource="@DepartmentsCreateSelectionItems">
+                        <SfMultiSelect @ref="CreateDepartmentDropdown" TValue="string[]" TItem="ServiceSelectionItem" PopupHeight="350px" PopupWidth="350px" Placeholder="@L["SelectDepartment"]" DataSource="@DepartmentsCreateSelectionItems">
                             <MultiSelectFieldSettings Value="DisplayName" Text="DisplayName"></MultiSelectFieldSettings>
-                            <MultiSelectEvents TValue="string[]" TItem="SelectionItem" ValueChange="OnDepartmentValueChange"></MultiSelectEvents>
+                            <MultiSelectEvents TValue="string[]" TItem="ServiceSelectionItem" ValueChange="OnDepartmentValueChange"></MultiSelectEvents>
                         </SfMultiSelect>
                     </Field>
                     
@@ -357,9 +357,9 @@
                     
                     <Field>
                         <FieldLabel>@L["Department"]</FieldLabel>
-                        <SfMultiSelect @ref="UpdateDepartmentDropdown" TValue="string[]" TItem="SelectionItem" PopupHeight="350px" PopupWidth="350px" Placeholder="@L["SelectDepartment"]" DataSource="@DepartmentsUpdateSelectionItems">
+                        <SfMultiSelect @ref="UpdateDepartmentDropdown" TValue="string[]" TItem="ServiceSelectionItem" PopupHeight="350px" PopupWidth="350px" Placeholder="@L["SelectDepartment"]" DataSource="@DepartmentsUpdateSelectionItems">
                             <MultiSelectFieldSettings Value="DisplayName" Text="DisplayName"></MultiSelectFieldSettings>
-                            <MultiSelectEvents TValue="string[]" TItem="SelectionItem" ValueChange="OnDepartmentValueChange"></MultiSelectEvents>
+                            <MultiSelectEvents TValue="string[]" TItem="ServiceSelectionItem" ValueChange="OnDepartmentValueChange"></MultiSelectEvents>
                         </SfMultiSelect>
                     </Field>
 

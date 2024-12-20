@@ -89,32 +89,7 @@ public class AppointmentManager(
         //Get the doctor's all slots for all days as a dictionary
         var slotsByDate = GetAppointmentSlotsByDate(workingHours, startDate, offset, duration);
 
-        return slotsByDate
-            .Select(item =>
-            {
-                var totalSlots = item.Value.Count;
-                var isWeekend = item.Key.DayOfWeek.IsWeekend();
-
-                // Check if there is a leave on this date
-                var hasLeave = doctorLeaves.Any(dl =>
-                    dl.StartDate.Date <= item.Key && dl.EndDate.Date >= item.Key);
-
-                //Calculate booked slot count
-                var bookedSlots = appointments.TryGetValue(item.Key, out var value)
-                    ? value.Count
-                    : 0;
-
-                var availableSlots = totalSlots - bookedSlots;
-
-                //If the day is weekend then AvailabilityValue must be false
-                return new AppointmentDayLookupDto
-                {
-                    Date = item.Key,
-                    AvailableSlotCount = (isWeekend || hasLeave) ? 0 : availableSlots,
-                    AvailabilityValue = !(isWeekend || hasLeave) && availableSlots > 0
-                };
-            })
-            .ToList();
+         return CreateAppointmentDayLookups(slotsByDate: slotsByDate, doctorLeaves: doctorLeaves, appointmentsByDate: appointments);
     }
 
     public virtual async Task<Appointment> CreateAsync(
@@ -393,5 +368,28 @@ public class AppointmentManager(
                 EndTime = appointmentTime.AddMinutes(durationMinutes).ToString("HH:mm")
             })
             .ToList();
+    }
+    
+    private List<AppointmentDayLookupDto> CreateAppointmentDayLookups(
+        Dictionary<DateTime, List<AppointmentSlotBaseDto>> slotsByDate,
+        IEnumerable<DoctorLeave> doctorLeaves,
+        Dictionary<DateTime, List<Appointment>> appointmentsByDate)
+    {
+        return slotsByDate.Select(slotByDate =>
+        {
+            var date = slotByDate.Key;
+            var totalSlots = slotByDate.Value.Count;
+            var isWeekend = date.DayOfWeek.IsWeekend();
+            var hasLeave = doctorLeaves.Any(leave => leave.StartDate.Date <= date && leave.EndDate.Date >= date);
+            var bookedSlots = appointmentsByDate.TryGetValue(date, out var appointments) ? appointments.Count : 0;
+            var availableSlots = totalSlots - bookedSlots;
+
+            return new AppointmentDayLookupDto
+            {
+                Date = date,
+                AvailableSlotCount = (isWeekend || hasLeave) ? 0 : availableSlots,
+                AvailabilityValue = !(isWeekend || hasLeave) && availableSlots > 0
+            };
+        }).ToList();
     }
 }

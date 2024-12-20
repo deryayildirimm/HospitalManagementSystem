@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Pusula.Training.HealthCare.Doctors;
+using Volo.Abp.Application.Dtos;
 using Volo.Abp.Domain.Repositories;
 
 namespace Pusula.Training.HealthCare.MedicalServices;
@@ -65,7 +67,15 @@ public interface IMedicalServiceRepository : IRepository<MedicalService, Guid>
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
         CancellationToken cancellationToken = default);
-
+    
+    Task<List<DoctorWithDetails>> GetMedicalServiceDoctorsAsync(
+        Guid medicalServiceId,
+        Guid? departmentId,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default);
+    
     Task<long> GetCountAsync(
         string? name = null,
         double? costMin = null,

@@ -299,6 +299,9 @@
     "LeaveCreatedSuccess": "Leave created for the doctor successfully",
     "ChooseSlot": "Choose an Available Slot",
     "ChooseNewDate": "Choose New Date",
-    "ValidationError": "Validation Error"
+    "ValidationError": "Validation Error",
+    "ExportChartsAs":  "Export Charts As",
+    "PrintCharts":  "Print Charts",
+    "Menu:ManageAppointment": "Manage Appointments"
   }
 }

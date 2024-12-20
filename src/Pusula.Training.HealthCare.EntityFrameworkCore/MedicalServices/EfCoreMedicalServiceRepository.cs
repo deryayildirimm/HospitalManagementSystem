@@ -5,6 +5,7 @@ using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -38,7 +39,7 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         var query = ApplyFilter(
             (await GetQueryForNavigationPropertiesAsync()),
             medicalServiceId: medicalServiceId);
-        
+
         return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
@@ -142,6 +143,43 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
                     .ToList()
             })
             .FirstOrDefaultAsync(cancellationToken))!;
+    }
+
+    public virtual async Task<List<DoctorWithDetails>> GetMedicalServiceDoctorsAsync(
+        Guid medicalServiceId,
+        Guid? departmentId,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default)
+    {
+        var query = ApplyFilter(
+            (await GetQueryForNavigationPropertiesAsync()),
+            medicalServiceId: medicalServiceId,
+            departmentId: departmentId);
+
+        query = query.OrderBy(string.IsNullOrWhiteSpace(sorting)
+            ? MedicalServiceConsts.GetDefaultSorting(false)
+            : sorting);
+
+        var doctorQuery = query.SelectMany(ms => ms.DepartmentMedicalServices)
+            .SelectMany(dms => dms.Department.Doctors)
+            .Distinct()
+            .Select(doctor => new DoctorWithDetails
+            {
+                Id = doctor.Id,
+                FirstName = doctor.FirstName,
+                LastName = doctor.LastName,
+                Gender = doctor.Gender,
+                DepartmentId = doctor.DepartmentId,
+                DepartmentName = doctor.Department.Name,
+                TitleId = doctor.TitleId,
+                TitleName = doctor.Title.TitleName
+            });
+
+        return await doctorQuery
+            .PageBy(skipCount, maxResultCount)
+            .ToListAsync(cancellationToken: cancellationToken);
     }
 
     public virtual async Task<long> GetCountAsync(

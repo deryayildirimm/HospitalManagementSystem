@@ -39,7 +39,7 @@ public class MedicalServiceManager(
         );
 
         await SetDepartmentsAsync(service: medicalService, departmentNames: departmentNames);
-        return await medicalServiceRepository.InsertAsync(medicalService);
+        return await medicalServiceRepository.InsertAsync(medicalService, true);
     }
 
     public virtual async Task<MedicalService> UpdateAsync(
@@ -77,7 +77,7 @@ public class MedicalServiceManager(
     {
         if (departmentNames.Count == 0)
         {
-            service.RemoveAllDepartments();
+            service.RemoveAll();
             return;
         }
 

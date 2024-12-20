@@ -1,0 +1,14 @@
+.e-dropdown-btn.e-custom-drop-btn {
+    width: 180px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    background-color: #0d6efd;
+}
+
+.e-custom-drop-btn {
+    background-color: #0d6efd; !important;
+}
+
+.e-dropdown-btn.e-custom-drop-btn .e-export-pdf::before {
+    font-size: 24px;
+}

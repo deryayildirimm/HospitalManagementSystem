@@ -22,10 +22,9 @@ public partial class CreateAppointment : HealthCareComponentBase
     private DateTime CurrentDate { get; set; }
     private int LookupPageSize { get; } = 100;
     private bool IsDoctorsEnabled { get; set; }
-    private GetDoctorsWithDepartmentIdsInput DoctorsWithDepartmentIdsInput { get; set; }
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
     private IReadOnlyList<MedicalServiceDto> MedicalServiceCollection { get; set; }
-    private List<DoctorLookupDto> DoctorsCollection { get; set; }
+    private IReadOnlyList<DoctorLookupDto> DoctorsCollection { get; set; }
     private IReadOnlyList<AppointmentCustomData> SlotItems { get; set; }
     private IReadOnlyList<PatientDto> PatientCollection { get; set; }
     private SfGrid<PatientDto> PatientGrid { get; set; }
@@ -54,7 +53,7 @@ public partial class CreateAppointment : HealthCareComponentBase
     private PatientCreateDto NewPatient { get; set; }
     private List<KeyValuePair<string, EnumGender>> GendersCollection { get; set; }
     private SfSchedule<AppointmentCustomData> ScheduleObj { get; set; }
-
+    private GetMedicalServiceInput DoctorsFilter { get; set; }
     private GetAppointmentsLookupInput DaysLookupFilter { get; set; }
     private GetAppointmentByDateInput AppointmentByDateInput { get; set; }
     private int LoadCount { get; set; } = 14;
@@ -111,14 +110,7 @@ public partial class CreateAppointment : HealthCareComponentBase
         IsCreateAppointmentOpen = false;
         IsEditAppointmentOpen = false;
         ScheduleObj = new SfSchedule<AppointmentCustomData>();
-        DoctorsWithDepartmentIdsInput = new GetDoctorsWithDepartmentIdsInput
-        {
-            Name = "",
-            MaxResultCount = DoctorPageSize,
-            SkipCount = (DoctorCurrentPage - 1) * DoctorPageSize,
-            Sorting = DoctorCurrentSorting
-        };
-
+        
         MedicalServiceFilter = new GetMedicalServiceInput
         {
             Name = "",
@@ -140,6 +132,14 @@ public partial class CreateAppointment : HealthCareComponentBase
             Sorting = "PatientNumber ASC",
             MaxResultCount = PatientPageSize,
             SkipCount = (PatientCurrentPage - 1) * PatientPageSize,
+        };
+        
+        DoctorsFilter = new GetMedicalServiceInput
+        {
+            Name = string.Empty,
+            MaxResultCount = ServicePageSize,
+            SkipCount = (ServiceCurrentPage - 1) * ServicePageSize,
+            Sorting = ServiceCurrentSorting
         };
 
         DaysLookupFilter = new GetAppointmentsLookupInput
@@ -217,18 +217,17 @@ public partial class CreateAppointment : HealthCareComponentBase
     {
         try
         {
-            var deptIds = GetRelevantDepartmentIds(NewAppointment.MedicalServiceId);
-
-            DoctorsWithDepartmentIdsInput.DepartmentIds = deptIds;
-            var doctors =
-                (await DoctorsAppService.GetByDepartmentIdsAsync(DoctorsWithDepartmentIdsInput))
+            DoctorsFilter.MedicalServiceId = NewAppointment.MedicalServiceId;
+            
+            var doctors = 
+                (await MedicalServicesAppService.GetMedicalServiceDoctorsAsync(DoctorsFilter))
                 .Items
                 .ToList();
 
             if (doctors.Count == 0)
             {
                 DoctorsCollection = [];
-                DoctorsWithDepartmentIdsInput = new GetDoctorsWithDepartmentIdsInput();
+                DoctorsFilter = new GetMedicalServiceInput();
                 IsDoctorsEnabled = false;
                 return;
             }
@@ -236,7 +235,7 @@ public partial class CreateAppointment : HealthCareComponentBase
             IsDoctorsEnabled = true;
 
             DoctorsCollection =
-                ObjectMapper.Map<List<DoctorWithNavigationPropertiesDto>, List<DoctorLookupDto>>(doctors);
+                ObjectMapper.Map<List<DoctorWithDetailsDto>, List<DoctorLookupDto>>(doctors);
         }
         catch (Exception e)
         {

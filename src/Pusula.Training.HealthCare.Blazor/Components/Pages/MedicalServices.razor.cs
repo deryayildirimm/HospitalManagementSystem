@@ -49,11 +49,11 @@ public partial class MedicalServices : HealthCareComponentBase
     protected string SelectedCreateTab = "medical-service-create-tab";
     protected string SelectedEditTab = "medical-service-edit-tab";
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; } = [];
-    private List<SelectionItem> DepartmentsCreateSelectionItems { get; set; } = [];
-    private List<SelectionItem> DepartmentsUpdateSelectionItems { get; set; } = [];
+    private List<ServiceSelectionItem> DepartmentsCreateSelectionItems { get; set; } = [];
+    private List<ServiceSelectionItem> DepartmentsUpdateSelectionItems { get; set; } = [];
     private List<MedicalServiceDto> SelectedMedicalServices { get; set; } = [];
-    private SfMultiSelect<string[], SelectionItem> CreateDepartmentDropdown { get; set; }
-    private SfMultiSelect<string[], SelectionItem> UpdateDepartmentDropdown { get; set; }
+    private SfMultiSelect<string[], ServiceSelectionItem> CreateDepartmentDropdown { get; set; }
+    private SfMultiSelect<string[], ServiceSelectionItem> UpdateDepartmentDropdown { get; set; }
 
     private List<string> SelectedDepartments { get; set; }
     private bool AllMedicalServicesSelected { get; set; }
@@ -68,8 +68,8 @@ public partial class MedicalServices : HealthCareComponentBase
             SkipCount = (CurrentPage - 1) * PageSize,
             Sorting = CurrentSorting
         };
-        CreateDepartmentDropdown = new SfMultiSelect<string[], SelectionItem>();
-        UpdateDepartmentDropdown = new SfMultiSelect<string[], SelectionItem>();
+        CreateDepartmentDropdown = new SfMultiSelect<string[], ServiceSelectionItem>();
+        UpdateDepartmentDropdown = new SfMultiSelect<string[], ServiceSelectionItem>();
         MedicalServiceList = [];
         DepartmentsCollection = new List<LookupDto<Guid>>();
         SelectedDepartments = [];
@@ -312,14 +312,14 @@ public partial class MedicalServices : HealthCareComponentBase
             (await LookupAppService.GetDepartmentLookupAsync(new LookupRequestDto { Filter = newValue }))
             .Items;
 
-        DepartmentsCreateSelectionItems = DepartmentsCollection.Select(department => new SelectionItem
+        DepartmentsCreateSelectionItems = DepartmentsCollection.Select(department => new ServiceSelectionItem
         {
             Id = department.Id,
             DisplayName = department.DisplayName,
             IsSelected = false
         }).ToList();
 
-        DepartmentsUpdateSelectionItems = DepartmentsCollection.Select(department => new SelectionItem
+        DepartmentsUpdateSelectionItems = DepartmentsCollection.Select(department => new ServiceSelectionItem
         {
             Id = department.Id,
             DisplayName = department.DisplayName,

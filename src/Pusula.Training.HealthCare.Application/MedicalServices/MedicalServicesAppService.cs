@@ -13,9 +13,7 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Authorization;
 using Volo.Abp.Caching;
 using Volo.Abp.Content;
-using System.Linq;
-using System.Linq.Dynamic.Core;
-using Pusula.Training.HealthCare.Exceptions;
+using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.GlobalExceptions;
 using Volo.Abp.Domain.Repositories;
 
@@ -49,7 +47,6 @@ public class MedicalServicesAppService(
     public virtual async Task<PagedResultDto<MedicalServiceDto>> GetMedicalServiceByDepartmentIdAsync(
         GetServiceByDepartmentInput input)
     {
-        
         var items = await medicalServiceRepository.GetMedicalServiceListByDepartmentIdAsync(input.DepartmentId,
             input.Sorting,
             input.MaxResultCount, input.SkipCount);
@@ -89,6 +86,23 @@ public class MedicalServicesAppService(
             input.MaxResultCount, input.SkipCount);
 
         return ObjectMapper.Map<MedicalServiceWithDoctors, MedicalServiceWithDoctorsDto>(result);
+    }
+
+    public virtual async Task<PagedResultDto<DoctorWithDetailsDto>> GetMedicalServiceDoctorsAsync(
+        GetMedicalServiceInput input)
+    {
+        var result = await medicalServiceRepository.GetMedicalServiceDoctorsAsync(
+            input.MedicalServiceId,
+            input.DepartmentId,
+            input.Sorting,
+            input.MaxResultCount,
+            input.SkipCount);
+
+        return new PagedResultDto<DoctorWithDetailsDto>
+        {
+            TotalCount = result.Count,
+            Items = ObjectMapper.Map<List<DoctorWithDetails>, List<DoctorWithDetailsDto>>(result)
+        };
     }
 
 

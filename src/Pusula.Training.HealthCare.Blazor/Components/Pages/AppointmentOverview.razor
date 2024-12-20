@@ -14,6 +14,8 @@
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Alignment = Syncfusion.Blazor.Charts.Alignment
 @using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.SplitButtons
+
 @inherits HealthCareComponentBase
 
 @inject IUiMessageService UiMessageService
@@ -28,6 +30,7 @@
 </SfBreadcrumb>
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["AppointmentOverview"]">
+    <link href="/Components/Pages/AppointmentOverview.razor.css?version=1.2" rel="stylesheet"/>
 </PageHeader>
 
 <div class="row py-2 px-2">
@@ -208,103 +211,126 @@
     </ChildContent>
 
     <ContentTemplate>
-        <div class="row py-2 px-2">
-            <div class="col-12 d-flex gap-3 border-1 bg-white rounded-1 p-4">
+        <div class="d-flex p-4 justify-content-between border-1 bg-white rounded-1">
+            <div class="d-flex gap-3">
                 <SfDateRangePicker Width="250px" TValue="DateTime?" Placeholder="@L["ChooseARange"]" StartDate="@ChartMinDate" EndDate="@ChartMaxDate">
                     <DateRangePickerEvents TValue="DateTime?" ValueChange="@OnGraphicDateChange"></DateRangePickerEvents>
-                    </SfDateRangePicker>
+                </SfDateRangePicker>
                 <SfButton CssClass="e-primary" OnClick="@GetGraphStatistics">
                     <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
                 </SfButton>
             </div>
-        </div>
-        <div class="row py-2 px-2">
-            @* ************************* Graphs ************************* *@
-            <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
-                <div class="w-50">
-                    <SfAccumulationChart Width="100%" Height="380px" Title="@L["AppointmentsByStatus"]">
-                        <AccumulationChartSeriesCollection>
-                            <AccumulationChartTitleStyle TextAlignment="Alignment.Center"></AccumulationChartTitleStyle>
+            <div>
+                <SfDropDownButton Content="@L["ExportChartsAs"]" CssClass="e-custom-drop-btn mx-2" IconCss="e-icons e-export-pdf">
+                    <DropDownButtonEvents ItemSelected="ExportItemSelected">
+                    </DropDownButtonEvents>
+                    <DropDownMenuItems >
+                        <DropDownMenuItem IconCss="e-icons e-export-pdf" Text="@L["PDF"]"></DropDownMenuItem>
+                        <DropDownMenuItem IconCss="e-icons e-export-xls" Text="@L["XLS"]"></DropDownMenuItem>
+                        <DropDownMenuItem IconCss="e-icons e-export-csv" Text="@L["CSV"]"></DropDownMenuItem>
+                    </DropDownMenuItems>
+                </SfDropDownButton>
 
-                            <AccumulationChartSeries DataSource="@AppointmentByStatusCollection" XName="GroupName" YName="AppointmentCount" InnerRadius="40%">
-                            </AccumulationChartSeries>
-                        </AccumulationChartSeriesCollection>
-                        <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
-                        <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
-                    </SfAccumulationChart>
-                </div>
-                <div class="w-50">
-                    <SfAccumulationChart Width="100%" Height="380px" Title="@($"{L["RevenueByServices"]} / {L["USD"]}")">
-                        <AccumulationChartSeriesCollection >
-                            <AccumulationChartSeries DataSource="@RevenuByServiceCollection" XName="GroupName" YName="AppointmentCount">
-                            </AccumulationChartSeries>
-                        </AccumulationChartSeriesCollection>
-
-                        <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
-                        <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
-                        <AccumulationChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y} USD</b>"></AccumulationChartTooltipSettings>
-
-                    </SfAccumulationChart>
-                </div>
+                <SfButton CssClass="e-primary" OnClick="@PrintCharts">
+                    <SfIcon IconCss="e-icons e-print"></SfIcon> @L["Print"]
+                </SfButton>
             </div>
         </div>
-        <div class="row py-2 px-2">
-            @* ************************* Graphs ************************* *@
-            <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
-                <div class="w-50">
-                    <SfAccumulationChart Width="100%" Height="380px" Title="@L["AppointmentsByGender"]">
-                        <AccumulationChartSeriesCollection>
-                            <AccumulationChartTitleStyle TextAlignment="Alignment.Center"></AccumulationChartTitleStyle>
+        <div class="row" @ref="Element">
+            <div class="row py-2 px-2">
+                @* ************************* Graphs ************************* *@
+                <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
+                    <div class="w-50">
+                        <SfAccumulationChart @ref="ChartByStatus" Width="100%" Height="380px" Title="@L["AppointmentsByStatus"]">
+                            <AccumulationChartSeriesCollection>
+                                <AccumulationChartTitleStyle TextAlignment="Alignment.Center"></AccumulationChartTitleStyle>
 
-                            <AccumulationChartSeries DataSource="@AppointmentByGenderCollection" XName="GroupName" YName="AppointmentCount" InnerRadius="40%">
-                            </AccumulationChartSeries>
-                        </AccumulationChartSeriesCollection>
-                        <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
-                        <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
-                    </SfAccumulationChart>
-                </div>
-                <div class="w-50">
-                    <SfAccumulationChart Width="100%" Height="380px" Title="@($"{L["RevenueByDepartments"]} / {L["USD"]}")">
-                        <AccumulationChartSeriesCollection >
-                            <AccumulationChartSeries DataSource="@RevenueByDepartmentCollection" XName="GroupName" YName="AppointmentCount">
-                            </AccumulationChartSeries>
-                        </AccumulationChartSeriesCollection>
+                                <AccumulationChartSeries DataSource="@AppointmentByStatusCollection" XName="GroupName" YName="AppointmentCount" InnerRadius="40%">
+                                    <AccumulationDataLabelSettings Visible="true" Name="AppointmentCount" Position="AccumulationLabelPosition.Outside">
+                                        <AccumulationChartConnector Type="ConnectorType.Curve" Length="20px"/>
+                                    </AccumulationDataLabelSettings>
+                                </AccumulationChartSeries>
+                            </AccumulationChartSeriesCollection>
+                            <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
+                            <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
+                        </SfAccumulationChart>
+                    </div>
+                    <div class="w-50">
+                        <SfAccumulationChart @ref="ChartRevenueByService" Width="100%" Height="380px" Title="@($"{L["RevenueByServices"]} / {L["USD"]}")">
+                            <AccumulationChartSeriesCollection >
+                                <AccumulationChartSeries DataSource="@RevenuByServiceCollection" XName="GroupName" YName="AppointmentCount">
+                                    <AccumulationDataLabelSettings Visible="true" Name="AppointmentCount" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
+                                </AccumulationChartSeries>
+                            </AccumulationChartSeriesCollection>
 
-                        <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
-                        <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
-                        <AccumulationChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y} USD</b>"></AccumulationChartTooltipSettings>
+                            <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
+                            <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
+                            <AccumulationChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y} USD</b>"></AccumulationChartTooltipSettings>
 
-                    </SfAccumulationChart>
+                        </SfAccumulationChart>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="row py-2 px-2">
-            @* ************************* Graphs ************************* *@
-            <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
-                <div class="w-50">
-                    <SfChart Width="100%" Height="380px" Title="@L["AppointmentsByType"]">
-                        <ChartTitleStyle Size="16px" Color="black" FontFamily="Helvetica" FontWeight="600" FontStyle="normal"></ChartTitleStyle>
-                        <ChartPrimaryXAxis Title="Day" ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                            <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
-                            <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
-                        </ChartPrimaryXAxis>
-                        <ChartPrimaryYAxis Title="@L["Appointments"]">
-                            <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
-                            <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
-                        </ChartPrimaryYAxis>
-                        <ChartTooltipSettings Enable="true">
-                            <ChartTooltipTextStyle FontFamily="Helvetica"></ChartTooltipTextStyle>
-                        </ChartTooltipSettings>
-                        <ChartSeriesCollection>
-                            <ChartSeries DataSource="@AppointmentByTypeCollection" XName="GroupName" YName="AppointmentCount" Type="ChartSeriesType.Column">
-                            </ChartSeries>
-                        </ChartSeriesCollection>
-                        <ChartLegendSettings Visible="true">
-                            <ChartLegendTextStyle FontFamily="Helvetica"></ChartLegendTextStyle>
-                        </ChartLegendSettings>
-                    </SfChart>
+            <div class="row py-2 px-2">
+                @* ************************* Graphs ************************* *@
+                <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
+                    <div class="w-50">
+                        <SfAccumulationChart @ref="ChartByGender" Width="100%" Height="380px" Title="@L["AppointmentsByGender"]">
+                            <AccumulationChartSeriesCollection>
+                                <AccumulationChartTitleStyle TextAlignment="Alignment.Center"></AccumulationChartTitleStyle>
+                                <AccumulationChartSeries DataSource="@AppointmentByGenderCollection" XName="GroupName" YName="AppointmentCount" InnerRadius="40%">
+                                    <AccumulationDataLabelSettings Visible="true" Name="AppointmentCount" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
+                                </AccumulationChartSeries>
+                            </AccumulationChartSeriesCollection>
+                            <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
+                            <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
+                        </SfAccumulationChart>
+                    </div>
+                    <div class="w-50">
+                        <SfAccumulationChart @ref="ChartRevenueByDepartment" Width="100%" Height="380px" Title="@($"{L["RevenueByDepartments"]} / {L["USD"]}")">
+                            <AccumulationChartSeriesCollection >
+                                <AccumulationChartSeries DataSource="@RevenueByDepartmentCollection" XName="GroupName" YName="AppointmentCount">
+                                    <AccumulationDataLabelSettings Visible="true" Name="AppointmentCount" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
+                                </AccumulationChartSeries>
+                            </AccumulationChartSeriesCollection>
+
+                            <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
+                            <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
+                            <AccumulationChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y} USD</b>"></AccumulationChartTooltipSettings>
+
+                        </SfAccumulationChart>
+                    </div>
                 </div>
-                <div class="w-50">
+            </div>
+            <div class="row py-2 px-2">
+                @* ************************* Graphs ************************* *@
+                <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
+                    <div class="w-50">
+                        <SfChart @ref="ChartByType" Width="100%" Height="380px" Title="@L["AppointmentsByType"]">
+                            <ChartTitleStyle Size="16px" Color="black" FontFamily="Helvetica" FontWeight="600" FontStyle="normal"></ChartTitleStyle>
+                            <ChartPrimaryXAxis Title="Day" ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                                <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
+                                <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
+                            </ChartPrimaryXAxis>
+                            <ChartPrimaryYAxis Title="@L["Appointments"]">
+                                <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
+                                <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
+                            </ChartPrimaryYAxis>
+                            <ChartTooltipSettings Enable="true">
+                                <ChartTooltipTextStyle FontFamily="Helvetica"></ChartTooltipTextStyle>
+                            </ChartTooltipSettings>
+                            <ChartSeriesCollection>
+                                <ChartSeries DataSource="@AppointmentByTypeCollection" XName="GroupName" YName="AppointmentCount" Type="ChartSeriesType.Column">
+                                    <ChartMarker>
+                                        <ChartDataLabel Visible="true"/>
+                                    </ChartMarker>
+                                </ChartSeries>
+                            </ChartSeriesCollection>
+                            <ChartLegendSettings Visible="true">
+                                <ChartLegendTextStyle FontFamily="Helvetica"></ChartLegendTextStyle>
+                            </ChartLegendSettings>
+                        </SfChart>
+                    </div>
                 </div>
             </div>
         </div>

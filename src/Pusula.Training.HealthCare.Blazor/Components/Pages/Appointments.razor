@@ -13,7 +13,6 @@
 
 @inject IAppointmentAppService AppointmentAppService
 @inject IMedicalServicesAppService MedicalServiceAppService
-@inject IDoctorsAppService DoctorsAppService
 @inject IPatientsAppService PatientsAppService
 @inject IUiMessageService UiMessageService
 @inject NavigationManager NavigationManager
@@ -195,8 +194,8 @@
                     </Addons>
                 </Form>
 
-                <SfListBox Height="350px" @ref="SelectServiceDropdown" TValue="SelectionItem[]" DataSource="@ServicesList" TItem="SelectionItem">
-                    <ListBoxEvents TValue="SelectionItem[]" ValueChange="OnServiceChange" TItem="SelectionItem"></ListBoxEvents>
+                <SfListBox Height="350px" @ref="SelectServiceDropdown" TValue="ServiceSelectionItem[]" DataSource="@MedicalServiceCollection" TItem="ServiceSelectionItem">
+                    <ListBoxEvents TValue="ServiceSelectionItem[]" ValueChange="OnServiceChange" TItem="ServiceSelectionItem"></ListBoxEvents>
                     <ListBoxFieldSettings Text="DisplayName" Value="DisplayName"/>
                     <ListBoxSelectionSettings ShowCheckbox="true" Mode="Syncfusion.Blazor.DropDowns.SelectionMode.Single"></ListBoxSelectionSettings>
                 </SfListBox>

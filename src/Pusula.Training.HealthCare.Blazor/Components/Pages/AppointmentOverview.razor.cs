@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Components;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Shared;
@@ -11,14 +12,23 @@ using Syncfusion.Blazor.Charts;
 using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.SplitButtons;
+using Syncfusion.PdfExport;
 using Volo.Abp;
+using ExportType = Syncfusion.Blazor.Charts.ExportType;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
 public partial class AppointmentOverview : HealthCareComponentBase
 {
+    private ElementReference Element { get; set; }
     private SfAccumulationChart AccumulationChart { get; set; }
     private SfGrid<GroupedAppointmentCountDto> Grid { get; set; }
+    private SfAccumulationChart ChartByStatus { get; set; }
+    private SfAccumulationChart ChartRevenueByService { get; set; }
+    private SfAccumulationChart ChartByGender { get; set; }
+    private SfAccumulationChart ChartRevenueByDepartment { get; set; }
+    private SfChart ChartByType { get; set; }
     private GetAppointmentsInput Filter { get; set; }
     private GetAppointmentsInput FilterDepartmentChart { get; set; }
     private GetAppointmentsInput FilterAppointmentByStatusChart { get; set; }
@@ -52,6 +62,10 @@ public partial class AppointmentOverview : HealthCareComponentBase
 
     public AppointmentOverview()
     {
+        ChartRevenueByService = new SfAccumulationChart();
+        ChartByGender =  new SfAccumulationChart();
+        ChartRevenueByDepartment = new SfAccumulationChart();
+        ChartByType = new SfChart();
         ChartMinDate = DateTime.Now.AddDays(-7);
         ChartMaxDate = DateTime.Now.AddDays(14);
         GroupByOptions =
@@ -62,9 +76,11 @@ public partial class AppointmentOverview : HealthCareComponentBase
             EnumAppointmentGroupFilter.Service
         ];
         GroupByField = AppointmentConsts.DefaultGroupBy;
+        Element = new ElementReference();
         FilterQuery = new Query();
         AccumulationChart = new SfAccumulationChart();
         Grid = new SfGrid<GroupedAppointmentCountDto>();
+        ChartByStatus = new SfAccumulationChart();
         Filter = new GetAppointmentsInput
         {
             GroupByField = AppointmentConsts.DefaultGroupBy,
@@ -312,5 +328,35 @@ public partial class AppointmentOverview : HealthCareComponentBase
         {
             await UiMessageService.Error(e.Message);
         }
+    }
+    
+    private async Task ExportItemSelected(MenuEventArgs args)
+    {
+        switch (args.Item.Text)
+        {
+            case "PDF":
+                await ExportCharts(ExportType.PDF);
+                break;
+            case "XLS":
+                await ExportCharts(ExportType.XLSX);
+                break;
+            case "CSV":
+                await ExportCharts(ExportType.CSV);
+                break;
+        }
+    }
+    
+    private async Task PrintCharts()
+    {
+        await ChartByStatus.PrintAsync(Element);
+    }
+
+    private async Task ExportCharts(ExportType type)
+    {
+        await ChartByType.ExportAsync(type, ChartByType.Title, PdfPageOrientation.Landscape);
+        await ChartByStatus.ExportAsync(ExportType.PNG, ChartByStatus.Title);
+        await ChartRevenueByService.ExportAsync(ExportType.PNG, ChartRevenueByService.Title);
+        await ChartByGender.ExportAsync(ExportType.PNG, ChartByGender.Title);
+        await ChartRevenueByDepartment.ExportAsync(ExportType.PNG, ChartRevenueByDepartment.Title);
     }
 }

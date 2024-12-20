@@ -40,8 +40,6 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
         SetCost(cost);
         SetServiceCreatedAt(serviceCreatedAt);
         SetDuration(duration);
-        DepartmentMedicalServices = new List<DepartmentMedicalService>();
-        ProtocolMedicalServices = new List<ProtocolMedicalService>();
     }
 
     public void SetName(string name)
@@ -94,7 +92,7 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
         DepartmentMedicalServices.RemoveAll(x => !departmentIds.Contains(x.DepartmentId));
     }
 
-    public void RemoveAllDepartments()
+    public void RemoveAll()
     {
         DepartmentMedicalServices.RemoveAll(x => x.MedicalServiceId == Id);
     }

@@ -2,7 +2,7 @@ using System;
 
 namespace Pusula.Training.HealthCare.Blazor.Models;
 
-public class SelectionItem
+public class ServiceSelectionItem
 {
     public Guid Id { get; set; }
     public string DisplayName { get; set; } = null!;
