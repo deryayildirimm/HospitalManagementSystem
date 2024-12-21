@@ -59,4 +59,8 @@ public interface IExaminationRepository : IRepository<Examination, Guid>
     Task<Examination?> GetByProtocolIdAsync(
         Guid? protocolId,
         CancellationToken cancellationToken = default);
+
+
+    Task UpdateExaminationIcdsAsync(Guid examinationId, List<Guid> icdIds,
+        CancellationToken cancellationToken = default);
 }

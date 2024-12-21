@@ -36,6 +36,7 @@ using Pusula.Training.HealthCare.Treatment.Icds;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Insurances;
 using Pusula.Training.HealthCare.Restrictions;
+using Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings;
 
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
 
@@ -72,6 +73,7 @@ public class HealthCareDbContext :
     public DbSet<Examination> Examinations { get; set; } = null!;
     public DbSet<FamilyHistory> FamilyHistories { get; set; } = null!;
     public DbSet<Background> Backgrounds { get; set; } = null!;
+    public DbSet<PhysicalFinding> PhysicalFindings { get; set; } = null!;
 
     public DbSet<Appointment> Appointments { get; set; } = null!;
     public DbSet<AppointmentType> AppointmentTypes { get; set; } = null!;
@@ -596,12 +598,17 @@ public class HealthCareDbContext :
                     .WithOne(d => d.Examination)
                     .IsRequired()
                     .HasForeignKey<Background>(d => d.ExaminationId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                    .OnDelete(DeleteBehavior.Cascade);
                 b.HasOne(d => d.FamilyHistory)
                     .WithOne(d => d.Examination)
                     .IsRequired()
                     .HasForeignKey<FamilyHistory>(d => d.ExaminationId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(d => d.PhysicalFinding)
+                    .WithOne(d => d.Examination)
+                    .IsRequired()
+                    .HasForeignKey<PhysicalFinding>(d => d.ExaminationId)
+                    .OnDelete(DeleteBehavior.Cascade);
                 b.HasOne(d => d.Protocol)
                     .WithOne()
                     .IsRequired()
@@ -617,14 +624,16 @@ public class HealthCareDbContext :
                 b.HasKey(x => new { x.ExaminationId, x.IcdId });
 
                 b.HasOne(ei => ei.Examination)
-                    .WithMany(e => e.ExaminationIcd)
+                    .WithMany(e => e.ExaminationIcds)
                     .IsRequired(false)
-                    .HasForeignKey(ei => ei.ExaminationId);
+                    .HasForeignKey(ei => ei.ExaminationId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 b.HasOne(ei => ei.Icd)
                     .WithMany()
                     .IsRequired(false)
-                    .HasForeignKey(ei => ei.IcdId);
+                    .HasForeignKey(ei => ei.IcdId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.Entity<FamilyHistory>(b =>
@@ -652,6 +661,21 @@ public class HealthCareDbContext :
                     .HasMaxLength(BackgroundConsts.MedicationsMaxLength);
                 b.Property(x => x.Habits).HasColumnName(nameof(Background.Habits))
                     .HasMaxLength(BackgroundConsts.HabitsMaxLength);
+            });
+            
+            builder.Entity<PhysicalFinding>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "PhysicalFindings", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.Weight).HasColumnName(nameof(PhysicalFinding.Weight));
+                b.Property(x => x.Height).HasColumnName(nameof(PhysicalFinding.Height));
+                b.Property(x => x.BodyTemperature).HasColumnName(nameof(PhysicalFinding.BodyTemperature));
+                b.Property(x => x.Pulse).HasColumnName(nameof(PhysicalFinding.Pulse));
+                b.Property(x => x.Vki).HasColumnName(nameof(PhysicalFinding.Vki));
+                b.Property(x => x.Vya).HasColumnName(nameof(PhysicalFinding.Vya));
+                b.Property(x => x.Kbs).HasColumnName(nameof(PhysicalFinding.Kbs));
+                b.Property(x => x.Kbd).HasColumnName(nameof(PhysicalFinding.Kbd));
+                b.Property(x => x.Spo2).HasColumnName(nameof(PhysicalFinding.Spo2));
             });
         }
     }

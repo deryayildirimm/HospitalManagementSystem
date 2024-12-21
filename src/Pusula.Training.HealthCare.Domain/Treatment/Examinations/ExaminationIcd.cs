@@ -12,5 +12,11 @@ public class ExaminationIcd : Entity
     public Guid IcdId { get; set; }
     public Icd Icd { get; set; } = null!;
 
+    public ExaminationIcd(Guid examinationId, Guid icdId)
+    {
+        ExaminationId = examinationId;
+        IcdId = icdId;
+    }
+
     public override object?[] GetKeys() => new object?[] { ExaminationId, IcdId };
 }
