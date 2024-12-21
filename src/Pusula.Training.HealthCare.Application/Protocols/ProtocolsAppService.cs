@@ -58,6 +58,71 @@ namespace Pusula.Training.HealthCare.Protocols
             return ObjectMapper.Map<Protocol, ProtocolDto>(protocol);
         }
 
+        public virtual async Task<PagedResultDto<ProtocolPatientDepartmentListReportDto>> GetPatientsByDepartmentAsync(
+            GetProtocolsInput input)
+        {
+
+            var count = await protocolRepository.GetGPatientsCountByDepartmentAsync( input.DepartmentName, input.PatientId, input.DepartmentId, input.ProtocolTypeId,input.DoctorId, input.DepartmentId, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin, input.EndTimeMax);
+
+            var items = await protocolRepository.GetGPatientsByDepartmentAsync(
+                departmentName: input.DepartmentName,
+                patientId: input.PatientId,
+                departmentId: input.DepartmentId,
+                protocolTypeId: input.ProtocolTypeId,
+                doctorId: input.DoctorId,
+                insuranceId: input.InsuranceId,
+                startTimeMin: input.StartTimeMin,
+                startTimeMax: input.StartTimeMax,
+                endTimeMin: input.EndTimeMin,
+                endTimeMax: input.EndTimeMax,
+                sorting:input.Sorting,
+                note: input.Notes,
+                filterText: input.FilterText,
+                maxResultCount: input.MaxResultCount,
+                skipCount: input.SkipCount
+            );
+            
+            return new PagedResultDto<ProtocolPatientDepartmentListReportDto>
+            {
+                TotalCount = count,
+                Items = ObjectMapper.Map<List<ProtocolPatientDepartmentListReport>, List<ProtocolPatientDepartmentListReportDto>>(items)
+            };
+            
+        }
+
+        public virtual async Task<PagedResultDto<ProtocolPatientDoctorListReportDto>> GetPatientsByDoctorAsync(
+            GetProtocolsInput input)
+        {
+
+            var count = await protocolRepository.GetGPatientsCountByDoctorAsync( input.DepartmentName, input.PatientId, input.DepartmentId, input.ProtocolTypeId,input.DoctorId, input.DepartmentId, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin, input.EndTimeMax);
+
+            var items = await protocolRepository.GetGPatientsByDoctorAsync(
+                departmentName: input.DepartmentName,
+                patientId: input.PatientId,
+                departmentId: input.DepartmentId,
+                protocolTypeId: input.ProtocolTypeId,
+                doctorId: input.DoctorId,
+                insuranceId: input.InsuranceId,
+                startTimeMin: input.StartTimeMin,
+                startTimeMax: input.StartTimeMax,
+                endTimeMin: input.EndTimeMin,
+                endTimeMax: input.EndTimeMax,
+                sorting:input.Sorting,
+                note: input.Notes,
+                filterText: input.FilterText,
+                maxResultCount: input.MaxResultCount,
+                skipCount: input.SkipCount
+            );
+            
+            return new PagedResultDto<ProtocolPatientDoctorListReportDto>
+            {
+                TotalCount = count,
+                Items = ObjectMapper.Map<List<ProtocolPatientDoctorListReport>, List<ProtocolPatientDoctorListReportDto>>(items)
+            };
+            
+        }
+
+      
 
         public virtual async Task<PagedResultDto<DepartmentStatisticDto>> GetDepartmentPatientStatisticsAsync(
             GetProtocolsInput input)
@@ -85,13 +150,56 @@ namespace Pusula.Training.HealthCare.Protocols
                 startTimeMin: input.StartTimeMin,
                 startTimeMax: input.StartTimeMax,
                 endTimeMin: input.EndTimeMin,
-                endTimeMax: input.EndTimeMax
+                endTimeMax: input.EndTimeMax,
+                sorting: input.Sorting,
+                maxResultCount: input.MaxResultCount,
+                skipCount: input.SkipCount
             );
             
             return new PagedResultDto<DepartmentStatisticDto>
             {
                 TotalCount = count,
                 Items = ObjectMapper.Map<List<DepartmentStatistic>, List<DepartmentStatisticDto>>(items)
+            };
+            
+        }
+        
+        public virtual async Task<PagedResultDto<DoctorStatisticDto>> GetDoctorPatientStatisticsAsync(
+            GetProtocolsInput input)
+        {
+
+            var count = await protocolRepository.GetGroupCountByDoctorPatientAsync(
+                departmentName: input.DepartmentName,
+                patientId: input.PatientId,
+                departmentId: input.DepartmentId,
+                protocolTypeId: input.ProtocolTypeId,
+                doctorId: input.DoctorId,
+                insuranceId: input.InsuranceId,
+                startTimeMin: input.StartTimeMin,
+                startTimeMax: input.StartTimeMax,
+                endTimeMin: input.EndTimeMin,
+                endTimeMax: input.EndTimeMax);
+
+            var items = await protocolRepository.GetGroupByDoctorPatientAsync(
+                departmentName: input.DepartmentName,
+                patientId: input.PatientId,
+                departmentId: input.DepartmentId,
+                protocolTypeId: input.ProtocolTypeId,
+                doctorId: input.DoctorId,
+                insuranceId: input.InsuranceId,
+                startTimeMin: input.StartTimeMin,
+                startTimeMax: input.StartTimeMax,
+                endTimeMin: input.EndTimeMin,
+                endTimeMax: input.EndTimeMax,
+                sorting: input.Sorting,
+                maxResultCount: input.MaxResultCount,
+                skipCount: input.SkipCount
+            );
+            
+            return new PagedResultDto<DoctorStatisticDto>
+            {
+                TotalCount = count,
+                Items = ObjectMapper.Map<List<DoctorStatistics>, List<DoctorStatisticDto>>(items)
             };
 
 
@@ -183,28 +291,7 @@ namespace Pusula.Training.HealthCare.Protocols
         [Authorize(HealthCarePermissions.Protocols.Create)]
         public virtual async Task<ProtocolDto> CreateAsync(ProtocolCreateDto input)
         {
-            HealthCareGlobalException.ThrowIf(
-                L["The {0} field is required.", L["Patient"]],
-                input.PatientId ==  Guid.Empty
-            );
-
-            HealthCareGlobalException.ThrowIf(
-                L["The {0} field is required.", L["Department"]],
-                input.DepartmentId ==  Guid.Empty
-            );
-            HealthCareGlobalException.ThrowIf(
-                L["The {0} field is required.", L["Doctor"]],
-                input.DoctorId == Guid.Empty
-            );
-            HealthCareGlobalException.ThrowIf(
-                L["The {0} field is required.", L["ProtocolType"]],
-                input.ProtocolTypeId ==  Guid.Empty
-            );
-            
-            HealthCareGlobalException.ThrowIf(
-                L["The {0} field is required.", L["Insurance"]],
-                input.InsuranceId ==  Guid.Empty
-            );
+          
             var protocol = await protocolManager.CreateAsync(
             input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId, input.InsuranceId, input.StartTime, input.Notes, input.EndTime
             );
@@ -215,27 +302,7 @@ namespace Pusula.Training.HealthCare.Protocols
         [Authorize(HealthCarePermissions.Protocols.Edit)]
         public virtual async Task<ProtocolDto> UpdateAsync(Guid id, ProtocolUpdateDto input)
         {
-            HealthCareGlobalException.ThrowIf(
-                L["The {0} field is required.", L["Patient"]],
-                input.PatientId ==  Guid.Empty
-            );
-
-            HealthCareGlobalException.ThrowIf(
-                L["The {0} field is required.", L["Department"]],
-                input.DepartmentId ==  Guid.Empty
-            );
-            HealthCareGlobalException.ThrowIf(
-                L["The {0} field is required.", L["Doctor"]],
-                input.DoctorId == Guid.Empty
-            );
-            HealthCareGlobalException.ThrowIf(
-                L["The {0} field is required.", L["ProtocolType"]],
-                input.ProtocolTypeId ==  Guid.Empty
-            );
-            HealthCareGlobalException.ThrowIf(
-                L["The {0} field is required.", L["Insurance"]],
-                input.InsuranceId ==  Guid.Empty
-            );
+            
             var protocol = await protocolManager.UpdateAsync(
             id,
             input.PatientId, input.DepartmentId, input.ProtocolTypeId,  input.DoctorId,  input.InsuranceId, input.StartTime, input.Notes, input.EndTime, input.ConcurrencyStamp

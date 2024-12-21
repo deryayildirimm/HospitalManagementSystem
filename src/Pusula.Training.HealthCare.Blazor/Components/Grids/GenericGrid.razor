@@ -1,29 +1,43 @@
 ﻿@typeparam TModel
 
-@using Syncfusion.Blazor.Grids
-@using Syncfusion.Blazor
-@using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.Buttons
 
-<SfGrid @ref="GridRef" TValue="TModel" AllowPaging="true" AllowSorting="true" AllowFiltering="false" Query="@Query">
-    <SfDataManager AdaptorInstance="@AdaptorInstance" Adaptor="AdaptorType">
+<SfGrid @ref="_gridRef" TValue="TModel" AllowPaging="true" AllowSorting="true" AllowFiltering="false" Query="@Query"  >
+    <SfDataManager AdaptorInstance="@AdaptorInstance" Adaptor="AdaptorType" >
     </SfDataManager>
-    <GridPageSettings PageSize="@PageSize"></GridPageSettings>
+    <GridPageSettings PageSize="@PageSize" ></GridPageSettings>
     <GridEditSettings AllowAdding="false" AllowDeleting="false" AllowEditing="false"></GridEditSettings>
-    <GridColumns >
+    <div style="padding: 15px; box-shadow:0 4px 8px rgba(0,0,0,0.2);  " > 
+        
+    <GridColumns  >
         @foreach (var column in Columns)
         {
-            <GridColumn Field="@column.Field" HeaderText="@column.HeaderText" Width="@column.Width" TextAlign="@column.TextAlign" >
+          
+            <GridColumn Field="@column.Field" HeaderText="@column.HeaderText" Width="@column.Width" TextAlign="TextAlign.Left" HeaderTextAlign="TextAlign.Justify"   >
+              
             </GridColumn>
            
+          
         }
-        <GridColumn HeaderText="Actions" Width="150px">
+        @if (ShowDetailButton)
+        {
+        <GridColumn HeaderText="Details" Width="100px" TextAlign="TextAlign.Justify" HeaderTextAlign="TextAlign.Justify">
+            <Template >
+                <SfButton IconCss="e-icons e-eye" CssClass="e-flat e-primary" @onclick="() => OnDetailClicked.InvokeAsync((TModel)context)">
+                    Details
+                </SfButton>
+            </Template>
+        </GridColumn>
+        }
+        @if (ShowActions)
+        {
+        <GridColumn HeaderText="Actions" Width="120px" HeaderTextAlign="TextAlign.Justify" >
             <GridCommandColumns>
                 <GridCommandColumn Type="CommandButtonType.Edit"
-                                   ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-edit", CssClass = "e-flat" })">
+                                   ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-edit", CssClass = "e-primary" })">
                 </GridCommandColumn>
                 <GridCommandColumn Type="CommandButtonType.Delete"
-                                   ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-delete", CssClass = "e-flat" })">
+                                   ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-delete", CssClass = "e-danger" })">
                 </GridCommandColumn>
                 <GridCommandColumn Type="CommandButtonType.Save"
                                    ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-save", CssClass = "e-flat" })">
@@ -33,7 +47,9 @@
                 </GridCommandColumn>
             </GridCommandColumns>
         </GridColumn>
+        }
     </GridColumns>
+    </div>
     <GridEvents CommandClicked="OnCommandClicked" TValue="TModel"></GridEvents>
 </SfGrid>
 
@@ -51,31 +67,30 @@
 
 
 @code {
-
- //   [Parameter] public IEnumerable<TModel>? Data { get; set; }
-    [Parameter] public List<GridColumnDefinition>? Columns { get; set; }
+    
+    [Parameter] public List<GridColumnDefinition> Columns { get; set; } =  new(3);
     [Parameter] public EventCallback<TModel> OnEdit { get; set; }
     [Parameter] public EventCallback<TModel> OnDelete { get; set; }
     [Parameter] public Type? AdaptorInstance { get; set; }
     [Parameter] public Adaptors AdaptorType { get; set; } = Adaptors.CustomAdaptor;
-    [Parameter] public int PageSize { get; set; } = 8; // Default değer
-    // DataManagerRequest için parametre kontrolü
-    [Parameter] public string? Filter { get; set; }
-
-    [Parameter] public Query Query { get; set; } 
-
+    [Parameter] public int PageSize { get; set; } = 8; 
+    [Parameter] public string? Filter { get; set; }    // DataManagerRequest için parametre kontrolü
+    [Parameter] public Query Query { get; set; }  = new Query();
+    [Parameter] public bool ShowActions { get; set; } = true; // Actions sütununu kontrol eder
+    
+    // for detail button 
+    [Parameter] public bool ShowDetailButton { get; set; } 
+    [Parameter] public EventCallback<TModel> OnDetailClicked { get; set; }
 
     private bool IsDeletePopupVisible { get; set; } = false;
     private TModel? SelectedItemToDelete { get; set; }
-    private SfGrid<TModel>? GridRef; // Grid için @ref
+    private SfGrid<TModel>? _gridRef; // Grid için @ref
  
-   
+
+
+    #region Grid içindeki olayları yakalamak için  -> OnCommandClicked
     //Bu event, doğrudan grid bileşenine bağlıdır ve bu event'le etkileşime geçmeden gridin içinden hangi butona basıldığını bilemeyiz.
     // Yani, OnCommandClicked, gridin kendi olayını yakalayarak dışarıya doğru bir köprü görevi görür.
-    /*
-     * Grid içindeki olayları yakalamak.
-     * Yakalanan olayları (Edit veya Delete gibi) dışarıya EventCallback olarak yönlendirmek.
-     */
     private void OnCommandClicked(CommandClickEventArgs<TModel> args)
     {
         if (args.CommandColumn.Type == CommandButtonType.Edit)
@@ -88,13 +103,14 @@
             IsDeletePopupVisible = true;
         }
     }
+
+    #endregion
   
     private async Task ConfirmDelete()
     {
-        if (OnDelete.HasDelegate)
-        {
+        if (OnDelete.HasDelegate) 
             await OnDelete.InvokeAsync(SelectedItemToDelete);
-        }
+      
         IsDeletePopupVisible = false;
     }
 
@@ -106,9 +122,24 @@
 
     public async Task RefreshGrid()
     {
-        if (GridRef != null)
-        {
-            await GridRef.Refresh();
-        }
+        if (_gridRef != null)
+            await _gridRef.Refresh();
     }
 }
+
+<style>
+    .e-content{
+        padding: 15px;
+        font-size: large;
+        margin: 10px;
+    }
+    .e-row {
+     /*   padding: 35px; */
+        }
+    .e-rowcell{
+    
+    }
+    
+    
+  
+</style>

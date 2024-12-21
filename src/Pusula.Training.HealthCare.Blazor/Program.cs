@@ -70,6 +70,10 @@ public class Program
             builder.Services.AddScoped<AppointmentAdaptor>();
             builder.Services.AddScoped<ProtocolAdaptor>();
             builder.Services.AddScoped<ProtocolTypeAdaptor>();
+            builder.Services.AddScoped<ProtocolDepartmentStatisticsAdaptor>();
+            builder.Services.AddScoped<ProtocolPatientDepartmentListAdaptor>();
+            builder.Services.AddScoped<ProtocolPatientDoctorListAdaptor>();
+            builder.Services.AddScoped<ProtocolDoctorStatisticsAdaptor>();
 
             // Serilog ve diğer ayarları ekleme
             builder.Host.AddAppSettingsSecretsJson()

@@ -30,6 +30,10 @@ public interface IProtocolsAppService : IApplicationService
     
     Task<PagedResultDto<DoctorStatisticDto>> GetDoctorPatientStatisticsAsync(GetProtocolsInput input);
     
+    Task<PagedResultDto<ProtocolPatientDepartmentListReportDto>> GetPatientsByDepartmentAsync(GetProtocolsInput input);
+    
+    Task<PagedResultDto<ProtocolPatientDoctorListReportDto>> GetPatientsByDoctorAsync(GetProtocolsInput input);
+    
     Task DeleteAsync(Guid id);
 
     Task<ProtocolDto> CreateAsync(ProtocolCreateDto input);

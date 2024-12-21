@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Protocols;
@@ -10,9 +8,8 @@ using Volo.Abp;
 
 namespace Pusula.Training.HealthCare.Blazor.Services;
 
-public class ProtocolDepartmentStatisticsAdaptor(IProtocolsAppService protocolTypesAppService) :DataAdaptor
+public class ProtocolPatientDoctorListAdaptor(IProtocolsAppService protocolTypesAppService) :DataAdaptor
 {
-    
     public override async Task<object> ReadAsync(DataManagerRequest dataManagerRequest, 
         string? additionalParam = null)
     {
@@ -20,9 +17,11 @@ public class ProtocolDepartmentStatisticsAdaptor(IProtocolsAppService protocolTy
         {
 
             var filterJson = dataManagerRequest?.Params?["Filter"]?.ToString();
+            
+            Console.WriteLine(filterJson);
 
             var filter = string.IsNullOrEmpty(filterJson)
-                ? new GetProtocolsInput { MaxResultCount = dataManagerRequest!.Take, SkipCount = dataManagerRequest!.Skip }
+                ? new GetProtocolsInput() { MaxResultCount = dataManagerRequest!.Take, SkipCount = dataManagerRequest!.Skip }
                 : JsonSerializer.Deserialize<GetProtocolsInput>(filterJson);
 
             filter!.Sorting = dataManagerRequest!.Sorted is { Count: > 0 }
@@ -31,7 +30,7 @@ public class ProtocolDepartmentStatisticsAdaptor(IProtocolsAppService protocolTy
 
             filter!.SkipCount = dataManagerRequest!.Skip;
             filter.MaxResultCount = dataManagerRequest.Take;
-            var result = await protocolTypesAppService.GetDepartmentPatientStatisticsAsync(filter!);
+            var result = await protocolTypesAppService.GetPatientsByDoctorAsync(filter!);
 
             var dataResult = new DataResult
             {
@@ -42,7 +41,7 @@ public class ProtocolDepartmentStatisticsAdaptor(IProtocolsAppService protocolTy
         }
         catch (Exception e)
         {
-            throw new UserFriendlyException(e.Message + e.Data.Keys + e.Data.Values);
+            throw new UserFriendlyException(e.Message);
         }
 
 

@@ -41,6 +41,16 @@ public class ProtocolController(IProtocolsAppService _protocolsAppService) : Hea
     [Route("doctor-statistic")]
     public Task<PagedResultDto<DoctorStatisticDto>> GetDoctorPatientStatisticsAsync(GetProtocolsInput input)
         => _protocolsAppService.GetDoctorPatientStatisticsAsync(input);
+    
+    [HttpGet]
+    [Route("patient-list-by-department")]
+    public Task<PagedResultDto<ProtocolPatientDepartmentListReportDto>> GetPatientsByDepartmentAsync(GetProtocolsInput input)
+        => _protocolsAppService.GetPatientsByDepartmentAsync(input);
+    
+    [HttpGet]
+    [Route("patient-list-by-doctor")]
+    public Task<PagedResultDto<ProtocolPatientDoctorListReportDto>> GetPatientsByDoctorAsync(GetProtocolsInput input)
+        => _protocolsAppService.GetPatientsByDoctorAsync(input);
 
     [HttpGet]
     [Route("patient-lookup")]

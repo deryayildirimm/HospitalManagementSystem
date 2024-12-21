@@ -209,6 +209,20 @@ public class HealthCareMenuContributor : IMenuContributor
                         displayName: l["Menu:Reports"],
                         icon: "fa-solid fa-chart-bar"
                     )
+                    .AddItem(new ApplicationMenuItem(
+                        name: HealthCareMenus.Reports_Department,
+                        displayName: l["Menu:Department-Reports"],
+                        url: "/protocols-report-department",
+                        icon: "fa fa-file-alt",
+                        requiredPermissionName: HealthCarePermissions.Protocols.Default)
+                    )
+                    .AddItem(new ApplicationMenuItem(
+                        name: HealthCareMenus.Reports_Doctor,
+                        displayName: l["Menu:Doctor-Reports"],
+                        url: "/protocols-report-doctor",
+                        icon: "fa fa-file-alt",
+                        requiredPermissionName: HealthCarePermissions.Protocols.Default)
+                    )
                 ));
 
 

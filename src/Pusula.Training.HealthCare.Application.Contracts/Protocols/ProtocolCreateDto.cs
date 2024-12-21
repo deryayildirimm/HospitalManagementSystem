@@ -12,16 +12,23 @@ public class ProtocolCreateDto
 {
 
     public string? Notes { get; set; } = null!;
-    [Required] public DateTime StartTime { get; set; }
+    [Required] 
+    public DateTime StartTime { get; set; }
     public DateTime? EndTime { get; set; }
+    
+    [Required(ErrorMessage = "Patient is required.")]
     public Guid PatientId { get; set; }
+    [Required(ErrorMessage = "Department is required.")]
     public Guid DepartmentId { get; set; }
     
+    [Required(ErrorMessage = "Doctor is required.")] 
     public Guid DoctorId { get; set; }
-    
+    [Required(ErrorMessage = "ProtocolType is required.")]
     public Guid ProtocolTypeId { get; set; }
     
+    [Required(ErrorMessage = "Insurance is required.")] 
     public Guid InsuranceId { get; set; }
    
+
 
 }

@@ -145,6 +145,70 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
         DateTime? endTimeMax = null,
         CancellationToken cancellationToken = default 
     );
+    Task<List<ProtocolPatientDepartmentListReport>> GetGPatientsByDepartmentAsync(
+        string? departmentName = null,
+        string? filterText = null,
+        string? note = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default 
+    );
+
+    Task<long> GetGPatientsCountByDepartmentAsync(
+        string? departmentName = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        CancellationToken cancellationToken = default 
+    );
+    Task<List<ProtocolPatientDoctorListReport>> GetGPatientsByDoctorAsync(
+        string? departmentName = null,
+        string? filterText = null,
+        string? note = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default 
+    );
+
+    Task<long> GetGPatientsCountByDoctorAsync(
+        string? departmentName = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        CancellationToken cancellationToken = default 
+    );
 }
 
     

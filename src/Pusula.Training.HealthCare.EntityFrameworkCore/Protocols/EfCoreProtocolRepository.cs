@@ -228,8 +228,10 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
     }
     #endregion
     
-    #region Doctor-Patient Report 
-    public virtual async Task<long> GetGroupCountByDoctorPatientAsync(
+    
+    #region Doctor bazlı patient listesi
+    
+    public virtual async Task<long> GetGPatientsCountByDoctorAsync(
         string? departmentName = null,
         Guid? patientId = null,
         Guid? departmentId = null,
@@ -248,10 +250,176 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         query = ApplyFilterForReports(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId,  startTimeMin, startTimeMax, endTimeMin, endTimeMax);
         
         return await query
+            .GroupBy(a => a.Id)
+            .LongCountAsync(cancellationToken);
+        
+    }
+    
+     public virtual async Task<List<ProtocolPatientDoctorListReport>> GetGPatientsByDoctorAsync(
+        string? departmentName = null,
+        string? filterText = null,
+        string? note = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var query = await GetQueryForNavigationPropertiesAsync();
+
+// Filtreleme işlemi
+        query = ApplyFilter(query, filterText, note, startTimeMin, startTimeMax, endTimeMin, endTimeMax, patientId,
+            departmentId, protocolTypeId, doctorId, insuranceId);
+
+// Departman bazlı gruplama ve hasta sayısı hesaplama
+       var patientList = await query
+           .GroupBy( p => new 
+           { 
+              
+              p.Patient.Id ,
+              p.Patient.PatientNumber, // Hasta numarası
+              p.Patient.FirstName,
+              p.Patient.LastName,
+              DoctorName = p.Protocol.Doctor.FirstName +" " + p.Protocol.Doctor.LastName
+           })
+           .Select( g => new ProtocolPatientDoctorListReport
+           {
+               PatientId = g.Key.Id,
+               PatientNumber = g.Key.PatientNumber, // Görünmesi için
+               FullName = g.Key.FirstName + " " + g.Key.LastName,
+               DoctorName = g.Key.DoctorName, 
+               ProtocolCount = g.Count(),
+               LastVisit = g.Max(x => x.Protocol.StartTime)
+               
+           })
+           .OrderByDescending(p => p.LastVisit) // Son ziyaret tarihine göre sırala
+           .PageBy(skipCount, maxResultCount)
+           .ToListAsync(cancellationToken); 
+       
+       return patientList;
+    }
+    
+    #endregion
+    
+    
+    #region Departman bazlı patient listesi
+    
+    // burada gruplama yapmışım ama kullanmıycam bunu galiba. 
+    // diğer metodlar da çalışırsa sadeleştiricez sonra 
+    // bi deniyoruz bakalım bir şey olacak mı 
+      public virtual async Task<long> GetGPatientsCountByDepartmentAsync(
+        string? departmentName = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        CancellationToken cancellationToken = default 
+    )
+    {
+        
+        var query = (await GetQueryableAsync());
+        query = ApplyFilterForReports(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId,  startTimeMin, startTimeMax, endTimeMin, endTimeMax);
+        
+        return await query
+            .GroupBy(a => a.Department.Id)
+            .LongCountAsync(cancellationToken);
+        
+    }
+ 
+    public virtual async Task<List<ProtocolPatientDepartmentListReport>> GetGPatientsByDepartmentAsync(
+        string? departmentName = null,
+        string? filterText = null,
+        string? note = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        string? sorting = null,
+        int maxResultCount = int.MaxValue,
+        int skipCount = 0,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var query = await GetQueryForNavigationPropertiesAsync();
+
+// Filtreleme işlemi
+        query = ApplyFilter(query, filterText, note, startTimeMin, startTimeMax, endTimeMin, endTimeMax, patientId,
+            departmentId, protocolTypeId, doctorId, insuranceId);
+
+// Departman bazlı gruplama ve hasta sayısı hesaplama
+       var patientList = await query
+           .GroupBy( p => new 
+           { 
+              
+              p.Patient.Id ,
+              p.Patient.PatientNumber, // Hasta numarası
+              p.Patient.FirstName,
+              p.Patient.LastName,
+              DepartmentName = p.Protocol.Department.Name 
+           })
+           .Select( g => new ProtocolPatientDepartmentListReport
+           {
+               PatientId = g.Key.Id,
+               PatientNumber = g.Key.PatientNumber, // Görünmesi için
+               FullName = g.Key.FirstName + " " + g.Key.LastName,
+               DepartmentName = g.Key.DepartmentName, // Departman ismini döndürüyoruz
+               ProtocolCount = g.Count(),
+               LastVisit = g.Max(x => x.Protocol.StartTime)
+               
+           })
+           .OrderByDescending(p => p.LastVisit) // Son ziyaret tarihine göre sırala
+           .PageBy(skipCount, maxResultCount)
+           .ToListAsync(cancellationToken); 
+       
+       return patientList;
+    }
+    
+    #endregion
+ 
+    #region Doctor-Patient Report 
+    public virtual async Task<long> GetGroupCountByDoctorPatientAsync(
+        string? departmentName = null,
+        Guid? patientId = null,
+        Guid? departmentId = null,
+        Guid? protocolTypeId = null,
+        Guid? doctorId = null,
+        Guid? insuranceId = null,
+        DateTime? startTimeMin = null,
+        DateTime? startTimeMax = null,
+        DateTime? endTimeMin = null,
+        DateTime? endTimeMax = null,
+        CancellationToken cancellationToken = default 
+    )
+    {
+        
+        var query = (await GetQueryableAsync());
+        query = ApplyFilterForReports(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId, startTimeMin, startTimeMax, endTimeMin, endTimeMax);
+
+        return await query
             .GroupBy(a => a.Doctor.Id)
             .LongCountAsync(cancellationToken);
         
     }
+   
     
     public virtual async Task<List<DoctorStatistics>> GetGroupByDoctorPatientAsync(
         string? departmentName = null,
@@ -278,7 +446,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
             .Select(g => new DoctorStatistics
             {
                 DoctorId = g.Key,
-                DoctorName = g.First().Doctor.FirstName + "  " + g.First().Doctor.LastName,
+                DoctorName = g.First().Doctor.FirstName +" " + g.First().Doctor.LastName,
                 PatientCount = g.Select(p => p.PatientId).Count(), 
                 
             })
