@@ -20,7 +20,7 @@ using Syncfusion.Blazor.Grids;
 using Volo.Abp;
 using SortDirection = Blazorise.SortDirection;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Doctor;
 
 public partial class Doctors
 {

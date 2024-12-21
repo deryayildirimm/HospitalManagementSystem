@@ -5,6 +5,8 @@ namespace Pusula.Training.HealthCare.MedicalServices;
 public class MedicalServiceExcelDownloadDto
 {
     public string DownloadToken { get; set; } = null!;
+    public Guid MedicalServiceId { get; set; }
+    public Guid? DepartmentId { get; set; }
 
     public Guid? PatientId { get; set; }
     public DateTime? ServiceDateMin { get; set; }

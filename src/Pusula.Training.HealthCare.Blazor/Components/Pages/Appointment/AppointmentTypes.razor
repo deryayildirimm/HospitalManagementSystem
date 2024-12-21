@@ -1,10 +1,9 @@
 @page "/appointments/definitions/types"
 
 @attribute [Authorize(HealthCarePermissions.AppointmentTypes.Default)]
-@using Microsoft.AspNetCore.Components
+
 @using Pusula.Training.HealthCare.AppointmentTypes
 @using Pusula.Training.HealthCare.Blazor.Services
-@using Pusula.Training.HealthCare.Departments
 
 @using Pusula.Training.HealthCare.Localization
 @using Pusula.Training.HealthCare.Permissions
@@ -12,7 +11,6 @@
 @using Volo.Abp.AspNetCore.Components.Web
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 @inherits HealthCareComponentBase
-@inject IDepartmentsAppService DepartmentsAppService
 @inject IAppointmentTypesAppService AppointmentTypesAppService
 @inject IUiMessageService UiMessageService
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
@@ -22,8 +20,6 @@
 @using Volo.Abp.Http.Client
 @using SelectionType = Syncfusion.Blazor.Grids.SelectionType
 @using Syncfusion.Blazor.Buttons
-@inject AppointmentTypeAdaptor TypeAdaptor
-
 
 <SfBreadcrumb>
     <BreadcrumbItems>
@@ -43,7 +39,7 @@
             TValue="AppointmentTypeDto"
             AllowPaging="true"
             AllowSorting="true"
-            Toolbar="@(new List<string>() { "Search", "Delete"})">
+            Toolbar="@ToolbarItems">
             <GridSelectionSettings Type="SelectionType.Multiple"></GridSelectionSettings>
             <SfDataManager 
                 AdaptorInstance="@typeof(AppointmentTypeAdaptor)"
@@ -57,12 +53,8 @@
                 ExcelQueryCellInfoEvent="ExcelQueryCellInfoHandler"
                 TValue="AppointmentTypeDto">
             </GridEvents>
-            <GridPageSettings PageSize="@PageSize"></GridPageSettings>
+            <GridPageSettings PageSizes="@PageSizes" PageSize="@PageSize"></GridPageSettings>
             <GridColumns>
-                @if (CanDeleteType)
-                {
-                    <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
-                }
                 <GridColumn Field="@nameof(AppointmentTypeDto.Name)" HeaderText="@L["Name"]" TextAlign="TextAlign.Left" Width="120"></GridColumn>
                 <GridColumn HeaderText="@L["Actions"]" Width="150">
                     <Template Context="context">

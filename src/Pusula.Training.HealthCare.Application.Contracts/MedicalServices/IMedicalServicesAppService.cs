@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.Shared;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
@@ -19,6 +20,9 @@ public interface IMedicalServicesAppService : IApplicationService
         GetMedicalServiceInput input);
     
     Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(
+        GetMedicalServiceInput input);
+    
+    Task<PagedResultDto<DoctorWithDetailsDto>> GetMedicalServiceDoctorsAsync(
         GetMedicalServiceInput input);
     
     Task<MedicalServiceDto> GetAsync(Guid id);

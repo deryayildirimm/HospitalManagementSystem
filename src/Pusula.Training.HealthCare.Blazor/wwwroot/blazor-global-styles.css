@@ -25,6 +25,45 @@
     cursor:pointer;
 }
 
+.days-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    margin-block: 1rem;
+}
+
+.days {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 10px;
+    white-space: nowrap;
+    width: 100%;
+}
+
+.status-div {
+    border-radius: 7px;
+    padding: 4px 8px;
+}
+
+
+/*# AppColors */
+.success-color {
+    background-color: var(--bs-success);
+}
+
+.fail-color {
+    background-color: var(--bs-danger);
+}
+
+.light-green {
+    background-color: #d6ffd1;
+}
+
+.light-red {
+    background-color: rgba(255, 56, 56, 0.5);
+}
+
 .orange-bg {
     background: #FFA500;
 }
@@ -45,7 +84,11 @@
     background: rgba(178, 0, 255, 0.66);
 }
 
-.status-div {
-    border-radius: 7px;
-    padding: 4px 8px;
+.purple {
+    color: purple !important;
+}
+
+/* Flex properties */
+.f1 {
+    flex: 1;
 }

@@ -231,10 +231,11 @@ public class HealthCareDbContext :
                     .HasColumnName(nameof(MedicalService.ServiceCreatedAt))
                     .IsRequired();
 
+                b.Property(x => x.ServiceCreatedAt).HasColumnName(nameof(MedicalService.ServiceCreatedAt)).IsRequired();
+
                 b.HasMany(x => x.DepartmentMedicalServices)
                     .WithOne(e => e.MedicalService)
                     .HasForeignKey(e => e.MedicalServiceId);
-                b.Property(x => x.ServiceCreatedAt).HasColumnName(nameof(MedicalService.ServiceCreatedAt)).IsRequired();
 
                 b.HasMany(x => x.ProtocolMedicalServices)
                     .WithOne(e => e.MedicalService)

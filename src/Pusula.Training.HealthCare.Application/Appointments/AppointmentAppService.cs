@@ -41,7 +41,7 @@ public class AppointmentAppService(
     public virtual async Task<PagedResultDto<AppointmentSlotDto>> GetAvailableSlotsAsync(GetAppointmentSlotInput input)
     {
         var availableSlots = await appointmentManager
-            .GetAppointmentSlotsAsync(input.DoctorId, input.MedicalServiceId, input.Date);
+            .GetAppointmentSlotsAsync(input.DoctorId, input.MedicalServiceId, input.Date, input.ExcludeNotAvailable);
 
         return new PagedResultDto<AppointmentSlotDto>(
             availableSlots.Count,
@@ -96,7 +96,7 @@ public class AppointmentAppService(
         };
     }
 
-    public virtual async Task<PagedResultDto<GroupedAppointmentCountDto>> GetCountByGroupAsync(
+    public virtual async Task<PagedResultDto<AppointmentStatisticDto>> GetCountByGroupAsync(
         GetAppointmentsInput input)
     {
         var count = await appointmentRepository.GetGroupCountByAsync(
@@ -144,10 +144,10 @@ public class AppointmentAppService(
             input.MaxResultCount,
             input.SkipCount);
 
-        return new PagedResultDto<GroupedAppointmentCountDto>
+        return new PagedResultDto<AppointmentStatisticDto>
         {
             TotalCount = count,
-            Items = ObjectMapper.Map<List<GroupedAppointmentCount>, List<GroupedAppointmentCountDto>>(items)
+            Items = ObjectMapper.Map<List<AppointmentStatistic>, List<AppointmentStatisticDto>>(items)
         };
     }
 

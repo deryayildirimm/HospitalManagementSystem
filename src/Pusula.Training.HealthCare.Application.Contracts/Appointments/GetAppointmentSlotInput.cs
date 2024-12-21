@@ -14,6 +14,8 @@ public class GetAppointmentSlotInput
     [Required]
     public DateTime Date { get; set; } = DateTime.Today;
     
+    public bool ExcludeNotAvailable { get; set; } = false;
+    
     public GetAppointmentSlotInput()
     {
     }
