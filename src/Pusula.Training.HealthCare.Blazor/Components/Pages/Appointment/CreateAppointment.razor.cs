@@ -211,6 +211,7 @@ public partial class CreateAppointment : HealthCareComponentBase
         try
         {
             DoctorsFilter.MedicalServiceId = NewAppointment.MedicalServiceId;
+            DoctorsFilter.DepartmentId = NewAppointment.DepartmentId;
 
             var doctors =
                 (await MedicalServicesAppService.GetMedicalServiceDoctorsAsync(DoctorsFilter))
