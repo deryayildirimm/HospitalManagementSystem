@@ -34,3 +34,66 @@
     }
 
 }
+
+<style>
+    .slot-selected-tag {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background-color: var(--bs-success);
+        border: 1px solid white;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .time-slot-card {
+        cursor: pointer;
+        border: 1px solid #dee2e6;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+        width: 140px;
+        margin-bottom: 0 !important;
+        border-radius: 8px;
+        position: relative;
+        color: white;
+    }
+
+    .time-slot-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        background-color: #c0fbb8;
+    }
+
+    .time-slot-card.active {
+        border-color: #cc7424;
+        background-color: #cc7424;
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.5);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+        color: white;
+    }
+
+    .is-booked {
+        color: #b3b3b3;
+        background-color: #f7f7f7;
+        box-shadow: none;
+        cursor: not-allowed;
+        border-radius: 8px;
+        width: 140px;
+    }
+
+    .is-booked:hover {
+        transform: none;
+        box-shadow: none;
+        background-color: #f7f7f7;
+    }
+
+    .time-slot-card .card-title {
+        font-size: 1.2em;
+        font-weight: 600;
+    }
+
+</style>
