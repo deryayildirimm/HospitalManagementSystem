@@ -95,7 +95,7 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         double? maxAmount = null,
         CancellationToken cancellationToken = default);
     
-    Task<List<GroupedAppointmentCount>> GetGroupByListAsync(
+    Task<List<AppointmentStatistic>> GetGroupByListAsync(
         EnumAppointmentGroupFilter groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,

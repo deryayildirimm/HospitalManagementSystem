@@ -35,8 +35,8 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
     private IReadOnlyList<LookupDto<Guid>> DoctorDepartmentCollection { get; set; }
     private IReadOnlyList<RestrictionDto> RestrictionCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
-    private IReadOnlyList<GroupedAppointmentCountDto> AppointmentByDateCollection { get; set; }
-    private IReadOnlyList<GroupedAppointmentCountDto> AppointmentByDepartmentCollection { get; set; }
+    private IReadOnlyList<AppointmentStatisticDto> AppointmentByDateCollection { get; set; }
+    private IReadOnlyList<AppointmentStatisticDto> AppointmentByDepartmentCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> MedicalServiceCollection { get; set; }
     private SfDialog CreateDialog { get; set; }

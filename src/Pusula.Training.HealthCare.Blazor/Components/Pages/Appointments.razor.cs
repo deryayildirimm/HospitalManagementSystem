@@ -14,7 +14,6 @@ using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Navigations;
 using Volo.Abp;
-using Doctor = Pusula.Training.HealthCare.Blazor.Models.Doctor;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
@@ -50,7 +49,7 @@ public partial class Appointments : HealthCareComponentBase
 
     #region DoctorFilters
 
-    private List<Doctor> DoctorsList { get; set; }
+    private List<DoctorModel> DoctorsList { get; set; }
     private bool IsDoctorListLoading { get; set; }
     private int DoctorLoadingShimmerCount { get; set; } = 5;
     private GetMedicalServiceInput DoctorsFilter { get; set; }
@@ -241,7 +240,7 @@ public partial class Appointments : HealthCareComponentBase
         await GetDoctorsList();
     }
 
-    private void OnDoctorSelect(Doctor item)
+    private void OnDoctorSelect(DoctorModel item)
     {
         if (item.IsSelected)
         {
@@ -268,7 +267,7 @@ public partial class Appointments : HealthCareComponentBase
 
     #endregion
 
-    #region API Fetch
+    #region APICalls
 
     private async Task GetPatient()
     {
@@ -354,7 +353,7 @@ public partial class Appointments : HealthCareComponentBase
             }
 
             DoctorsList = doctors
-                .Select(x => new Doctor
+                .Select(x => new DoctorModel
                 {
                     Id = x.Id,
                     DepartmentId = x.DepartmentId,
@@ -383,7 +382,8 @@ public partial class Appointments : HealthCareComponentBase
             SlotsLoading = true;
 
             var slots =
-                (await AppointmentAppService.GetAvailableSlotsAsync(GetAppointmentSlotFilter)).Items;
+                (await AppointmentAppService.GetAvailableSlotsAsync(GetAppointmentSlotFilter))
+                .Items;
 
             if (!slots.Any())
             {
@@ -413,6 +413,62 @@ public partial class Appointments : HealthCareComponentBase
         finally
         {
             SlotsLoading = false;
+        }
+    }
+
+    private async Task CreateAppointment()
+    {
+        if (!IsThirdStepValid)
+        {
+            return;
+        }
+
+        try
+        {
+            var baseDate = StepperModel.AppointmentDate;
+            var start = ConvertToDateTime(baseDate, StepperModel.StartTime);
+            var end = ConvertToDateTime(baseDate, StepperModel.EndTime);
+            if (start == null || end == null)
+            {
+                return;
+            }
+            
+            //New appointment object mapping
+            NewAppointment.DoctorId = StepperModel.DoctorId;
+            NewAppointment.DepartmentId = StepperModel.DepartmentId;
+            NewAppointment.PatientId = StepperModel.PatientId;
+            NewAppointment.MedicalServiceId = StepperModel.MedicalServiceId;
+            NewAppointment.AppointmentDate = StepperModel.AppointmentDate;
+            NewAppointment.StartTime = start.Value;
+            NewAppointment.EndTime = end.Value;
+            NewAppointment.Amount = StepperModel.Amount;
+            NewAppointment.Notes = StepperModel.Note;
+            NewAppointment.ReminderSent = StepperModel.ReminderSent;
+            NewAppointment.AppointmentTypeId = StepperModel.AppointmentTypeId;
+
+            var message = L["ConfirmMessage"];
+            var confirm = L["Confirm"];
+
+            if (!await UiMessageService.Confirm(message, confirm, options =>
+                {
+                    options.ConfirmButtonText = L["Yes"];
+                    options.CancelButtonText = L["No"];
+                }))
+            {
+                IsFinalResultSuccess = false;
+                return;
+            }
+
+            await AppointmentAppService.CreateAsync(NewAppointment);
+            IsFinalResultSuccess = true;
+            await OnNextStep();
+        }
+        catch (Exception e)
+        {
+            IsFinalResultSuccess = false;
+            await OnNextStep();
+            await UiMessageService.Error(e.Message);
+            FailureMessage = e.Message;
         }
     }
 
@@ -460,7 +516,7 @@ public partial class Appointments : HealthCareComponentBase
 
     #region StyleHandler
 
-    private static string GetDoctorCardClass(Doctor doctor)
+    private static string GetDoctorCardClass(DoctorModel doctorModel)
     {
         var classes = new List<string>
         {
@@ -473,12 +529,12 @@ public partial class Appointments : HealthCareComponentBase
             "doctor-card"
         };
 
-        if (doctor.IsSelected)
+        if (doctorModel.IsSelected)
         {
             classes.Add("doctor-card-active");
         }
 
-        if (!doctor.IsAvailable)
+        if (!doctorModel.IsAvailable)
         {
             classes.Add("disabled-card");
         }
@@ -505,22 +561,37 @@ public partial class Appointments : HealthCareComponentBase
             return;
         }
 
-        if (appointmentSlot.IsSelected)
+        ClearAllSlotSelections();
+        var toggleValue = appointmentSlot.IsSelected;
+
+        if (!toggleValue)
         {
-            AppointmentSlots.ForEach(e => e.IsSelected = false);
-            StepperModel.AppointmentDisplayTime = null!;
-            StepperModel.StartTime = null!;
-            StepperModel.EndTime = null!;
+            SetAppointmentTimes(appointmentSlot);
+            return;
         }
-        else
-        {
-            AppointmentSlots.ForEach(e => e.IsSelected = false);
-            appointmentSlot.IsSelected = true;
-            StepperModel.AppointmentDisplayTime =
-                $"{appointmentSlot.StartTime.ToString(CultureInfo.CurrentCulture)} - {appointmentSlot.EndTime.ToString(CultureInfo.CurrentCulture)}";
-            StepperModel.StartTime = appointmentSlot.StartTime;
-            StepperModel.EndTime = appointmentSlot.EndTime;
-        }
+        
+        ClearAppointmentDisplayTimes();
+    }
+
+    private void ClearAllSlotSelections()
+    {
+        AppointmentSlots.ForEach(slot => slot.IsSelected = false);
+    }
+
+    private void ClearAppointmentDisplayTimes()
+    {
+        StepperModel.AppointmentDisplayTime = string.Empty;
+        StepperModel.StartTime = string.Empty;
+        StepperModel.EndTime = string.Empty;
+    }
+
+    private void SetAppointmentTimes(AppointmentSlotItem slot)
+    {
+        slot.IsSelected = true;
+        StepperModel.AppointmentDisplayTime =
+            $"{slot.StartTime.ToString(CultureInfo.CurrentCulture)} - {slot.EndTime.ToString(CultureInfo.CurrentCulture)}";
+        StepperModel.StartTime = slot.StartTime;
+        StepperModel.EndTime = slot.EndTime;
     }
 
     private Task OnReminderSettingChanged(bool val)
@@ -529,66 +600,9 @@ public partial class Appointments : HealthCareComponentBase
         return Task.CompletedTask;
     }
 
-    private async Task CreateAppointment()
+    private static DateTime? ConvertToDateTime(DateTime appointmentDate, string timeString)
     {
-        if (!IsThirdStepValid)
-        {
-            return;
-        }
-
-        try
-        {
-            var baseDate = StepperModel.AppointmentDate;
-            var parsedStartDateTime = ConvertToDateTime(baseDate, StepperModel.StartTime);
-            var parsedEndDateTime = ConvertToDateTime(baseDate, StepperModel.EndTime);
-
-            //New appointment object mapping
-            NewAppointment.DoctorId = StepperModel.DoctorId;
-            NewAppointment.DepartmentId = StepperModel.DepartmentId;
-            NewAppointment.PatientId = StepperModel.PatientId;
-            NewAppointment.MedicalServiceId = StepperModel.MedicalServiceId;
-            NewAppointment.AppointmentDate = StepperModel.AppointmentDate;
-            NewAppointment.StartTime = parsedStartDateTime;
-            NewAppointment.EndTime = parsedEndDateTime;
-            NewAppointment.Amount = StepperModel.Amount;
-            NewAppointment.Notes = StepperModel.Note;
-            NewAppointment.ReminderSent = StepperModel.ReminderSent;
-            NewAppointment.AppointmentTypeId = StepperModel.AppointmentTypeId;
-
-            var message = L["ConfirmMessage"];
-            var confirm = L["Confirm"];
-
-            if (!await UiMessageService.Confirm(message, confirm, options =>
-                {
-                    options.ConfirmButtonText = L["Yes"];
-                    options.CancelButtonText = L["No"];
-                }))
-            {
-                IsFinalResultSuccess = false;
-                return;
-            }
-
-            await AppointmentAppService.CreateAsync(NewAppointment);
-            IsFinalResultSuccess = true;
-            await OnNextStep();
-        }
-        catch (Exception e)
-        {
-            IsFinalResultSuccess = false;
-            await OnNextStep();
-            await UiMessageService.Error(e.Message);
-            FailureMessage = e.Message;
-        }
-    }
-
-    private static DateTime ConvertToDateTime(DateTime appointmentDate, string timeString)
-    {
-        if (TimeSpan.TryParse(timeString, out var time))
-        {
-            return appointmentDate.Date.Add(time);
-        }
-
-        throw new FormatException("Invalid time format. Expected format is 'hh:mm'.");
+        return TimeSpan.TryParse(timeString, out var time) ? appointmentDate.Date.Add(time) : null;
     }
 
     #region StepHandlers

@@ -52,6 +52,27 @@ public class HealthCareMenuContributor : IMenuContributor
 
         context.Menu.AddItem(
             new ApplicationMenuItem(
+                    name: HealthCareMenus.Doctors,
+                    displayName: l["Menu:Doctors"],
+                    icon: "fa-solid fa-user-md",
+                    requiredPermissionName: HealthCarePermissions.Doctors.Default
+                )
+                .AddItem(new ApplicationMenuItem(
+                    name: HealthCareMenus.Doctors,
+                    displayName: l["Menu:DoctorList"],
+                    url: "doctors/list",
+                    icon: "fa-solid fa-list")
+                )
+                .AddItem(new ApplicationMenuItem(
+                    name: HealthCareMenus.DoctorLeaves,
+                    displayName: l["Menu:DoctorLeaves"],
+                    url: "doctors/leaves",
+                    icon: "fa-solid fa-calendar")
+                )
+        );
+
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
                     name: HealthCareMenus.Appointments,
                     displayName: l["Menu:Appointment"],
                     icon: "fa-solid fa-calendar-check",
@@ -116,26 +137,7 @@ public class HealthCareMenuContributor : IMenuContributor
                         )
                 )
         );
-
-
-        context.Menu.AddItem(
-            new ApplicationMenuItem(
-                HealthCareMenus.Doctors,
-                l["Menu:Doctors"],
-                url: "/doctors",
-                icon: "fa fa-user-md",
-                requiredPermissionName: HealthCarePermissions.Doctors.Default)
-        );
         
-        context.Menu.AddItem(
-            new ApplicationMenuItem(
-                HealthCareMenus.DoctorLeaves,
-                l["Menu:DoctorLeaves"],
-                url: "/doctor-leaves",
-                icon: "fa fa-user-md",
-                requiredPermissionName: HealthCarePermissions.DoctorLeaves.Default)
-        );
-
         context.Menu.AddItem(
             new ApplicationMenuItem(
                 HealthCareMenus.BloodTests,

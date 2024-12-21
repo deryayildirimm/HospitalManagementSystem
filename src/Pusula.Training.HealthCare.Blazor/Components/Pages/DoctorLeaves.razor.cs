@@ -248,6 +248,7 @@ public partial class DoctorLeaves : HealthCareComponentBase
         {
             if (EditingLeaveId == Guid.Empty)
             {
+                await UiMessageService.Error(@L["FillRequiredFields"]);
                 return;
             }
 

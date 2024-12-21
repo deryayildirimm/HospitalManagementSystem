@@ -130,10 +130,11 @@
             <div class="w-50">
                 <SfAccumulationChart @ref="AccumulationChart" Width="100%" Height="380px" Title="@($"{L["AppointmentsBy"]} {L[Filter.GroupByField.ToString()]}")">
                     <AccumulationChartSeriesCollection >
-                        <AccumulationChartSeries DataSource="@AppointmentByDepartmentCollection" XName="GroupName" YName="AppointmentCount">
+                        <AccumulationChartSeries DataSource="@AppointmentByDepartmentCollection" XName="GroupName" YName="Number">
+                            <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
+
                         </AccumulationChartSeries>
                     </AccumulationChartSeriesCollection>
-
                     <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
                     <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
                     <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
@@ -155,8 +156,11 @@
                         <ChartTooltipTextStyle FontFamily="Helvetica"></ChartTooltipTextStyle>
                     </ChartTooltipSettings>
                     <ChartSeriesCollection>
-                        <ChartSeries DataSource="@AppointmentByDateCollection" XName="GroupName" YName="AppointmentCount" Type="ChartSeriesType.Column">
-                        </ChartSeries>
+                        <ChartSeries DataSource="@AppointmentByDateCollection" XName="GroupName" YName="Number" Type="ChartSeriesType.Column">
+                            <ChartMarker>
+                                <ChartDataLabel Visible="true"/>
+                            </ChartMarker>
+                            </ChartSeries>
                     </ChartSeriesCollection>
                     <ChartLegendSettings Visible="true">
                         <ChartLegendTextStyle FontFamily="Helvetica"></ChartLegendTextStyle>
@@ -169,7 +173,7 @@
         <div class="row py-2 px-2">
             <div class="col-12 border-1 bg-white rounded-1 p-4 d-flex flex-column gap-2">
                 <div class="d-flex gap-2 mb-2 text-center align-items-center">
-                    <h6 class="m-0">@L["AppointmentCountBy"] : </h6>
+                    <h6 class="m-0">@L["NumberBy"] : </h6>
                     <SfDropDownList
                         Width="120px"
                         TItem="EnumAppointmentGroupFilter"
@@ -186,7 +190,7 @@
 
                 <SfGrid
                     @ref="Grid"
-                    TValue="GroupedAppointmentCountDto"
+                    TValue="AppointmentStatisticDto"
                     AllowPaging="true"
                     AllowSorting="true"
                     Query="@FilterQuery">
@@ -197,7 +201,7 @@
                     <GridPageSettings PageSize="@PageSize"></GridPageSettings>
                     <GridColumns>
                         <GridColumn Field="GroupName" HeaderText="@L["Name"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
-                        <GridColumn Field="AppointmentCount" HeaderText="@L["AppointmentCount"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+                        <GridColumn Field="Number" HeaderText="@L["Number"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
                     </GridColumns>
                 </SfGrid>
             </div>
@@ -236,7 +240,7 @@
                 </SfButton>
             </div>
         </div>
-        <div class="row" @ref="Element">
+        <div class="row justify-content-center align-items-center" @ref="Element">
             <div class="row py-2 px-2">
                 @* ************************* Graphs ************************* *@
                 <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
@@ -245,8 +249,8 @@
                             <AccumulationChartSeriesCollection>
                                 <AccumulationChartTitleStyle TextAlignment="Alignment.Center"></AccumulationChartTitleStyle>
 
-                                <AccumulationChartSeries DataSource="@AppointmentByStatusCollection" XName="GroupName" YName="AppointmentCount" InnerRadius="40%">
-                                    <AccumulationDataLabelSettings Visible="true" Name="AppointmentCount" Position="AccumulationLabelPosition.Outside">
+                                <AccumulationChartSeries DataSource="@AppointmentByStatusCollection" XName="GroupName" YName="Number" InnerRadius="40%">
+                                    <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside">
                                         <AccumulationChartConnector Type="ConnectorType.Curve" Length="20px"/>
                                     </AccumulationDataLabelSettings>
                                 </AccumulationChartSeries>
@@ -258,8 +262,8 @@
                     <div class="w-50">
                         <SfAccumulationChart @ref="ChartRevenueByService" Width="100%" Height="380px" Title="@($"{L["RevenueByServices"]} / {L["USD"]}")">
                             <AccumulationChartSeriesCollection >
-                                <AccumulationChartSeries DataSource="@RevenuByServiceCollection" XName="GroupName" YName="AppointmentCount">
-                                    <AccumulationDataLabelSettings Visible="true" Name="AppointmentCount" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
+                                <AccumulationChartSeries DataSource="@RevenueByServiceCollection" XName="GroupName" YName="Number">
+                                    <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
                                 </AccumulationChartSeries>
                             </AccumulationChartSeriesCollection>
 
@@ -278,8 +282,8 @@
                         <SfAccumulationChart @ref="ChartByGender" Width="100%" Height="380px" Title="@L["AppointmentsByGender"]">
                             <AccumulationChartSeriesCollection>
                                 <AccumulationChartTitleStyle TextAlignment="Alignment.Center"></AccumulationChartTitleStyle>
-                                <AccumulationChartSeries DataSource="@AppointmentByGenderCollection" XName="GroupName" YName="AppointmentCount" InnerRadius="40%">
-                                    <AccumulationDataLabelSettings Visible="true" Name="AppointmentCount" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
+                                <AccumulationChartSeries DataSource="@AppointmentByGenderCollection" XName="GroupName" YName="Number" InnerRadius="40%">
+                                    <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
                                 </AccumulationChartSeries>
                             </AccumulationChartSeriesCollection>
                             <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
@@ -289,11 +293,10 @@
                     <div class="w-50">
                         <SfAccumulationChart @ref="ChartRevenueByDepartment" Width="100%" Height="380px" Title="@($"{L["RevenueByDepartments"]} / {L["USD"]}")">
                             <AccumulationChartSeriesCollection >
-                                <AccumulationChartSeries DataSource="@RevenueByDepartmentCollection" XName="GroupName" YName="AppointmentCount">
-                                    <AccumulationDataLabelSettings Visible="true" Name="AppointmentCount" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
+                                <AccumulationChartSeries DataSource="@RevenueByDepartmentCollection" XName="GroupName" YName="Number">
+                                    <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
                                 </AccumulationChartSeries>
                             </AccumulationChartSeriesCollection>
-
                             <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
                             <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
                             <AccumulationChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y} USD</b>"></AccumulationChartTooltipSettings>
@@ -320,7 +323,7 @@
                                 <ChartTooltipTextStyle FontFamily="Helvetica"></ChartTooltipTextStyle>
                             </ChartTooltipSettings>
                             <ChartSeriesCollection>
-                                <ChartSeries DataSource="@AppointmentByTypeCollection" XName="GroupName" YName="AppointmentCount" Type="ChartSeriesType.Column">
+                                <ChartSeries DataSource="@AppointmentByTypeCollection" XName="GroupName" YName="Number" Type="ChartSeriesType.Column">
                                     <ChartMarker>
                                         <ChartDataLabel Visible="true"/>
                                     </ChartMarker>

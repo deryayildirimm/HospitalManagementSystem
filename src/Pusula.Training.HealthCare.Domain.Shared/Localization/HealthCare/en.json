@@ -70,6 +70,7 @@
     "Menu:HealthCare": "Health Care",
     "Menu:MedicalServices": "Medical Services",
     "Menu:Appointment": "Appointments",
+    "Menu:DoctorList": "Doctor List",
     "Menu:AppointmentList": "Appointment List",
     "Menu:AppointmentsOverview": "Appointments Overview",
     "Menu:Appointments": "Appointments",
@@ -84,7 +85,6 @@
     "Protocols": "Protocols",
     "MinStartTime": "Min Start Time",
     "MaxStartTime": "Max Start Time",
-    
     "NewProtocol": "New Protocol",
     "Menu:Protocols": "Protocols",
     "Permission:Departments": "Departments",

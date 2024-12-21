@@ -6,7 +6,7 @@ public static class AppointmentConsts
 {
     private const string DefaultSorting = "{0}AppointmentDate asc";
     public const EnumAppointmentGroupFilter DefaultGroupBy = EnumAppointmentGroupFilter.Department;
-    public const string DefaultGroupBySorting = "{0}AppointmentCount asc";
+    public const string DefaultGroupBySorting = "{0}Number asc";
     
     public static string GetDefaultSorting(bool withEntityName)
     {

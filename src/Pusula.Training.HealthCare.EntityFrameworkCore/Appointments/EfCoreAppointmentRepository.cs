@@ -170,7 +170,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         return await groupedQuery.LongCountAsync(cancellationToken);
     }
 
-    public virtual async Task<List<GroupedAppointmentCount>> GetGroupByListAsync(
+    public virtual async Task<List<AppointmentStatistic>> GetGroupByListAsync(
         EnumAppointmentGroupFilter groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
@@ -212,7 +212,6 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             .PageBy(skipCount, maxResultCount)
             .ToListAsync(cancellationToken);
     }
-
 
     #region NavigationQueryCreator
 
@@ -329,18 +328,18 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
 
     #region DynamicGroupByQuery
 
-    private static IQueryable<GroupedAppointmentCount> GroupAppointments(
+    private static IQueryable<AppointmentStatistic> GroupAppointments(
         IQueryable<Appointment> query,
         Expression<Func<Appointment, object>> groupKey,
         Func<Appointment, string> groupFunc,
         bool appointmentCountSum = false)
         => query
             .GroupBy(groupKey)
-            .Select(g => new GroupedAppointmentCount
+            .Select(g => new AppointmentStatistic
             {
                 GroupKey = FormatKey(g.Key),
                 GroupName = groupFunc(g.FirstOrDefault()!),
-                AppointmentCount = appointmentCountSum ? (int)g.Sum(x => x.Amount) : g.Count()
+                Number = appointmentCountSum ? (int)g.Sum(x => x.Amount) : g.Count()
             });
 
     private static string FormatKey<TKey>(TKey key) => (key switch
@@ -350,7 +349,7 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
     })!;
 
 
-    private static IQueryable<GroupedAppointmentCount> ApplyDynamicGrouping(
+    private static IQueryable<AppointmentStatistic> ApplyDynamicGrouping(
         IQueryable<Appointment> query,
         EnumAppointmentGroupFilter groupByField)
     {

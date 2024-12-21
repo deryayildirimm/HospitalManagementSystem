@@ -38,3 +38,10 @@
     background: linear-gradient(135deg, rgba(255, 221, 225, 1) 5%, rgba(255, 126, 95, 1) 96%);
     transition: 0.2s;
 }
+
+.e-icons.e-medium {
+    font-size: 55px !important;
+}
+.large-icon {
+    font-size: 55px !important;
+}

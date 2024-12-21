@@ -8,4 +8,18 @@ public partial class Index
         NavigationManager.NavigateTo("/appointments/reports/doctor-appointments");
     }
 
+    private void NavigateToAppointments()
+    {
+        NavigationManager.NavigateTo("/appointments/operations/create");
+    }
+    
+    private void NavigateToPatientModule()
+    {
+        NavigationManager.NavigateTo("/patients");
+    }
+    
+    private void NavigateToTreatment()
+    {
+        NavigationManager.NavigateTo("/my-protocols");
+    }
 }
