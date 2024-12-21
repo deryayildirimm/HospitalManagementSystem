@@ -17,21 +17,21 @@ public class DoctorWorkingHourController(IDoctorWorkingHourAppService doctorWork
     : HealthCareController, IDoctorWorkingHourAppService
 {
     [HttpGet]
-    public Task<PagedResultDto<DoctorWorkingHoursDto>> GetListAsync(GetDoctorWorkingHoursInput input)
+    public virtual Task<PagedResultDto<DoctorWorkingHoursDto>> GetListAsync(GetDoctorWorkingHoursInput input)
         => doctorWorkingHourAppService.GetListAsync(input);
 
     [HttpGet]
     [Route("{id}")]
-    public Task<DoctorWorkingHoursDto> GetAsync(Guid id)
+    public virtual Task<DoctorWorkingHoursDto> GetAsync(Guid id)
         => doctorWorkingHourAppService.GetAsync(id);
 
     [HttpDelete]
     [Route("")]
-    public Task DeleteByIdsAsync(List<Guid> ids)
+    public virtual Task DeleteByIdsAsync(List<Guid> ids)
         => doctorWorkingHourAppService.DeleteByIdsAsync(ids);
 
     [HttpDelete]
     [Route("{id}")]
-    public Task DeleteAsync(Guid id)
+    public virtual Task DeleteAsync(Guid id)
         => doctorWorkingHourAppService.DeleteAsync(id);
 }

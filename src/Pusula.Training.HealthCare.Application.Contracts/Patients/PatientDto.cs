@@ -12,7 +12,8 @@ public class PatientDto : FullAuditedEntityDto<Guid>, IHasConcurrencyStamp
     public string LastName { get; set; } = null!;
     public string? MothersName { get; set; }
     public string? FathersName { get; set; }
-    public string IdentityAndPassportNumber { get; set; } = null!;
+    public string IdentityNumber { get; set; } = null!;
+    public string? PassportNumber { get; set; }
     public string? Nationality { get; set; } 
     public DateTime BirthDate { get; set; }
     public string? EmailAddress { get; set; }

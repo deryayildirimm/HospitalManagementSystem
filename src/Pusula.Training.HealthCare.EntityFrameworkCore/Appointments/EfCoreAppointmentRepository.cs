@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Pusula.Training.HealthCare.AppointmentTypes;
-using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
-using Pusula.Training.HealthCare.MedicalServices;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.Patients;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -51,6 +51,26 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
 
         var ids = query.Select(x => x.Id);
         await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
+    }
+
+    public virtual async Task<Appointment> GetByDateAsync(
+        Guid doctorId,
+        Guid medicalServiceId,
+        DateTime startTime,
+        DateTime endTime,
+        DateTime appointmentDate,
+        CancellationToken cancellationToken = default)
+    {
+        var query = ApplyFilter((await GetQueryForNavigationPropertiesAsync()),
+            doctorId: doctorId,
+            medicalServiceId: medicalServiceId,
+            appointmentDate:appointmentDate,
+            startTime:startTime,
+            endTime: endTime);
+
+        var appointment = await query.FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.AppointmentNotFound, appointment is null);
+        return appointment!;
     }
 
     public virtual async Task<List<Appointment>> GetListAsync(
@@ -115,7 +135,8 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         return await query.LongCountAsync(cancellationToken);
     }
 
-    public virtual async Task<long> GetGroupCountByDepartmentsAsync(
+    public virtual async Task<long> GetGroupCountByAsync(
+        string groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
@@ -144,12 +165,13 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             reminderSent,
             minAmount, maxAmount);
 
-        return await query
-            .GroupBy(a => a.Department.Id)
-            .LongCountAsync(cancellationToken);
+        var groupedQuery = ApplyDynamicGrouping(query, groupByField);
+
+        return await groupedQuery.LongCountAsync(cancellationToken);
     }
 
-    public virtual async Task<List<DepartmentAppointmentCount>> GetGroupByDepartmentsAsync(
+    public virtual async Task<List<GroupedAppointmentCount>> GetGroupByListAsync(
+        string groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
@@ -181,15 +203,12 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             reminderSent,
             minAmount, maxAmount);
 
-        return await query
-            .GroupBy(a => a.Department.Id)
-            .Select(g => new DepartmentAppointmentCount
-            {
-                DepartmentId = g.Key,
-                DepartmentName = g.First().Department.Name,
-                AppointmentCount = g.Count()
-            })
-            .OrderBy(d => d.DepartmentName)
+        var groupedQuery = ApplyDynamicGrouping(query, groupByField);
+
+        return await groupedQuery
+            .OrderBy(string.IsNullOrWhiteSpace(sorting)
+                ? AppointmentConsts.GetGroupDefaultSorting(false)
+                : sorting)
             .PageBy(skipCount, maxResultCount)
             .ToListAsync(cancellationToken);
     }
@@ -209,6 +228,19 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
     #endregion
 
     #region ApplyFilter
+
+    protected virtual IQueryable<Appointment> ApplyFilter(
+        IQueryable<Appointment> query,
+        Guid doctorId,
+        Guid medicalServiceId,
+        DateTime startTime,
+        DateTime endTime,
+        DateTime appointmentDate) =>
+        query
+            .Where(x => x.DoctorId == doctorId)
+            .Where(x => x.MedicalServiceId == medicalServiceId)
+            .Where(x => x.AppointmentDate.Date == appointmentDate.Date)
+            .Where(x => x.StartTime >= startTime && x.EndTime <= endTime);
 
     protected virtual IQueryable<Appointment> ApplyFilter(
         IQueryable<Appointment> query,
@@ -269,14 +301,14 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             .WhereIf(appointmentTypeId.HasValue, e => e.AppointmentTypeId == appointmentTypeId)
             .WhereIf(departmentId.HasValue, x => x.DepartmentId == departmentId)
             .WhereIf(!string.IsNullOrWhiteSpace(patientName), x =>
-                x.Patient.FirstName.ToLower().Contains(patientName!.ToLower()) ||
-                x.Patient.LastName.ToLower().Contains(patientName!.ToLower()))
+                EF.Functions.ILike(x.Patient.FirstName, $"%{patientName}%") ||
+                EF.Functions.ILike(x.Patient.LastName, $"%{patientName}%"))
             .WhereIf(!string.IsNullOrWhiteSpace(doctorName), x =>
-                x.Doctor.FirstName.ToLower().Contains(doctorName!.ToLower()) ||
-                x.Doctor.LastName.ToLower().Contains(doctorName!.ToLower()))
+                EF.Functions.ILike(x.Doctor.FirstName, $"%{doctorName}%") ||
+                EF.Functions.ILike(x.Doctor.LastName, $"%{doctorName}%"))
             .WhereIf(!string.IsNullOrWhiteSpace(serviceName), x =>
-                x.MedicalService.Name.ToLower().Contains(serviceName!.ToLower()) ||
-                x.MedicalService.Name.ToLower().Contains(serviceName!.ToLower()))
+                EF.Functions.ILike(x.MedicalService.Name, $"%{serviceName}%") ||
+                EF.Functions.ILike(x.Doctor.LastName, $"%{serviceName}%"))
             .WhereIf(patientNumber.HasValue, x => x.Patient.PatientNumber == patientNumber)
             .WhereIf(patientType.HasValue, x => x.Patient.PatientType == patientType)
             .WhereIf(appointmentMinDate.HasValue,
@@ -291,6 +323,85 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
                 e => e.Amount >= minAmount!.Value)
             .WhereIf(maxAmount.HasValue,
                 e => e.Amount <= maxAmount!.Value);
+
+    #endregion
+
+    #region DynamicGroupByQuery
+
+    private static IQueryable<GroupedAppointmentCount> ApplyDynamicGrouping(
+        IQueryable<Appointment> query,
+        string groupByField)
+    {
+        return groupByField switch
+        {
+            "Department" => query.GroupBy(a => a.DepartmentId)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToString(), GroupName = g.First().Department.Name, AppointmentCount = g.Count()
+                }),
+            "Service" => query.GroupBy(a => a.MedicalServiceId)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToString(), GroupName = g.First().MedicalService.Name, AppointmentCount = g.Count()
+                }),
+            "Doctor" => query.GroupBy(a => a.DoctorId)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToString(),
+                    GroupName =
+                        $"{g.First().Doctor.Title.TitleName} {g.First().Doctor.FirstName} {g.First().Doctor.LastName}",
+                    AppointmentCount = g.Count()
+                }),
+            "Status" => query.GroupBy(a => a.DoctorId)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToString(),
+                    GroupName = g.First().Status.ToString(),
+                    AppointmentCount = g.Count()
+                }),
+            "Date" => query.GroupBy(a => a.AppointmentDate.Date)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToShortDateString(),
+                    GroupName = g.Key.ToShortDateString(),
+                    AppointmentCount = g.Count()
+                }),
+            "AppointmentType" => query.GroupBy(a => a.AppointmentTypeId)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToString(),
+                    GroupName = g.First().AppointmentType.Name,
+                    AppointmentCount = g.Count()
+                }),
+            "RevenueByService" => query.GroupBy(a => a.MedicalServiceId)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToString(),
+                    GroupName = g.First().MedicalService.Name,
+                    AppointmentCount = (int)g.Sum(x => x.Amount)
+                }),
+            "RevenueByDepartment" => query.GroupBy(a => a.DepartmentId)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToString(),
+                    GroupName = g.First().Department.Name,
+                    AppointmentCount = (int)g.Sum(x => x.Amount)
+                }),
+            "PatientGender" => query.GroupBy(a => a.Patient.DiscountGroup)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key!.ToString(),
+                    GroupName = g.First().Patient.Gender.ToString(),
+                    AppointmentCount = g.Count()
+                }),
+            //Group by department by default
+            _ => query.GroupBy(a => a.DepartmentId)
+                .Select(g => new GroupedAppointmentCount
+                {
+                    GroupKey = g.Key.ToString(), GroupName = g.First().Department.Name, AppointmentCount = g.Count()
+                })
+        };
+    }
 
     #endregion
 }

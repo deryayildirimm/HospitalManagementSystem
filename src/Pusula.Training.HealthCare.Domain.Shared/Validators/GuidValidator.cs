@@ -5,10 +5,10 @@ namespace Pusula.Training.HealthCare.Validators;
 
 public class GuidValidator : ValidationAttribute
 {
-    public GuidValidator() : base("The GUID field cannot be empty or default.")
+    public GuidValidator() : base(HealthCareDomainErrorKeyValuePairs.GuidRequired.Value)
     {
     }
-    
+
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
         if (value == null)
@@ -18,12 +18,11 @@ public class GuidValidator : ValidationAttribute
 
         if (value is Guid guidValue)
         {
-            return guidValue == Guid.Empty || guidValue == default(Guid)
+            return guidValue == Guid.Empty
                 ? new ValidationResult(ErrorMessage)
                 : ValidationResult.Success;
         }
 
-        return new ValidationResult("The provided value is not a valid GUID.");
+        return new ValidationResult(HealthCareDomainErrorKeyValuePairs.GuidNotValid.Value);
     }
-    
 }

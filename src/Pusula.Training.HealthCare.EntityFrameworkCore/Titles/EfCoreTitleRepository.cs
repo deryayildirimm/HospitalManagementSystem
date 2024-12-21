@@ -30,7 +30,7 @@ public class EfCoreTitleRepository(IDbContextProvider<HealthCareDbContext> dbCon
         string? filterText = null, 
         string? titleName = null, 
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
@@ -43,7 +43,7 @@ public class EfCoreTitleRepository(IDbContextProvider<HealthCareDbContext> dbCon
         string? filterText = null, 
         string? titleName = null, 
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {

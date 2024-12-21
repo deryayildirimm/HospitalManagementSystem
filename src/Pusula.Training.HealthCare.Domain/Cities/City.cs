@@ -8,7 +8,7 @@ namespace Pusula.Training.HealthCare.Cities;
 public class City : FullAuditedAggregateRoot<Guid>
 {
     [NotNull]
-    public string Name { get; protected set; }
+    public string Name { get; private set; } = null!;
 
     protected City()
     {
@@ -17,14 +17,13 @@ public class City : FullAuditedAggregateRoot<Guid>
 
     public City(Guid id, string name)
     {
-        Check.NotNullOrWhiteSpace(name, nameof(name), CityConsts.NameMaxLength, CityConsts.NameMinLength);
-
         Id = id;
-        Name = name;
+        SetName(name);
     }
 
     public void SetName(string name)
     {
+        Check.NotNullOrWhiteSpace(name, nameof(name), CityConsts.NameMaxLength, CityConsts.NameMinLength);
         Name = name;
     }
 }

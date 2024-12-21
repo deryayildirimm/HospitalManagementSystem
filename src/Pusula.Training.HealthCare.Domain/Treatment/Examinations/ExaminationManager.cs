@@ -48,21 +48,12 @@ public class ExaminationManager(
             startDate,
             story
         );
-        
+
         var newExamination = await examinationRepository.InsertAsync(examination);
         await unitOfWorkManager.Current!.SaveChangesAsync();
-        
-        var icds = await icdRepository.GetListAsync(x => icdIds.Contains(x.Id));
-        foreach (var icd in icds)
-        {
-            var examinationIcd = new ExaminationIcd
-            {
-                ExaminationId = examination.Id,
-                IcdId = icd.Id,
-            };
-            examination.ExaminationIcd.Add(examinationIcd);
-        }
-        
+
+        await AddExaminationIcd(icdIds, examination);
+
         await familyHistoryManager.CreateAsync(newExamination.Id, areParentsRelated, motherDisease, fatherDisease,
             sisterDisease, brotherDisease);
         await backgroundManager.CreateAsync(newExamination.Id, allergies, medications, habits);
@@ -70,6 +61,21 @@ public class ExaminationManager(
         return await examinationRepository.GetAsync(newExamination.Id);
     }
 
+    private async Task AddExaminationIcd(List<Guid>? icdIds, Examination examination)
+    {
+        if (icdIds != null && icdIds.Count != 0)
+        {
+            var icds = await icdRepository.GetListAsync(x => icdIds.Contains(x.Id));
+            foreach (var icd in icds)
+            {
+                examination.AddIcd(new ExaminationIcd
+                {
+                    ExaminationId = examination.Id,
+                    IcdId = icd.Id,
+                });
+            }
+        }
+    }
 
     public virtual async Task<Examination> UpdateAsync(
         Guid id,
@@ -96,26 +102,41 @@ public class ExaminationManager(
 
         var examination = await examinationRepository.GetWithNavigationPropertiesAsync(id);
 
-        examination!.SetProtocolId(protocolId);
-        examination!.SetDate(date);
-        examination!.SetComplaint(complaint);
-        examination!.SetStartDate(startDate);
-        examination!.SetStory(story);
-        
-        var icds = await icdRepository.GetListAsync(x => icdIds.Contains(x.Id));
-        foreach (var icd in icds)
-        {
-            var examinationIcd = new ExaminationIcd
-            {
-                ExaminationId = examination.Id,
-                IcdId = icd.Id,
-            };
-            examination.ExaminationIcd.Add(examinationIcd);
-        }
+        Check.NotNull(examination, nameof(examination));
+
+        examination.SetProtocolId(protocolId);
+        examination.SetDate(date);
+        examination.SetComplaint(complaint);
+        examination.SetStartDate(startDate);
+        examination.SetStory(story);
+
+        await UpdateExaminationIcds(icdIds, examination);
+
         await familyHistoryManager.UpdateAsync(examination.FamilyHistory!.Id, id, areParentsRelated, motherDisease,
             fatherDisease, sisterDisease, brotherDisease);
         await backgroundManager.UpdateAsync(examination.Background!.Id, id, allergies, medications, habits);
 
         return await examinationRepository.UpdateAsync(examination);
+    }
+
+    private async Task UpdateExaminationIcds(List<Guid>? icdIds, Examination examination)
+    {
+        var currentIcdIds = examination.ExaminationIcd.Select(e => e.IcdId).ToList();
+        var newIcdIds = icdIds ?? new List<Guid>();
+
+        foreach (var icdId in currentIcdIds.Where(icdId => !newIcdIds.Contains(icdId)))
+        {
+            examination.RemoveIcd(icdId);
+        }
+
+        var icdsToAdd = await icdRepository.GetListAsync(x => newIcdIds.Contains(x.Id) && !currentIcdIds.Contains(x.Id));
+        foreach (var icd in icdsToAdd)
+        {
+            examination.AddIcd(new ExaminationIcd
+            {
+                ExaminationId = examination.Id,
+                IcdId = icd.Id,
+            });
+        }
     }
 }

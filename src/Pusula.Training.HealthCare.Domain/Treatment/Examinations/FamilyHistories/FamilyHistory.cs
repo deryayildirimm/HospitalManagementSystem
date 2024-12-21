@@ -7,14 +7,14 @@ namespace Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
 
 public class FamilyHistory : FullAuditedAggregateRoot<Guid>
 {
-    public string? MotherDisease { get; protected set; }
-    public string? FatherDisease { get; protected set; }
-    public string? SisterDisease { get; protected set; }
-    public string? BrotherDisease { get; protected set; }
+    public string? MotherDisease { get; private set; }
+    public string? FatherDisease { get; private set; }
+    public string? SisterDisease { get; private set; }
+    public string? BrotherDisease { get; private set; }
     [NotNull]
-    public bool AreParentsRelated { get; protected set; }
-    public Guid ExaminationId { get; protected set; }
-    public Examination Examination { get; set; }
+    public bool AreParentsRelated { get; private set; }
+    public Guid ExaminationId { get; private set; }
+    public Examination Examination { get; private set; } = null!;
 
     protected FamilyHistory()
     {

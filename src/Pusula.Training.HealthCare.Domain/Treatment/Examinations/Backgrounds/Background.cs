@@ -6,11 +6,11 @@ namespace Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 
 public class Background : FullAuditedAggregateRoot<Guid>
 {
-    public string? Allergies { get; protected set; }
-    public string? Medications { get; protected set; }
-    public string? Habits { get; protected set; }
-    public Guid ExaminationId { get; protected set; }
-    public Examination Examination { get; protected set; }
+    public string? Allergies { get; private set; }
+    public string? Medications { get; private set; }
+    public string? Habits { get; private set; }
+    public Guid ExaminationId { get; private set; }
+    public Examination Examination { get; private set; } = null!;
 
     protected Background()
     {

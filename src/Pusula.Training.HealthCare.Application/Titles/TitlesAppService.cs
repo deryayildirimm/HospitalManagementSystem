@@ -32,7 +32,7 @@ public class TitlesAppService(ITitleRepository titleRepository,
     }
 
     [Authorize(HealthCarePermissions.Titles.Delete)]
-    public virtual async void DeleteAsync(Guid id)
+    public virtual async Task DeleteAsync(Guid id)
     {
         await titleRepository.DeleteAsync(id);
     }

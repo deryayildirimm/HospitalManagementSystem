@@ -20,7 +20,8 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
-        string? identityAndPassportNumber = null,
+        string? identityNumber = null,
+        string? passportNumber = null,
         string? nationality = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
@@ -33,7 +34,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
     {
         var query = await GetQueryableAsync();
 
-        query = ApplyFilter(query, filterText, patientNumber, firstName, lastName, identityAndPassportNumber, nationality, birthDateMin, birthDateMax, 
+        query = ApplyFilter(query, filterText, patientNumber, firstName, lastName, identityNumber, passportNumber, nationality, birthDateMin, birthDateMax, 
             emailAddress, mobilePhoneNumber, patientType, discountGroup, gender);
 
         var ids = query.Select(x => x.Id);
@@ -45,7 +46,8 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
-        string? identityAndPassportNumber = null,
+        string? identityNumber = null,
+        string? passportNumber = null,
         string? nationality = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
@@ -60,7 +62,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), filterText, patientNumber, firstName, lastName, identityAndPassportNumber, nationality, birthDateMin, 
+        var query = ApplyFilter((await GetQueryableAsync()), filterText, patientNumber, firstName, lastName, identityNumber, passportNumber, nationality, birthDateMin, 
             birthDateMax, emailAddress, mobilePhoneNumber, patientType, discountGroup, gender, isDeleted);
       query = query.OrderBy(e => e.IsDeleted) // IsDeleted'e göre önce sıralama
           .ThenByDescending(e => e.CreationTime) // IsDeleted içindeki her grupta en son oluşturulan en başta görünsün
@@ -94,7 +96,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         var dbContext = await GetDbContextAsync();
 
        var patient =  await dbContext.Patients
-            .Where(a => a.IdentityAndPassportNumber == identityNumber)
+            .Where(a => a.IdentityNumber == identityNumber)
             .FirstOrDefaultAsync(cancellationToken);
         
        HealthCareGlobalException.ThrowIf(
@@ -111,7 +113,8 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
-        string? identityAndPassportNumber = null,
+        string? identityNumber = null,
+        string? passportNumber = null,
         string? nationality = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
@@ -123,7 +126,7 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         bool? isDeleted = null,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetDbSetAsync()), filterText, patientNumber, firstName, lastName, identityAndPassportNumber, nationality, birthDateMin, birthDateMax, 
+        var query = ApplyFilter((await GetDbSetAsync()), filterText, patientNumber, firstName, lastName, identityNumber, passportNumber, nationality, birthDateMin, birthDateMax, 
             emailAddress, mobilePhoneNumber, patientType, discountGroup, gender, isDeleted);
         return await query.LongCountAsync(GetCancellationToken(cancellationToken));
     }
@@ -134,7 +137,8 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         int? patientNumber = null,
         string? firstName = null,
         string? lastName = null,
-        string? identityAndPassportNumber = null,
+        string? identityNumber = null,
+        string? passportNumber = null,
         string? nationality = null,
         DateTime? birthDateMin = null,
         DateTime? birthDateMax = null,
@@ -150,12 +154,13 @@ public class EfCorePatientRepository(IDbContextProvider<HealthCareDbContext> dbC
         
         return query
             .WhereIf(!string.IsNullOrWhiteSpace(filterText),
-                e => e.FirstName.Contains(filterText!) || e.LastName.Contains(filterText!) ||
-                     e.IdentityAndPassportNumber!.Contains(filterText!) || e.EmailAddress!.Contains(filterText!) ||
+                e => EF.Functions.ILike(e.FirstName, $"%{filterText}%") || EF.Functions.ILike(e.LastName, $"%{filterText}%") ||
+                     e.IdentityNumber!.Contains(filterText!) || e.EmailAddress!.Contains(filterText!) ||
                      e.MobilePhoneNumber!.Contains(filterText!))
-            .WhereIf(!string.IsNullOrWhiteSpace(firstName), e => e.FirstName.ToLower().Contains(firstName!.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(lastName), e => e.LastName.ToLower().Contains(lastName!.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(identityAndPassportNumber), e => e.IdentityAndPassportNumber.Contains(identityAndPassportNumber!))
+            .WhereIf(!string.IsNullOrWhiteSpace(firstName), e => EF.Functions.ILike(e.FirstName, $"%{firstName}%"))
+            .WhereIf(!string.IsNullOrWhiteSpace(lastName), e => EF.Functions.ILike(e.LastName, $"%{lastName}%"))
+            .WhereIf(!string.IsNullOrWhiteSpace(identityNumber), e => e.IdentityNumber!.Contains(identityNumber!))
+            .WhereIf(!string.IsNullOrWhiteSpace(passportNumber), e => e.PassportNumber!.Contains(passportNumber!))
             .WhereIf(birthDateMin.HasValue, e => e.BirthDate >= birthDateMin!.Value)
             .WhereIf(birthDateMax.HasValue, e => e.BirthDate <= birthDateMax!.Value)
             .WhereIf(!string.IsNullOrWhiteSpace(emailAddress), e => e.EmailAddress!.Contains(emailAddress!))

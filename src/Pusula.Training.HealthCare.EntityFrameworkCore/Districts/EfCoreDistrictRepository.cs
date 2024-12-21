@@ -34,10 +34,10 @@ public class EfCoreDistrictRepository(IDbContextProvider<HealthCareDbContext> db
         var dbContext = await GetDbContextAsync();
 
         return (await GetDbSetAsync()).Where(b => b.Id == id)
-            .Select(doctor => new DistrictWithNavigationProperties
+            .Select(district => new DistrictWithNavigationProperties
             {
-                District = doctor,
-                City = dbContext.Set<City>().FirstOrDefault(c => c.Id == doctor.CityId)!
+                District = district,
+                City = dbContext.Set<City>().FirstOrDefault(c => c.Id == district.CityId)!
             })
             .FirstOrDefault()!;
     }
@@ -64,7 +64,7 @@ public class EfCoreDistrictRepository(IDbContextProvider<HealthCareDbContext> db
         string? name = null,
         Guid? cityId = null,
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
@@ -92,35 +92,32 @@ public class EfCoreDistrictRepository(IDbContextProvider<HealthCareDbContext> db
             IQueryable<District> query,
             string? filterText = null, 
             string? name = null,
-            Guid? cityId = null,
-            List<Guid>? cityIds = null) =>
-            query
-                .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Name!.ToLower().Contains(filterText!.ToLower()))
-                .WhereIf(!string.IsNullOrWhiteSpace(name), e => e.Name!.ToLower().Contains(name!.ToLower()))
-                .WhereIf(cityId.HasValue, e => e.CityId == cityId);
-
-        protected virtual async Task<IQueryable<DistrictWithNavigationProperties>> GetQueryForNavigationPropertiesAsync() =>
-            from doctor in (await GetDbSetAsync())
-            join city in (await GetDbContextAsync()).Set<City>() on doctor.CityId equals city.Id into cities
-            from city in cities.DefaultIfEmpty()
-            select new DistrictWithNavigationProperties
-            {
-                District = doctor,
-                City = city
-            };
-
-
-        protected virtual IQueryable<DistrictWithNavigationProperties> ApplyFilter(
-            IQueryable<DistrictWithNavigationProperties> query,
-            string? filterText = null,
-            string? name = null,
             Guid? cityId = null) =>
             query
-                .WhereIf(!string.IsNullOrWhiteSpace(filterText),
-                    e => e.District.Name!.ToLower().Contains(filterText!.ToLower()))
-                .WhereIf(!string.IsNullOrWhiteSpace(name),
-                    e => e.District.Name!.ToLower().Contains(name!.ToLower()))
-                .WhereIf(cityId.HasValue, e => e.City.Id == cityId);
+                .Where(e => EF.Functions.ILike(e.Name, $"%{filterText}%"))
+                .Where(e => EF.Functions.ILike(e.Name, $"%{name}%"))
+                .WhereIf(cityId.HasValue, e => e.CityId.Equals(cityId));
 
-        #endregion
+    protected virtual async Task<IQueryable<DistrictWithNavigationProperties>> GetQueryForNavigationPropertiesAsync() =>
+        from district in (await GetDbSetAsync())
+        join city in (await GetDbContextAsync()).Set<City>() on district.CityId equals city.Id into cities
+        from city in cities.DefaultIfEmpty()
+        select new DistrictWithNavigationProperties
+        {
+            District = district,
+            City = city
+        };
+
+
+    protected virtual IQueryable<DistrictWithNavigationProperties> ApplyFilter(
+        IQueryable<DistrictWithNavigationProperties> query,
+        string? filterText = null,
+        string? name = null,
+        Guid? cityId = null) =>
+        query
+            .Where(e => EF.Functions.ILike(e.District.Name, $"%{filterText}%"))
+            .Where(e => EF.Functions.ILike(e.District.Name, $"%{name}%"))
+            .WhereIf(cityId.HasValue, e => e.City.Id.Equals(cityId));
+
+    #endregion
 }

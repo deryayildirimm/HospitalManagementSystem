@@ -74,3 +74,4 @@ stages:
               repository: 'medplus1/medplusproject'
               command: 'push'
               tags: '$(imageTag)'
+

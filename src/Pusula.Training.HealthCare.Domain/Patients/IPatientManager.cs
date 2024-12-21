@@ -9,13 +9,13 @@ namespace Pusula.Training.HealthCare.Patients
 {
     public interface IPatientManager : IDomainService
     {
-        Task<Patient> CreateAsync(int patientNumber, string firstName, string lastName, DateTime birthDate, EnumGender gender, string identityAndPassportNumber,
+        Task<Patient> CreateAsync(int patientNumber, string firstName, string lastName, DateTime birthDate, EnumGender gender, string identityNumber, string passportNumber,
         string? nationality = null, string? mobilePhoneNumber = null, EnumPatientTypes? patientType = null, string? mothersName = null, string? fathersName = null,
         string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null);
 
-        Task<Patient> UpdateAsync(Guid id, bool isDeleted,
-        string firstName, string lastName, DateTime birthDate, EnumGender gender, string identityAndPassportNumber, string? nationality = null, string? mobilePhoneNumber = null,
-        EnumPatientTypes? patientType = null, string? mothersName = null, string? fathersName = null, string? emailAddress = null,
-        EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null, string? concurrencyStamp = null);
+        Task<Patient> UpdateAsync(Guid id, string firstName, string lastName, DateTime birthDate, EnumGender gender, string identityNumber, string? passportNumber, 
+            string? nationality = null, string? mobilePhoneNumber = null, EnumPatientTypes? patientType = null, string? mothersName = null, string? fathersName = null, 
+            string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null, 
+            string? concurrencyStamp = null);
     }
 }

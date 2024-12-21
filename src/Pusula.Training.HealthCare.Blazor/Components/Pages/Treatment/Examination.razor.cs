@@ -145,11 +145,6 @@ public partial class Examination
         if (icd != null && !SelectedIcds.Any(i => i.Id == icd.Id))
         {
             SelectedIcds.Add(icd);
-            EditingExamination.ExaminationIcd.Add(new ExaminationIcdDto
-            {
-                ExaminationId = EditingExamination.Id,
-                IcdId = icd.Id
-            });
         }
     }
 
@@ -159,11 +154,6 @@ public partial class Examination
         if (icd != null)
         {
             SelectedIcds.Remove(icd);
-            var examinationIcd = EditingExamination.ExaminationIcd.FirstOrDefault(e => e.IcdId == icdId);
-            if (examinationIcd != null)
-            {
-                EditingExamination.ExaminationIcd.Remove(examinationIcd);
-            }
         }
     }
 }

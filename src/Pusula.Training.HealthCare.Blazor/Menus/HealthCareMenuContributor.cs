@@ -126,6 +126,15 @@ public class HealthCareMenuContributor : IMenuContributor
                 icon: "fa fa-user-md",
                 requiredPermissionName: HealthCarePermissions.Doctors.Default)
         );
+        
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
+                HealthCareMenus.DoctorLeaves,
+                l["Menu:DoctorLeaves"],
+                url: "/doctor-leaves",
+                icon: "fa fa-user-md",
+                requiredPermissionName: HealthCarePermissions.DoctorLeaves.Default)
+        );
 
         context.Menu.AddItem(
             new ApplicationMenuItem(
@@ -230,7 +239,8 @@ public class HealthCareMenuContributor : IMenuContributor
             new ApplicationMenuItem(
                     name: HealthCareMenus.Treatment,
                     displayName: l["Menu:Treatment"],
-                    icon: "fa-solid fa-medkit"
+                    icon: "fa-solid fa-medkit",
+                    requiredPermissionName: HealthCarePermissions.Treatment.Default
                 )
                 .AddItem(
                     new ApplicationMenuItem(

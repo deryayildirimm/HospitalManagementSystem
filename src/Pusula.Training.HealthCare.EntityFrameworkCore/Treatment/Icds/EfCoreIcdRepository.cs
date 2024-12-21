@@ -33,13 +33,13 @@ public class EfCoreIcdRepository(IDbContextProvider<HealthCareDbContext> dbConte
         string? codeNumber = null, 
         string? detail = null, 
         string? sorting = null, 
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
         var query = ApplyFilter((await GetQueryableAsync()), filterText, codeNumber, detail);
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? IcdConsts.GetDefaultSorting(false) : sorting);
-        return await query.PageBy(skipCount, maxResultCount).ToListAsync(cancellationToken);
+        return await query.PageBy(skipCount, maxResultCount).ToListAsync(GetCancellationToken(cancellationToken));
     }
 
     public virtual async Task<long> GetCountAsync(
@@ -47,7 +47,7 @@ public class EfCoreIcdRepository(IDbContextProvider<HealthCareDbContext> dbConte
         string? codeNumber = null, 
         string? detail = null, 
         string? sorting = null, 
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
@@ -62,10 +62,9 @@ public class EfCoreIcdRepository(IDbContextProvider<HealthCareDbContext> dbConte
         string? detail = null)
     {
         return query
-            .WhereIf(!string.IsNullOrWhiteSpace(filterText), e =>  e.CodeNumber.ToUpper().Contains(filterText!.ToUpper()) 
-                                                                  || e.Detail.ToLower().Contains(filterText!.ToLower())
-                                                                  || filterText!.ToLower().Contains(e.Detail.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(codeNumber), e => e.CodeNumber.ToUpper().Contains(codeNumber!.ToUpper()))
-            .WhereIf(!string.IsNullOrWhiteSpace(detail), e => e.Detail.ToLower().Contains(detail!.ToLower()));
+            .Where(e => EF.Functions.ILike(e.CodeNumber, $"%{filterText}%")
+                || EF.Functions.ILike(e.Detail, $"%{filterText}%"))
+            .Where(e => EF.Functions.ILike(e.CodeNumber, $"%{codeNumber}%"))
+            .Where(e => EF.Functions.ILike(e.Detail, $"%{detail}%"));
     }
 }

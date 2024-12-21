@@ -60,8 +60,7 @@ public class MedicalServiceManager(
         Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue,
             MedicalServiceConsts.DurationMaxValue);
 
-        var service = await medicalServiceRepository.FirstOrDefaultAsync(x => x.Id == id);
-
+        var service = await medicalServiceRepository.GetWithDetailsAsync(id);
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.MedicalServiceNotFound, service is null);
 
         service!.SetName(name);
@@ -87,6 +86,8 @@ public class MedicalServiceManager(
 
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DepartmentNotFound,
             departmentIds.Count == 0);
+        
+        service.RemoveAllDepartmentsExceptGivenIds(departmentIds);
 
         foreach (var id in departmentIds)
         {

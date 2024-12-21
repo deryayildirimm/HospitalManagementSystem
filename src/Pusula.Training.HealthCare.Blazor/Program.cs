@@ -6,14 +6,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-//using Pusula.Training.HealthCare.Blazor.Components.Services;
 using Pusula.Training.HealthCare.Blazor.Services;
+using Pusula.Training.HealthCare.Blazor.Services.Treatment;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
 using Syncfusion.Blazor;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Pusula.Training.HealthCare.Blazor;
 
@@ -68,6 +67,11 @@ public class Program
             builder.Services.AddScoped<AppointmentTypeAdaptor>();
             builder.Services.AddScoped<AppointmentStatisticsAdaptor>();
             builder.Services.AddScoped<AppointmentAdaptor>();
+            builder.Services.AddScoped<DoctorLeaveAdaptor>();
+            builder.Services.AddScoped<IcdAdaptor>();
+            builder.Services.AddScoped<IcdReportAdaptor>();
+            builder.Services.AddScoped<DoctorAdaptor>();
+            builder.Services.AddScoped<MedicalStaffAdaptor>();
             builder.Services.AddScoped<ProtocolAdaptor>();
             builder.Services.AddScoped<ProtocolTypeAdaptor>();
             builder.Services.AddScoped<ProtocolDepartmentStatisticsAdaptor>();
