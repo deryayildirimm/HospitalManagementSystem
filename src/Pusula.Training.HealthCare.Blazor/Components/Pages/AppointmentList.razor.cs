@@ -24,11 +24,13 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
 public partial class AppointmentList : HealthCareComponentBase
 {
+    public PrintMode PrintMode { get; set; } = PrintMode.CurrentPage;
     private Query FilterQuery { get; set; }
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private SfGrid<AppointmentDto> Grid { get; set; }
     private List<SlotDropdownItem> AppointmentSlots { get; set; }
     private int PageSize { get; } = 5;
+    private string[] PageSizes { get; set; }
     private int LookupPageSize { get; } = 100;
     private int CurrentPage { get; set; } = 1;
     private string CurrentSorting { get; set; } = string.Empty;
@@ -57,7 +59,8 @@ public partial class AppointmentList : HealthCareComponentBase
 
     public AppointmentList()
     {
-        ToolbarItems = ["Add", "Delete", "Edit", "ExcelExport"];
+        ToolbarItems = ["Add", "Delete", "Edit", "ExcelExport", "Print"];
+        PageSizes = ["5", "10", "15", "20"];
         SelectedSlot = new SlotDropdownItem();
         Grid = new SfGrid<AppointmentDto>();
         DeleteConfirmDialog = new SfDialog();
@@ -108,18 +111,12 @@ public partial class AppointmentList : HealthCareComponentBase
     {
         if (firstRender)
         {
-            await SetToolbarItemsAsync();
             await Grid.EnableToolbarItemsAsync(["Delete"], false);
             await Refresh();
             await InvokeAsync(StateHasChanged);
         }
     }
 
-    protected virtual ValueTask SetToolbarItemsAsync()
-    {
-        Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
-        return ValueTask.CompletedTask;
-    }
 
     private async Task SetPermissionsAsync()
     {
@@ -194,16 +191,18 @@ public partial class AppointmentList : HealthCareComponentBase
                 }
                 case "Delete":
                 {
+                    args.Cancel = true;
                     await DeleteAppointmentsAsync();
                     break;
                 }
                 case "Excel Export":
                 {
-                    var exportProperties = new ExcelExportProperties
-                    {
-                        IncludeTemplateColumn = true
-                    };
-                    await Grid.ExportToExcelAsync(exportProperties);
+                    await DownloadAsExcelAsync();
+                    break;
+                }
+                case "Print":
+                {
+                    await Grid.PrintAsync();
                     break;
                 }
             }

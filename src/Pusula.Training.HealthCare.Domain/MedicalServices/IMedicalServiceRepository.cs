@@ -18,13 +18,14 @@ public interface IMedicalServiceRepository : IRepository<MedicalService, Guid>
         DateTime? serviceDateMax = null,
         CancellationToken cancellationToken = default
     );
-    
+
     Task<MedicalService?> GetWithDetailsAsync(
         Guid departmentId,
         CancellationToken cancellationToken = default
     );
 
     Task<List<MedicalService>> GetListAsync(
+        Guid? departmentId = null,
         string? name = null,
         double? costMin = null,
         double? costMax = null,
@@ -35,7 +36,7 @@ public interface IMedicalServiceRepository : IRepository<MedicalService, Guid>
         int skipCount = 0,
         CancellationToken cancellationToken = default
     );
-    
+
     Task<List<MedicalServiceWithDepartments>> GetMedicalServiceWithDepartmentsAsync(
         string? name = null,
         double? costMin = null,
@@ -67,7 +68,7 @@ public interface IMedicalServiceRepository : IRepository<MedicalService, Guid>
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
         CancellationToken cancellationToken = default);
-    
+
     Task<List<DoctorWithDetails>> GetMedicalServiceDoctorsAsync(
         Guid medicalServiceId,
         Guid? departmentId,
@@ -75,8 +76,9 @@ public interface IMedicalServiceRepository : IRepository<MedicalService, Guid>
         int maxResultCount = int.MaxValue,
         int skipCount = 0,
         CancellationToken cancellationToken = default);
-    
+
     Task<long> GetCountAsync(
+        Guid? departmentId = null,
         string? name = null,
         double? costMin = null,
         double? costMax = null,
@@ -84,5 +86,4 @@ public interface IMedicalServiceRepository : IRepository<MedicalService, Guid>
         DateTime? serviceDateMax = null,
         CancellationToken cancellationToken = default
     );
-    
 }

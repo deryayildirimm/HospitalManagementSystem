@@ -30,12 +30,20 @@ public class MedicalServicesAppService(
     public virtual async Task<PagedResultDto<MedicalServiceDto>> GetListAsync(GetMedicalServiceInput input)
     {
         var totalCount =
-            await medicalServiceRepository.GetCountAsync(input.Name, input.CostMin, input.CostMax, input.ServiceDateMin,
+            await medicalServiceRepository.GetCountAsync(
+                input.DepartmentId, input.Name, input.CostMin, input.CostMax, input.ServiceDateMin,
                 input.ServiceDateMax);
 
-        var items = await medicalServiceRepository.GetListAsync(input.Name,
-            input.CostMin, input.CostMax, input.ServiceDateMin, input.ServiceDateMax, input.Sorting,
-            input.MaxResultCount, input.SkipCount);
+        var items = await medicalServiceRepository.GetListAsync(
+            input.DepartmentId,
+            input.Name,
+            input.CostMin,
+            input.CostMax,
+            input.ServiceDateMin,
+            input.ServiceDateMax,
+            input.Sorting,
+            input.MaxResultCount,
+            input.SkipCount);
 
         return new PagedResultDto<MedicalServiceDto>
         {
@@ -62,7 +70,8 @@ public class MedicalServicesAppService(
         GetMedicalServiceInput input)
     {
         var totalCount =
-            await medicalServiceRepository.GetCountAsync(input.Name, input.CostMin, input.CostMax, input.ServiceDateMin,
+            await medicalServiceRepository.GetCountAsync(
+                input.DepartmentId, input.Name, input.CostMin, input.CostMax, input.ServiceDateMin,
                 input.ServiceDateMax);
 
         var items = await medicalServiceRepository.GetMedicalServiceWithDepartmentsAsync(input.Name,
@@ -163,7 +172,8 @@ public class MedicalServicesAppService(
             throw new AbpAuthorizationException("Invalid download token: " + input.DownloadToken);
         }
 
-        var items = await medicalServiceRepository.GetListAsync(input.MedicalServiceName,
+        var items = await medicalServiceRepository.GetListAsync(input.DepartmentId,
+            input.MedicalServiceName,
             input.CostMin, input.CostMax, input.ServiceDateMin, input.ServiceDateMax);
 
         var memoryStream = new MemoryStream();

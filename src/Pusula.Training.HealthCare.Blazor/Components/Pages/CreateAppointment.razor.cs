@@ -23,6 +23,7 @@ public partial class CreateAppointment : HealthCareComponentBase
     private int LookupPageSize { get; } = 100;
     private bool IsDoctorsEnabled { get; set; }
     private IReadOnlyList<LookupDto<Guid>> AppointmentTypesCollection { get; set; }
+    private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
     private IReadOnlyList<MedicalServiceDto> MedicalServiceCollection { get; set; }
     private IReadOnlyList<DoctorLookupDto> DoctorsCollection { get; set; }
     private IReadOnlyList<AppointmentCustomData> SlotItems { get; set; }
@@ -38,9 +39,6 @@ public partial class CreateAppointment : HealthCareComponentBase
     private int ServicePageSize { get; } = 50;
     private int ServiceCurrentPage { get; set; } = 1;
     private string ServiceCurrentSorting { get; set; } = string.Empty;
-    private int DoctorPageSize { get; } = 50;
-    private int DoctorCurrentPage { get; set; } = 1;
-    private string DoctorCurrentSorting { get; set; } = string.Empty;
     private AppointmentCreateDto NewAppointment { get; set; }
     private AppointmentUpdateDto EditingAppointment { get; set; }
     private int AppointmentPageSize { get; set; } = 50;
@@ -103,6 +101,7 @@ public partial class CreateAppointment : HealthCareComponentBase
         DaysLookupList = [];
         PatientCollection = [];
         DoctorsCollection = [];
+        DepartmentsCollection = [];
         IsDoctorsEnabled = false;
         IsVisibleSearchPatient = false;
         IsCreateAppointmentOpen = false;
@@ -168,6 +167,11 @@ public partial class CreateAppointment : HealthCareComponentBase
         {
             AppointmentTypesCollection =
                 (await LookupAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+
+            DepartmentsCollection =
+                (await LookupAppService.GetDepartmentLookupAsync(new LookupRequestDto
                     { MaxResultCount = LookupPageSize }))
                 .Items;
         }
@@ -526,12 +530,32 @@ public partial class CreateAppointment : HealthCareComponentBase
         }
     }
 
+    private async Task OnDepartmentChange(SelectEventArgs<LookupDto<Guid>> args)
+    {
+        try
+        {
+            NewAppointment.DepartmentId = args.ItemData.Id;
+            MedicalServiceFilter.DepartmentId = args.ItemData.Id;
+            IsDoctorsEnabled = false;
+            await GetMedicalServices();
+        }
+        catch (Exception e)
+        {
+            IsDoctorsEnabled = false;
+            await UiMessageService.Error(e.Message);
+        }
+        finally
+        {
+            NewAppointment.MedicalServiceId = Guid.Empty;
+            NewAppointment.DoctorId = Guid.Empty;
+        }
+    }
+
     private async void OnDoctorChange(SelectEventArgs<DoctorLookupDto> args)
     {
         try
         {
             NewAppointment.DoctorId = args.ItemData.Id;
-            NewAppointment.DepartmentId = args.ItemData.DepartmentId;
             DoctorNameInfo = args.ItemData.DisplayName;
             await GetAppointmentDays();
         }

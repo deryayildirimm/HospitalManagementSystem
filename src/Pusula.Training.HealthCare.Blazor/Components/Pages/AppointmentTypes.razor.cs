@@ -18,7 +18,8 @@ public partial class AppointmentTypes : HealthCareComponentBase
 {
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private SfGrid<AppointmentTypeDto> Grid { get; set; }
-    private int PageSize { get; } = 20;
+    private int PageSize { get; } = 5;
+    private string[] ToolbarItems { get; set; }
     private int CurrentPage { get; set; } = 1;
     private string CurrentSorting { get; set; } = string.Empty;
     private bool CanCreateType { get; set; }
@@ -33,9 +34,11 @@ public partial class AppointmentTypes : HealthCareComponentBase
     private bool IsDeleteDialogVisible { get; set; }
     private SfDialog DeleteConfirmDialog { get; set; }
     private bool Flag { get; set; }
+    private string[] PageSizes { get; set; }
 
     public AppointmentTypes()
     {
+        ToolbarItems = ["Search", "Delete"];
         DeleteConfirmDialog = new SfDialog();
         Grid = new SfGrid<AppointmentTypeDto>();
         NewType = new AppointmentTypeCreateDto();
@@ -51,6 +54,7 @@ public partial class AppointmentTypes : HealthCareComponentBase
         IsCreateDialogVisible = false;
         IsDeleteDialogVisible = false;
         Flag = false;
+        PageSizes = ["5", "10", "15", "20"];
     }
 
     protected override async Task OnInitializedAsync()

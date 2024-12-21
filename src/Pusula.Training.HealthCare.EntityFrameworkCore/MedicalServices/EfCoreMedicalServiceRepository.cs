@@ -44,6 +44,7 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
     }
 
     public virtual async Task<List<MedicalService>> GetListAsync(
+        Guid? departmentId = null,
         string? name = null,
         double? costMin = null,
         double? costMax = null,
@@ -54,7 +55,10 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), name,
+        var query = ApplyFilter((await GetQueryableAsync()),
+            medicalServiceId: null,
+            departmentId: departmentId,
+            name,
             costMin, costMax, serviceDateMin, serviceDateMax);
 
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting)
@@ -183,6 +187,7 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
     }
 
     public virtual async Task<long> GetCountAsync(
+        Guid? departmentId = null,
         string? name = null,
         double? costMin = null,
         double? costMax = null,
@@ -190,8 +195,14 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         DateTime? serviceDateMax = null,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetDbSetAsync()), name,
-            costMin, costMax, serviceDateMin, serviceDateMax);
+        var query = ApplyFilter((await GetDbSetAsync()),
+            medicalServiceId: null,
+            departmentId: departmentId,
+            name: name,
+            costMin: costMin,
+            costMax: costMax,
+            serviceDateMin: serviceDateMin,
+            serviceDateMax: serviceDateMax);
 
         return await query.LongCountAsync(cancellationToken);
     }

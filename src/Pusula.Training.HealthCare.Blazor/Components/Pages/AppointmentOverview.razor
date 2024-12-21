@@ -30,7 +30,7 @@
 </SfBreadcrumb>
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["AppointmentOverview"]">
-    <link href="/Components/Pages/AppointmentOverview.razor.css?version=1.2" rel="stylesheet"/>
+    <link href="/Components/Pages/AppointmentOverview.razor.css?version=1.24" rel="stylesheet"/>
 </PageHeader>
 
 <div class="row py-2 px-2">
@@ -173,7 +173,7 @@
         <div class="row py-2 px-2">
             <div class="col-12 border-1 bg-white rounded-1 p-4 d-flex flex-column gap-2">
                 <div class="d-flex gap-2 mb-2 text-center align-items-center">
-                    <h6 class="m-0">@L["NumberBy"] : </h6>
+                    <h6 class="m-0">@L["GroupBy"] : </h6>
                     <SfDropDownList
                         Width="120px"
                         TItem="EnumAppointmentGroupFilter"
@@ -198,7 +198,7 @@
                         AdaptorInstance="@typeof(AppointmentStatisticsAdaptor)"
                         Adaptor="Adaptors.CustomAdaptor">
                     </SfDataManager>
-                    <GridPageSettings PageSize="@PageSize"></GridPageSettings>
+                    <GridPageSettings PageSizes="@PageSizes" PageSize="@PageSize"></GridPageSettings>
                     <GridColumns>
                         <GridColumn Field="GroupName" HeaderText="@L["Name"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
                         <GridColumn Field="Number" HeaderText="@L["Number"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>

@@ -55,6 +55,7 @@ public partial class AppointmentOverview : HealthCareComponentBase
     private Query FilterQuery { get; set; }
     private string CurrentSorting { get; set; } = string.Empty;
     private int PageSize { get; } = 5;
+    private string[] PageSizes { get; set; }
     private int LookupPageSize { get; } = 100;
     private int CurrentPage { get; set; } = 1;
     private EnumAppointmentGroupFilter GroupByField { get; set; }
@@ -137,7 +138,7 @@ public partial class AppointmentOverview : HealthCareComponentBase
             MaxResultCount = PageSize,
             SkipCount = 0
         };
-
+        PageSizes = ["5", "10", "15", "20"];
         AppointmentTypesCollection = [];
         DepartmentsCollection = [];
         PatientTypeCollection = [];

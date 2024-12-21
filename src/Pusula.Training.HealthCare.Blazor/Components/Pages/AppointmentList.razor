@@ -33,7 +33,7 @@
     </BreadcrumbItems>
 </SfBreadcrumb>
 @* ************************* PAGE HEADER ************************* *@
-<PageHeader Title="@L["AppointmentList"]" Toolbar="Toolbar">
+<PageHeader Title="@L["AppointmentList"]">
     <link href="../Components/Pages/AppointmentList.razor.css?version=1.2" rel="stylesheet"/>
 </PageHeader>
 
@@ -133,6 +133,7 @@
             AllowPaging="true"
             AllowSorting="true"
             Toolbar="@ToolbarItems"
+            PrintMode="@PrintMode"
             Query="@FilterQuery">
             <GridSelectionSettings Type="SelectionType.Single"></GridSelectionSettings>
             <SfDataManager
@@ -152,7 +153,7 @@
                 AllowEditing="true"
                 AllowDeleting="@CanDeleteAppointment">
             </GridEditSettings>
-            <GridPageSettings PageSize="@PageSize"></GridPageSettings>
+            <GridPageSettings PageSizes="@PageSizes" PageSize="@PageSize"></GridPageSettings>
             <GridColumns>
                 <GridColumn Type="ColumnType.Date" Format="dd/MM/yyyy" Field="AppointmentDate" HeaderText="@L["Date"]" Width="auto">
                 </GridColumn>
@@ -234,7 +235,15 @@
         <div class="mx-3 mb-2">
             <div class="d-flex justify-content-between mb-1">
                 <h6>@L["From"]</h6>
-                <SfButton CssClass="e-success" Content="@L["Reschedule"]" IsPrimary="true" type="button" @onclick="ToggleAppointmentEdit"/>
+                @if (EditingAppointment.Status != EnumAppointmentStatus.Cancelled)
+                {
+                    <SfButton
+                        CssClass="e-success"
+                        IconCss="e-icons e-edit" 
+                        Content="@L["Reschedule"]" 
+                        IsPrimary="true" type="button"
+                        @onclick="ToggleAppointmentEdit"/>
+                }
             </div>
             <SfDateTimePicker Enabled="false" @bind-Value="@(EditingAppointment.StartTime)"></SfDateTimePicker>
         </div>
