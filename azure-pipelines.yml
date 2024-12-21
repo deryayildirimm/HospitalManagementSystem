@@ -49,6 +49,21 @@ stages:
               tags: $(imageTag)
               buildArguments: '--memory=4g --cpu-shares=1024'
 
+  - stage: DockerImageSecurityScan
+    displayName: Docker Image Security Scan
+    jobs:
+      - job: SecurityScan
+        displayName: Run Trivy Security Scan
+        steps:
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                $(TrivyPath) image registry.gitlab.com/medplus1/medplusproject:$(imageTag) --exit-code 0 --severity HIGH,CRITICAL
+                echo "### CRITICAL ve HIGH Seviyedeki Güvenlik Açıkları Kontrol Ediliyor..."
+                $(TrivyPath) image registry.gitlab.com/medplus1/medplusproject:$(imageTag) --exit-code 1 --severity CRITICAL
+            displayName: 'Docker Image Trivy Taraması'
+
   - stage: TagAndRemoveImage
     displayName: Tag and Remove Docker Image
     jobs:
@@ -74,4 +89,5 @@ stages:
               repository: 'medplus1/medplusproject'
               command: 'push'
               tags: '$(imageTag)'
+
 
