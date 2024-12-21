@@ -48,6 +48,19 @@ stages:
               Dockerfile: '**/Dockerfile-BlazorApp'
               tags: $(imageTag)
               buildArguments: '--memory=4g --cpu-shares=1024'
+              
+  - stage: TagAndRemoveImage
+    displayName: Tag and Remove Docker Image
+    jobs:
+      - job: TagAndRemove
+        displayName: Tag and Remove Blazor Docker Image
+        steps:
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                docker tag blazorapp:$(imageTag) registry.gitlab.com/medplus1/medplusproject:$(imageTag)
+                docker rmi blazorapp:$(imageTag)
 
   - stage: DockerImageSecurityScan
     displayName: Docker Image Security Scan
@@ -64,18 +77,7 @@ stages:
                 $(TrivyPath) image registry.gitlab.com/medplus1/medplusproject:$(imageTag) --exit-code 1 --severity CRITICAL
             displayName: 'Docker Image Trivy Taraması'
 
-  - stage: TagAndRemoveImage
-    displayName: Tag and Remove Docker Image
-    jobs:
-      - job: TagAndRemove
-        displayName: Tag and Remove Blazor Docker Image
-        steps:
-          - task: Bash@3
-            inputs:
-              targetType: 'inline'
-              script: |
-                docker tag blazorapp:$(imageTag) registry.gitlab.com/medplus1/medplusproject:$(imageTag)
-                docker rmi blazorapp:$(imageTag)
+
 
   - stage: PushDockerImage
     displayName: Push Docker Image to GitLab
