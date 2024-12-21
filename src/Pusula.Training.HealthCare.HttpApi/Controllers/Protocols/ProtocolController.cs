@@ -15,93 +15,93 @@ namespace Pusula.Training.HealthCare.Controllers.Protocols;
 [Area("app")]
 [ControllerName("Protocol")]
 [Route("api/app/protocols")]
-public class ProtocolController(IProtocolsAppService _protocolsAppService) : HealthCareController, IProtocolsAppService
+public class ProtocolController(IProtocolsAppService protocolsAppService) : HealthCareController, IProtocolsAppService
 {
 
     [HttpGet]
-    public virtual Task<PagedResultDto<ProtocolWithNavigationPropertiesDto>> GetListAsync(GetProtocolsInput input) => _protocolsAppService.GetListAsync(input);
+    public virtual Task<PagedResultDto<ProtocolWithNavigationPropertiesDto>> GetListAsync(GetProtocolsInput input) => protocolsAppService.GetListAsync(input);
    
 
     [HttpGet]
     [Route("with-navigation-properties/{id}")]
-    public virtual Task<ProtocolDto> GetWithNavigationPropertiesAsync(Guid id) => _protocolsAppService.GetWithNavigationPropertiesAsync(id);
+    public virtual Task<ProtocolDto> GetWithNavigationPropertiesAsync(Guid id) => protocolsAppService.GetWithNavigationPropertiesAsync(id);
     
 
     [HttpGet]
     [Route("{id}")]
-    public virtual Task<ProtocolDto> GetAsync(Guid id) => _protocolsAppService.GetAsync(id);
+    public virtual Task<ProtocolDto> GetAsync(Guid id) => protocolsAppService.GetAsync(id);
    
     
     [HttpGet]
     [Route("department-statistic")]
     public Task<PagedResultDto<DepartmentStatisticDto>> GetDepartmentPatientStatisticsAsync(GetProtocolsInput input)
-        => _protocolsAppService.GetDepartmentPatientStatisticsAsync(input);
+        => protocolsAppService.GetDepartmentPatientStatisticsAsync(input);
     
     [HttpGet]
     [Route("doctor-statistic")]
     public Task<PagedResultDto<DoctorStatisticDto>> GetDoctorPatientStatisticsAsync(GetProtocolsInput input)
-        => _protocolsAppService.GetDoctorPatientStatisticsAsync(input);
+        => protocolsAppService.GetDoctorPatientStatisticsAsync(input);
     
     [HttpGet]
     [Route("patient-list-by-department")]
     public Task<PagedResultDto<ProtocolPatientDepartmentListReportDto>> GetPatientsByDepartmentAsync(GetProtocolsInput input)
-        => _protocolsAppService.GetPatientsByDepartmentAsync(input);
+        => protocolsAppService.GetPatientsByDepartmentAsync(input);
     
     [HttpGet]
     [Route("patient-list-by-doctor")]
     public Task<PagedResultDto<ProtocolPatientDoctorListReportDto>> GetPatientsByDoctorAsync(GetProtocolsInput input)
-        => _protocolsAppService.GetPatientsByDoctorAsync(input);
+        => protocolsAppService.GetPatientsByDoctorAsync(input);
 
     [HttpGet]
     [Route("patient-lookup")]
-    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetPatientLookupAsync(LookupRequestDto input) => _protocolsAppService.GetPatientLookupAsync(input);
+    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetPatientLookupAsync(LookupRequestDto input) => protocolsAppService.GetPatientLookupAsync(input);
   
     [HttpGet]
     [Route("department-lookup")]
-    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetDepartmentLookupAsync(LookupRequestDto input) => _protocolsAppService.GetDepartmentLookupAsync(input);
+    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetDepartmentLookupAsync(LookupRequestDto input) => protocolsAppService.GetDepartmentLookupAsync(input);
     
     [HttpGet]
     [Route("doctor-lookup")]
-    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetDoctorLookUpAsync(LookupRequestDto input) => _protocolsAppService.GetDoctorLookUpAsync(input);
+    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetDoctorLookUpAsync(LookupRequestDto input) => protocolsAppService.GetDoctorLookUpAsync(input);
     
     [HttpGet]
     [Route("protocol-type-lookup")]
-    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookUpAsync(LookupRequestDto input) => _protocolsAppService.GetProtocolTypeLookUpAsync(input);
+    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookUpAsync(LookupRequestDto input) => protocolsAppService.GetProtocolTypeLookUpAsync(input);
     
     [HttpGet]
     [Route("insurance-lookup")]
-    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetInsuranceLookUpAsync(LookupRequestDto input) => _protocolsAppService.GetInsuranceLookUpAsync(input);
+    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetInsuranceLookUpAsync(LookupRequestDto input) => protocolsAppService.GetInsuranceLookUpAsync(input);
 
 
     [HttpPost]
-    public virtual Task<ProtocolDto> CreateAsync(ProtocolCreateDto input) => _protocolsAppService.CreateAsync(input);
+    public virtual Task<ProtocolDto> CreateAsync(ProtocolCreateDto input) => protocolsAppService.CreateAsync(input);
     
 
     [HttpPut]
     [Route("{id}")]
-    public virtual Task<ProtocolDto> UpdateAsync(Guid id, ProtocolUpdateDto input) => _protocolsAppService.UpdateAsync(id, input);
+    public virtual Task<ProtocolDto> UpdateAsync(Guid id, ProtocolUpdateDto input) => protocolsAppService.UpdateAsync(id, input);
 
     [HttpDelete]
     [Route("{id}")]
-    public virtual Task DeleteAsync(Guid id) => _protocolsAppService.DeleteAsync(id);
+    public virtual Task DeleteAsync(Guid id) => protocolsAppService.DeleteAsync(id);
    
 
     [HttpGet]
     [Route("as-excel-file")]
-    public virtual Task<IRemoteStreamContent> GetListAsExcelFileAsync(ProtocolExcelDownloadDto input) => _protocolsAppService.GetListAsExcelFileAsync(input);
+    public virtual Task<IRemoteStreamContent> GetListAsExcelFileAsync(ProtocolExcelDownloadDto input) => protocolsAppService.GetListAsExcelFileAsync(input);
   
     [HttpGet]
     [Route("download-token")]
-    public virtual Task<DownloadTokenResultDto> GetDownloadTokenAsync() => _protocolsAppService.GetDownloadTokenAsync();
+    public virtual Task<DownloadTokenResultDto> GetDownloadTokenAsync() => protocolsAppService.GetDownloadTokenAsync();
   
 
     [HttpDelete]
     [Route("")]
-    public virtual Task DeleteByIdsAsync(List<Guid> protocolIds) => _protocolsAppService.DeleteByIdsAsync(protocolIds);
+    public virtual Task DeleteByIdsAsync(List<Guid> protocolIds) => protocolsAppService.DeleteByIdsAsync(protocolIds);
     
 
     [HttpDelete]
     [Route("all")]
-    public virtual Task DeleteAllAsync(GetProtocolsInput input) => _protocolsAppService.DeleteAllAsync(input);
+    public virtual Task DeleteAllAsync(GetProtocolsInput input) => protocolsAppService.DeleteAllAsync(input);
    
 }

@@ -1,11 +1,7 @@
-using JetBrains.Annotations;
+
 using System;
 using System.Threading.Tasks;
-using Pusula.Training.HealthCare.Departments;
-using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.GlobalExceptions;
-using Pusula.Training.HealthCare.Patients;
-using Pusula.Training.HealthCare.ProtocolTypes;
 using Volo.Abp;
 using Volo.Abp.Data;
 using Volo.Abp.Domain.Services;
@@ -28,8 +24,7 @@ public class ProtocolManager(IProtocolRepository protocolRepository
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidDateRange_MESSAGE, 
             HealthCareDomainErrorCodes.InvalidDateRange_CODE, 
             startTime > endTime);
-      
-     
+        
         var protocol = new Protocol(
             GuidGenerator.Create(),
             patientId, departmentId, protocolTypeId, doctorId, insuranceId, startTime,notes, endTime
@@ -40,7 +35,7 @@ public class ProtocolManager(IProtocolRepository protocolRepository
 
     public virtual async Task<Protocol> UpdateAsync(
         Guid id,
-        Guid patientId, Guid departmentId,Guid protocolTypeId, Guid doctorId, Guid insuranceId, DateTime startTime,string? note = null, DateTime? endTime = null, [CanBeNull] string? concurrencyStamp = null
+        Guid patientId, Guid departmentId,Guid protocolTypeId, Guid doctorId, Guid insuranceId, DateTime startTime,string? note = null, DateTime? endTime = null, string? concurrencyStamp = null
     )
     {
         
@@ -55,7 +50,7 @@ public class ProtocolManager(IProtocolRepository protocolRepository
             HealthCareDomainErrorCodes.ProtocolUpdate_CODE,
             protocol == null);
 
-        protocol.SetPatientId(patientId);
+        protocol!.SetPatientId(patientId);
         protocol.SetDepartmentId(departmentId);
         protocol.SetProtocolTypeId(protocolTypeId);
         protocol.SetDoctorId(doctorId);

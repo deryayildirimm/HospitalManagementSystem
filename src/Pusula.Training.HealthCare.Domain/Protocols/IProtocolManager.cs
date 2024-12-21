@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 
 namespace Pusula.Training.HealthCare.Protocols;
 
@@ -14,7 +13,7 @@ public interface IProtocolManager
      Task<Protocol> UpdateAsync(
         Guid id,
         Guid patientId, Guid departmentId, Guid protocolTypeId, Guid doctorId,  Guid insuranceId,  DateTime startTime, string? note = null,
-        DateTime? endTime = null, [CanBeNull] string? concurrencyStamp = null
+        DateTime? endTime = null,  string? concurrencyStamp = null
     );
 
 

@@ -9,9 +9,12 @@ using System.IO;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
-using AutoMapper.Configuration.Annotations;
+using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.Insurances;
+using Pusula.Training.HealthCare.Patients;
+using Pusula.Training.HealthCare.ProtocolTypes;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Caching;
@@ -26,11 +29,11 @@ namespace Pusula.Training.HealthCare.Protocols
         IProtocolRepository protocolRepository, 
         ProtocolManager protocolManager, 
         IDistributedCache<ProtocolDownloadTokenCacheItem, string> downloadTokenCache, 
-        IRepository<Patients.Patient, Guid> patientRepository, 
-        IRepository<Departments.Department, Guid> departmentRepository,
-        IRepository<Doctors.Doctor, Guid> doctorRepository,
-        IRepository<ProtocolTypes.ProtocolType, Guid> protocolTypeRepository,
-        IRepository<Insurances.Insurance, Guid> insuranceRepository) : HealthCareAppService, IProtocolsAppService
+        IPatientRepository patientRepository, 
+        IDepartmentRepository departmentRepository,
+        IDoctorRepository doctorRepository,
+        IProtocolTypeRepository protocolTypeRepository,
+        IInsuranceRepository insuranceRepository) : HealthCareAppService, IProtocolsAppService
     {
         public virtual async Task<PagedResultDto<ProtocolWithNavigationPropertiesDto>> GetListAsync(GetProtocolsInput input)
         {
@@ -228,7 +231,7 @@ namespace Pusula.Training.HealthCare.Protocols
         {
             var query = (await protocolTypeRepository.GetQueryableAsync())
                 .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                    x => x.Name.Contains(input.Filter));
+                    x => x.Name.Contains(input.Filter!));
             var lookupData = await query.PageBy(input.SkipCount, input.MaxResultCount).ToDynamicListAsync<ProtocolTypes.ProtocolType>();
             var totalCount = query.Count();
 
@@ -243,7 +246,7 @@ namespace Pusula.Training.HealthCare.Protocols
         {
             var query = (await doctorRepository.GetQueryableAsync())
                 .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                    x => x.FirstName != null && x.FirstName.Contains(input.Filter!));
+                    x =>  x.FirstName.Contains(input.Filter!));
 
             var lookupData = await query.PageBy(input.SkipCount, input.MaxResultCount).ToDynamicListAsync<Doctors.Doctor>();
             var totalCount = query.Count();
@@ -258,7 +261,7 @@ namespace Pusula.Training.HealthCare.Protocols
         {
             var query = (await insuranceRepository.GetQueryableAsync())
                 .WhereIf(!string.IsNullOrWhiteSpace(input.Filter),
-                    x => x.InsuranceCompanyName.ToString() != null && x.InsuranceCompanyName.ToString().Contains(input.Filter!));
+                    x =>  x.InsuranceCompanyName.ToString().Contains(input.Filter!));
 
             var lookupData = await query.PageBy(input.SkipCount, input.MaxResultCount).ToDynamicListAsync<Insurances.Insurance>();
             var totalCount = query.Count();
@@ -326,11 +329,11 @@ namespace Pusula.Training.HealthCare.Protocols
             var items = protocols.Select(item => new
             {
 
-                Patient = item.Patient?.FirstName,
-                Department = item.Department?.Name,
-                Doctor = item.Doctor?.FirstName + " " + item.Doctor?.LastName,
-                ProtocolType = item.ProtocolType?.Name,
-                Insurance = item.Insurance?.InsuranceCompanyName
+                Patient = item.Patient.FirstName,
+                Department = item.Department.Name,
+                Doctor = item.Doctor.FirstName + " " + item.Doctor.LastName,
+                ProtocolType = item.ProtocolType.Name,
+                Insurance = item.Insurance.InsuranceCompanyName
                 
 
             });
@@ -351,7 +354,7 @@ namespace Pusula.Training.HealthCare.Protocols
             await protocolRepository.DeleteAllAsync(input.FilterText, input.Notes, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin, input.EndTimeMax, input.PatientId, input.DepartmentId, input.DoctorId);
         
         
-        public virtual async Task<Shared.DownloadTokenResultDto> GetDownloadTokenAsync()
+        public virtual async Task<DownloadTokenResultDto> GetDownloadTokenAsync()
         {
             var token = Guid.NewGuid().ToString("N");
 

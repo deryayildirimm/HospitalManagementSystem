@@ -30,6 +30,8 @@ public static class HealthCareDomainErrorCodes
     public const string HealthcareError_MESSAGE = "Healthcare error occured!!";
     public const string InvalidNoteLength_MESSAGE = "Notes must be between {1} and {100} characters.";
     public const string ProtocolUpdate_MESSAGE = "Protocol not found with the given ID.";
+    public const string PatientNotFoundByNumber_CODE = "HealthCare:002";
+    public const string PatientNotFoundByNumber_MESSAGE = "Patient with number {0} could not be found.";
     
     /*  CODES */
     public const string ValidationError_CODE = "400";          

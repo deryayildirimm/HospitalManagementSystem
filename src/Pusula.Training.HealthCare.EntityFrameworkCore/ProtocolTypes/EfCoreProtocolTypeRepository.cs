@@ -55,7 +55,7 @@ public class EfCoreProtocolTypeRepository(IDbContextProvider<HealthCareDbContext
         IQueryable<ProtocolType> query,
         string? filterText = null,
         string? name = null)  => query
-            .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Name!.ToLower().Contains(filterText!.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(name), e => e.Name.ToLower().Contains(name!.ToLower()));
+        .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => EF.Functions.ILike(e.Name!, $"%{filterText}%"))
+        .WhereIf(!string.IsNullOrWhiteSpace(name), e => EF.Functions.ILike(e.Name!, $"%{name}%"));
     
 }

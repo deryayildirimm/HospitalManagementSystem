@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Doctors;
-using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.Insurances;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.ProtocolTypes;
@@ -19,7 +18,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
     [NotNull]
     public virtual DateTime StartTime { get; private set; }
 
-    [CanBeNull]
+ 
     public virtual DateTime? EndTime { get; private set; }
     public Guid PatientId { get; private set; }
     public virtual Patient Patient { get;  set; }
@@ -64,7 +63,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         
     }
     
-    public void SetId(Guid id)
+    private void SetId(Guid id)
     {
         Check.NotNull(id, nameof(id));
         Id = id;
@@ -76,11 +75,8 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         StartTime = startTime;
     }
 
-    public void SetEndTime(DateTime? endTime)
-    {
-        EndTime = endTime;
-    }
-    
+    public void SetEndTime(DateTime? endTime) =>   EndTime = endTime;
+ 
     public void SetDoctorId(Guid doctorId)
     {
         Check.NotNull(doctorId, nameof(doctorId));
@@ -110,15 +106,9 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         Check.NotNull(protocolTypeId, nameof(protocolTypeId));
         ProtocolTypeId = protocolTypeId;
     }
- 
-    public void SetNote(string? note)
-    {
-        
-       
-        
-        Note = note;
-    }   
 
+    public void SetNote(string? note) => Note = note;
     
+
 
 }
