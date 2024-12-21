@@ -15,7 +15,7 @@ using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Schedule;
 using Volo.Abp;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Appointment;
 
 public partial class CreateAppointment : HealthCareComponentBase
 {

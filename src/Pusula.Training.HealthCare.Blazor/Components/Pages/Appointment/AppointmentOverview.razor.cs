@@ -17,7 +17,7 @@ using Syncfusion.PdfExport;
 using Volo.Abp;
 using ExportType = Syncfusion.Blazor.Charts.ExportType;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Appointment;
 
 public partial class AppointmentOverview : HealthCareComponentBase
 {

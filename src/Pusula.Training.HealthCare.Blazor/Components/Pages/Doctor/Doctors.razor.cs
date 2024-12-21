@@ -21,7 +21,7 @@ using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using SortDirection = Blazorise.SortDirection;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Doctor;
 
 public partial class Doctors
 {

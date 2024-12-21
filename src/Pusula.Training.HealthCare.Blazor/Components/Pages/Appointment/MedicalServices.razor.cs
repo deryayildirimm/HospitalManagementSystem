@@ -16,7 +16,7 @@ using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using Volo.Abp.BlazoriseUI.Components;
 
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Appointment;
 
 public partial class MedicalServices : HealthCareComponentBase
 {

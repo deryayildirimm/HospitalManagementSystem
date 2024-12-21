@@ -20,7 +20,7 @@ using Syncfusion.Blazor.Popups;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Appointment;
 
 public partial class AppointmentList : HealthCareComponentBase
 {
