@@ -31,7 +31,7 @@ public class EfCoreCityRepository(IDbContextProvider<HealthCareDbContext> dbCont
         string? filterText = null, 
         string? name = null, 
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
@@ -44,7 +44,7 @@ public class EfCoreCityRepository(IDbContextProvider<HealthCareDbContext> dbCont
         string? filterText = null, 
         string? name = null, 
         string? sorting = null,
-        int maxResultCount = Int32.MaxValue, 
+        int maxResultCount = int.MaxValue, 
         int skipCount = 0, 
         CancellationToken cancellationToken = default)
     {
@@ -58,7 +58,7 @@ public class EfCoreCityRepository(IDbContextProvider<HealthCareDbContext> dbCont
         string? name = null)
     {
         return query
-            .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Name!.ToLower().Contains(filterText!.ToLower()))
-            .WhereIf(!string.IsNullOrWhiteSpace(name), e => e.Name.ToLower().Contains(name!.ToLower()));
+            .Where(e => EF.Functions.ILike(e.Name, $"%{filterText}%"))
+            .Where(e => EF.Functions.ILike(e.Name, $"%{name}%"));
     }
 }

@@ -1,6 +1,4 @@
-﻿using Blazorise;
-using Blazorise.DataGrid;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Validators;
@@ -13,12 +11,13 @@ using System.Web;
 using Microsoft.OpenApi.Extensions;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Shared;
+using Syncfusion.Blazor.Buttons;
 using Syncfusion.Blazor.Data;
-using Syncfusion.Blazor.Popups;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
+using Volo.Abp;
 using SortDirection = Blazorise.SortDirection;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Doctor;
@@ -29,10 +28,11 @@ public partial class Doctors
     public string PhoneNumber { get; set; } = string.Empty;
 
     protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = new();
+    private Query FilterQuery { get; set; }
     protected PageToolbar Toolbar { get; } = new PageToolbar();
+    private SfGrid<DoctorWithNavigationPropertiesDto> Grid { get; set; }
     protected bool ShowAdvancedFilters { get; set; }
-    private IReadOnlyList<DoctorWithNavigationPropertiesDto> DoctorList { get; set; }
-    private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
+    private int PageSize { get; } = 10;
     private int CurrentPage { get; set; } = 1;
     private int TotalCount { get; set; }
     private string CurrentSorting { get; set; } = string.Empty;
@@ -42,26 +42,22 @@ public partial class Doctors
     private bool CanDeleteDoctor { get; set; }
     private DoctorCreateDto NewDoctor { get; set; }
     private DoctorUpdateDto EditingDoctor { get; set; }
-    private Validations NewDoctorValidations { get; set; } = new();
-    private Validations EditingDoctorValidations { get; set; } = new();
     private Guid EditingDoctorId { get; set; }
-    private SfDialog CreateDoctorModal;
-    private SfDialog EditDoctorModal;
     private GetDoctorsInput Filter { get; set; }
-    private List<DoctorWithNavigationPropertiesDto> SelectedDoctors { get; set; } = new();
     private List<KeyValuePair<EnumGender, string>> Genders { get; set; }
     private IReadOnlyList<LookupDto<Guid>> CitiesCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DistrictsCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> TitlesCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
 
+    private bool Flag { get; set; }
     private bool IsVisibleCreate { get; set; }
     private bool IsVisibleEdit { get; set; }
 
         
     public Doctors()
     {
-        
+        Grid = new SfGrid<DoctorWithNavigationPropertiesDto>();
         IsVisibleCreate = false;
         IsVisibleEdit = false;
         NewDoctor = new DoctorCreateDto();
@@ -72,7 +68,8 @@ public partial class Doctors
             SkipCount = (CurrentPage - 1) * PageSize,
             Sorting = CurrentSorting
         };
-        DoctorList = new List<DoctorWithNavigationPropertiesDto>();
+        Flag = false;
+        FilterQuery = new Query();
     }
 
     protected override async Task OnInitializedAsync()
@@ -80,9 +77,15 @@ public partial class Doctors
         await SetPermissionsAsync();
         await SetLookupsAsync();
         await GetGendersListAsync();
-        await SearchAsync();
+        SetFilters();
     }
 
+    private void SetFilters()
+    {
+        FilterQuery.Queries.Params = new Dictionary<string, object>();
+        FilterQuery.Queries.Params.Add("Filter", Filter);
+    }
+    
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -90,19 +93,20 @@ public partial class Doctors
             await SetBreadcrumbItemsAsync();
             await SetToolbarItemsAsync();
             await InvokeAsync(StateHasChanged);
+            await Grid.EnableToolbarItemsAsync(["Delete"], false);
+            await Refresh();
         }
     }
 
     protected virtual ValueTask SetBreadcrumbItemsAsync()
     {
-        BreadcrumbItems.Add(new Volo.Abp.BlazoriseUI.BreadcrumbItem(L["Doctors"]));
         return ValueTask.CompletedTask;
     }
 
     protected virtual ValueTask SetToolbarItemsAsync()
     {
         Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
-        Toolbar.AddButton(L["NewDoctor"], OpenCreateDoctorModalAsync, IconName.Add, requiredPolicyName: HealthCarePermissions.Doctors.Create);
+        Toolbar.AddButton(L["NewDoctor"], OpenCreateDoctorModalAsync, IconName.Plus, requiredPolicyName: HealthCarePermissions.Doctors.Create);
         return ValueTask.CompletedTask;
     }
 
@@ -121,29 +125,135 @@ public partial class Doctors
         DepartmentsCollection = (await DoctorsAppService.GetDepartmentLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items.ToList();
     }
     
-    public async Task PageChangingHandler(GridPageChangingEventArgs args)
-    {
-        CurrentPage = args.CurrentPage;
-        await GetDoctorsAsync();
-    }
-
-    public async Task PageChangedHandler(GridPageChangedEventArgs args)
-    {
-        CurrentPage = args.CurrentPage;
-        await GetDoctorsAsync();    
-
-    }
     private async Task GetDoctorsAsync()
     {
         Filter.MaxResultCount = PageSize;
         Filter.SkipCount = (CurrentPage - 1) * PageSize;
         Filter.Sorting = CurrentSorting;
+        
+        SetFilters();
+        await Refresh();
+    }
 
-        var result = await DoctorsAppService.GetListAsync(Filter);
-        DoctorList = result.Items;
-        TotalCount = (int)result.TotalCount;
+    private async Task ClearFilters()
+    {
+        Filter = new GetDoctorsInput
+        {
+            MaxResultCount = PageSize,
+            SkipCount = (CurrentPage - 1) * PageSize,
+            Sorting = CurrentSorting,
+        };
 
-        await ClearSelection();
+        StateHasChanged();
+        SetFilters();
+        await Refresh();
+    }
+
+    public async void OnActionBegin(ActionEventArgs<DoctorWithNavigationPropertiesDto> args)
+    {
+        
+        if (args.RequestType.ToString() != "Delete" 
+            // || !IsDeleteDialogVisible
+            )
+        {
+            return;
+        }
+        
+        if (args.RequestType.ToString() == "Paging")
+        {
+            return;
+        }
+
+        args.Cancel = true;
+        // await DeleteConfirmDialog.ShowAsync();
+        Flag = false;
+        await Refresh();
+    }
+
+    public void Closed()
+    {
+        Flag = true;
+    }
+
+    public void RowSelectHandler(RowSelectEventArgs<DoctorWithNavigationPropertiesDto> args)
+    {
+        var selectedRecordCount = Grid.GetSelectedRecordsAsync().Result.Count;
+        if (selectedRecordCount > 0)
+        {
+            Grid.EnableToolbarItemsAsync(["Delete"], true);
+        }
+    }
+
+    public void RowDeselectHandler(RowDeselectEventArgs<DoctorWithNavigationPropertiesDto> args)
+    {
+        var selectedRecordCount = Grid.GetSelectedRecordsAsync().Result.Count;
+        if (selectedRecordCount == 0)
+        {
+            Grid.EnableToolbarItemsAsync(["Delete"], false);
+        }
+    }
+
+    public async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        try
+        {
+            switch (args.Item.Text)
+            {
+                case "Delete":
+                {
+                    var selectedRecord = Grid.GetSelectedRecordsAsync().Result;
+
+                    if (selectedRecord == null || selectedRecord.Count == 0)
+                    {
+                        return;
+                    }
+
+                    var ids = selectedRecord.Select(x => x.Doctor.Id).ToList();
+
+                    var confirmed = await UiMessageService.Confirm(@L["DeleteSelectedRecords", ids.Count]);
+                    if (!confirmed)
+                    {
+                        return;
+                    }
+
+                    await DoctorsAppService.DeleteByIdsAsync(ids);
+                    break;
+                }
+                case "Excel Export":
+                {
+                    var exportProperties = new ExcelExportProperties
+                    {
+                        IncludeTemplateColumn = true
+                    };
+                    await Grid.ExportToExcelAsync(exportProperties);
+                    break;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new UserFriendlyException(e.Message);
+        }
+        finally
+        {
+            await Refresh();
+        }
+    }
+    
+
+    
+    private async Task DeleteDoctorAsync(DoctorWithNavigationPropertiesDto input)
+    {
+        var confirmed = await UiMessageService.Confirm($"Are you sure you want to delete {input.Doctor.FirstName} {input.Doctor.LastName}?");
+        if (!confirmed) return;
+
+        await DoctorsAppService.DeleteAsync(input.Doctor.Id);
+        await Refresh();
+    }
+
+    private async Task Refresh()
+    {
+        await Grid.Refresh();
     }
 
     protected virtual async Task SearchAsync()
@@ -158,13 +268,13 @@ public partial class Doctors
     {
         var token = (await DoctorsAppService.GetDownloadTokenAsync()).Token;
         var remoteService = await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ?? await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        var culture = CultureInfo.CurrentUICulture.Name ?? CultureInfo.CurrentCulture.Name;
+        var culture = CultureInfo.CurrentUICulture.Name;
         if (!culture.IsNullOrEmpty())
         {
             culture = "&culture=" + culture;
         }
         await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/patients/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&FirstName={HttpUtility.UrlEncode(Filter.FirstName)}&LastName={HttpUtility.UrlEncode(Filter.LastName)}&BirthDateMin={Filter.BirthDateMin?.ToString("O")}&BirthDateMax={Filter.BirthDateMax?.ToString("O")}&IdentityNumber={HttpUtility.UrlEncode(Filter.IdentityNumber)}&Email={HttpUtility.UrlEncode(Filter.Email)}&PhoneNumber={HttpUtility.UrlEncode(Filter.PhoneNumber)}&Gender={Filter.Gender}", forceLoad: true);
+        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/doctors/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&FirstName={HttpUtility.UrlEncode(Filter.FirstName)}&LastName={HttpUtility.UrlEncode(Filter.LastName)}&BirthDateMin={Filter.BirthDateMin?.ToString("O")}&BirthDateMax={Filter.BirthDateMax?.ToString("O")}&IdentityNumber={HttpUtility.UrlEncode(Filter.IdentityNumber)}&Email={HttpUtility.UrlEncode(Filter.Email)}&PhoneNumber={HttpUtility.UrlEncode(Filter.PhoneNumber)}&Gender={Filter.Gender}&BirthDateMin={Filter.BirthDateMin?.ToString("O")}&CityId={Filter.CityId?.ToString("O")}&DistrictId={Filter.DistrictId?.ToString("O")}&TitleId={Filter.TitleId?.ToString("O")}&DepartmentId={Filter.DepartmentId?.ToString("O")}", forceLoad: true);
     }
 
     private void OpenEditModal(DoctorWithNavigationPropertiesDto doctor)
@@ -186,17 +296,6 @@ public partial class Doctors
             StartDate = doctor.Doctor.StartDate
         };
         IsVisibleEdit = true;
-    }
-
-    private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<DoctorWithNavigationPropertiesDto> e)
-    {
-        CurrentSorting = e.Columns
-            .Where(c => c.SortDirection != SortDirection.Default)
-            .Select(c => c.Field + (c.SortDirection == SortDirection.Descending ? " DESC" : ""))
-            .JoinAsString(",");
-        CurrentPage = e.Page;
-        await GetDoctorsAsync();
-        await InvokeAsync(StateHasChanged);
     }
     
     public bool EnableDistrictDropDown = false;
@@ -235,15 +334,6 @@ public partial class Doctors
         await GetGendersListAsync();
         NewDoctor = new DoctorCreateDto();
     }
-    
-    private async Task DeleteDoctorAsync(DoctorWithNavigationPropertiesDto input)
-    {
-        var confirmed = await UiMessageService.Confirm($"Are you sure you want to delete {input.Doctor.FirstName} {input.Doctor.LastName}?");
-        if (!confirmed) return;
-
-        await DoctorsAppService.DeleteAsync(input.Doctor.Id);
-        await GetDoctorsAsync();
-    }
 
     private async Task CreateDoctorAsync()
     {
@@ -264,9 +354,8 @@ public partial class Doctors
     {
         try
         {
-
             await DoctorsAppService.UpdateAsync(EditingDoctor);
-            await GetDoctorsAsync();
+            await Refresh();
             CloseEditDoctorModal();
         }
         catch (Exception ex)
@@ -282,55 +371,6 @@ public partial class Doctors
             .Select(s => new { Key = s, Value = s.GetDisplayName().ToString() })
             .ToDictionary(d => d.Key, d => d.Value).ToList();
     }
-
-    private Task SelectAllItems()
-    {
-        AllDoctorsSelected = true;
-
-        return Task.CompletedTask;
-    }
-
-
-    private async Task ClearSelection()
-    {
-        SelectedDoctors.Clear();
-        AllDoctorsSelected = false;
-    }
-    
-    private Task SelectedDoctorRowsChanged()
-    {
-        if (SelectedDoctors.Count != PageSize)
-        {
-            AllDoctorsSelected = false;
-        }
-
-        return Task.CompletedTask;
-    }
-
-    private async Task DeleteSelectedDoctorsAsync()
-    {
-        var message = AllDoctorsSelected ? L["DeleteAllRecords"].Value : L["DeleteSelectedRecords", SelectedDoctors.Count].Value;
-
-        if (!await UiMessageService.Confirm(message))
-        {
-            return;
-        }
-
-        if (AllDoctorsSelected)
-        {
-            await DoctorsAppService.DeleteAllAsync(Filter);
-        }
-        else
-        {
-            await DoctorsAppService.DeleteByIdsAsync(SelectedDoctors.Select(x => x.Doctor.Id).ToList());
-        }
-
-        SelectedDoctors.Clear();
-        AllDoctorsSelected = false;
-
-        await GetDoctorsAsync();
-    }
-
     private void CloseCreateDoctorModal()
     {
         IsVisibleCreate = false;
@@ -340,10 +380,4 @@ public partial class Doctors
     {
         IsVisibleEdit = false;
     }
-
-    private async Task ClearPhone()
-    {
-        PhoneNumber = string.Empty;
-    }
-
 }

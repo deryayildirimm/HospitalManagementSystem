@@ -9,9 +9,6 @@ public interface IBackgroundsAppService
 {
     Task<PagedResultDto<BackgroundDto>> GetListAsync(GetBackgroundsInput input);
     Task<BackgroundDto> GetAsync(Guid id);
-    void DeleteAsync(Guid id);
     Task<BackgroundDto> CreateAsync(BackgroundCreateDto input);
     Task<BackgroundDto> UpdateAsync(BackgroundUpdateDto input);
-    Task DeleteByIdsAsync(List<Guid> backgroundIds);
-    Task DeleteAllAsync(GetBackgroundsInput input);
 }

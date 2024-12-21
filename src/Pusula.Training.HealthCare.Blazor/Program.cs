@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Pusula.Training.HealthCare.Blazor.Services;
+using Pusula.Training.HealthCare.Blazor.Services.Treatment;
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.Elasticsearch;
@@ -66,6 +67,10 @@ public class Program
             builder.Services.AddScoped<AppointmentStatisticsAdaptor>();
             builder.Services.AddScoped<AppointmentAdaptor>();
             builder.Services.AddScoped<DoctorLeaveAdaptor>();
+            builder.Services.AddScoped<IcdAdaptor>();
+            builder.Services.AddScoped<IcdReportAdaptor>();
+            builder.Services.AddScoped<DoctorAdaptor>();
+            builder.Services.AddScoped<MedicalStaffAdaptor>();
 
             // Serilog ve diğer ayarları ekleme
             builder.Host.AddAppSettingsSecretsJson()

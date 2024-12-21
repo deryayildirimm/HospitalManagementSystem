@@ -37,7 +37,7 @@ public class CityController(ICitiesAppService citiesAppService) : HealthCareCont
     
     [HttpDelete]
     [Route("{id}")]
-    public void DeleteAsync(Guid id) => citiesAppService.DeleteAsync(id);
+    public Task DeleteAsync(Guid id) => citiesAppService.DeleteAsync(id);
     [HttpDelete]
     [Route("all")]
     public Task DeleteAllAsync(GetCitiesInput input) => citiesAppService.DeleteAllAsync(input);

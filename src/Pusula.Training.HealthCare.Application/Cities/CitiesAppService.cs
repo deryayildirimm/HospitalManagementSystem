@@ -40,7 +40,7 @@ IDistributedCache<CityDownloadTokenCacheItem, string> downloadTokenCache) : Heal
     }
 
     [Authorize(HealthCarePermissions.Cities.Delete)]
-    public virtual async void DeleteAsync(Guid id)
+    public virtual async Task DeleteAsync(Guid id)
     {
         await cityRepository.DeleteAsync(id);
     }

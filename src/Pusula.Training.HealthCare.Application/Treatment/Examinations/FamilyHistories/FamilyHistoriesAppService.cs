@@ -34,12 +34,6 @@ public class FamilyHistoriesAppService(IFamilyHistoryRepository familyHistoryRep
         return ObjectMapper.Map<FamilyHistory, FamilyHistoryDto>(familyHistory);
     }
 
-    [Authorize(HealthCarePermissions.FamilyHistories.Delete)]
-    public virtual async void DeleteAsync(Guid id)
-    {
-        await familyHistoryRepository.DeleteAsync(id);
-    }
-
     [Authorize(HealthCarePermissions.FamilyHistories.Create)]
     public virtual async Task<FamilyHistoryDto> CreateAsync(FamilyHistoryCreateDto input)
     {
@@ -56,18 +50,5 @@ public class FamilyHistoriesAppService(IFamilyHistoryRepository familyHistoryRep
             input.MotherDisease, input.FatherDisease, input.SisterDisease, input.BrotherDisease);
         
         return ObjectMapper.Map<FamilyHistory, FamilyHistoryDto>(familyHistory);
-    }
-
-    [Authorize(HealthCarePermissions.FamilyHistories.Delete)]
-    public virtual async Task DeleteByIdsAsync(List<Guid> familyHistoryIds)
-    {
-        await familyHistoryRepository.DeleteManyAsync(familyHistoryIds);
-    }
-
-    [Authorize(HealthCarePermissions.FamilyHistories.Delete)]
-    public virtual async Task DeleteAllAsync(GetFamilyHistoriesInput input)
-    {
-        await familyHistoryRepository.DeleteAllAsync(input.FilterText, input.MotherDisease, input.FatherDisease,
-            input.SisterDisease, input.BrotherDisease, input.AreParentsRelated, input.ExaminationId);
     }
 }

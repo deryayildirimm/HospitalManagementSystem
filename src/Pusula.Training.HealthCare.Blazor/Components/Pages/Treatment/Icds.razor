@@ -1,14 +1,14 @@
 ﻿@page "/icds"
 
 @attribute [Authorize(HealthCarePermissions.Icds.Default)]
+
+@using Pusula.Training.HealthCare.Blazor.Services.Treatment
 @using Pusula.Training.HealthCare.Localization
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 
 @using Pusula.Training.HealthCare.Permissions
 @using Volo.Abp.AspNetCore.Components.Web
-@using Pusula.Training.HealthCare.Patients
-@using Pusula.Training.HealthCare.Shared
 @using Pusula.Training.HealthCare.Treatment.Icds
 @using Volo.Abp.Http.Client
 @inherits HealthCareComponentBase
@@ -21,27 +21,30 @@
 
 @using Syncfusion.Blazor
 @using Syncfusion.Blazor.Buttons
-@using Syncfusion.Blazor.DropDowns
-@using Syncfusion.Blazor.Calendars
-@using Syncfusion.Blazor.Inputs
 @using SelectionType = Syncfusion.Blazor.Grids.SelectionType
-@using Syncfusion.Blazor.Grids
-@using Syncfusion.Blazor.Popups;
-@using Syncfusion.Blazor.DropDowns;
+
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home"/>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["ICDs"]/>
+    </BreadcrumbItems>
+</SfBreadcrumb>
 
 @* ************************* PAGE HEADER ************************* *@
-<PageHeader Title="@L["Icds"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
+<PageHeader Title="@L["ICDs"]" Toolbar="Toolbar">
 
 </PageHeader>
 
 @* ************************* SEARCH ************************* *@
 <Card>
     <CardBody>
-        <SfTextBox @bind-Value="@Filter.FilterText" Placeholder="@L["Search"]" CssClass="form-control mb-3" @onchange="GetIcdsAsync"></SfTextBox>
-        <SfButton CssClass="btn btn-primary" OnClick="GetIcdsAsync">
-            <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
-        </SfButton>
-
+        <Row>
+            <SfTextBox @bind-Value="@Filter.FilterText" Placeholder="@L["Search"]" CssClass="form-control mb-3" @onchange="GetIcdsAsync"></SfTextBox>
+            <SfButton CssClass="btn e-primary" OnClick="GetIcdsAsync">
+                <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
+            </SfButton>
+        </Row>
+        
         <Row Class="mt-3 mb-3">
             <div class="col-md-12">
                 <a href="javascript:;" class="text-decoration-none" @onclick="() => ShowAdvancedFilters = !ShowAdvancedFilters">@L["SeeAdvancedFilters"]</a>
@@ -69,61 +72,28 @@
 
 @* ************************* DATA GRID ************************* *@
 
-<Card>
-    <CardBody>
-        @if (SelectedIcds.Any())
-        {
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            @if (AllIcdsSelected)
-            {
-            <p class="lead mb-0">
-                @L["AllItemsAreSelected", TotalCount]
-            </p>
-            }
-            else
-            {
-            <p class="lead mb-0">
-                @if (SelectedIcds.Count > 1)
-                {
-                @L["NumberOfItemsOnThisPageAreSelected", SelectedIcds.Count]
-                }
-                else
-                {
-                @L["OneItemOnThisPageIsSelected"]
-                }
-            </p>
-            }
-
-            <div>
-                @if ((SelectedIcds.Count == PageSize || SelectedIcds.Count == IcdList.Count) && TotalCount > SelectedIcds.Count)
-                {
-                if (!AllIcdsSelected)
-                {
-                <SfButton OnClick="SelectAllItems" CssClass="mx-1 btn-outline-secondary">@L["SelectAllItems", TotalCount]</SfButton>
-                }
-                else
-                {
-                <SfButton OnClick="ClearSelection" CssClass="mx-1 btn-outline-secondary">@L["ClearSelection"]</SfButton>
-                }
-                }
-
-
-                <SfButton CssClass="e-danger" OnClick="DeleteSelectedIcdsAsync">@L["Delete"]
-                    <span class="e-icons e-delete white-icon"></span>
-                    </SfButton>
-            </div>
-        </div>
-
-        <hr class="my-1 mx-0" />
-        }
-
+<div class="row py-3 px-2">
+    <div class="col-12 border-1 bg-white rounded-1 p-4">
         <SfGrid TItem="IcdDto"
-                DataSource="IcdList"
+                TValue="IcdDto"
+                @ref="Grid"
                 AllowPaging="true"
                 AllowSorting="true"
-                SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
-            <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
-            <GridEvents PageChanging="PageChangingHandler" PageChanged="PageChangedHandler" TValue="IcdDto"></GridEvents>
+                Toolbar="@(new List<string>() { "Delete" })"
+                SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }"
+                Query="@FilterQuery">
+            <SfDataManager
+                AdaptorInstance="@typeof(IcdAdaptor)"
+                Adaptor="Adaptors.CustomAdaptor">
+            </SfDataManager>
+            <GridEvents
+                OnActionBegin="OnActionBegin"
+                RowSelected="RowSelectHandler"
+                OnToolbarClick="ToolbarClickHandler"
+                RowDeselected="RowDeselectHandler"
+                TValue="IcdDto">
+            </GridEvents>
+            <GridPageSettings PageSize="@PageSize"></GridPageSettings>
             <GridColumns>
                 @if (CanDeleteIcd && IcdList.Any())
                 {
@@ -149,11 +119,6 @@
                         @detail
                     </Template>
                 </GridColumn>
-                <style>
-                    .white-icon {
-                        color: white !important;
-                    }
-                </style>
 
                 <GridColumn HeaderText="@L["Actions"]" Width="150">
                     <Template>
@@ -161,20 +126,31 @@
                         var icd = (context as IcdDto);
                         }
                         <div class="d-flex justify-content-around">
-                            <SfButton CssClass="e-primary" OnClick="@(args => OpenEditIcdModal(icd))">
-                                <span class="e-icons e-edit white-icon"></span>
+                            <SfButton IconCss="e-icons e-edit" CssClass="e-primary" OnClick="@(() => OpenEditIcdModal(icd!))">
                             </SfButton>
-                            <SfButton CssClass="e-danger" OnClick="@(args => DeleteIcdAsync(icd))">
-                                <span class="e-icons e-delete white-icon"></span>
+                            
+                            <SfButton IconCss="e-icons e-delete" CssClass="e-danger" OnClick="@(() => DeleteIcdAsync(icd!))">
                             </SfButton>
                         </div>
                     </Template>
                 </GridColumn>
             </GridColumns>
         </SfGrid>
-    </CardBody>
-</Card>
+    </div>
+</div>
 
+@* ************************* CONFIRM MODAL ************************* *@
+<SfDialog @ref="DeleteConfirmDialog" Width="250px" Visible="false" ShowCloseIcon="true" IsModal="true">
+    <DialogEvents Closed="Closed"></DialogEvents>
+    <DialogTemplates>
+        <Header>@L["DeleteRecord"]</Header>
+        <Content>@L["DeleteConfirmationMessage"] </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton OnClick="OkClick" Content="@L["Yes"]" IsPrimary="true"></DialogButton>
+        <DialogButton OnClick="CancelClick" Content="@L["No"]"></DialogButton>
+    </DialogButtons>
+</SfDialog>
 
 @* ************************* CREATE MODAL ************************* *@
 <SfDialog Width="800px" IsModal="true" Header="@L["CreateIcd"]"
@@ -190,31 +166,30 @@
     </DialogTemplates>
 
     <EditForm Model="@NewIcd" OnValidSubmit="CreateIcdAsync">
-        <SfForm>
-            <div class="form-row">
-                <div class="col-md-6 mb-3">
-                    <label>@L["CodeNumber"]</label>
-                    <SfTextBox TValue="string" @bind-Value="@NewIcd.CodeNumber" Placeholder="@L["EnterCodeNumber"]"
-                               MaxLength="IcdConsts.CodeNumberLength">
-                        <TextBoxEvents OnInput="() => ValidateField('CodeNumber')" />
-                    </SfTextBox>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Detail"]</label>
-                    <SfTextBox TValue="string" @bind-Value="@NewIcd.Detail" Placeholder="@L["EnterDetail"]"
-                               MaxLength="IcdConsts.DetailLength">
-                        <TextBoxEvents OnInput="() => ValidateField('Detail')" />
-                    </SfTextBox>
-                </div>
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="col-md-6 mb-3">
+                <label>@L["CodeNumber"]</label>
+                <SfTextBox TValue="string" @bind-Value="@NewIcd.CodeNumber" Placeholder="@L["EnterCodeNumber"]"
+                           MaxLength="IcdConsts.CodeNumberLength">
+                </SfTextBox>
+                <ValidationMessage For="@(() => NewIcd.CodeNumber)"></ValidationMessage>
             </div>
-        </SfForm>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Detail"]</label>
+                <SfTextBox TValue="string" @bind-Value="@NewIcd.Detail" Placeholder="@L["EnterDetail"]"
+                           MaxLength="IcdConsts.DetailLength">
+                </SfTextBox>
+                <ValidationMessage For="@(() => NewIcd.Detail)"></ValidationMessage>
+            </div>
+        </div>
     </EditForm>
 
-    <DialogFooter>
+    <Footer>
         <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseCreateIcdModal" />
         <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="CreateIcdAsync" />
-    </DialogFooter>
+    </Footer>
 </SfDialog>
 
 @* ************************* EDIT MODAL ************************* *@
@@ -232,25 +207,26 @@
     </DialogTemplates>
 
     <EditForm Model="@EditingIcd" OnValidSubmit="UpdateIcdAsync">
-        <SfForm>
-            <div class="form-row">
-                <div class="col-md-6 mb-3">
-                    <label>@L["CodeNumber"]</label>
-                    <SfTextBox TValue="string" @bind-Value="@EditingIcd.CodeNumber" Placeholder="@L["EnterCodeNumber"]"
-                               MaxLength="IcdConsts.CodeNumberMaxLength" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Detail"]</label>
-                    <SfTextBox TValue="string" @bind-Value="@EditingIcd.Detail" Placeholder="@L["EnterDetail"]"
-                               MaxLength="IcdConsts.DetailMaxLength" />
-                </div>
+        <DataAnnotationsValidator />
+        <div class="form-row">
+            <div class="col-md-6 mb-3">
+                <label>@L["CodeNumber"]</label>
+                <SfTextBox TValue="string" @bind-Value="@EditingIcd.CodeNumber" Placeholder="@L["EnterCodeNumber"]"
+                           MaxLength="IcdConsts.CodeNumberMaxLength" />
+                <ValidationMessage For="@(() => EditingIcd.CodeNumber)"></ValidationMessage>
             </div>
-        </SfForm>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Detail"]</label>
+                <SfTextBox TValue="string" @bind-Value="@EditingIcd.Detail" Placeholder="@L["EnterDetail"]"
+                           MaxLength="IcdConsts.DetailMaxLength" />
+                <ValidationMessage For="@(() => EditingIcd.Detail)"></ValidationMessage>
+            </div>
+        </div>
     </EditForm>
 
-    <DialogFooter>
+    <Footer>
         <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseEditIcdModal" />
         <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="UpdateIcdAsync" />
-    </DialogFooter>
+    </Footer>
 </SfDialog>

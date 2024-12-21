@@ -25,13 +25,4 @@ public class BackgroundController(IBackgroundsAppService backgroundsAppService) 
     public Task<BackgroundDto> CreateAsync(BackgroundCreateDto input) => backgroundsAppService.CreateAsync(input);
     [HttpPut]
     public Task<BackgroundDto> UpdateAsync(BackgroundUpdateDto input) => backgroundsAppService.UpdateAsync(input);
-    [HttpDelete]
-    [Route("{id}")]
-    public void DeleteAsync(Guid id) => backgroundsAppService.DeleteAsync(id);
-    [HttpDelete]
-    [Route("all")]
-    public Task DeleteAllAsync(GetBackgroundsInput input) => backgroundsAppService.DeleteAllAsync(input);
-    [HttpDelete]
-    [Route("")]
-    public Task DeleteByIdsAsync(List<Guid> backgroundIds) => backgroundsAppService.DeleteByIdsAsync(backgroundIds);
 }
