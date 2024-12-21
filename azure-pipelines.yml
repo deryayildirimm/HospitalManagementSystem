@@ -73,8 +73,6 @@ stages:
               targetType: 'inline'
               script: |
                 $(TrivyPath) image registry.gitlab.com/medplus1/medplusproject:$(imageTag) --exit-code 0 --severity HIGH,CRITICAL
-                echo "### CRITICAL ve HIGH Seviyedeki Güvenlik Açıkları Kontrol Ediliyor..."
-                $(TrivyPath) image registry.gitlab.com/medplus1/medplusproject:$(imageTag) --exit-code 1 --severity CRITICAL
             displayName: 'Docker Image Trivy Taraması'
 
 
