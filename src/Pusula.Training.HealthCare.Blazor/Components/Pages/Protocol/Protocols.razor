@@ -1,669 +1,298 @@
-@page "/protocolsaejfsgk"
+@page "/protocols"
 
 @attribute [Authorize(HealthCarePermissions.Protocols.Default)]
-@using Pusula.Training.HealthCare.Protocols
-@using Pusula.Training.HealthCare.Localization
 @using Pusula.Training.HealthCare.Shared
-@using Blazorise.Components
-@using Pusula.Training.HealthCare.Doctors
-@using Pusula.Training.HealthCare.Patients
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Buttons
 
+@using Pusula.Training.HealthCare.Blazor.Components.Grids
+@using Pusula.Training.HealthCare.Blazor.Components.Modals
+@using Pusula.Training.HealthCare.Blazor.Components.Filters
 @using Pusula.Training.HealthCare.Permissions
-@using Volo.Abp.AspNetCore.Components.Web
+@using Pusula.Training.HealthCare.ProtocolTypes
 @using Volo.Abp.Http.Client
+@using Pusula.Training.HealthCare.Blazor.Services
+@using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Protocols
 @inherits HealthCareComponentBase
+@inject IProtocolTypesAppService ProtocolTypesAppService
 @inject IProtocolsAppService ProtocolsAppService
 @inject IPatientsAppService PatientsAppService
-@inject IDoctorsAppService DoctorsAppService
-
 @inject IUiMessageService UiMessageService
-@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
 
+
 @* ************************* PAGE HEADER ************************* *@
-<PageHeader Title="@L["Protocols"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
+<PageHeader Title="@L["Protocol"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
 
 </PageHeader>
-
+<!--
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home" />
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["Protocol "] />
+    </BreadcrumbItems>
+</SfBreadcrumb>
+-->
 @* ************************* SEARCH ************************* *@
-<Card>
-    <CardBody>
-        <Form id="ProtocolSearchForm" class="mb-3">
-            <Addons>
-                <Addon AddonType="AddonType.Body">
-                    <TextEdit @bind-Text="@Filter.FilterText"
-                              Autofocus="true"
-                              Placeholder="@L["Search"]"
-                              >
-                    </TextEdit>
-                </Addon>
-                <Addon AddonType="AddonType.End">
-                    <SubmitButton Form="ProtocolSearchForm" Clicked="GetProtocolsAsync">
-                        <Icon Name="IconName.Search" Class="me-1"></Icon>@L["Search"]
-                    </SubmitButton>
-                </Addon>
-            </Addons>
-        </Form>
 
-        <Row Class="mt-3 mb-3">
-            <div class="col-md-12">
-                <a href="javascript:;" class="text-decoration-none" @onclick="() => ShowAdvancedFilters = !ShowAdvancedFilters">@L["SeeAdvancedFilters"]</a>
+<div class="row py-3 px-2">
+<div class="col-12 border-1 bg-white p-4" style="box-shadow:0 4px 8px rgba(0,0,0,0.2); ">
+    <div class="row">
+
+    <GenericFilter TFilter="GetProtocolsInput"
+                   Filter="@Filter"
+                   GetSearchValue="filter => filter.FilterText ?? string.Empty"
+                   SetSearchValue="(filter, value) => filter.FilterText = value"
+                   OnFilterChanged="HandleFilterChanged"
+                   OnClearFilters="ClearFilters">
+        <div class="col-3 my-1">
+            <h6>@L["StartMinDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.StartTimeMin" Placeholder="@L["StartMinDate"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <h6>@L["StartMaxDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.StartTimeMax" Placeholder="@L["StartMaxDate"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <h6>@L["EndMinDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.EndTimeMin" Placeholder="@L["EndTimeMin"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <h6>@L["EndMaxDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.EndTimeMax" Placeholder="@L["EndTimeMax"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <div>
+                <h6>@L["Departments"]</h6>
+                <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                @bind-Value="Filter.DepartmentId"
+                                DataSource="@DepartmentsCollection">
+                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
             </div>
-        </Row>
-
-        <div style="display: @(!ShowAdvancedFilters ? "none" : "block")" >
-            <Row>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["MinStartTime"]</FieldLabel>
-                        <DatePicker TValue="DateTime?"
-                                    InputMode="DateInputMode.Date"
-                                    Date="@Filter.StartTimeMin"
-                                    DateChanged="@OnStartTimeMinChangedAsync"
-                                    Placeholder="@string.Empty"/>
-                    </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["MaxStartTime"]</FieldLabel>
-                        <DatePicker TValue="DateTime?"
-                                    InputMode="DateInputMode.Date"
-                                    Date="@Filter.StartTimeMax"
-                                    DateChanged="@OnStartTimeMaxChangedAsync"
-                                    Placeholder="@string.Empty"/>
-                    </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["MinEndTime"]</FieldLabel>
-                        <DatePicker TValue="DateTime?"
-                                    InputMode="DateInputMode.Date"
-                                    Date="@Filter.EndTimeMin"
-                                    DateChanged="@OnEndTimeMinChangedAsync"
-                                    Placeholder="@string.Empty"/>
-                    </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["MaxEndTime"]</FieldLabel>
-                        <DatePicker TValue="DateTime?"
-                                    InputMode="DateInputMode.Date"
-                                    Date="@Filter.EndTimeMax"
-                                    DateChanged="@OnEndTimeMaxChangedAsync"
-                                    Placeholder="@string.Empty"/>
-                    </Field>
-                </Column>
-                
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["Department"]</FieldLabel>
-                        <Select TValue="Guid?"
-                                @onclick="LoadLookupsAsync"
-                                SelectedValue="@Filter.DepartmentId"
-                                SelectedValueChanged="@OnDepartmentIdChangedAsync">
-
-                            <SelectItem></SelectItem>
-
-                            @foreach (var item in DepartmentsCollection)
-                            {
-                                <SelectItem TValue="Guid" Value="@item.Id">
-                                    @item.DisplayName
-                                </SelectItem>
-                            }
-
-                        </Select>
-                    </Field>
-                </Column>
-                
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["Insurance"]</FieldLabel>
-                        <Select TValue="Guid?"
-                                @onclick=" LoadLookupsAsync"
-                                SelectedValue="@Filter.InsuranceId"
-                                SelectedValueChanged="@OnInsuranceIdChangedAsync">
-
-                            <SelectItem></SelectItem>
-
-                            @foreach (var item in InsuranceCollections)
-                            {
-                            <SelectItem TValue="Guid" Value="@item.Id">
-                                @item.DisplayName
-                            </SelectItem>
-                            }
-
-                        </Select>
-                    </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["Doctor"]</FieldLabel>
-                        <Select TValue="Guid?"
-                                @onclick="LoadLookupsAsync"
-                                SelectedValue="@Filter.DoctorId"
-                                SelectedValueChanged="@OnDoctorIdChangedAsync">
-
-                            <SelectItem></SelectItem>
-
-                            @foreach (var item in DoctorsCollection)
-                            {
-                                <SelectItem TValue="Guid" Value="@item.Id">
-                                    @item.DisplayName
-                                </SelectItem>
-                            }
-
-                        </Select>
-                    </Field>
-                </Column>
-                <Column ColumnSize="ColumnSize.Is3">
-                    <Field>
-                        <FieldLabel>@L["Protocol Type"]</FieldLabel>
-                        <Select TValue="Guid?"
-                                @onclick="LoadLookupsAsync"
-                                SelectedValue="@Filter.ProtocolTypeId"
-                                SelectedValueChanged="@OnProtocolTypeIdChangedAsync">
-                            <SelectItem></SelectItem>
-
-                            @foreach (var item in ProtocolTypesCollection)
-                            {
-                                <SelectItem TValue="Guid" Value="@item.Id">
-                                    @item.DisplayName
-                                </SelectItem>
-                            }
-
-                        </Select>
-                    </Field>
-                </Column>
-
-            </Row>
-            @*//<suite-custom-code-block-2>*@
-            @*//</suite-custom-code-block-2>*@
         </div>
 
-        @*//<suite-custom-code-block-3>*@
-        @*//</suite-custom-code-block-3>*@
-    </CardBody>
-</Card>
-
-@* ************************* DATA GRID ************************* *@
-<Card>
-    <CardBody>
-        @if (SelectedProtocols.Any())
-        {
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                @if (AllProtocolsSelected)
-                {
-                    <p class="lead mb-0">
-                        @L["AllItemsAreSelected", TotalCount]
-                    </p>
-                }
-                else
-                {
-                    <p class="lead mb-0">
-                        @if (SelectedProtocols.Count > 1)
-                        {
-                            @L["NumberOfItemsOnThisPageAreSelected", SelectedProtocols.Count]
-                        }
-                        else
-                        {
-                            @L["OneItemOnThisPageIsSelected"]
-                        }
-                    </p>
-                }
-
-                <div>
-                    @if ((SelectedProtocols.Count == PageSize || SelectedProtocols.Count == ProtocolList.Count) && TotalCount > SelectedProtocols.Count)
-                    {
-                        if (!AllProtocolsSelected)
-                        {
-                            <Button Clicked="SelectAllItems" Class="mx-1 btn-outline-secondary">@L["SelectAllItems", TotalCount]</Button>
-                        }
-                        else
-                        {
-                            <Button Clicked="ClearSelection" Class="mx-1 btn-outline-secondary">@L["ClearSelection"]</Button>
-                        }
-                    }
-
-                    <Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedProtocolsAsync">
-                        <Icon Name="@IconName.Delete"/> @L["Delete"]
-                    </Button>
-                </div>
+        <div class="col-3 my-1">
+            <div>
+                <h6>@L["Doctors"]</h6>
+                <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                @bind-Value="Filter.DoctorId"
+                                DataSource="@DoctorsCollection">
+                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
             </div>
+        </div>
 
-            <hr class="my-1 mx-0"/>
-        }
-        <DataGrid TItem="ProtocolWithNavigationPropertiesDto"
-                  Data="ProtocolList"
-                  SelectionMode="DataGridSelectionMode.Multiple"
-                  SelectedRows="SelectedProtocols"
-                  RowSelectable="@((args) => CanDeleteProtocol)"
-                  SelectedRowsChanged="SelectedProtocolRowsChanged"
-                  ReadData="OnDataGridReadAsync"
-                  TotalItems="TotalCount"
-                  ShowPager="true"
-                  Responsive="true"
-                  PageSize="PageSize"
-                  Class="datagrid-detail">
-            <LoadingTemplate>
-                <Row Class="w-100 align-items-center" Style="height: 150px;">
-                    <Column>
-                        <RadarSpinner/>
-                    </Column>
-                </Row>
-            </LoadingTemplate>
-            <EmptyTemplate>
-                <Row Class="w-100 align-items-center" Style="height: 150px;">
-                    <Column>
-                        <Heading Size="HeadingSize.Is4" TextAlignment="TextAlignment.Center">@L["NoDataAvailable"]</Heading>
-                    </Column>
-                </Row>
-            </EmptyTemplate>
-            <DataGridColumns>
+        <div class="col-3 my-1">
+            <div>
+                <h6>@L["ProtocolType"]</h6>
+                <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                @bind-Value="Filter.ProtocolTypeId"
+                                DataSource="@ProtocolTypesCollection">
+                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
+            </div>
+        </div>
 
-                @if (CanDeleteProtocol && ProtocolList.Any())
-                {
-                    <DataGridMultiSelectColumn TItem="ProtocolWithNavigationPropertiesDto" DisplayOrder="-1" Width="30px"></DataGridMultiSelectColumn>
-                }
+        <div class="col-3 my-1">
+            <div>
+                <h6>@L["Insurance"]</h6>
+                <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                @bind-Value="Filter.InsuranceId"
+                                DataSource="@InsuranceCollections">
+                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
+            </div>
+        </div>
+    </GenericFilter>
 
+</div>
+</div>
+</div>
 
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Patient.FirstName"
-                                Caption="@L["Patient"]">
-                    <DisplayTemplate>
-                        @($"{context.Patient?.FirstName} {context.Patient?.LastName}")
-                    </DisplayTemplate>
-                </DataGridColumn>
+  @if (_spinnerVisible)
+  {
+    <SfSpinner  Label="Loading..." Type="SpinnerType.Material" CssClass="e-spinner" Visible="_spinnerVisible" />
+}
+else
+{
+  
+    <GenericGrid TModel="ProtocolWithNavigationPropertiesDto"
+                 @ref="_gridRef"
+                 Columns="@_columns" 
+                 OnEdit="OpenEditModal"
+                 PageSize="10"
+                 Query="@FilterQuery"
+                 OnDelete="DeleteProtocolTypeAsync"
+                 ShowDetailButton="true"
+                 OnDetailClicked="NavigateToDetail"
+                 AdaptorInstance="@typeof(ProtocolAdaptor)"
+                 AdaptorType="Adaptors.CustomAdaptor"></GenericGrid>
+                 
+}
 
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Department.Name"
-                                Caption="@L["Department"]">
-                </DataGridColumn>
+<!-- Update Modal -->
 
+<GenericModal TModel="ProtocolUpdateDto" @ref="_editModal" Title="Edit Protocol" Model="@_selectedProtocolType" OnSaveCallback="UpdateProtocolTypeAsync">
 
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Doctor.FirstName"
-                                Caption="@L["Doctor"]">
-                    <DisplayTemplate>
-                        @($"{context.Doctor?.FirstName} {context.Doctor?.LastName}")
-                    </DisplayTemplate>
-                </DataGridColumn>
+    <div class="form-group">
+        <label>@L["Patient"]</label>
+        <SfTextBox TValue="string" Value="@_selectedProtocolType.Patient.FirstName" Readonly="true" />
+    </div>
+    <div class="form-group">
+        <label>@L["StartTime"]</label>
+        <SfDatePicker TValue="DateTime" Placeholder="@L["SelectStartTime"]" @bind-Value="_selectedProtocolType.StartTime">
+        </SfDatePicker>
+    </div>
 
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="ProtocolType.Name"
-                                Caption="@L["Protocol Type"]">
-                    <DisplayTemplate>
-                        @context.ProtocolType?.Name
-                    </DisplayTemplate>
-                </DataGridColumn>
+    <!-- End Time -->
+    <div class="form-group">
+        <label>@L["EndTime"]</label>
+        <SfDatePicker TValue="DateTime?" Placeholder="@L["SelectEndTime"]" @bind-Value="_selectedProtocolType.EndTime">
+        </SfDatePicker>
+    </div>
 
+    <!-- Department -->
+    <div class="form-group">
+        <label>@L["Department"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectDepartment"]"
+                        DataSource="@DepartmentsCollection" TItem="LookupDto<Guid>" @bind-Value="_selectedProtocolType.DepartmentId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
 
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Insurance.InsuranceCompanyName"
-                                Caption="@L["Insurance"]">
-                    <DisplayTemplate>
-                        @context.Insurance?.InsuranceCompanyName
-                    </DisplayTemplate>
-                </DataGridColumn>
+    <!-- Doctor -->
+    <div class="form-group">
+        <label>@L["Doctor"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectDoctor"]"
+                        DataSource="@DoctorsCollection" TItem="LookupDto<Guid>" @bind-Value="_selectedProtocolType.DoctorId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
 
-                
+    <!-- Protocol Type -->
+    <div class="form-group">
+        <label>@L["ProtocolType"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectProtocolType"]"
+                        DataSource="@ProtocolTypesCollection" TItem="LookupDto<Guid>" @bind-Value="_selectedProtocolType.ProtocolTypeId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
 
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Protocol.StartTime"
-                                Caption="@L["StartTime"]">
-                    <DisplayTemplate>
-                        @context.Protocol.StartTime.ToShortDateString()
-                    </DisplayTemplate>
-                </DataGridColumn>
-
-
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"
-                                Field="Protocol.EndTime"
-                                Caption="@L["EndTime"]">
-                    <DisplayTemplate>
-                        @context.Protocol?.EndTime?.ToShortDateString()
-                    </DisplayTemplate>
-                </DataGridColumn>
-                
-                <DataGridEntityActionsColumn TItem="ProtocolWithNavigationPropertiesDto" @ref="@EntityActionsColumn">
-                    <DisplayTemplate>
-                        <EntityActions TItem="ProtocolWithNavigationPropertiesDto" EntityActionsColumn="@EntityActionsColumn">
-                            <EntityAction TItem="ProtocolWithNavigationPropertiesDto"
-                                          Visible="@CanEditProtocol"
-                                          Clicked="async () => await OpenEditProtocolModalAsync(context)"
-                                          Text="@L["Edit"]">
-                            </EntityAction>
-                            <EntityAction TItem="ProtocolWithNavigationPropertiesDto"
-                                          Visible="@CanDeleteProtocol"
-                                          Clicked="() => DeleteProtocolAsync(context)"
-                                          ConfirmationMessage="@(() => L["DeleteConfirmationMessage"])"
-                                          Text="@L["Delete"]">
-                            </EntityAction>
-                        </EntityActions>
-                    </DisplayTemplate>
-                </DataGridEntityActionsColumn>
-
-                <!-- Detail Page Column -->
-                <DataGridColumn TItem="ProtocolWithNavigationPropertiesDto"  Caption="@L["Detay"]">
-                    <DisplayTemplate>
-                        <Button Color="Color.Primary" @onclick="() => NavigateToDetail(context)">
-                            <Icon Name="@IconName.ExternalLinkSquareAlt" />
-                        </Button>
-                    </DisplayTemplate>
-                </DataGridColumn>
-                
-            </DataGridColumns>
+    <!-- Insurance -->
+    <div class="form-group">
+        <label>@L["Insurance"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectInsurance"]"
+                        DataSource="@InsuranceCollections" TItem="LookupDto<Guid>" @bind-Value="_selectedProtocolType.InsuranceId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
+</GenericModal>
+  
+  <!-- Create Modal -->
+  
+  <GenericModal TModel="ProtocolCreateDto" @ref="_createModal" Title="Create Protocol" Model="@_newProtocol" OnSaveCallback="CreateProtocolTypeAsync">
 
 
-        </DataGrid>
-    </CardBody>
-</Card>
+      <div class="form-group">
+          <label class="e-label">@L["Identity Number"]</label>
+          <SfTextBox Placeholder="Enter Identity Number" CssClass="e-input" @bind-Value="IdentityNumber" />
+      </div>
+      
+      <div class="form-group">
+          <label class="e-label" style="color: white;">@L["     sdfşklg      "]</label>
+          <SfButton CssClass="e-primary" @onclick="OnCheckIdentityNumberClicked">@L["Check"]</SfButton>
+      </div>
+      
+      
+      <div style="display: @(IsPatientFound ? "block" : "none")">
+        
+          <div class="e-field">
+              <SfTextBox bind-Value="@FoundPatientName" CssClass="e-input" Readonly="true" />
+          </div>
+       
+      </div>
+      <div style="display: @(!IsPatientFound ? "block" : "none")">
+          <div class="form-group">
+              <label class="e-label">@L["First Name"]</label>
+              <SfTextBox Placeholder="Enter First Name" CssClass="e-input" @bind-Value="NewPatient.FirstName"/>
+          </div>
+          <div class="form-group">
+              <label class="e-label">@L["Last Name"]</label>
+              <SfTextBox Placeholder="Enter Last Name" CssClass="e-input" @bind-Value="NewPatient.LastName" />
+          </div>
+          <div class="form-group">
+              <label class="e-label">@L["Identity Number"]</label>
+              <SfTextBox  Placeholder="Enter Identity Number" CssClass="e-input" @bind-Value="NewPatient.IdentityAndPassportNumber" />
+          </div>
+          <div class="form-group">
+              <label class="e-label">@L["Birthdate"] *</label>
+              <SfDatePicker  Placeholder="Select Birthdate" Format="dd/MM/yyyy" CssClass="e-datepicker" @bind-Value="NewPatient.BirthDate" />
+          </div>
+          <div class="form-group">
+              <label class="e-label">@L["Gender"] *</label>
+             
+          </div>
+          
+          
+      </div>
+    
+      <div class="form-group">
+        <label>@L["StartTime"]</label>
+        <SfDatePicker TValue="DateTime" Placeholder="@L["SelectStartTime"]" @bind-Value="_newProtocol.StartTime">
+        </SfDatePicker>
+          <ValidationMessage For="@(() => _newProtocol.StartTime)"></ValidationMessage>
+    </div>
 
-@* ************************* CREATE MODAL ************************* *@
-<Modal @ref="CreateProtocolModal" Closing="@CreateProtocolModal.CancelClosingModalWhenFocusLost">
-    <ModalContent Centered="true" >
-        @*//<suite-custom-code-block-5>*@
-        @*//</suite-custom-code-block-5>*@
-        <Form id="CreateProtocolForm">
-            <ModalHeader>
-                <ModalTitle>@L["NewProtocol"]</ModalTitle>
-                <CloseButton Clicked="CloseCreateProtocolModalAsync"/>
-            </ModalHeader>
-            <ModalBody>
-                <Validations @ref="@NewProtocolValidations"
-                             Mode="ValidationMode.Auto"
-                             Model="@NewProtocol"
-                             ValidateOnLoad="false">
+    <!-- End Time -->
+    <div class="form-group">
+        <label>@L["EndTime"]</label>
+        <SfDatePicker TValue="DateTime?" Placeholder="@L["SelectEndTime"]" @bind-Value="_newProtocol.EndTime">
+        </SfDatePicker>
+        <ValidationMessage For="@(() => _newProtocol.EndTime)"></ValidationMessage>
+    </div>
 
-                    <Row>
-                        <Column ColumnSize="ColumnSize.Is6">
-                            <Validation MessageLocalizer="@LH.Localize">
-                                <Field>
-                                    <FieldLabel>@L["StartTime"]</FieldLabel>
-                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.StartTime">
-                                        <Feedback>
-                                            <ValidationError/>
-                                        </Feedback>
-                                    </DateEdit>
-                                </Field>
-                            </Validation>
-                        </Column>
-                        <Column ColumnSize="ColumnSize.Is6">
-                            <Validation MessageLocalizer="@LH.Localize">
-                                <Field>
-                                    <FieldLabel>@L["EndTime"]</FieldLabel>
-                                    <DateEdit TValue="DateTime?" InputMode="DateInputMode.Date" @bind-Date="@NewProtocol.EndTime">
-                                        <Feedback>
-                                            <ValidationError/>
-                                        </Feedback>
-                                    </DateEdit>
-                                </Field>
-                            </Validation>
+    <!-- Department -->
+    <div class="form-group">
+        <label>@L["Department"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectDepartment"]"
+                        DataSource="@DepartmentsCollection" TItem="LookupDto<Guid>" @bind-Value="_newProtocol.DepartmentId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+        <ValidationMessage For="@(() => _newProtocol.DepartmentId)"></ValidationMessage>
+    </div>
 
-                        </Column>
+    <!-- Doctor -->
+    <div class="form-group">
+        <label>@L["Doctor"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectDoctor"]"
+                        DataSource="@DoctorsCollection" TItem="LookupDto<Guid>" @bind-Value="_newProtocol.DoctorId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+        <ValidationMessage For="@(() => _newProtocol.DoctorId)"></ValidationMessage>
+    </div>
 
-                    </Row>
-                    @if (IsPatientFound)
-                    {
-                        <Row >
-                            <Column ColumnSize="ColumnSize.Is8">
-                                <Field>
-                                    <FieldLabel style="display: inline-flex; align-items: center;">@L["Identity Number"]</FieldLabel>
-                                    <TextEdit Text="@IdentityNumber" TextChanged="@((value) => IdentityNumber = value)" Placeholder="Enter Identity Number"/>
-                                    <ValidationMessage For="@(() => IdentityNumber)"/>
-                                </Field>
-                            </Column>
-                            <Column ColumnSize="ColumnSize.Is4">
-                                <Field>
-                                    <FieldLabel style="display: inline-flex; align-items: center; color: white">@L["     sdfşklg      "]</FieldLabel>
-                                    <Button Color="Color.Primary" Clicked="OnCheckIdentityNumberClicked">
-                                        @L["Check"]
-                                    </Button>
-                                </Field>
+    <!-- Protocol Type -->
+    <div class="form-group">
+        <label>@L["ProtocolType"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectProtocolType"]"
+                        DataSource="@ProtocolTypesCollection" TItem="LookupDto<Guid>" @bind-Value="_newProtocol.ProtocolTypeId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+        <ValidationMessage For="@(() => _newProtocol.ProtocolTypeId)"></ValidationMessage>
+    </div>
 
-                            </Column>
-                        </Row>
-                    }
-                    <div style="display: @(IsPatientFound ? "block" : "none")">
-                        <Column>
-                            <Field>
-                                <TextEdit Value="@FoundPatientName" Plaintext Disabled/>
-                            </Field>
-                        </Column>
-                    </div>
-                    <div style="display: @(!IsPatientFound ? "block" : "none")">
-                        <Row>
-                            <Column ColumnSize="ColumnSize.Is12" >
-                                <Field>
-                                    <FieldLabel>@L["First Name"]</FieldLabel>
-                                    <TextEdit @bind-Text="@NewPatient.FirstName" Placeholder="Enter First Name"/>
-                                </Field>
-                            </Column>
-                            <Column ColumnSize="ColumnSize.Is12">
-                                <Field>
-                                    <FieldLabel>@L["Last Name"]</FieldLabel>
-                                    <TextEdit @bind-Text="@NewPatient.LastName" Placeholder="Enter Last Name"/>
-                                </Field>
-                            </Column> 
-                            <Column ColumnSize="ColumnSize.Is12">
-                                <Field>
-                                    <FieldLabel>@L["Identity Number"]</FieldLabel>
-                                    <TextEdit @bind-Text="@NewPatient.IdentityAndPassportNumber" Placeholder="Enter Identity Number"/>
-                                </Field>
-                            </Column>
-                           
-                            <Column ColumnSize="ColumnSize.Is6">
-                                <Field >
-                                    <FieldLabel>@L["Birthdate"] *</FieldLabel>
-                                    <DateEdit TValue="DateTime" @bind-Date="@NewPatient.BirthDate" InputMode="DateInputMode.Date"/>
-                                </Field>
-                            </Column>
-                           
-                            <Column ColumnSize="ColumnSize.Is6">
-                                <Field>
-                                    <FieldLabel style="display: inline-flex; align-items: center;">@L["Gender"] *</FieldLabel>
-                                    <Select TValue="EnumGender" @bind-SelectedValue="@NewPatient.Gender">
-                                        <SelectItem Value="EnumGender.MALE">@L["Male"]</SelectItem>
-                                        <SelectItem Value="EnumGender.FEMALE">@L["Female"]</SelectItem>
-                                    </Select>
-                                </Field>
-                            </Column>
-                        </Row>
-                    </div>
-                    <Row>
-                       
-                        <Field>
-                            <FieldLabel>@L["Department"]</FieldLabel>
-                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DepartmentId" >
-
-                                <SelectItem></SelectItem>
-
-                                @foreach (var department in DepartmentsCollection)
-                                {
-                                    <SelectItem TValue="Guid" Value="@(department.Id)">
-                                        @(department.DisplayName)
-                                    </SelectItem>
-                                }
-                            </Select>
-                        </Field>
-
-                        <Field>
-                            <FieldLabel>@L["Doctor"]</FieldLabel>
-                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.DoctorId">
-
-                                <SelectItem></SelectItem>
-
-                                @foreach (var doctor in DoctorsCollection)
-                                {
-                                    <SelectItem TValue="Guid" Value="@(doctor.Id)">
-                                        @(doctor.DisplayName)
-                                    </SelectItem>
-                                }
-                            </Select>
-                        </Field>
-                        <Field>
-                            <FieldLabel>@L["Insurance"]</FieldLabel>
-                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.InsuranceId">
-
-                                <SelectItem></SelectItem>
-
-                                @foreach (var insurance in InsuranceCollections)
-                                {
-                                <SelectItem TValue="Guid" Value="@(insurance.Id)">
-                                    @(insurance.DisplayName)
-                                </SelectItem>
-                                }
-                            </Select>
-                        </Field>
-                        <Field>
-                            <FieldLabel>@L["Protocol Type"]</FieldLabel>
-                            <Select TValue="Guid" @bind-SelectedValue="@NewProtocol.ProtocolTypeId" >
-
-                                <SelectItem></SelectItem>
-
-                                @foreach (var type in ProtocolTypesCollection)
-                                {
-                                <SelectItem TValue="Guid" Value="@(type.Id)">
-                                    @(type.DisplayName)
-                                </SelectItem>
-                                }
-                            </Select>
-                        </Field>
-                    </Row>
-                    
-                    <Row>
-                    
-
-                        <Validation MessageLocalizer="@LH.Localize">
-                            <Field>
-                                <FieldLabel>@L["Notes"] *</FieldLabel>
-                                <TextEdit @bind-Text="@NewProtocol.Notes" MaxLength="ProtocolConsts.MaxNotesLength" Plaintext >
-                                    <Feedback>
-                                        <ValidationError/>
-                                    </Feedback>
-                                </TextEdit>
-                            </Field>
-                        </Validation>
-                        
-                    </Row>
-
-                </Validations>
-            </ModalBody>
-            <ModalFooter>
-                <Button Color="Color.Secondary"
-                        Clicked="CloseCreateProtocolModalAsync">
-                    @L["Cancel"]
-                </Button>
-                <SubmitButton Form="CreateProtocolForm" Clicked="CreateProtocolAsync"/>
-                @*//<suite-custom-code-block-6>*@
-                @*//</suite-custom-code-block-6>*@
-            </ModalFooter>
-        </Form>
-        @*//<suite-custom-code-block-7>*@
-        @*//</suite-custom-code-block-7>*@
-    </ModalContent>
-</Modal>
-
-@* ************************* EDIT MODAL ************************* *@
-<Modal @ref="EditProtocolModal" Closing="@EditProtocolModal.CancelClosingModalWhenFocusLost">
-    <ModalContent Centered="true" >
-        @*//<suite-custom-code-block-8>*@
-        @*//</suite-custom-code-block-8>*@
-        <Form id="EditProtocolForm">
-            <ModalHeader>
-                <ModalTitle>@L["Update"]</ModalTitle>
-                <CloseButton Clicked="CloseEditProtocolModalAsync"/>
-            </ModalHeader>
-            <ModalBody>
-                <Validations @ref="@EditingProtocolValidations"
-                             Mode="ValidationMode.Auto"
-                             Model="@EditingProtocol"
-                             ValidateOnLoad="false">
-                    
-                    <Validation MessageLocalizer="@LH.Localize">
-                        <Field>
-                            <FieldLabel>@L["StartTime"]</FieldLabel>
-                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingProtocol.StartTime">
-                                <Feedback>
-                                    <ValidationError/>
-                                </Feedback>
-                            </DateEdit>
-                        </Field>
-                    </Validation>
-                
-                    <Validation MessageLocalizer="@LH.Localize">
-                        <Field>
-                            <FieldLabel>@L["EndTime"]</FieldLabel>
-                            <DateEdit TValue="DateTime?" InputMode="DateInputMode.Date" @bind-Date="@EditingProtocol.EndTime">
-                                <Feedback>
-                                    <ValidationError/>
-                                </Feedback>
-                            </DateEdit>
-                        </Field>
-                    </Validation>
-
-                    <Field>
-                        <FieldLabel>@L["Department"]</FieldLabel>
-                        <Select TValue="Guid" @bind-SelectedValue="@EditingProtocol.DepartmentId">
-                            @foreach (var department in DepartmentsCollection)
-                            {
-                                <SelectItem TValue="Guid" Value="@(department.Id)">
-                                    @(department.DisplayName)
-                                </SelectItem>
-                            }
-                        </Select>
-                    </Field>
-
-                    <Field>
-                        <FieldLabel>@L["Doctor"]</FieldLabel>
-                        <Select TValue="Guid" @bind-SelectedValue="@EditingProtocol.DoctorId">
-                            @foreach (var doctor in DoctorsCollection)
-                            {
-                                <SelectItem TValue="Guid" Value="@(doctor.Id)">
-                                    @(doctor.DisplayName)
-                                </SelectItem>
-                            }
-                        </Select>
-                    </Field>
-
-                    <Field>
-                        <FieldLabel>@L["ProtocolType"]</FieldLabel>
-                        <Select TValue="Guid" @bind-SelectedValue="@EditingProtocol.ProtocolTypeId">
-                            @foreach (var type in ProtocolTypesCollection)
-                            {
-                                <SelectItem TValue="Guid" Value="@(type.Id)">
-                                    @(type.DisplayName)
-                                </SelectItem>
-                            }
-                        </Select>
-                    </Field>
-                    <Field>
-                        <FieldLabel>@L["Insurance"]</FieldLabel>
-                        <Select TValue="Guid" @bind-SelectedValue="@EditingProtocol.InsuranceId">
-                            @foreach (var type in InsuranceCollections)
-                            {
-                            <SelectItem TValue="Guid" Value="@(type.Id)">
-                                @(type.DisplayName)
-                            </SelectItem>
-                            }
-                        </Select>
-                    </Field>
-
-                </Validations>
-            </ModalBody>
-            <ModalFooter>
-                <Button Color="Color.Secondary"
-                        Clicked="CloseEditProtocolModalAsync">
-                    @L["Cancel"]
-                </Button>
-                <SubmitButton Form="EditProtocolForm" Clicked="UpdateProtocolAsync"/>
-                @*//<suite-custom-code-block-9>*@
-                @*//</suite-custom-code-block-9>*@
-            </ModalFooter>
-        </Form>
-        @*//<suite-custom-code-block-10>*@
-        @*//</suite-custom-code-block-10>*@
-    </ModalContent>
-</Modal>
+    <!-- Insurance -->
+    <div class="form-group">
+        <label>@L["Insurance"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectInsurance"]"
+                        DataSource="@InsuranceCollections" TItem="LookupDto<Guid>" @bind-Value="_newProtocol.InsuranceId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+        <ValidationMessage For="@(() => _newProtocol.InsuranceId)"></ValidationMessage>
+    </div>
+</GenericModal>

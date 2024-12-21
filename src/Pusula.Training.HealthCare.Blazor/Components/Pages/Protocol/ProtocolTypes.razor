@@ -6,7 +6,6 @@
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 
-
 @using Pusula.Training.HealthCare.Blazor.Components.Grids
 @using Pusula.Training.HealthCare.Blazor.Components.Modals
 @using Pusula.Training.HealthCare.Blazor.Components.Filters
@@ -27,11 +26,8 @@
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["Protocol Types"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
-
 </PageHeader>
 <!--
-
-
 <SfBreadcrumb>
     <BreadcrumbItems>
         <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home" />
@@ -42,45 +38,55 @@
 @* ************************* SEARCH ************************* *@
 
 <div class="row py-3 px-2">
-    <div class="col-12 border-1 bg-white rounded-1 p-4">
+    <div class="col-12 border-1 bg-white  p-4" style="box-shadow:0 4px 8px rgba(0,0,0,0.2); ">
 
         <GenericFilter TFilter="GetProtocolTypeInput"
                        Filter="@Filter"
                        GetSearchValue="filter => filter?.FilterText ?? string.Empty"
                        SetSearchValue="(filter, value) => filter.FilterText = value"
-                       OnFilterChanged="HandleFilterChanged" />
+                       OnFilterChanged="HandleFilterChanged"
+                       OnClearFilters="ClearFilters">
+            
+            <div class="col-4 mt-3">
+                <h6>@L["Protocol Type Name"]</h6>
+                <input type="text" class="form-control" placeholder="Search" @bind-value="Filter.Name"/>
+            </div>
+
+        </GenericFilter>
     </div>
 </div>
 
-@if (SpinnerVisible)
+@if (_spinnerVisible)
 {
-<SfSpinner  Label="Loading..." Type="SpinnerType.Material" CssClass="e-spinner" Visible="SpinnerVisible" />
+<SfSpinner  Label="Loading..." Type="SpinnerType.Material" CssClass="e-spinner" Visible="_spinnerVisible" />
 }
 else
 {
-<GenericGrid TModel="ProtocolTypeDto"
-             @ref="GridRef"
-             Columns="@Columns"
-             OnEdit="OpenEditModal"
-             PageSize="11"
-             Query="@FilterQuery"
-             OnDelete="DeleteProtocolTypeAsync"
-             AdaptorInstance="@typeof(ProtocolTypeAdaptor)"
-             AdaptorType="Adaptors.CustomAdaptor"></GenericGrid>
+ 
+        <GenericGrid TModel="ProtocolTypeDto"
+                     @ref="_gridRef"
+                     Columns="@_columns"
+                     OnEdit="OpenEditModal"
+                     PageSize="11"
+                     Query="@FilterQuery"
+                     OnDelete="DeleteProtocolTypeAsync"
+                     AdaptorInstance="@typeof(ProtocolTypeAdaptor)"
+                     AdaptorType="Adaptors.CustomAdaptor"></GenericGrid>
+    
 }
 
-<GenericModal TModel="ProtocolTypeCreateDto" @ref="CreateModal" Title="Add Protocol Type" Model="@newProtocol" OnSaveCallback="CreateProtocolTypeAsync">
+<GenericModal TModel="ProtocolTypeCreateDto" @ref="_createModal" Title="Add Protocol Type" Model="@_newProtocol" OnSaveCallback="CreateProtocolTypeAsync">
     <div>
         <label>Name:</label>
-        <SfTextBox @bind-Value="@newProtocol.Name" Placeholder="Enter name"></SfTextBox>
-        <ValidationMessage For="@(() => newProtocol.Name)"></ValidationMessage>
+        <SfTextBox @bind-Value="@_newProtocol.Name" Placeholder="Enter name"></SfTextBox>
+        <ValidationMessage For="@(() => _newProtocol.Name)"></ValidationMessage>
     </div>
 </GenericModal>
 
-<GenericModal TModel="ProtocolTypeUpdateDto" @ref="EditModal" Title="Edit Protocol Type" Model="@SelectedProtocolType" OnSaveCallback="UpdateProtocolTypeAsync">
+<GenericModal TModel="ProtocolTypeUpdateDto" @ref="_editModal" Title="Edit Protocol Type" Model="@_selectedProtocolType" OnSaveCallback="UpdateProtocolTypeAsync">
     <div>
         <label>Name:</label>
-        <SfTextBox @bind-Value="@SelectedProtocolType.Name" Placeholder="Enter name"></SfTextBox>
-        <ValidationMessage For="@(() => SelectedProtocolType.Name)"></ValidationMessage>
+        <SfTextBox @bind-Value="@_selectedProtocolType.Name" Placeholder="Enter name"></SfTextBox>
+        <ValidationMessage For="@(() => _selectedProtocolType.Name)"></ValidationMessage>
     </div>
 </GenericModal>

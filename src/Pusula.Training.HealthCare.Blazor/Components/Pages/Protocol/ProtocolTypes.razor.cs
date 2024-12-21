@@ -9,7 +9,6 @@ using System.Web;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
-using Volo.Abp.BlazoriseUI.Components;
 using Pusula.Training.HealthCare.Blazor.Components.Modals;
 using Pusula.Training.HealthCare.Blazor.Components.Grids;
 using Microsoft.EntityFrameworkCore;
@@ -17,85 +16,98 @@ using Npgsql;
 using Volo.Abp;
 using Syncfusion.Blazor.Data;
 
-
-
-
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Protocol;
 
-public partial class ProtocolTypes 
+public partial class ProtocolTypes : HealthCareComponentBase
 {
 
-    protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
+    protected readonly List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
     protected PageToolbar Toolbar { get; } = new PageToolbar();
-    protected bool ShowAdvancedFilters { get; set; }
-    private IReadOnlyList<ProtocolTypeDto> ProtocolTypeList { get; set; }
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private string CurrentSorting { get; set; } = string.Empty;
-    private int TotalCount { get; set; }
     private bool CanCreateProtocolType { get; set; }
     private bool CanEditProtocolType { get; set; }
     private bool CanDeleteProtocolType { get; set; }
+    private Query FilterQuery { get; set; }
 
-    private bool SpinnerVisible = false;
-
-
+    private bool _spinnerVisible;
+    private ProtocolTypeCreateDto _newProtocol;
+    private ProtocolTypeUpdateDto _selectedProtocolType;
+    
+    private GenericGrid<ProtocolTypeDto> _gridRef;
+    private GenericModal<ProtocolTypeCreateDto> _createModal;
+    private GenericModal<ProtocolTypeUpdateDto> _editModal;
+    private Guid EditingProtocolTypeId { get; set; }
+    
     private GetProtocolTypeInput Filter { get; set; }
-    private DataGridEntityActionsColumn<ProtocolTypeDto> EntityActionsColumn { get; set; } = new();
-    protected string SelectedCreateTab = "type-create-tab";
-    protected string SelectedEditTab = "type-edit-tab";
-
- 
-
-    private List<ProtocolTypeDto> SelectedProtocolTypes { get; set; } = [];
-    private bool AllProtocolTypesSelected { get; set; }
-
+    
     public ProtocolTypes()
     {
-
+        _gridRef = new GenericGrid<ProtocolTypeDto>();
+        _createModal = new GenericModal<ProtocolTypeCreateDto>();
+        _editModal = new GenericModal<ProtocolTypeUpdateDto>();
+        _newProtocol = new ProtocolTypeCreateDto();
+        _selectedProtocolType = new ProtocolTypeUpdateDto();
         Filter = new GetProtocolTypeInput
         {
             MaxResultCount = PageSize,
             SkipCount = 0
         };
         FilterQuery = new Query();
-
-        ProtocolTypeList = [];
-       
-
     }
 
     protected override async Task OnInitializedAsync()
     {
-        SpinnerVisible = true;
+        _spinnerVisible = true;
         try
         {
-
-            Filter = new GetProtocolTypeInput();// Filter instance'�n� burada tan�mlay�n.
+            Filter = new GetProtocolTypeInput();
             await SetPermissionsAsync();
             SetFilters();
-            
         }
         finally
         {
-           SpinnerVisible = false;
+            _spinnerVisible = false;
         }
-       
     }
-
-
-
-    private GenericModal<ProtocolTypeCreateDto> CreateModal;
-    private GenericModal<ProtocolTypeUpdateDto> EditModal;
-    private ProtocolTypeCreateDto newProtocol = new ProtocolTypeCreateDto();
-    private ProtocolTypeUpdateDto SelectedProtocolType = new ProtocolTypeUpdateDto();
-    private GenericGrid<ProtocolTypeDto> GridRef;
-    private Guid EditingProtocolTypeId { get; set; }
-
-    private void ShowModal()
+    
+    private void SetFilters()
     {
-        newProtocol = new ProtocolTypeCreateDto();
-        CreateModal?.Show();
+        FilterQuery.Queries.Params = new Dictionary<string, object>();
+        FilterQuery.Queries.Params.Add("Filter", Filter);
+    }
+    
+    private async Task HandleFilterChanged(GetProtocolTypeInput updatedFilter)
+    {
+
+        Filter.MaxResultCount = PageSize;
+        Filter.SkipCount = (CurrentPage - 1) * PageSize;
+        Filter.Sorting = CurrentSorting;
+
+        SetFilters();
+        await _gridRef.RefreshGrid();
+  
+    }
+    
+    private async Task ClearFilters()
+    {
+        Filter = new GetProtocolTypeInput
+        {
+            MaxResultCount = PageSize,
+            SkipCount = (CurrentPage - 1) * PageSize,
+            Sorting = CurrentSorting,
+        };
+        StateHasChanged();
+        SetFilters();
+        await _gridRef.RefreshGrid();
+    }
+    
+    private  Task ShowModal()
+    {
+        _newProtocol = new ProtocolTypeCreateDto();
+        _createModal?.Show();
+        return Task.CompletedTask;
     }
 
     private async Task OpenEditModal(ProtocolTypeDto protocol)
@@ -104,39 +116,43 @@ public partial class ProtocolTypes
         var type = await ProtocolTypesAppService.GetAsync(protocol.Id);
         
         EditingProtocolTypeId = type.Id;
-        SelectedProtocolType = ObjectMapper.Map<ProtocolTypeDto, ProtocolTypeUpdateDto>(type);
+        _selectedProtocolType = ObjectMapper.Map<ProtocolTypeDto, ProtocolTypeUpdateDto>(type);
 
-        EditModal?.Show();
+        _editModal?.Show();
     }
 
     private async Task UpdateProtocolTypeAsync()
     {
         try
         {
-            await ProtocolTypesAppService.UpdateAsync(EditingProtocolTypeId, SelectedProtocolType);
-
+            await ProtocolTypesAppService.UpdateAsync(EditingProtocolTypeId, _selectedProtocolType);
         }
         catch (Exception ex)
         {
-            await UiMessageService.Error(@L["An error occurred while deleting the Protocol Type."]);
+            await UiMessageService.Error(@L["An error occurred while updating the Protocol Type."]);
             throw new UserFriendlyException(ex.Message);
         }
         finally
         {
-            if (GridRef != null)
-            {
-                await GridRef.RefreshGrid();
-            }
+                await _gridRef.RefreshGrid();
         }
           
     }
     private async Task CreateProtocolTypeAsync(ProtocolTypeCreateDto protocol)
     {
-
+        try
+        {
             await ProtocolTypesAppService.CreateAsync(protocol);
-             await GridRef.RefreshGrid();
-       
-       
+        }
+        catch (Exception e)
+        {
+            await UiMessageService.Error(@L["An error occurred while creating the Protocol Type."]);
+            throw new UserFriendlyException(e.Message);
+        }
+        finally
+        {
+            await _gridRef.RefreshGrid();
+        }
     }
 
 
@@ -144,7 +160,6 @@ public partial class ProtocolTypes
     {
         if (firstRender)
         {
-
             await SetBreadcrumbItemsAsync();
             await SetToolbarItemsAsync();
             await InvokeAsync(StateHasChanged);
@@ -160,8 +175,7 @@ public partial class ProtocolTypes
     protected virtual ValueTask SetToolbarItemsAsync()
     {
         Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
-
-
+        Toolbar.AddButton(L["Create Protocol Type"], ShowModal, IconName.Add, requiredPolicyName: HealthCarePermissions.ProtocolTypes.Create);
         return ValueTask.CompletedTask;
     }
 
@@ -175,14 +189,12 @@ public partial class ProtocolTypes
                         .IsGrantedAsync(HealthCarePermissions.ProtocolTypes.Delete);
         
     }
-
-
-
+    
     private async Task DownloadAsExcelAsync()
     {
         var token = (await ProtocolTypesAppService.GetDownloadTokenAsync()).Token;
         var remoteService = await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ?? await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        var culture = CultureInfo.CurrentUICulture.Name ?? CultureInfo.CurrentCulture.Name;
+        var culture = CultureInfo.CurrentUICulture.Name;
         if (!culture.IsNullOrEmpty())
         {
             culture = "&culture=" + culture;
@@ -192,7 +204,7 @@ public partial class ProtocolTypes
     }
 
     
-    private List<GridColumnDefinition> Columns = new()
+    private List<GridColumnDefinition> _columns = new()
     {
         new GridColumnDefinition { Field = "Name", HeaderText = "Name", Width = "200px" },
     };
@@ -208,37 +220,15 @@ public partial class ProtocolTypes
         }
         catch (DbUpdateException ex) when (ex.InnerException is PostgresException pgEx && pgEx.SqlState == "23503")
         {
-            // Foreign Key violation hatas�
             await UiMessageService.Error(@L["This Protocol Type is associated with existing Protocols and cannot be deleted."]);
-
         }
         catch (Exception ex)
         {
+            await UiMessageService.Error(@L["An error occurred while deleting the Protocol Type."] + ex.Message);
             
-            await UiMessageService.Error(@L["An error occurred while deleting the Protocol Type."]);
-           
         }
 
-        await GridRef.RefreshGrid();
+        await _gridRef.RefreshGrid();
     }
-
-    private Query FilterQuery { get; set; }
-    private void SetFilters()
-    {
-        FilterQuery.Queries.Params = new Dictionary<string, object>();
-        FilterQuery.Queries.Params.Add("Filter", Filter);
-    }
-
- 
-    private async Task HandleFilterChanged(GetProtocolTypeInput updatedFilter)
-    {
-
-        Filter.MaxResultCount = PageSize;
-        Filter.SkipCount = (CurrentPage - 1) * PageSize;
-        Filter.Sorting = CurrentSorting;
-
-        SetFilters();
-        await GridRef.RefreshGrid();
-  
-    }
+   
 }
