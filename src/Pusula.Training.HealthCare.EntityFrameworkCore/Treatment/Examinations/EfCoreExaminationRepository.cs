@@ -31,6 +31,7 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
             true, 
             true, 
             true,
+            true,
             true), filterText, dateMin, dateMax, complaint, story, protocolId);
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? ExaminationConsts.GetDefaultSorting(false) : sorting);
 
@@ -111,6 +112,7 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
             includeProtocol: true,
             includeFamilyHistory: true,
             includeBackground: true,
+            includePhysicalFindings: true,
             includeExaminationIcd: true);
 
         return await query.FirstOrDefaultAsync(e => e.Id == id,
@@ -124,7 +126,9 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         var query = ApplyFilter(await GetQueryForNavigationPropertiesAsync(
             includeProtocol: true,
             includeFamilyHistory: true,
-            includeBackground: true), protocolId: protocolId);
+            includeBackground: true,
+            includePhysicalFindings: true,
+            includeExaminationIcd: true), protocolId: protocolId);
         return await query.FirstOrDefaultAsync(GetCancellationToken(cancellationToken));
     }
     
@@ -153,6 +157,7 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         bool includeProtocol = false,
         bool includeFamilyHistory = false,
         bool includeBackground = false,
+        bool includePhysicalFindings = false,
         bool includeExaminationIcd = false
         )
         =>
@@ -160,6 +165,7 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
             .IncludeIf(includeProtocol, examination => examination.Protocol)
             .IncludeIf(includeFamilyHistory, examination => examination.FamilyHistory)
             .IncludeIf(includeBackground, examination => examination.Background)
+            .IncludeIf(includePhysicalFindings, examination => examination.PhysicalFinding)
             .IncludeIf(includeExaminationIcd, examination => examination.ExaminationIcds);
 
     #endregion

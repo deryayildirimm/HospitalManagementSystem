@@ -147,7 +147,7 @@
             </GridEvents>
             <GridPageSettings PageSize="@PageSize"></GridPageSettings>
             <GridColumns>
-                @if (CanDeleteMedicalStaff && MedicalStaffList.Any())
+                @if (CanDeleteMedicalStaff)
                 {
                 <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
                 }
