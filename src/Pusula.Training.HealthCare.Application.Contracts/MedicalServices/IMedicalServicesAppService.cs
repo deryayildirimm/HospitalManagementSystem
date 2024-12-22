@@ -20,10 +20,10 @@ public interface IMedicalServicesAppService : IApplicationService
         GetMedicalServiceInput input);
     
     Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(
-        GetMedicalServiceInput input);
+        GetMedicalServiceWithDoctorsInput input);
     
     Task<PagedResultDto<DoctorWithDetailsDto>> GetMedicalServiceDoctorsAsync(
-        GetMedicalServiceInput input);
+        GetDepartmentServiceDoctorsInput input);
     
     Task<MedicalServiceDto> GetAsync(Guid id);
 

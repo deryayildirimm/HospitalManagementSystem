@@ -348,7 +348,6 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         _ => key!.ToString()
     })!;
 
-
     private static IQueryable<AppointmentStatistic> ApplyDynamicGrouping(
         IQueryable<Appointment> query,
         EnumAppointmentGroupFilter groupByField)
@@ -370,10 +369,10 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
             EnumAppointmentGroupFilter.AppointmentType => GroupAppointments(query, a => a.AppointmentTypeId,
                 a => a.AppointmentType.Name),
 
-            EnumAppointmentGroupFilter.RevenueByService => GroupAppointments(query, a => a.Amount,
+            EnumAppointmentGroupFilter.RevenueByService => GroupAppointments(query, a => a.MedicalServiceId,
                 a => a.MedicalService.Name, true),
 
-            EnumAppointmentGroupFilter.RevenueByDepartment => GroupAppointments(query, a => a.Amount,
+            EnumAppointmentGroupFilter.RevenueByDepartment => GroupAppointments(query, a => a.DepartmentId,
                 a => a.Department.Name, true),
 
             EnumAppointmentGroupFilter.PatientGender => GroupAppointments(query, a => a.Patient.Gender,

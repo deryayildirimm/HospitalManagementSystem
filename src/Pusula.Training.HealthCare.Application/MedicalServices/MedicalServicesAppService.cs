@@ -86,23 +86,30 @@ public class MedicalServicesAppService(
     }
 
     public virtual async Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(
-        GetMedicalServiceInput input)
+        GetMedicalServiceWithDoctorsInput input)
     {
-        var result = await medicalServiceRepository.GetMedicalServiceWithDoctorsAsync(input.MedicalServiceId,
+        var result = await medicalServiceRepository.GetMedicalServiceWithDoctorsAsync(
+            input.MedicalServiceId,
             input.DepartmentId,
             input.Name,
-            input.CostMin, input.CostMax, input.ServiceDateMin, input.ServiceDateMax, input.Sorting,
-            input.MaxResultCount, input.SkipCount);
+            input.CostMin,
+            input.CostMax,
+            input.ServiceDateMin,
+            input.ServiceDateMax,
+            input.Sorting,
+            input.MaxResultCount,
+            input.SkipCount);
 
         return ObjectMapper.Map<MedicalServiceWithDoctors, MedicalServiceWithDoctorsDto>(result);
     }
 
     public virtual async Task<PagedResultDto<DoctorWithDetailsDto>> GetMedicalServiceDoctorsAsync(
-        GetMedicalServiceInput input)
+        GetDepartmentServiceDoctorsInput input)
     {
         var result = await medicalServiceRepository.GetMedicalServiceDoctorsAsync(
             input.MedicalServiceId,
             input.DepartmentId,
+            input.DoctorFilterText,
             input.Sorting,
             input.MaxResultCount,
             input.SkipCount);
@@ -114,17 +121,12 @@ public class MedicalServicesAppService(
         };
     }
 
-
     public virtual async Task<MedicalServiceDto> GetAsync(Guid id)
-    {
-        return ObjectMapper.Map<MedicalService, MedicalServiceDto>(await medicalServiceRepository.GetAsync(id));
-    }
+        => ObjectMapper.Map<MedicalService, MedicalServiceDto>(await medicalServiceRepository.GetAsync(id));
 
     [Authorize(HealthCarePermissions.MedicalServices.Delete)]
     public virtual async Task DeleteAsync(Guid id)
-    {
-        await medicalServiceRepository.DeleteAsync(id);
-    }
+        => await medicalServiceRepository.DeleteAsync(id);
 
     [Authorize(HealthCarePermissions.MedicalServices.Create)]
     public virtual async Task<MedicalServiceDto> CreateAsync(MedicalServiceCreateDto input)
@@ -142,7 +144,6 @@ public class MedicalServicesAppService(
 
         return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
     }
-
 
     [Authorize(HealthCarePermissions.MedicalServices.Edit)]
     public virtual async Task<MedicalServiceDto> UpdateAsync(Guid id, MedicalServiceUpdateDto input)
@@ -184,10 +185,10 @@ public class MedicalServicesAppService(
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
 
+    [Authorize(HealthCarePermissions.MedicalServices.Delete)]
     public async Task DeleteByIdsAsync(List<Guid> medicalServiceIds)
         => await medicalServiceRepository.DeleteManyAsync(medicalServiceIds);
-
-
+    
     [Authorize(HealthCarePermissions.MedicalServices.Delete)]
     public virtual async Task DeleteAllAsync(GetMedicalServiceInput input)
         => await medicalServiceRepository.DeleteAllAsync(input.Name, input.CostMin, input.CostMax);
