@@ -13,7 +13,7 @@ using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Syncfusion.Blazor.Notifications;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Doctor;
 
 public partial class DoctorLeaves : HealthCareComponentBase
 {
@@ -248,6 +248,7 @@ public partial class DoctorLeaves : HealthCareComponentBase
         {
             if (EditingLeaveId == Guid.Empty)
             {
+                await UiMessageService.Error(@L["FillRequiredFields"]);
                 return;
             }
 

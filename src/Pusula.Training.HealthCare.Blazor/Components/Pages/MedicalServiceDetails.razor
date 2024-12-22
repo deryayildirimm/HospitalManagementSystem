@@ -36,20 +36,19 @@
 </PageHeader>
 
 <div class="row p-4 border-1 bg-white rounded-1 mx-1 my-1">
-    <div class="col-12 card p-2">
+    <div class="col-12 card p-2 mb-0">
         <h4 class="fw-bold">@L["ServiceInformation"]</h4>
-
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 mb-1">
             <h5>@L["Name"]: @MedicalService.Name</h5>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 mb-1">
             <h5>@L["Cost"]: @MedicalService.Cost @L["USD"]</h5>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 mb-1">
             <h5>@L["Duration"]: @MedicalService.Duration @L["Minutes"]</h5>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <h5>@L["ServiceCreatedAt"]: @MedicalService.CreationTime.ToShortDateString()</h5>
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <h5>@L["ServiceCreatedAt"]: @MedicalService.ServiceCreatedAt.ToShortDateString()</h5>
         </div>
     </div>
 </div>
@@ -65,7 +64,7 @@
                 <ContentTemplate>
                     <div class="my-3">
                         <SfGrid TItem="DoctorDto"
-                                DataSource="DoctorCollection"
+                                DataSource="ServiceDoctorsCollection"
                                 AllowPaging="true"
                                 AllowSorting="true">
                             <GridSelectionSettings Type="SelectionType.Multiple"></GridSelectionSettings>
@@ -75,7 +74,7 @@
                                     <Template>
                                         @{
                                             var doctorContext = (context as DoctorDto);
-                                            var doctor = doctorContext?.FirstName + " " + doctorContext?.LastName;
+                                            var doctor = $"{doctorContext?.Title?.TitleName} {doctorContext?.FirstName} {doctorContext?.LastName}";
                                         }
                                         @doctor
                                     </Template>
@@ -85,7 +84,7 @@
                                     <Template>
                                         @{
                                             var doctor = (context as DoctorDto);
-                                            var department = doctor?.Department.Name ?? "No Data";
+                                            var department = doctor?.Department.Name ?? @L["NoData"];
                                         }
                                         @department
                                     </Template>
@@ -195,12 +194,12 @@
             <SfDropDownList
                 ShowClearButton="true"
                 TValue="Guid?"
-                TItem="LookupDto<Guid>"
+                TItem="DoctorLookupDto"
                 Placeholder="@L["Select"]"
                 @bind-Value="NewRestriction.DoctorId"
                 DataSource="@DoctorDepartmentCollection"
                 AllowFiltering="true">
-                <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid?"></DropDownListEvents>
+                <DropDownListEvents TItem="DoctorLookupDto" TValue="Guid?"></DropDownListEvents>
                 <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
             </SfDropDownList>
         </div>
@@ -266,12 +265,12 @@
             <SfDropDownList
                 ShowClearButton="true"
                 TValue="Guid?"
-                TItem="LookupDto<Guid>"
+                TItem="DoctorLookupDto"
                 Placeholder="@L["Select"]"
                 @bind-Value="UpdateRestriction.DoctorId"
                 DataSource="@DoctorDepartmentCollection"
                 AllowFiltering="true">
-                <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid?"></DropDownListEvents>
+                <DropDownListEvents TItem="DoctorLookupDto" TValue="Guid?"></DropDownListEvents>
                 <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
             </SfDropDownList>
         </div>

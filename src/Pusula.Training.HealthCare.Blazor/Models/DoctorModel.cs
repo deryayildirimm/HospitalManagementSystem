@@ -3,7 +3,7 @@ using Pusula.Training.HealthCare.Patients;
 
 namespace Pusula.Training.HealthCare.Blazor.Models;
 
-public class Doctor
+public class DoctorModel
 {
     public Guid Id { get; set; }
     public Guid DepartmentId { get; set; }

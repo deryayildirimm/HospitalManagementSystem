@@ -17,7 +17,6 @@
 @inherits HealthCareComponentBase
 
 @inject IAppointmentAppService AppointmentAppService
-@inject IDoctorsAppService DoctorsAppService
 @inject IUiMessageService UiMessageService
 @inject ILookupAppService LookupAppService
 @inject IMedicalServicesAppService MedicalServicesAppService
@@ -32,8 +31,6 @@
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["NewAppointment"]">
-    <link href="../Components/Pages/CreateAppointment.razor.css" rel="stylesheet"/>
-    <link href="../Components/Pages/Appointments.razor.css" rel="stylesheet"/>
 </PageHeader>
 
 <div class="row p-2 px-1">
@@ -74,6 +71,18 @@
             <hr class="my-1"/>
             <div class="d-flex flex-column gap-2 mt-2">
                 <h5>@L["Summary"]</h5>
+                <div>
+                    <h6>@L["Departments"]</h6>
+                    <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid"
+                                    AllowFiltering="true"
+                                    ShowClearButton="true"
+                                    Placeholder="@L["Select"]"
+                                    @bind-Value="NewAppointment.DepartmentId"
+                                    DataSource="@DepartmentsCollection">
+                        <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@OnDepartmentChange"></DropDownListEvents>
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
                 <div>
                     <h6>@L["MedicalService"]</h6>
                     <SfDropDownList
@@ -160,7 +169,7 @@
             }
 
 
-            <SfSchedule @ref="ScheduleObj" TValue="AppointmentCustomData" Height="650px" AllowDragAndDrop="true"  AllowMultiDrag="false" @bind-SelectedDate="@CurrentDate">
+            <SfSchedule @ref="ScheduleObj" TValue="AppointmentCustomData" Height="650px" AllowDragAndDrop="true" AllowMultiDrag="false" @bind-SelectedDate="@CurrentDate">
                 <ScheduleEvents TValue="AppointmentCustomData" Dragged="OnDragged" OnDragStart="OnDragStart" Navigating="@OnNavigateDate" OnPopupOpen="@OnPopupOpen"></ScheduleEvents>
 
                 <ScheduleQuickInfoTemplates>
@@ -380,7 +389,7 @@
 
 @* Create Appointment Modal *@
 <SfDialog CssClass="p-2" Visible="@IsCreateAppointmentOpen" IsModal="true" Width="575px" ShowCloseIcon="true">
-    
+
     <DialogTemplates>
         <Header>
             <div>@L["NewAppointment"]</div>
@@ -423,7 +432,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="e-textlabel my-2">@L["AppointmentType"]</td>
+                        <td class="e-textlabel my-2">@L["AppointmentType"] *</td>
                         <td class="mx-1" colspan="4">
                             <SfDropDownList
                                 TValue="Guid"
@@ -476,7 +485,7 @@
     </DialogTemplates>
 </SfDialog>
 
-@* Create Appointment Modal *@
+@* Edit Appointment Modal *@
 <SfDialog CssClass="p-2" Visible="@IsEditAppointmentOpen" IsModal="true" Width="575px" ShowCloseIcon="true">
     <DialogEvents Closed="@CloseEditAppointmentModal"></DialogEvents>
     <DialogTemplates>
@@ -521,7 +530,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="e-textlabel my-2">@L["AppointmentType"]</td>
+                        <td class="e-textlabel my-2">@L["AppointmentType"] *</td>
                         <td class="mx-1" colspan="4">
                             <SfDropDownList
                                 TValue="Guid"
@@ -533,7 +542,6 @@
                                 <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
                             </SfDropDownList>
                             <ValidationMessage For="() => (EditingAppointment.AppointmentTypeId)"/>
-
                         </td>
                     </tr>
                     <tr>

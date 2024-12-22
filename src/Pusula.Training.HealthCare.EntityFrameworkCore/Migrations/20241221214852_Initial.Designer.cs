@@ -13,7 +13,7 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Pusula.Training.HealthCare.Migrations
 {
     [DbContext(typeof(HealthCareDbContext))]
-    [Migration("20241219121742_Initial")]
+    [Migration("20241221214852_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
