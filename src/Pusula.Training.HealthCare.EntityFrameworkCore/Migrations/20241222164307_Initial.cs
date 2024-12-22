@@ -1565,7 +1565,8 @@ namespace Pusula.Training.HealthCare.Migrations
                         name: "FK_AppBackgrounds_AppExaminations_ExaminationId",
                         column: x => x.ExaminationId,
                         principalTable: "AppExaminations",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -1582,12 +1583,14 @@ namespace Pusula.Training.HealthCare.Migrations
                         name: "FK_AppExaminationIcds_AppExaminations_ExaminationId",
                         column: x => x.ExaminationId,
                         principalTable: "AppExaminations",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AppExaminationIcds_AppIcds_IcdId",
                         column: x => x.IcdId,
                         principalTable: "AppIcds",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -1618,7 +1621,44 @@ namespace Pusula.Training.HealthCare.Migrations
                         name: "FK_AppFamilyHistories_AppExaminations_ExaminationId",
                         column: x => x.ExaminationId,
                         principalTable: "AppExaminations",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AppPhysicalFindings",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Weight = table.Column<int>(type: "integer", nullable: true),
+                    Height = table.Column<int>(type: "integer", nullable: true),
+                    BodyTemperature = table.Column<int>(type: "integer", nullable: true),
+                    Pulse = table.Column<int>(type: "integer", nullable: true),
+                    Vki = table.Column<int>(type: "integer", nullable: true),
+                    Vya = table.Column<int>(type: "integer", nullable: true),
+                    Kbs = table.Column<int>(type: "integer", nullable: true),
+                    Kbd = table.Column<int>(type: "integer", nullable: true),
+                    Spo2 = table.Column<int>(type: "integer", nullable: true),
+                    ExaminationId = table.Column<Guid>(type: "uuid", nullable: false),
+                    ExtraProperties = table.Column<string>(type: "text", nullable: false),
+                    ConcurrencyStamp = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
+                    CreationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: false),
+                    CreatorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    LastModificationTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    LastModifierId = table.Column<Guid>(type: "uuid", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeleterId = table.Column<Guid>(type: "uuid", nullable: true),
+                    DeletionTime = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AppPhysicalFindings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AppPhysicalFindings_AppExaminations_ExaminationId",
+                        column: x => x.ExaminationId,
+                        principalTable: "AppExaminations",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -1965,6 +2005,12 @@ namespace Pusula.Training.HealthCare.Migrations
                 column: "DistrictId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AppPhysicalFindings_ExaminationId",
+                table: "AppPhysicalFindings",
+                column: "ExaminationId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AppProtocolMedicalServices_MedicalServiceId_ProtocolId",
                 table: "AppProtocolMedicalServices",
                 columns: new[] { "MedicalServiceId", "ProtocolId" },
@@ -2152,6 +2198,9 @@ namespace Pusula.Training.HealthCare.Migrations
 
             migrationBuilder.DropTable(
                 name: "AppMedicalStaff");
+
+            migrationBuilder.DropTable(
+                name: "AppPhysicalFindings");
 
             migrationBuilder.DropTable(
                 name: "AppProtocolMedicalServices");
