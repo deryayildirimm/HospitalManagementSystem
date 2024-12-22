@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Components;
 using Pusula.Training.HealthCare.Appointments;
+using Pusula.Training.HealthCare.Blazor.Models;
 using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.Calendars;
@@ -43,7 +44,7 @@ public partial class AppointmentOverview : HealthCareComponentBase
     private List<KeyValuePair<string, EnumPatientTypes>> PatientTypeCollection { get; set; }
     private List<KeyValuePair<string, EnumAppointmentStatus>> StatusCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
-    private IReadOnlyList<AppointmentStatisticDto> AppointmentByDateCollection { get; set; }
+    private IReadOnlyList<AppointmentByDateItem> AppointmentByDateCollection { get; set; }
     private IReadOnlyList<AppointmentStatisticDto> AppointmentByStatusCollection { get; set; }
     private IReadOnlyList<AppointmentStatisticDto> AppointmentByGenderCollection { get; set; }
     private IReadOnlyList<AppointmentStatisticDto> AppointmentByDepartmentCollection { get; set; }
@@ -59,7 +60,7 @@ public partial class AppointmentOverview : HealthCareComponentBase
     private int LookupPageSize { get; } = 100;
     private int CurrentPage { get; set; } = 1;
     private EnumAppointmentGroupFilter GroupByField { get; set; }
-    
+
     public AppointmentOverview()
     {
         ChartRevenueByService = new SfAccumulationChart();
@@ -224,19 +225,33 @@ public partial class AppointmentOverview : HealthCareComponentBase
         AppointmentByDepartmentCollection = await GetAppointmentsStatistics(FilterDepartmentChart);
 
         FilterDateChart.GroupByField = EnumAppointmentGroupFilter.Date;
-        AppointmentByDateCollection = await GetAppointmentsStatistics(FilterDateChart);
+        var dateData = await GetAppointmentsStatistics(FilterDateChart);
+
+        if (dateData.Count == 0)
+        {
+            return;
+        }
+
+        MapAppointmentByDateCollection(dateData);
     }
-    
+
+    private void MapAppointmentByDateCollection(List<AppointmentStatisticDto> appointments)
+    {
+        AppointmentByDateCollection = appointments
+            .Select(dto => new AppointmentByDateItem
+            {
+                GroupKey = dto.GroupKey,
+                GroupName = DateTime.Parse(dto.GroupName),
+                Number = dto.Number
+            })
+            .ToList();
+    }
+
     private async Task Refresh()
     {
         await Grid.Refresh();
     }
 
-    private void OnResize(AccumulationResizeEventArgs arg)
-    {
-        AccumulationChart.Refresh();
-    }
-    
     #region Filters
 
     private void SetFilters()
@@ -312,6 +327,7 @@ public partial class AppointmentOverview : HealthCareComponentBase
     #endregion
 
     #region OnChangeMethods
+
     private void OnGraphicDateChange(RangePickerEventArgs<DateTime?> args)
     {
         ChartMinDate = args.StartDate;
@@ -331,9 +347,9 @@ public partial class AppointmentOverview : HealthCareComponentBase
             await UiMessageService.Error(e.Message);
         }
     }
-    
+
     #endregion
-    
+
     private async Task ExportItemSelected(MenuEventArgs args)
     {
         switch (args.Item.Text)

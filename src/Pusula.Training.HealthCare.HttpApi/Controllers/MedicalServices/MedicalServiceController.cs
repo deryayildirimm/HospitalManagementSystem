@@ -37,12 +37,12 @@ public class MedicalServiceController(IMedicalServicesAppService medicalServices
 
     [HttpGet]
     [Route("with-doctors")]
-    public virtual Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(GetMedicalServiceInput input)
+    public virtual Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(GetMedicalServiceWithDoctorsInput input)
         => medicalServicesAppService.GetMedicalServiceWithDoctorsAsync(input);
     
     [HttpGet]
     [Route("doctors")]
-    public Task<PagedResultDto<DoctorWithDetailsDto>> GetMedicalServiceDoctorsAsync(GetMedicalServiceInput input)
+    public Task<PagedResultDto<DoctorWithDetailsDto>> GetMedicalServiceDoctorsAsync(GetDepartmentServiceDoctorsInput input)
         => medicalServicesAppService.GetMedicalServiceDoctorsAsync(input);
 
     [HttpGet]

@@ -165,41 +165,55 @@
                 </div>
             </div>
             <div class="col-sm-12 col-md-4">
-                <h5 class="fw-bold">@L["Services"]</h5>
-                <Form id="ServiceSearchForm" class="mb-2" Width="Width.Is100">
-                    <Addons>
-                        <Addon AddonType="AddonType.Start">
-                            <AddonLabel
-                                Border="Blazorise.Border.RoundedStart"
-                                Padding="Padding.Is2"
-                                Style="background-color: var(--bs-gray-300)">
-                                <Icon IconSize="IconSize.Large" Name="IconName.Search"></Icon>
-                            </AddonLabel>
-                        </Addon>
-                        <Addon AddonType="AddonType.Body">
-                            <TextEdit
-                                Class="px-1"
-                                Style="background-color: var(--bs-gray-300)"
-                                Autofocus="true"
-                                Text="@MedicalServiceFilter.Name"
-                                TextChanged="@OnTextChanged"
-                                Placeholder="@L["Search"]">
-                            </TextEdit>
-                        </Addon>
-                        <Addon AddonType="AddonType.End">
-                            <Button Clicked="ClearServiceSearch" Class="px-2" Border="Blazorise.Border.RoundedEnd" Style="background-color: var(--bs-gray-300)">
-                                <Icon Name="IconName.Clear" Style="background-color: var(--bs-gray-300)"></Icon>
-                            </Button>
-                        </Addon>
-                    </Addons>
-                </Form>
+                <div class="mb-2">
+                    <h5 class="fw-bold">@L["Departments"]</h5>
+                    <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid"
+                                    AllowFiltering="true"
+                                    ShowClearButton="true"
+                                    Placeholder="@L["Select"]"
+                                    PopupHeight="250px"
+                                    @bind-Value="NewAppointment.DepartmentId"
+                                    DataSource="@DepartmentsCollection">
+                        <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@OnDepartmentChange"></DropDownListEvents>
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+                <div>
+                    <h5 class="fw-bold">@L["Services"]</h5>
+                    <Form id="ServiceSearchForm" class="mb-2" Width="Width.Is100">
+                        <Addons>
+                            <Addon AddonType="AddonType.Start">
+                                <AddonLabel
+                                    Border="Blazorise.Border.RoundedStart"
+                                    Padding="Padding.Is2"
+                                    Style="background-color: var(--bs-gray-300)">
+                                    <Icon IconSize="IconSize.Large" Name="IconName.Search"></Icon>
+                                </AddonLabel>
+                            </Addon>
+                            <Addon AddonType="AddonType.Body">
+                                <TextEdit
+                                    Class="px-1"
+                                    Style="background-color: var(--bs-gray-300)"
+                                    Autofocus="true"
+                                    Text="@MedicalServiceFilter.Name"
+                                    TextChanged="@OnTextChanged"
+                                    Placeholder="@L["Search"]">
+                                </TextEdit>
+                            </Addon>
+                            <Addon AddonType="AddonType.End">
+                                <Button Clicked="ClearServiceSearch" Class="px-2" Border="Blazorise.Border.RoundedEnd" Style="background-color: var(--bs-gray-300)">
+                                    <Icon Name="IconName.Clear" Style="background-color: var(--bs-gray-300)"></Icon>
+                                </Button>
+                            </Addon>
+                        </Addons>
+                    </Form>
 
-                <SfListBox Height="350px" @ref="SelectServiceDropdown" TValue="ServiceSelectionItem[]" DataSource="@MedicalServiceCollection" TItem="ServiceSelectionItem">
-                    <ListBoxEvents TValue="ServiceSelectionItem[]" ValueChange="OnServiceChange" TItem="ServiceSelectionItem"></ListBoxEvents>
-                    <ListBoxFieldSettings Text="DisplayName" Value="DisplayName"/>
-                    <ListBoxSelectionSettings ShowCheckbox="true" Mode="Syncfusion.Blazor.DropDowns.SelectionMode.Single"></ListBoxSelectionSettings>
-                </SfListBox>
-
+                    <SfListBox Height="350px" @ref="SelectServiceDropdown" TValue="ServiceSelectionItem[]" DataSource="@MedicalServiceCollection" TItem="ServiceSelectionItem">
+                        <ListBoxEvents TValue="ServiceSelectionItem[]" ValueChange="OnServiceChange" TItem="ServiceSelectionItem"></ListBoxEvents>
+                        <ListBoxFieldSettings Text="DisplayName" Value="DisplayName"/>
+                        <ListBoxSelectionSettings ShowCheckbox="true" Mode="Syncfusion.Blazor.DropDowns.SelectionMode.Single"></ListBoxSelectionSettings>
+                    </SfListBox>
+                </div>
             </div>
         </div>
     </Div>

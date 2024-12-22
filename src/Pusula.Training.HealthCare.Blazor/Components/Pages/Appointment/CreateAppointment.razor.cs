@@ -50,7 +50,7 @@ public partial class CreateAppointment : HealthCareComponentBase
     private PatientCreateDto NewPatient { get; set; }
     private List<KeyValuePair<string, EnumGender>> GendersCollection { get; set; }
     private SfSchedule<AppointmentCustomData> ScheduleObj { get; set; }
-    private GetMedicalServiceInput DoctorsFilter { get; set; }
+    private GetDepartmentServiceDoctorsInput DoctorsFilter { get; set; }
     private GetAppointmentsLookupInput DaysLookupFilter { get; set; }
     private GetAppointmentByDateInput AppointmentByDateInput { get; set; }
     private int LoadCount { get; set; } = 14;
@@ -131,9 +131,9 @@ public partial class CreateAppointment : HealthCareComponentBase
             SkipCount = (PatientCurrentPage - 1) * PatientPageSize,
         };
 
-        DoctorsFilter = new GetMedicalServiceInput
+        DoctorsFilter = new GetDepartmentServiceDoctorsInput
         {
-            Name = string.Empty,
+            DoctorFilterText = string.Empty,
             MaxResultCount = ServicePageSize,
             SkipCount = (ServiceCurrentPage - 1) * ServicePageSize,
             Sorting = ServiceCurrentSorting
@@ -221,7 +221,7 @@ public partial class CreateAppointment : HealthCareComponentBase
             if (doctors.Count == 0)
             {
                 DoctorsCollection = [];
-                DoctorsFilter = new GetMedicalServiceInput();
+                DoctorsFilter = new GetDepartmentServiceDoctorsInput();
                 NewAppointment.DoctorId = Guid.Empty;
                 IsDoctorsEnabled = false;
                 return;

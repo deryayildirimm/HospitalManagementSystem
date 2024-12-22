@@ -182,6 +182,7 @@ public class AppointmentAppService(
         await appointmentRepository.DeleteAsync(id);
     }
 
+    [Authorize(HealthCarePermissions.Appointments.Create)]
     public virtual async Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
     {
         var appointment = await appointmentManager.CreateAsync(
@@ -268,9 +269,7 @@ public class AppointmentAppService(
 
     [Authorize(HealthCarePermissions.Appointments.Delete)]
     public virtual async Task DeleteByIdsAsync(List<Guid> appointmentIds)
-    {
-        await appointmentRepository.DeleteManyAsync(appointmentIds);
-    }
+        => await appointmentRepository.DeleteManyAsync(appointmentIds);
 
     [Authorize(HealthCarePermissions.Appointments.Delete)]
     public virtual async Task DeleteAllAsync(GetAppointmentsInput input)

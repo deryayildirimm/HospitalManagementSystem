@@ -22,7 +22,8 @@ namespace Pusula.Training.HealthCare.AppointmentTypes;
 public class AppointmentTypesAppService(
     IAppointmentTypeRepository appointmentTypeRepository,
     IAppointmentTypeManager appointmentTypeManager,
-    IDistributedCache<AppointmentTypesDownloadTokenCacheItem, string> downloadTokenCache)
+    IDistributedCache<AppointmentTypesDownloadTokenCacheItem, string> downloadTokenCache,
+    IDistributedCache<AppointmentTypeCacheItem> appointmentTypeCache)
     : HealthCareAppService, IAppointmentTypesAppService
 {
     public virtual async Task<PagedResultDto<AppointmentTypeDto>> GetListAsync(GetAppointmentTypesInput input)
@@ -40,7 +41,23 @@ public class AppointmentTypesAppService(
 
     public virtual async Task<AppointmentTypeDto> GetAsync(Guid id)
     {
-        return ObjectMapper.Map<AppointmentType, AppointmentTypeDto>(await appointmentTypeRepository.GetAsync(id));
+        var cacheToken = $"AppointmentType:{id}";
+        var cacheResult = await appointmentTypeCache.GetAsync(cacheToken);
+        if (cacheResult != null)
+        {
+            return ObjectMapper.Map<AppointmentTypeCacheItem, AppointmentTypeDto>(cacheResult);
+        }
+
+        var type = await appointmentTypeRepository.GetAsync(id);
+        
+        await appointmentTypeCache.SetAsync(cacheToken,
+            ObjectMapper.Map<AppointmentType, AppointmentTypeCacheItem>(type),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+
+        return ObjectMapper.Map<AppointmentType, AppointmentTypeDto>(type);
     }
 
     [Authorize(HealthCarePermissions.AppointmentTypes.Delete)]

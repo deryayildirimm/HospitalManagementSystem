@@ -67,8 +67,9 @@ public class HealthCareApplicationAutoMapperProfile : Profile
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
         CreateMap<MedicalService, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
-
-
+        CreateMap<MedicalServiceCacheItem, MedicalServiceDto>();
+        CreateMap<MedicalService, MedicalServiceCacheItem>();
+        
         CreateMap<Title, TitleDto>();
         CreateMap<TitleDto, TitleUpdateDto>();
         CreateMap<Title, LookupDto<Guid>>()
@@ -204,6 +205,8 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<AppointmentType, AppointmentTypeDto>();
         CreateMap<AppointmentTypeDto, AppointmentTypeUpdateDto>();
         CreateMap<AppointmentType, AppointmentTypeExcelDto>();
+        CreateMap<AppointmentTypeCacheItem, AppointmentTypeDto>();
+        CreateMap<AppointmentType, AppointmentTypeCacheItem>();
         CreateMap<AppointmentType, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
 

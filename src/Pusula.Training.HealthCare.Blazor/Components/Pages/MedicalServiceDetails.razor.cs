@@ -27,12 +27,12 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
     private List<KeyValuePair<string, EnumGender>> GendersCollection { get; set; }
     private SfGrid<RestrictionDto> RestrictionGrid { get; set; }
     private string[] ToolbarItems { get; set; }
-    private GetMedicalServiceInput DoctorFilter { get; set; }
-    private GetMedicalServiceInput DoctorDepartmentFilter { get; set; }
+    private GetMedicalServiceWithDoctorsInput DoctorFilter { get; set; }
+    private GetDepartmentServiceDoctorsInput DoctorDepartmentFilter { get; set; }
     private GetRestrictionsInput RestrictionFilter { get; set; }
     private RestrictionExcelDownloadDto RestrictionFilterExcel { get; set; }
-    private IReadOnlyList<DoctorDto> DoctorCollection { get; set; }
-    private IReadOnlyList<LookupDto<Guid>> DoctorDepartmentCollection { get; set; }
+    private IReadOnlyList<DoctorDto> ServiceDoctorsCollection { get; set; }
+    private IReadOnlyList<DoctorLookupDto> DoctorDepartmentCollection { get; set; }
     private IReadOnlyList<RestrictionDto> RestrictionCollection { get; set; }
     private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
     private IReadOnlyList<AppointmentStatisticDto> AppointmentByDateCollection { get; set; }
@@ -85,14 +85,14 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
 
         MedicalService = new MedicalServiceDto();
 
-        DoctorFilter = new GetMedicalServiceInput()
+        DoctorFilter = new GetMedicalServiceWithDoctorsInput
         {
             MaxResultCount = PageSize,
             SkipCount = (CurrentPage - 1) * PageSize,
             Sorting = CurrentSorting
         };
 
-        DoctorDepartmentFilter = new GetMedicalServiceInput
+        DoctorDepartmentFilter = new GetDepartmentServiceDoctorsInput
         {
             MaxResultCount = PageSize,
             SkipCount = (CurrentPage - 1) * PageSize,
@@ -111,7 +111,7 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
 
         AppointmentTypesCollection = [];
         DepartmentsCollection = [];
-        DoctorCollection = [];
+        ServiceDoctorsCollection = [];
         RestrictionCollection = [];
         MedicalServiceCollection = [];
         AppointmentByDateCollection = [];
@@ -231,12 +231,13 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
             DoctorFilter.SkipCount = (CurrentPage - 1) * PageSize;
             DoctorFilter.Sorting = CurrentSorting;
             DoctorFilter.MedicalServiceId = Id;
-            DoctorCollection = (await MedicalServicesAppService.GetMedicalServiceWithDoctorsAsync(DoctorFilter)).Doctors
+            ServiceDoctorsCollection = (await MedicalServicesAppService.GetMedicalServiceWithDoctorsAsync(DoctorFilter))
+                .Doctors
                 .ToList();
         }
         catch (Exception e)
         {
-            DoctorCollection = [];
+            ServiceDoctorsCollection = [];
             await UiMessageService.Error(e.Message);
         }
     }
@@ -324,11 +325,11 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
             DoctorDepartmentFilter.DepartmentId = departmentId;
 
             var doctors =
-                (await MedicalServicesAppService.GetMedicalServiceWithDoctorsAsync(DoctorDepartmentFilter))
-                .Doctors
+                (await MedicalServicesAppService.GetMedicalServiceDoctorsAsync(DoctorDepartmentFilter))
+                .Items
                 .ToList();
 
-            DoctorDepartmentCollection = ObjectMapper.Map<List<DoctorDto>, List<LookupDto<Guid>>>(doctors);
+            DoctorDepartmentCollection = ObjectMapper.Map<List<DoctorWithDetailsDto>, List<DoctorLookupDto>>(doctors);
         }
         catch (Exception e)
         {

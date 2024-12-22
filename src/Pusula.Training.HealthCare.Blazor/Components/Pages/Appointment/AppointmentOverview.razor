@@ -30,314 +30,304 @@
 </SfBreadcrumb>
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["AppointmentOverview"]">
-    <link href="/Components/Pages/AppointmentOverview.razor.css?version=1.24" rel="stylesheet"/>
 </PageHeader>
 
 <div class="row py-2 px-2">
+    <SfTab>
+        <TabItems>
+            <TabItem>
+                <ChildContent>
+                    <TabHeader Text="@L["Overview"]"></TabHeader>
+                </ChildContent>
 
-
-</div>
-<SfTab>
-<TabItems>
-<TabItem>
-    <ChildContent>
-        <TabHeader Text="@L["Overview"]"></TabHeader>
-    </ChildContent>
-
-    <ContentTemplate>
-        @* ************************* SEARCH ************************* *@
-        <div class="row py-2 px-2">
-            <div class="col-12 border-1 bg-white rounded-1 p-4">
-                <div class="row">
-                    <div class="col-3 my-1">
-                        <div>
-                            <h6>@L["PatientType"]</h6>
-                            <SfDropDownList
-                                TItem="KeyValuePair<string, EnumPatientTypes>"
-                                TValue="EnumPatientTypes?"
-                                @bind-Value="Filter.PatientType"
-                                DataSource="@PatientTypeCollection">
-                                <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
-                            </SfDropDownList>
-                        </div>
-                    </div>
-                    <div class="col-3 my-1">
-                        <div>
-                            <h6>@L["Status"]</h6>
-                            <SfDropDownList
-                                TItem="KeyValuePair<string, EnumAppointmentStatus>"
-                                TValue="EnumAppointmentStatus?"
-                                @bind-Value="Filter.Status"
-                                DataSource="@StatusCollection">
-                                <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
-                            </SfDropDownList>
-                        </div>
-                    </div>
-                    <div class="col-3 my-1">
-                        <h6>@L["MinCost"]</h6>
-                        <SfNumericTextBox TValue="double?" @bind-Value="@Filter.MinAmount" Placeholder="@L["MinCost"]" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue"></SfNumericTextBox>
-                    </div>
-                    <div class="col-3 my-1">
-                        <h6>@L["MaxCost"]</h6>
-                        <SfNumericTextBox TValue="double?" @bind-Value="@Filter.MaxAmount" Placeholder="@L["MaxCost"]" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue"></SfNumericTextBox>
-                    </div>
-                    <div class="col-3 my-1">
-                        <h6>@L["AppointmentMinDate"]</h6>
-                        <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.AppointmentMinDate" Placeholder="@L["AppointmentMinDate"]"></SfDatePicker>
-                    </div>
-                    <div class="col-3 my-1">
-                        <h6>@L["AppointmentMaxDate"]</h6>
-                        <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.AppointmentMaxDate" Placeholder="@L["AppointmentMaxDate"]"></SfDatePicker>
-                    </div>
-                    <div class="col-3 my-1">
-                        <div>
-                            <h6>@L["Departments"]</h6>
-                            <SfDropDownList
-                                TItem="LookupDto<Guid>" TValue="Guid?"
-                                @bind-Value="Filter.DepartmentId"
-                                DataSource="@DepartmentsCollection"
-                                AllowFiltering="true">
-                                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
-                            </SfDropDownList>
-                        </div>
-                    </div>
-                    <div class="col-3 my-1">
-                        <div>
-                            <h6>@L["MedicalService"]</h6>
-                            <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
-                                            @bind-Value="Filter.MedicalServiceId"
-                                            DataSource="@MedicalServiceCollection"
+                <ContentTemplate>
+                    @* ************************* SEARCH ************************* *@
+                    <div class="row py-2 px-2">
+                        <div class="col-12 border-1 bg-white rounded-1 p-4">
+                            <div class="row">
+                                <div class="col-3 my-1">
+                                    <div>
+                                        <h6>@L["PatientType"]</h6>
+                                        <SfDropDownList
+                                            TItem="KeyValuePair<string, EnumPatientTypes>"
+                                            TValue="EnumPatientTypes?"
+                                            @bind-Value="Filter.PatientType"
+                                            DataSource="@PatientTypeCollection">
+                                            <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+                                        </SfDropDownList>
+                                    </div>
+                                </div>
+                                <div class="col-3 my-1">
+                                    <div>
+                                        <h6>@L["Status"]</h6>
+                                        <SfDropDownList
+                                            TItem="KeyValuePair<string, EnumAppointmentStatus>"
+                                            TValue="EnumAppointmentStatus?"
+                                            @bind-Value="Filter.Status"
+                                            DataSource="@StatusCollection">
+                                            <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+                                        </SfDropDownList>
+                                    </div>
+                                </div>
+                                <div class="col-3 my-1">
+                                    <h6>@L["MinCost"]</h6>
+                                    <SfNumericTextBox TValue="double?" @bind-Value="@Filter.MinAmount" Placeholder="@L["MinCost"]" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue"></SfNumericTextBox>
+                                </div>
+                                <div class="col-3 my-1">
+                                    <h6>@L["MaxCost"]</h6>
+                                    <SfNumericTextBox TValue="double?" @bind-Value="@Filter.MaxAmount" Placeholder="@L["MaxCost"]" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue"></SfNumericTextBox>
+                                </div>
+                                <div class="col-3 my-1">
+                                    <h6>@L["AppointmentMinDate"]</h6>
+                                    <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.AppointmentMinDate" Placeholder="@L["AppointmentMinDate"]"></SfDatePicker>
+                                </div>
+                                <div class="col-3 my-1">
+                                    <h6>@L["AppointmentMaxDate"]</h6>
+                                    <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.AppointmentMaxDate" Placeholder="@L["AppointmentMaxDate"]"></SfDatePicker>
+                                </div>
+                                <div class="col-3 my-1">
+                                    <div>
+                                        <h6>@L["Departments"]</h6>
+                                        <SfDropDownList
+                                            TItem="LookupDto<Guid>" TValue="Guid?"
+                                            @bind-Value="Filter.DepartmentId"
+                                            DataSource="@DepartmentsCollection"
                                             AllowFiltering="true">
-                                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
-                            </SfDropDownList>
+                                            <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                                        </SfDropDownList>
+                                    </div>
+                                </div>
+                                <div class="col-3 my-1">
+                                    <div>
+                                        <h6>@L["MedicalService"]</h6>
+                                        <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                                        @bind-Value="Filter.MedicalServiceId"
+                                                        DataSource="@MedicalServiceCollection"
+                                                        AllowFiltering="true">
+                                            <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                                        </SfDropDownList>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <SfButton CssClass="e-primary" OnClick="GetAppointmentsAsync">
+                                    <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
+                                </SfButton>
+                                <SfButton CssClass="e-danger" OnClick="ClearFilters">
+                                    <SfIcon IconCss="e-icons e-filter-clear"></SfIcon> @L["ClearFilters"]
+                                </SfButton>
+                            </div>
+
                         </div>
                     </div>
-                </div>
-                <div>
-                    <SfButton CssClass="e-primary" OnClick="GetAppointmentsAsync">
-                        <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
-                    </SfButton>
-                    <SfButton CssClass="e-danger" OnClick="ClearFilters">
-                        <SfIcon IconCss="e-icons e-filter-clear"></SfIcon> @L["ClearFilters"]
-                    </SfButton>
-                </div>
 
-            </div>
-        </div>
+                    @* ************************* Graphs ************************* *@
+                    <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
+                        <div class="w-50">
+                            <SfAccumulationChart Width="100%" Height="380px" Title="@($"{L["AppointmentsBy"]} {L[Filter.GroupByField.ToString()]}")">
+                                <AccumulationChartSeriesCollection >
+                                    <AccumulationChartSeries DataSource="@AppointmentByDepartmentCollection" XName="GroupName" YName="Number">
+                                        <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
 
-        @* ************************* Graphs ************************* *@
-        <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
-            <div class="w-50">
-                <SfAccumulationChart @ref="AccumulationChart" Width="100%" Height="380px" Title="@($"{L["AppointmentsBy"]} {L[Filter.GroupByField.ToString()]}")">
-                    <AccumulationChartSeriesCollection >
-                        <AccumulationChartSeries DataSource="@AppointmentByDepartmentCollection" XName="GroupName" YName="Number">
-                            <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
+                                    </AccumulationChartSeries>
+                                </AccumulationChartSeriesCollection>
+                                <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
+                                <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
 
-                        </AccumulationChartSeries>
-                    </AccumulationChartSeriesCollection>
-                    <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
-                    <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
-                    <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
-
-                </SfAccumulationChart>
-            </div>
-            <div class="w-50">
-                <SfChart Title="@L["AppointmentsByDates"]">
-                    <ChartTitleStyle Size="16px" Color="black" FontFamily="Helvetica" FontWeight="600" FontStyle="normal"></ChartTitleStyle>
-                    <ChartPrimaryXAxis Title="Day" ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime">
-                        <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
-                        <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
-                    </ChartPrimaryXAxis>
-                    <ChartPrimaryYAxis Title="@L["Appointments"]">
-                        <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
-                        <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
-                    </ChartPrimaryYAxis>
-                    <ChartTooltipSettings Enable="true">
-                        <ChartTooltipTextStyle FontFamily="Helvetica"></ChartTooltipTextStyle>
-                    </ChartTooltipSettings>
-                    <ChartSeriesCollection>
-                        <ChartSeries DataSource="@AppointmentByDateCollection" XName="GroupName" YName="Number" Type="ChartSeriesType.Column">
-                            <ChartMarker>
-                                <ChartDataLabel Visible="true"/>
-                            </ChartMarker>
-                            </ChartSeries>
-                    </ChartSeriesCollection>
-                    <ChartLegendSettings Visible="true">
-                        <ChartLegendTextStyle FontFamily="Helvetica"></ChartLegendTextStyle>
-                    </ChartLegendSettings>
-                </SfChart>
-            </div>
-        </div>
-
-        @* ************************* GRID ************************* *@
-        <div class="row py-2 px-2">
-            <div class="col-12 border-1 bg-white rounded-1 p-4 d-flex flex-column gap-2">
-                <div class="d-flex gap-2 mb-2 text-center align-items-center">
-                    <h6 class="m-0">@L["GroupBy"] : </h6>
-                    <SfDropDownList
-                        Width="120px"
-                        TItem="EnumAppointmentGroupFilter"
-                        TValue="EnumAppointmentGroupFilter"
-                        @bind-Value="Filter.GroupByField"
-                        DataSource="@GroupByOptions">
-                        <DropDownListEvents
-                            TItem="EnumAppointmentGroupFilter"
-                            TValue="EnumAppointmentGroupFilter"
-                            OnValueSelect="@OnGroupByChange">
-                        </DropDownListEvents>
-                    </SfDropDownList>
-                </div>
-
-                <SfGrid
-                    @ref="Grid"
-                    TValue="AppointmentStatisticDto"
-                    AllowPaging="true"
-                    AllowSorting="true"
-                    Query="@FilterQuery">
-                    <SfDataManager
-                        AdaptorInstance="@typeof(AppointmentStatisticsAdaptor)"
-                        Adaptor="Adaptors.CustomAdaptor">
-                    </SfDataManager>
-                    <GridPageSettings PageSizes="@PageSizes" PageSize="@PageSize"></GridPageSettings>
-                    <GridColumns>
-                        <GridColumn Field="GroupName" HeaderText="@L["Name"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
-                        <GridColumn Field="Number" HeaderText="@L["Number"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
-                    </GridColumns>
-                </SfGrid>
-            </div>
-        </div>
-    </ContentTemplate>
-</TabItem>
-
-<TabItem>
-    <ChildContent>
-        <TabHeader Text="@L["StatisticsAndInfoGraphics"]"></TabHeader>
-    </ChildContent>
-
-    <ContentTemplate>
-        <div class="d-flex p-4 justify-content-between border-1 bg-white rounded-1">
-            <div class="d-flex gap-3">
-                <SfDateRangePicker Width="250px" TValue="DateTime?" Placeholder="@L["ChooseARange"]" StartDate="@ChartMinDate" EndDate="@ChartMaxDate">
-                    <DateRangePickerEvents TValue="DateTime?" ValueChange="@OnGraphicDateChange"></DateRangePickerEvents>
-                </SfDateRangePicker>
-                <SfButton CssClass="e-primary" OnClick="@GetGraphStatistics">
-                    <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
-                </SfButton>
-            </div>
-            <div>
-                <SfDropDownButton Content="@L["ExportChartsAs"]" CssClass="e-custom-drop-btn mx-2" IconCss="e-icons e-export-pdf">
-                    <DropDownButtonEvents ItemSelected="ExportItemSelected">
-                    </DropDownButtonEvents>
-                    <DropDownMenuItems >
-                        <DropDownMenuItem IconCss="e-icons e-export-pdf" Text="@L["PDF"]"></DropDownMenuItem>
-                        <DropDownMenuItem IconCss="e-icons e-export-xls" Text="@L["XLS"]"></DropDownMenuItem>
-                        <DropDownMenuItem IconCss="e-icons e-export-csv" Text="@L["CSV"]"></DropDownMenuItem>
-                    </DropDownMenuItems>
-                </SfDropDownButton>
-
-                <SfButton CssClass="e-primary" OnClick="@PrintCharts">
-                    <SfIcon IconCss="e-icons e-print"></SfIcon> @L["Print"]
-                </SfButton>
-            </div>
-        </div>
-        <div class="row justify-content-center align-items-center" @ref="Element">
-            <div class="row py-2 px-2">
-                @* ************************* Graphs ************************* *@
-                <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
-                    <div class="w-50">
-                        <SfAccumulationChart @ref="ChartByStatus" Width="100%" Height="380px" Title="@L["AppointmentsByStatus"]">
-                            <AccumulationChartSeriesCollection>
-                                <AccumulationChartTitleStyle TextAlignment="Alignment.Center"></AccumulationChartTitleStyle>
-
-                                <AccumulationChartSeries DataSource="@AppointmentByStatusCollection" XName="GroupName" YName="Number" InnerRadius="40%">
-                                    <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside">
-                                        <AccumulationChartConnector Type="ConnectorType.Curve" Length="20px"/>
-                                    </AccumulationDataLabelSettings>
-                                </AccumulationChartSeries>
-                            </AccumulationChartSeriesCollection>
-                            <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
-                            <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
-                        </SfAccumulationChart>
+                            </SfAccumulationChart>
+                        </div>
+                        <div class="w-50">
+                            <SfChart Title="@L["AppointmentsByDates"]">
+                                <ChartTitleStyle Size="16px" Color="black" FontFamily="Helvetica" FontWeight="600" FontStyle="normal"></ChartTitleStyle>
+                                <ChartPrimaryXAxis Title="@L["Date"]" ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime">
+                                    <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
+                                    <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
+                                </ChartPrimaryXAxis>
+                                <ChartPrimaryYAxis Title="@L["Appointments"]">
+                                    <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
+                                    <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
+                                </ChartPrimaryYAxis>
+                                <ChartTooltipSettings Enable="true">
+                                    <ChartTooltipTextStyle FontFamily="Helvetica"></ChartTooltipTextStyle>
+                                </ChartTooltipSettings>
+                                <ChartSeriesCollection>
+                                    <ChartSeries DataSource="@AppointmentByDateCollection" XName="GroupName" YName="Number" Type="ChartSeriesType.Column">
+                                        <ChartMarker>
+                                            <ChartDataLabel Visible="true"/>
+                                        </ChartMarker>
+                                    </ChartSeries>
+                                </ChartSeriesCollection>
+                                <ChartLegendSettings Visible="true">
+                                    <ChartLegendTextStyle FontFamily="Helvetica"></ChartLegendTextStyle>
+                                </ChartLegendSettings>
+                            </SfChart>
+                        </div>
                     </div>
-                    <div class="w-50">
-                        <SfAccumulationChart @ref="ChartRevenueByService" Width="100%" Height="380px" Title="@($"{L["RevenueByServices"]} / {L["USD"]}")">
-                            <AccumulationChartSeriesCollection >
-                                <AccumulationChartSeries DataSource="@RevenueByServiceCollection" XName="GroupName" YName="Number">
-                                    <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
-                                </AccumulationChartSeries>
-                            </AccumulationChartSeriesCollection>
 
-                            <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
-                            <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
-                            <AccumulationChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y} USD</b>"></AccumulationChartTooltipSettings>
+                    @* ************************* GRID ************************* *@
+                    <div class="row py-2 px-2">
+                        <div class="col-12 border-1 bg-white rounded-1 p-4 d-flex flex-column gap-2">
+                            <div class="d-flex gap-2 mb-2 text-center align-items-center">
+                                <h6 class="m-0">@L["GroupBy"] : </h6>
+                                <SfDropDownList
+                                    Width="120px"
+                                    TItem="EnumAppointmentGroupFilter"
+                                    TValue="EnumAppointmentGroupFilter"
+                                    @bind-Value="Filter.GroupByField"
+                                    DataSource="@GroupByOptions">
+                                    <DropDownListEvents
+                                        TItem="EnumAppointmentGroupFilter"
+                                        TValue="EnumAppointmentGroupFilter"
+                                        OnValueSelect="@OnGroupByChange">
+                                    </DropDownListEvents>
+                                </SfDropDownList>
+                            </div>
 
-                        </SfAccumulationChart>
+                            <SfGrid
+                                @ref="Grid"
+                                TValue="AppointmentStatisticDto"
+                                AllowPaging="true"
+                                AllowSorting="true"
+                                Query="@FilterQuery">
+                                <SfDataManager
+                                    AdaptorInstance="@typeof(AppointmentStatisticsAdaptor)"
+                                    Adaptor="Adaptors.CustomAdaptor">
+                                </SfDataManager>
+                                <GridPageSettings PageSizes="@PageSizes" PageSize="@PageSize"></GridPageSettings>
+                                <GridColumns>
+                                    <GridColumn Field="GroupName" HeaderText="@L["Name"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+                                    <GridColumn Field="Number" HeaderText="@L["Number"]" TextAlign="TextAlign.Left" Width="130"></GridColumn>
+                                </GridColumns>
+                            </SfGrid>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="row py-2 px-2">
-                @* ************************* Graphs ************************* *@
-                <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
-                    <div class="w-50">
-                        <SfAccumulationChart @ref="ChartByGender" Width="100%" Height="380px" Title="@L["AppointmentsByGender"]">
-                            <AccumulationChartSeriesCollection>
-                                <AccumulationChartTitleStyle TextAlignment="Alignment.Center"></AccumulationChartTitleStyle>
-                                <AccumulationChartSeries DataSource="@AppointmentByGenderCollection" XName="GroupName" YName="Number" InnerRadius="40%">
-                                    <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
-                                </AccumulationChartSeries>
-                            </AccumulationChartSeriesCollection>
-                            <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
-                            <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
-                        </SfAccumulationChart>
-                    </div>
-                    <div class="w-50">
-                        <SfAccumulationChart @ref="ChartRevenueByDepartment" Width="100%" Height="380px" Title="@($"{L["RevenueByDepartments"]} / {L["USD"]}")">
-                            <AccumulationChartSeriesCollection >
-                                <AccumulationChartSeries DataSource="@RevenueByDepartmentCollection" XName="GroupName" YName="Number">
-                                    <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
-                                </AccumulationChartSeries>
-                            </AccumulationChartSeriesCollection>
-                            <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
-                            <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
-                            <AccumulationChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y} USD</b>"></AccumulationChartTooltipSettings>
+                </ContentTemplate>
+            </TabItem>
 
-                        </SfAccumulationChart>
+            <TabItem>
+                <ChildContent>
+                    <TabHeader Text="@L["StatisticsAndInfoGraphics"]"></TabHeader>
+                </ChildContent>
+
+                <ContentTemplate>
+                    <div class="d-flex p-4 justify-content-between border-1 bg-white rounded-1 my-2">
+                        <div class="d-flex gap-3">
+                            <SfDateRangePicker Width="250px" TValue="DateTime?" Placeholder="@L["ChooseARange"]" StartDate="@ChartMinDate" EndDate="@ChartMaxDate">
+                                <DateRangePickerEvents TValue="DateTime?" ValueChange="@OnGraphicDateChange"></DateRangePickerEvents>
+                            </SfDateRangePicker>
+                            <SfButton CssClass="e-primary" OnClick="@GetGraphStatistics">
+                                <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
+                            </SfButton>
+                        </div>
+                        <div>
+                            <SfDropDownButton Content="@L["ExportChartsAs"]" CssClass="e-custom-drop-btn mx-2" IconCss="e-icons e-export-pdf">
+                                <DropDownButtonEvents ItemSelected="ExportItemSelected">
+                                </DropDownButtonEvents>
+                                <DropDownMenuItems >
+                                    <DropDownMenuItem IconCss="e-icons e-export-pdf" Text="@L["PDF"]"></DropDownMenuItem>
+                                    <DropDownMenuItem IconCss="e-icons e-export-xls" Text="@L["XLS"]"></DropDownMenuItem>
+                                    <DropDownMenuItem IconCss="e-icons e-export-csv" Text="@L["CSV"]"></DropDownMenuItem>
+                                </DropDownMenuItems>
+                            </SfDropDownButton>
+
+                            <SfButton CssClass="e-primary" OnClick="@PrintCharts">
+                                <SfIcon IconCss="e-icons e-print"></SfIcon> @L["Print"]
+                            </SfButton>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="row py-2 px-2">
-                @* ************************* Graphs ************************* *@
-                <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
-                    <div class="w-50">
-                        <SfChart @ref="ChartByType" Width="100%" Height="380px" Title="@L["AppointmentsByType"]">
-                            <ChartTitleStyle Size="16px" Color="black" FontFamily="Helvetica" FontWeight="600" FontStyle="normal"></ChartTitleStyle>
-                            <ChartPrimaryXAxis Title="Day" ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                                <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
-                                <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
-                            </ChartPrimaryXAxis>
-                            <ChartPrimaryYAxis Title="@L["Appointments"]">
-                                <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
-                                <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
-                            </ChartPrimaryYAxis>
-                            <ChartTooltipSettings Enable="true">
-                                <ChartTooltipTextStyle FontFamily="Helvetica"></ChartTooltipTextStyle>
-                            </ChartTooltipSettings>
-                            <ChartSeriesCollection>
-                                <ChartSeries DataSource="@AppointmentByTypeCollection" XName="GroupName" YName="Number" Type="ChartSeriesType.Column">
-                                    <ChartMarker>
-                                        <ChartDataLabel Visible="true"/>
-                                    </ChartMarker>
-                                </ChartSeries>
-                            </ChartSeriesCollection>
-                            <ChartLegendSettings Visible="true">
-                                <ChartLegendTextStyle FontFamily="Helvetica"></ChartLegendTextStyle>
-                            </ChartLegendSettings>
-                        </SfChart>
+                    <div class="row justify-content-center align-items-center" @ref="Element">
+                        <div class="row py-2 px-2">
+                            @* ************************* Graphs ************************* *@
+                            <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
+                                <div class="w-50">
+                                    <SfAccumulationChart @ref="ChartByStatus" Width="100%" Height="380px" Title="@L["AppointmentsByStatus"]">
+                                        <AccumulationChartSeriesCollection>
+                                            <AccumulationChartTitleStyle TextAlignment="Alignment.Center"></AccumulationChartTitleStyle>
+                                            <AccumulationChartSeries DataSource="@AppointmentByStatusCollection" XName="GroupName" YName="Number" InnerRadius="40%">
+                                                <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside">
+                                                    <AccumulationChartConnector Type="ConnectorType.Curve" Length="20px"/>
+                                                </AccumulationDataLabelSettings>
+                                            </AccumulationChartSeries>
+                                        </AccumulationChartSeriesCollection>
+                                        <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
+                                        <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
+                                    </SfAccumulationChart>
+                                </div>
+                                <div class="w-50">
+                                    <SfAccumulationChart @ref="ChartRevenueByService" Width="100%" Height="380px" Title="@($"{L["RevenueByServices"]} / {L["USD"]}")">
+                                        <AccumulationChartSeriesCollection >
+                                            <AccumulationChartSeries DataSource="@RevenueByServiceCollection" XName="GroupName" YName="Number">
+                                                <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
+                                            </AccumulationChartSeries>
+                                        </AccumulationChartSeriesCollection>
+                                        <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
+                                        <AccumulationChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y} USD</b>"></AccumulationChartTooltipSettings>
+                                    </SfAccumulationChart>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row py-2 px-2">
+                            @* ************************* Graphs ************************* *@
+                            <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
+                                <div class="w-50">
+                                    <SfAccumulationChart @ref="ChartByGender" Width="100%" Height="380px" Title="@L["AppointmentsByGender"]">
+                                        <AccumulationChartSeriesCollection>
+                                            <AccumulationChartTitleStyle TextAlignment="Alignment.Center"></AccumulationChartTitleStyle>
+                                            <AccumulationChartSeries DataSource="@AppointmentByGenderCollection" XName="GroupName" YName="Number" InnerRadius="40%">
+                                                <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
+                                            </AccumulationChartSeries>
+                                        </AccumulationChartSeriesCollection>
+                                        <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
+                                        <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
+                                    </SfAccumulationChart>
+                                </div>
+                                <div class="w-50">
+                                    <SfAccumulationChart @ref="ChartRevenueByDepartment" Width="100%" Height="380px" Title="@($"{L["RevenueByDepartments"]} / {L["USD"]}")">
+                                        <AccumulationChartSeriesCollection >
+                                            <AccumulationChartSeries DataSource="@RevenueByDepartmentCollection" XName="GroupName" YName="Number">
+                                                <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
+                                            </AccumulationChartSeries>
+                                        </AccumulationChartSeriesCollection>
+                                        <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
+                                        <AccumulationChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y} USD</b>"></AccumulationChartTooltipSettings>
+                                    </SfAccumulationChart>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row py-2 px-2">
+                            @* ************************* Graphs ************************* *@
+                            <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
+                                <div class="w-50">
+                                    <SfChart @ref="ChartByType" Width="100%" Height="380px" Title="@L["AppointmentsByType"]">
+                                        <ChartTitleStyle Size="16px" Color="black" FontFamily="Helvetica" FontWeight="600" FontStyle="normal"></ChartTitleStyle>
+                                        <ChartPrimaryXAxis Title="Day" ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                                            <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
+                                            <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
+                                        </ChartPrimaryXAxis>
+                                        <ChartPrimaryYAxis Title="@L["Appointments"]">
+                                            <ChartAxisLabelStyle FontFamily="Helvetica"></ChartAxisLabelStyle>
+                                            <ChartAxisTitleStyle FontFamily="Helvetica"></ChartAxisTitleStyle>
+                                        </ChartPrimaryYAxis>
+                                        <ChartTooltipSettings Enable="true">
+                                            <ChartTooltipTextStyle FontFamily="Helvetica"></ChartTooltipTextStyle>
+                                        </ChartTooltipSettings>
+                                        <ChartSeriesCollection>
+                                            <ChartSeries DataSource="@AppointmentByTypeCollection" XName="GroupName" YName="Number" Type="ChartSeriesType.Column">
+                                                <ChartMarker>
+                                                    <ChartDataLabel Visible="true"/>
+                                                </ChartMarker>
+                                            </ChartSeries>
+                                        </ChartSeriesCollection>
+                                        <ChartLegendSettings Visible="true">
+                                            <ChartLegendTextStyle FontFamily="Helvetica"></ChartLegendTextStyle>
+                                        </ChartLegendSettings>
+                                    </SfChart>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </ContentTemplate>
-</TabItem>
-</TabItems>
-</SfTab>
+                </ContentTemplate>
+            </TabItem>
+        </TabItems>
+    </SfTab>
+</div>
