@@ -35,6 +35,8 @@ public partial class Protocols
     private bool _spinnerVisible;
     
     private bool IsLookupsLoaded { get; set; } 
+    
+    private int LookupPageSize { get; } = 50;
 
     private GenericModal<ProtocolCreateDto> _createModal;
     private GenericModal<ProtocolUpdateDto> _editModal;
@@ -144,34 +146,34 @@ public partial class Protocols
     #endregion
 
     #region LookUps
-    private  async Task LoadLookupsAsync()
-    {
-        
-        await GetDepartmentCollectionLookupAsync();
-        await GetDoctorCollectionLookupAsync();
-        await GetProtocolTypeCollectionLookupAsync();
-        await GetInsuranceCollectionLookupAsync();
-        
-    }
     
-    private async Task GetDepartmentCollectionLookupAsync(string? newValue = null)
+    private async Task LoadLookupsAsync()
     {
-        DepartmentsCollection = (await ProtocolsAppService.GetDepartmentLookupAsync(new LookupRequestDto { Filter = newValue })).Items;
-    }
-    
-    private async Task GetInsuranceCollectionLookupAsync(string? newValue = null)
-    {
-        InsuranceCollections = (await ProtocolsAppService.GetInsuranceLookUpAsync(new LookupRequestDto { Filter = newValue })).Items;
-    }
-    
-    private async Task GetDoctorCollectionLookupAsync(string? newValue = null)
-    {
-        DoctorsCollection = (await ProtocolsAppService.GetDoctorLookUpAsync(new LookupRequestDto { Filter = newValue })).Items;
-    }
-    
-    private async Task GetProtocolTypeCollectionLookupAsync(string? newValue = null)
-    {
-        ProtocolTypesCollection = (await ProtocolsAppService.GetProtocolTypeLookUpAsync(new LookupRequestDto { Filter = newValue })).Items;
+        try
+        {
+            DepartmentsCollection =
+                (await LookupAppService.GetDepartmentLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+
+            InsuranceCollections =
+                (await LookupAppService.GetInsuranceLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+
+            DoctorsCollection = (await LookupAppService.GetDoctorLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+            ProtocolTypesCollection =
+                (await LookupAppService.GetProtocolTypeLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+
+        }
+        catch (Exception e)
+        {
+            await UiMessageService.Error(e.Message);
+        }
     }
     
     #endregion
@@ -190,7 +192,7 @@ public partial class Protocols
 
     protected virtual ValueTask SetBreadcrumbItemsAsync()
     {
-        BreadcrumbItems.Add(new Volo.Abp.BlazoriseUI.BreadcrumbItem(L["Protocols"]));
+        BreadcrumbItems.Add(new Volo.Abp.BlazoriseUI.BreadcrumbItem(L["Protocol"]));
         return ValueTask.CompletedTask;
     }
 
@@ -215,7 +217,7 @@ public partial class Protocols
     
     private async Task DownloadAsExcelAsync()
     {
-        var token = (await ProtocolTypesAppService.GetDownloadTokenAsync()).Token;
+        var token = (await ProtocolsAppService.GetDownloadTokenAsync()).Token;
         var remoteService = await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ?? await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
         var culture = CultureInfo.CurrentUICulture.Name ;
         if (!culture.IsNullOrEmpty())
@@ -277,7 +279,7 @@ public partial class Protocols
             FoundPatientName = string.Empty;
             NewPatient = new PatientCreateDto
             {
-                IdentityAndPassportNumber = IdentityNumber // take the identitiy number 
+                IdentityNumber = IdentityNumber // take the identitiy number 
             };
             // warn the user 
             await UiMessageService.Warn("No patient found. Please fill in the patient details.");

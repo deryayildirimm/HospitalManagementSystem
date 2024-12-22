@@ -7,11 +7,20 @@
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Buttons
+
 @using Pusula.Training.HealthCare.Permissions
 @using Volo.Abp.AspNetCore.Components.Web
 @using Volo.Abp.Http.Client
+@using Pusula.Training.HealthCare.Blazor.Components.Modals
+@using Pusula.Training.HealthCare.Shared
+
+@using Pusula.Training.HealthCare.Protocols
 @inherits HealthCareComponentBase
 @inject IPatientsAppService PatientsAppService
+@inject IProtocolsAppService ProtocolsAppService
+@inject ILookupAppService LookupAppService
 
 @inject IUiMessageService UiMessageService
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
@@ -39,7 +48,7 @@
                 </Addon>
                 <Addon AddonType="AddonType.End">
                     <SubmitButton Form="PatientSearchForm" Clicked="GetPatientsAsync">
-                        <Icon Name="IconName.Search" Class="me-1"></Icon>@L["Search"]
+                    @L["Search"]
                     </SubmitButton>
                 </Addon>
             </Addons>
@@ -163,7 +172,7 @@
                     }
 
                     <Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedPatientsAsync">
-                        <Icon Name="@IconName.Delete" /> @L["Delete"]
+                      @L["Delete"]
                     </Button>
                 </div>
             </div>
@@ -257,18 +266,19 @@
                     <DisplayTemplate>
                         <Button Color="Color.Primary" Disabled="context.IsDeleted"
                                 Clicked="async () => await OpenEditPatientModalAsync(context)">
-                            <Icon Name="@IconName.Edit" />
+                            @L["Edit"]
                         </Button>
                     </DisplayTemplate>
                 </DataGridColumn>
 
 
                 <!-- Detail Page Column -->
+                
                 <DataGridColumn TItem="PatientDto">
                     <DisplayTemplate>
                         <Button Color="Color.Primary" @onclick="() => NavigateToDetail(context)"
                                 Disabled="context.IsDeleted">
-                            <Icon Name="@IconName.ExternalLinkSquareAlt" />
+                            @L["Detail"]
                         </Button>
                     </DisplayTemplate>
                 </DataGridColumn>
@@ -279,24 +289,19 @@
                     <DisplayTemplate>
                         <Button Color="Color.Danger" Clicked="() => DeletePatientAsync(context)"
                                 Disabled="context.IsDeleted">
-                            <Icon Name="@IconName.Times" />
+                            @L["Delete"]
                         </Button>
                     </DisplayTemplate>
                 </DataGridColumn>
-
-                <!-- Revert Button Column -->
-                <!--
+                
                 <DataGridColumn TItem="PatientDto">
                     <DisplayTemplate>
-                        <Button Color="Color.Secondary" Clicked="  () => RevertPatientAsync (context)" Disabled="!context.IsDeleted">
-                            <Icon Name="@IconName.Undo" />
+                        <Button Color="Color.Secondary" Clicked=" () => ShowCreateModal(context)" >
+                            @L["Protocol"]
                         </Button>
                     </DisplayTemplate>
                 </DataGridColumn>
-                -->
-
             </DataGridColumns>
-
 
         </DataGrid>
     </CardBody>
@@ -309,7 +314,7 @@
 
             <ModalHeader>
                 <ModalTitle style="display: inline-flex; align-items: center;">
-                    <Icon Name="@("fa-pen-to-square")" IconSize="IconSize.x2" Style="margin-right:5px;"></Icon>
+                    <Icon Name="@("fa-pen-to-square")"  Style="margin-right:5px;"></Icon>
                     <Heading Size="HeadingSize.Is1" style="margin: 0;">@L["CreatePatient"] </Heading>
                 </ModalTitle>
                 <CloseButton Clicked=@(async()=>await CloseCreatePatientModalAsync())></CloseButton>
@@ -639,7 +644,7 @@
 
             <ModalHeader>
                 <ModalTitle style="display: inline-flex; align-items: center;">
-                    <Icon Name="@("fa-arrows-rotate")" IconSize="IconSize.x2" Style="margin-right:5px;"></Icon>
+                    <Icon Name="@("fa-arrows-rotate")" Style="margin-right:5px;"></Icon>
                     <Heading Size="HeadingSize.Is1" style="margin: 0;">@L["UpdatePatient"] </Heading>
                 </ModalTitle>
                 <CloseButton Clicked=@(async()=>await CloseEditPatientModalAsync()) />
@@ -929,3 +934,63 @@
         </EditForm>
     </ModalContent>
 </Modal>
+
+@* ************************* Protocol Create MODAL ************************* *@
+
+<GenericModal TModel="ProtocolCreateDto" @ref="_createModal" Title="@L["Create Protocol"]"  Model="@_newProtocol" OnSaveCallback="CreateProtocolTypeAsync">
+    
+      <div class="form-group">
+        <label>@L["StartTime"]</label>
+        <SfDatePicker TValue="DateTime" Placeholder="@L["SelectStartTime"]" @bind-Value="_newProtocol.StartTime">
+        </SfDatePicker>
+          <ValidationMessage For="@(() => _newProtocol.StartTime)"></ValidationMessage>
+    </div>
+
+    <!-- End Time -->
+    <div class="form-group">
+        <label>@L["EndTime"]</label>
+        <SfDatePicker TValue="DateTime?" Placeholder="@L["SelectEndTime"]" @bind-Value="_newProtocol.EndTime">
+        </SfDatePicker>
+        <ValidationMessage For="@(() => _newProtocol.EndTime)"></ValidationMessage>
+    </div>
+
+    <!-- Department -->
+    <div class="form-group">
+        <label>@L["Department"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectDepartment"]"
+                        DataSource="@DepartmentsCollection" TItem="LookupDto<Guid>" @bind-Value="_newProtocol.DepartmentId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+        <ValidationMessage For="@(() => _newProtocol.DepartmentId)"></ValidationMessage>
+    </div>
+
+    <!-- Doctor -->
+    <div class="form-group">
+        <label>@L["Doctor"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectDoctor"]"
+                        DataSource="@DoctorsCollection" TItem="LookupDto<Guid>" @bind-Value="_newProtocol.DoctorId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+        <ValidationMessage For="@(() => _newProtocol.DoctorId)"></ValidationMessage>
+    </div>
+
+    <!-- Protocol Type -->
+    <div class="form-group">
+        <label>@L["ProtocolType"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectProtocolType"]"
+                        DataSource="@ProtocolTypesCollection" TItem="LookupDto<Guid>" @bind-Value="_newProtocol.ProtocolTypeId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+        <ValidationMessage For="@(() => _newProtocol.ProtocolTypeId)"></ValidationMessage>
+    </div>
+
+    <!-- Insurance -->
+    <div class="form-group">
+        <label>@L["Insurance"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectInsurance"]"
+                        DataSource="@InsuranceCollections" TItem="LookupDto<Guid>" @bind-Value="_newProtocol.InsuranceId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
+    <ValidationMessage For="@(() => _newProtocol.InsuranceId)"></ValidationMessage>
+</GenericModal>

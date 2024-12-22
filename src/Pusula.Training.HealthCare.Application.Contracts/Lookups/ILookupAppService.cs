@@ -19,4 +19,12 @@ public interface ILookupAppService : IApplicationService
     Task<PagedResultDto<LookupDto<Guid>>> GetCityLookupAsync(LookupRequestDto input);
     
     Task<PagedResultDto<LookupDto<Guid>>> GetDistrictLookupAsync(LookupRequestDto input);
+    
+    Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookupAsync(LookupRequestDto input);
+    
+    Task<PagedResultDto<LookupDto<Guid>>> GetInsuranceLookupAsync(LookupRequestDto input);
+    
+    Task<PagedResultDto<LookupDto<Guid>>> GetDoctorLookupAsync(LookupRequestDto input);
+    
+    
 }

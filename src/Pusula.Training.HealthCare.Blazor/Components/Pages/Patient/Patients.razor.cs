@@ -12,9 +12,16 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Pusula.Training.HealthCare.Blazor.Components.Modals;
+using Pusula.Training.HealthCare.Lookups;
+using Pusula.Training.HealthCare.Protocols;
+using Pusula.Training.HealthCare.Shared;
+using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
+using Volo.Abp.Domain.Entities;
 
+    
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Patient;
 
 public partial class Patients
@@ -39,6 +46,7 @@ public partial class Patients
     private bool CanCreatePatient { get; set; }
     private bool CanEditPatient { get; set; }
     private bool CanDeletePatient { get; set; }
+    private int LookupPageSize { get; } = 100;
     private PatientCreateDto NewPatient { get; set; } = new PatientCreateDto();
     private PatientUpdateDto EditingPatient { get; set; }
     private Validations NewPatientValidations { get; set; } = new();
@@ -59,6 +67,8 @@ public partial class Patients
     public Patients()
     {
         EditingPatient = new PatientUpdateDto();
+        _createModal = new GenericModal<ProtocolCreateDto>();
+        _newProtocol = new ProtocolCreateDto();
         Filter = new GetPatientsInput
         {
             MaxResultCount = PageSize,
@@ -68,9 +78,84 @@ public partial class Patients
         PatientList = [];
     }
 
+    private ProtocolCreateDto _newProtocol;
+    private GenericModal<ProtocolCreateDto> _createModal;
+    private bool IsLookupsLoaded { get; set; } 
+    private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; } = [];
+    
+    private IReadOnlyList<LookupDto<Guid>> InsuranceCollections { get; set; } = [];
+    private IReadOnlyList<LookupDto<Guid>> DoctorsCollection { get; set; } = [];
+    private IReadOnlyList<LookupDto<Guid>> ProtocolTypesCollection { get; set; } = [];
+    
+
+    private async Task LoadLookupsAsync()
+    {
+        try
+        {
+            DepartmentsCollection =
+                (await LookupAppService.GetDepartmentLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+
+            InsuranceCollections =
+                (await LookupAppService.GetInsuranceLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+
+            DoctorsCollection = (await LookupAppService.GetDoctorLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+            ProtocolTypesCollection =
+                (await LookupAppService.GetProtocolTypeLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+
+        }
+        catch (Exception e)
+        {
+            await UiMessageService.Error(e.Message);
+        }
+    }
+    
+    private string FoundPatientName { get; set; } = string.Empty; // Bulunan hastanın adı (eğer varsa)
+    
+    private async Task ShowCreateModal(PatientDto patientDto)
+    {
+
+        _newProtocol = new ProtocolCreateDto();
+        FoundPatientName = patientDto.FirstName + " " + patientDto.LastName;
+
+        _newProtocol.PatientId = patientDto.Id;
+        
+        if (!IsLookupsLoaded) 
+        {
+            await LoadLookupsAsync();
+            IsLookupsLoaded = true; 
+        }
+        _createModal.Show(); 
+    }
+    private async Task CreateProtocolTypeAsync(ProtocolCreateDto protocol)
+    {
+        try
+        {
+            protocol = _newProtocol;
+            await ProtocolsAppService.CreateAsync(protocol);
+
+            await UiMessageService.Success(L["Protocol created successfully"] );
+            
+        }
+        catch (Exception ex)
+        {
+            await UiMessageService.Error(@L["An error occurred while creating the Protocol."] + ex.Message);
+            throw new UserFriendlyException(ex.Message);
+        }
+    }
+    
+    
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
+       
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -121,7 +206,7 @@ public partial class Patients
     }
 
     // for navigate to the detail-page
-    protected void NavigateToDetail(PatientDto patientDto)
+    private void NavigateToDetail(PatientDto patientDto)
     {
         //seçili hastayı servise kaydediyoruz 
         //   patientService.SetPatient(patientDto);

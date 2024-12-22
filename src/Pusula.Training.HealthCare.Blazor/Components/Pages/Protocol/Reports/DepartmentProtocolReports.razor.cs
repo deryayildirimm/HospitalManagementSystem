@@ -9,6 +9,7 @@ using System.Web;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using Pusula.Training.HealthCare.Blazor.Components.Grids;
+using Pusula.Training.HealthCare.Lookups;
 using Syncfusion.Blazor.Data;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Shared;
@@ -24,6 +25,7 @@ public partial class DepartmentProtocolReports : HealthCareComponentBase
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
+    private int LookupPageSize { get; } = 50;
     private string CurrentSorting { get; set; } = string.Empty;
     private bool CanCreateProtocolType { get; set; }
     private bool CanEditProtocolType { get; set; }
@@ -147,15 +149,22 @@ public partial class DepartmentProtocolReports : HealthCareComponentBase
     
     #endregion
     
-    private  async Task LoadLookupsAsync()
-    {
-        await GetDepartmentCollectionLookupAsync();
-    }
     
-    private async Task GetDepartmentCollectionLookupAsync(string? newValue = null)
+    private async Task LoadLookupsAsync()
     {
-        DepartmentsCollection = (await ProtocolsAppService.GetDepartmentLookupAsync(new LookupRequestDto { Filter = newValue })).Items;
+        try
+        {
+            DepartmentsCollection =
+                (await LookupAppService.GetDepartmentLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+        }
+        catch (Exception e)
+        {
+            await UiMessageService.Error(e.Message);
+        }
     }
+   
     private async Task DownloadAsExcelAsync()
     {
         var token = (await ProtocolsAppService.GetDownloadTokenAsync()).Token;

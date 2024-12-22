@@ -23,6 +23,7 @@
 @inject IUiMessageService UiMessageService
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
+@inject ILookupAppService LookupAppService
 
 
 @* ************************* PAGE HEADER ************************* *@
@@ -137,7 +138,7 @@ else
 
 <!-- Update Modal -->
 
-<GenericModal TModel="ProtocolUpdateDto" @ref="_editModal" Title="Edit Protocol" Model="@_selectedProtocolType" OnSaveCallback="UpdateProtocolTypeAsync">
+<GenericModal TModel="ProtocolUpdateDto" @ref="_editModal" Title="@L["Edit Protocol"]"  Model="@_selectedProtocolType" OnSaveCallback="UpdateProtocolTypeAsync">
 
     <div class="form-group">
         <label>@L["Patient"]</label>
@@ -195,7 +196,7 @@ else
   
   <!-- Create Modal -->
   
-  <GenericModal TModel="ProtocolCreateDto" @ref="_createModal" Title="Create Protocol" Model="@_newProtocol" OnSaveCallback="CreateProtocolTypeAsync">
+  <GenericModal TModel="ProtocolCreateDto" @ref="_createModal" Title="@L["Create Protocol"]" Model="@_newProtocol" OnSaveCallback="CreateProtocolTypeAsync">
 
 
       <div class="form-group">
@@ -227,7 +228,7 @@ else
           </div>
           <div class="form-group">
               <label class="e-label">@L["Identity Number"]</label>
-              <SfTextBox  Placeholder="Enter Identity Number" CssClass="e-input" @bind-Value="NewPatient.IdentityAndPassportNumber" />
+              <SfTextBox  Placeholder="Enter Identity Number" CssClass="e-input" @bind-Value="NewPatient.IdentityNumber" />
           </div>
           <div class="form-group">
               <label class="e-label">@L["Birthdate"] *</label>

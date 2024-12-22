@@ -26,11 +26,6 @@
     <PackageReference Include="Syncfusion.Blazor.Buttons" Version="27.2.5" />
     <PackageReference Include="Syncfusion.Blazor.Cards" Version="27.2.3" />
     <PackageReference Include="Syncfusion.Blazor.Charts" Version="27.2.5" />
-<<<<<<< HEAD
-    <PackageReference Include="Syncfusion.Blazor.Charts" Version="27.2.3" />
-=======
-    <PackageReference Include="Syncfusion.Blazor.Charts" Version="27.2.5" />
->>>>>>> development
     <PackageReference Include="Syncfusion.Blazor.DataForm" Version="27.2.3" />
     <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="27.2.3" />
     <PackageReference Include="Syncfusion.Blazor.Grid" Version="27.2.3" />

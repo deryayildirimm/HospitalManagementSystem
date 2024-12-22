@@ -24,6 +24,7 @@ public partial class DoctorProtocolReports : HealthCareComponentBase
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
+    private int LookupPageSize { get; } = 50;
     private string CurrentSorting { get; set; } = string.Empty;
     private bool CanCreateProtocolType { get; set; }
     private bool CanEditProtocolType { get; set; }
@@ -143,14 +144,19 @@ public partial class DoctorProtocolReports : HealthCareComponentBase
     
     #endregion
     
-    private  async Task LoadLookupsAsync()
+    private async Task LoadLookupsAsync()
     {
-        await GetDoctorCollectionLookupAsync();
-    }
-    
-    private async Task GetDoctorCollectionLookupAsync(string? newValue = null)
-    {
-        DoctorsCollection = (await ProtocolsAppService.GetDoctorLookUpAsync(new LookupRequestDto { Filter = newValue })).Items;
+        try
+        {
+            DoctorsCollection =
+                (await LookupAppService.GetDoctorLookupAsync(new LookupRequestDto
+                    { MaxResultCount = LookupPageSize }))
+                .Items;
+        }
+        catch (Exception e)
+        {
+            await UiMessageService.Error(e.Message);
+        }
     }
     private async Task DownloadAsExcelAsync()
     {
