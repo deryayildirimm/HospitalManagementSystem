@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
@@ -12,9 +13,11 @@ using Volo.Abp.EntityFrameworkCore;
 namespace Pusula.Training.HealthCare.Migrations
 {
     [DbContext(typeof(HealthCareDbContext))]
-    partial class HealthCareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241219220515_Examination_Updated")]
+    partial class Examination_Updated
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1819,100 +1822,6 @@ namespace Pusula.Training.HealthCare.Migrations
                         .IsUnique();
 
                     b.ToTable("AppFamilyHistories", (string)null);
-                });
-
-            modelBuilder.Entity("Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings.PhysicalFinding", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<int?>("BodyTemperature")
-                        .HasColumnType("integer")
-                        .HasColumnName("BodyTemperature");
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("character varying(40)")
-                        .HasColumnName("ConcurrencyStamp");
-
-                    b.Property<DateTime>("CreationTime")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("CreationTime");
-
-                    b.Property<Guid?>("CreatorId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("CreatorId");
-
-                    b.Property<Guid?>("DeleterId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("DeleterId");
-
-                    b.Property<DateTime?>("DeletionTime")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("DeletionTime");
-
-                    b.Property<Guid>("ExaminationId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ExtraProperties")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("ExtraProperties");
-
-                    b.Property<int?>("Height")
-                        .HasColumnType("integer")
-                        .HasColumnName("Height");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasColumnName("IsDeleted");
-
-                    b.Property<int?>("Kbd")
-                        .HasColumnType("integer")
-                        .HasColumnName("Kbd");
-
-                    b.Property<int?>("Kbs")
-                        .HasColumnType("integer")
-                        .HasColumnName("Kbs");
-
-                    b.Property<DateTime?>("LastModificationTime")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("LastModificationTime");
-
-                    b.Property<Guid?>("LastModifierId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("LastModifierId");
-
-                    b.Property<int?>("Pulse")
-                        .HasColumnType("integer")
-                        .HasColumnName("Pulse");
-
-                    b.Property<int?>("Spo2")
-                        .HasColumnType("integer")
-                        .HasColumnName("Spo2");
-
-                    b.Property<int?>("Vki")
-                        .HasColumnType("integer")
-                        .HasColumnName("Vki");
-
-                    b.Property<int?>("Vya")
-                        .HasColumnType("integer")
-                        .HasColumnName("Vya");
-
-                    b.Property<int?>("Weight")
-                        .HasColumnType("integer")
-                        .HasColumnName("Weight");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExaminationId")
-                        .IsUnique();
-
-                    b.ToTable("AppPhysicalFindings", (string)null);
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Treatment.Icds.Icd", b =>
@@ -4062,13 +3971,11 @@ namespace Pusula.Training.HealthCare.Migrations
                 {
                     b.HasOne("Pusula.Training.HealthCare.Treatment.Examinations.Examination", "Examination")
                         .WithMany("ExaminationIcds")
-                        .HasForeignKey("ExaminationId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("ExaminationId");
 
                     b.HasOne("Pusula.Training.HealthCare.Treatment.Icds.Icd", "Icd")
                         .WithMany()
-                        .HasForeignKey("IcdId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("IcdId");
 
                     b.Navigation("Examination");
 
@@ -4080,17 +3987,6 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.HasOne("Pusula.Training.HealthCare.Treatment.Examinations.Examination", "Examination")
                         .WithOne("FamilyHistory")
                         .HasForeignKey("Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories.FamilyHistory", "ExaminationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Examination");
-                });
-
-            modelBuilder.Entity("Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings.PhysicalFinding", b =>
-                {
-                    b.HasOne("Pusula.Training.HealthCare.Treatment.Examinations.Examination", "Examination")
-                        .WithOne("PhysicalFinding")
-                        .HasForeignKey("Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings.PhysicalFinding", "ExaminationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -4265,8 +4161,6 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.Navigation("ExaminationIcds");
 
                     b.Navigation("FamilyHistory");
-
-                    b.Navigation("PhysicalFinding");
                 });
 
             modelBuilder.Entity("Volo.Abp.AuditLogging.AuditLog", b =>

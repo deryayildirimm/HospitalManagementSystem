@@ -5,6 +5,7 @@ using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
+using Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -18,7 +19,8 @@ public class Examination : FullAuditedAggregateRoot<Guid>
     public string? Story { get; private set; }
     public Background? Background { get; private set; }
     public FamilyHistory? FamilyHistory { get; private set; }
-    public ICollection<ExaminationIcd> ExaminationIcd { get; private set; }
+    public PhysicalFinding? PhysicalFinding { get; private set; }
+    public ICollection<ExaminationIcd> ExaminationIcds { get; private set; }
     public Guid ProtocolId { get; private set; }
     public Protocol Protocol { get; private set; } = null!;
 
@@ -26,7 +28,7 @@ public class Examination : FullAuditedAggregateRoot<Guid>
     {
         Date = DateTime.Now;
         Complaint = string.Empty;
-        ExaminationIcd = [];
+        ExaminationIcds = [];
     }
 
     public Examination(Guid id, Guid protocolId, DateTime date, string complaint, DateTime? startDate, string? story)
@@ -37,7 +39,6 @@ public class Examination : FullAuditedAggregateRoot<Guid>
         SetComplaint(complaint);
         SetStartDate(startDate);
         SetStory(story);
-        ExaminationIcd = new List<ExaminationIcd>(); 
     }
 
     public void SetDate(DateTime date) => Date = date;
@@ -63,18 +64,31 @@ public class Examination : FullAuditedAggregateRoot<Guid>
         ProtocolId = protocolId;
     }
     
-    public void AddIcd(ExaminationIcd icd)
+    public void AddIcd(Guid icdId)
     {
-        Check.NotNull(icd, nameof(icd));
-        HealthCareGlobalException.ThrowIf("ExaminationIcdAlreadyExists",
-            ExaminationIcd.Any(e => e.IcdId == icd.IcdId) );
-        ExaminationIcd.Add(icd);
+        Check.NotNull(icdId, nameof(icdId));
+
+        if (IsInIcd(icdId)) return;
+            
+        ExaminationIcds.Add(new ExaminationIcd(Id, icdId));
     }
 
     public void RemoveIcd(Guid icdId)
     {
-        var icd = ExaminationIcd.FirstOrDefault(e => e.IcdId == icdId);
-        HealthCareGlobalException.ThrowIf("ExaminationIcdNotFound", icd == null);
-        ExaminationIcd.Remove(icd!);
+        Check.NotNull(icdId, nameof(icdId));
+
+        if (!IsInIcd(icdId)) return;
+
+        ExaminationIcds.RemoveAll(x => x.IcdId == icdId);
     }
+
+    public void RemoveAllIcdsExceptGivenIds(ICollection<Guid> icdIds)
+    {
+        Check.NotNullOrEmpty(icdIds, nameof(icdIds));
+        ExaminationIcds.RemoveAll(x => !icdIds.Contains(x.IcdId));
+    }
+
+    public void RemoveAllIcds() => ExaminationIcds.RemoveAll(x => x.ExaminationId == Id);
+
+    private bool IsInIcd(Guid icdId) => ExaminationIcds.Any(x => x.IcdId == icdId);
 }

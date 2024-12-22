@@ -25,6 +25,7 @@ using Pusula.Training.HealthCare.Treatment.Icds;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Insurances;
 using Pusula.Training.HealthCare.Restrictions;
+using Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings;
 
 namespace Pusula.Training.HealthCare;
 
@@ -143,6 +144,11 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Background, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
 
+        CreateMap<PhysicalFinding, PhysicalFindingDto>();
+        CreateMap<PhysicalFindingDto, PhysicalFindingUpdateDto>();
+        CreateMap<PhysicalFinding, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
+        
         CreateMap<Examination, ExaminationDto>();
         CreateMap<ExaminationDto, ExaminationUpdateDto>();
         CreateMap<Examination, LookupDto<Guid>>()

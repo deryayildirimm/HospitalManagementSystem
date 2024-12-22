@@ -25,6 +25,7 @@ using Pusula.Training.HealthCare.Titles;
 using Pusula.Training.HealthCare.Treatment.Examinations;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
+using Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings;
 using Pusula.Training.HealthCare.Treatment.Icds;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
@@ -58,6 +59,7 @@ namespace Pusula.Training.HealthCare
         IExaminationRepository examinationRepository,
         IFamilyHistoryRepository familyHistoryRepository,
         IBackgroundRepository backgroundRepository,
+        IPhysicalFindingRepository physicalFindingRepository,
         IMedicalStaffRepository medicalStaffRepository,
         IInsuranceRepository insuranceRepository,
         IRestrictionManager restrictionManager,
@@ -86,6 +88,7 @@ namespace Pusula.Training.HealthCare
             await SeedExaminations();
             await SeedFamilyHistory();
             await SeedBackground();
+            await SeedPhysicalFindings();
             await SeedTestCategoryRecords();
             await SeedTestRecords();
             await SeedMedicalServiceRestrictions();
@@ -1216,6 +1219,47 @@ namespace Pusula.Training.HealthCare
             await backgroundRepository.InsertAsync(background1, true);
             await backgroundRepository.InsertAsync(background2, true);
             await backgroundRepository.InsertAsync(background3, true);
+        }
+        
+        private async Task SeedPhysicalFindings()
+        {
+            if (await examinationRepository.GetCountAsync() == 0)
+            {
+                return;
+            }
+
+            var examinations = await examinationRepository.GetListAsync();
+
+            var physicalFinding1 = new PhysicalFinding(
+                id: Guid.NewGuid(),
+                examinationId: examinations[0].Id,
+                weight: 50,
+                height: 165,
+                bodyTemperature: 37,
+                pulse: 100
+            );
+
+            var physicalFinding2 = new PhysicalFinding(
+                id: Guid.NewGuid(),
+                examinationId: examinations[1].Id,
+                weight: 50,
+                vki: 1,
+                kbs: 3,
+                spo2: 1
+            );
+
+            var physicalFinding3 = new PhysicalFinding(
+                id: Guid.NewGuid(),
+                examinationId: examinations[2].Id,
+                weight: 150,
+                height: 195,
+                vya: 2,
+                kbd: 2
+            );
+
+            await physicalFindingRepository.InsertAsync(physicalFinding1, true);
+            await physicalFindingRepository.InsertAsync(physicalFinding2, true);
+            await physicalFindingRepository.InsertAsync(physicalFinding3, true);
         }
     }
 }

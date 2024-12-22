@@ -61,8 +61,10 @@ public class ExaminationsAppService(IExaminationRepository examinationRepository
         var examination = await examinationManager.CreateAsync(input.ProtocolId, input.Date,
             input.Complaint, input.FamilyHistory.AreParentsRelated, input.FamilyHistory.MotherDisease,
             input.FamilyHistory.FatherDisease, input.FamilyHistory.SisterDisease, input.FamilyHistory.BrotherDisease,
-            input.Background.Allergies, input.Background.Medications, input.Background.Habits, input.StartDate, 
-            input.Story, input.IcdIds);
+            input.Background.Allergies, input.Background.Medications, input.Background.Habits, input.PhysicalFinding.Weight,
+            input.PhysicalFinding.Height, input.PhysicalFinding.BodyTemperature, input.PhysicalFinding.Pulse,
+            input.PhysicalFinding.Vki, input.PhysicalFinding.Vya, input.PhysicalFinding.Kbs, input.PhysicalFinding.Kbd,
+            input.PhysicalFinding.Spo2, input.StartDate, input.Story, input.IcdIds);
         
         await distributedEventBus.PublishAsync(new ExaminationCreatedEto 
             { 
@@ -83,7 +85,10 @@ public class ExaminationsAppService(IExaminationRepository examinationRepository
             input.Date, input.Complaint, input.FamilyHistory.AreParentsRelated, 
             input.FamilyHistory.MotherDisease, input.FamilyHistory.FatherDisease, input.FamilyHistory.SisterDisease, 
             input.FamilyHistory.BrotherDisease, input.Background.Allergies, input.Background.Medications, 
-            input.Background.Habits, input.StartDate, input.Story, input.IcdIds);
+            input.Background.Habits, input.PhysicalFinding.Weight, input.PhysicalFinding.Height, 
+            input.PhysicalFinding.BodyTemperature, input.PhysicalFinding.Pulse, input.PhysicalFinding.Vki, 
+            input.PhysicalFinding.Vya, input.PhysicalFinding.Kbs, input.PhysicalFinding.Kbd,
+            input.PhysicalFinding.Spo2, input.StartDate, input.Story, input.IcdIds);
         
         return ObjectMapper.Map<Examination, ExaminationDto>(examination);
     }

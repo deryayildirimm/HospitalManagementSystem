@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
+using Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings;
 
 namespace Pusula.Training.HealthCare.Treatment.Examinations;
 
@@ -22,6 +23,7 @@ public class ExaminationUpdateDto
 
     public BackgroundUpdateDto Background { get; set; } = new BackgroundUpdateDto();
     public FamilyHistoryUpdateDto FamilyHistory { get; set; } = new FamilyHistoryUpdateDto();
+    public PhysicalFindingUpdateDto PhysicalFinding { get; set; } = new PhysicalFindingUpdateDto();
     public ICollection<ExaminationIcdDto>? ExaminationIcd { get; set; }
     public List<Guid> IcdIds { get; set; } = new List<Guid>();
     [Required]
