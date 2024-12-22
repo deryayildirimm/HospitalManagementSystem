@@ -24,20 +24,16 @@
 
 @code {
 
-
-
     [Parameter] public string Title { get; set; } = "Modal";
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [Parameter] public TModel? Model { get; set; }
     [Parameter] public EventCallback<TModel> OnSaveCallback { get; set; }
-
-
-
+    
     public bool IsVisible { get; set; } = false;
 
     private EditContext? EditContext { get; set; }
 
-    private string? BackendErrorMessage;
+    private string? _backendErrorMessage;
 
     public void Close() => IsVisible = false;
 
@@ -47,7 +43,7 @@
         StateHasChanged();
     }
 
-    public void Hide()
+    private void Hide()
     {
         IsVisible = false;
         StateHasChanged();
@@ -56,7 +52,7 @@
     protected override void OnParametersSet()
     {
         EditContext = new EditContext(Model);
-        BackendErrorMessage = string.Empty;
+        _backendErrorMessage = string.Empty;
        
     }
 
@@ -72,7 +68,7 @@
         }
         catch (Exception ex)
         {
-            BackendErrorMessage = $"Error: {ex.Message}";
+            _backendErrorMessage = $"Error: {ex.Message}";
         }
     }
 
@@ -82,7 +78,7 @@
 
         if (!EditContext.Validate())
         {
-            BackendErrorMessage = "Please fill all required fields correctly.";
+            _backendErrorMessage = "Please fill all required fields correctly.";
            
             return;
         }
@@ -93,7 +89,7 @@
         }
         catch (Exception ex)
         {
-            BackendErrorMessage = $"Backend error: {ex.Message}";
+            _backendErrorMessage = $"Backend error: {ex.Message}";
         }
     }
 

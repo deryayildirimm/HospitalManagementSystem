@@ -8,8 +8,8 @@ public class HealthCareMenus
     //Add your menu items here...
     public const string Patients = Prefix + ".Patients";
     public const string Protocols = Prefix + ".Protocols";
-    public const string Reports_Doctor = Protocols + ".Doctor_Reports";
-    public const string Reports_Department = Protocols + ".Department-Reports";
+    public const string ReportsDoctor = Protocols + ".Doctor_Reports";
+    public const string ReportsDepartment = Protocols + ".Department-Reports";
     public const string Departments = Prefix + ".Departments";
     public const string MedicalServices = Prefix + ".MedicalServices";
     public const string Doctors = Prefix + ".Doctors";

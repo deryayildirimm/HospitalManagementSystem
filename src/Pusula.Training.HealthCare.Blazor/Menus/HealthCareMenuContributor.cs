@@ -166,7 +166,7 @@ public class HealthCareMenuContributor : IMenuContributor
         context.Menu.AddItem(
             new ApplicationMenuItem(
                     name: "Hasta Kabul",
-                    displayName: l["Hasta Kabul"],
+                    displayName: l["Menu:HastaKabul"],
                     icon: "fa fa-users",
                     requiredPermissionName: HealthCarePermissions.Patients.Default
                 )
@@ -219,14 +219,14 @@ public class HealthCareMenuContributor : IMenuContributor
                         icon: "fa-solid fa-chart-bar"
                     )
                     .AddItem(new ApplicationMenuItem(
-                        name: HealthCareMenus.Reports_Department,
+                        name: HealthCareMenus.ReportsDepartment,
                         displayName: l["Menu:Department-Reports"],
                         url: "/protocols-report-department",
                         icon: "fa fa-file-alt",
                         requiredPermissionName: HealthCarePermissions.Protocols.Default)
                     )
                     .AddItem(new ApplicationMenuItem(
-                        name: HealthCareMenus.Reports_Doctor,
+                        name: HealthCareMenus.ReportsDoctor,
                         displayName: l["Menu:Doctor-Reports"],
                         url: "/protocols-report-doctor",
                         icon: "fa fa-file-alt",
