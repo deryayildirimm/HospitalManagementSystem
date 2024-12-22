@@ -24,7 +24,8 @@ namespace Pusula.Training.HealthCare.MedicalServices;
 public class MedicalServicesAppService(
     IMedicalServiceRepository medicalServiceRepository,
     MedicalServiceManager medicalServiceManager,
-    IDistributedCache<MedicalServiceDownloadTokenCacheItem, string> downloadCache
+    IDistributedCache<MedicalServiceDownloadTokenCacheItem, string> downloadCache,
+    IDistributedCache<MedicalServiceCacheItem> medicalServiceCache
 ) : HealthCareAppService, IMedicalServicesAppService
 {
     public virtual async Task<PagedResultDto<MedicalServiceDto>> GetListAsync(GetMedicalServiceInput input)
@@ -122,7 +123,25 @@ public class MedicalServicesAppService(
     }
 
     public virtual async Task<MedicalServiceDto> GetAsync(Guid id)
-        => ObjectMapper.Map<MedicalService, MedicalServiceDto>(await medicalServiceRepository.GetAsync(id));
+    {
+        var cacheToken = $"MedicalService:{id}";
+        var cacheResult = await medicalServiceCache.GetAsync(cacheToken);
+        if (cacheResult != null)
+        {
+            return ObjectMapper.Map<MedicalServiceCacheItem, MedicalServiceDto>(cacheResult);
+        }
+
+        var service = await medicalServiceRepository.GetAsync(id);
+
+        await medicalServiceCache.SetAsync(cacheToken,
+            ObjectMapper.Map<MedicalService, MedicalServiceCacheItem>(service),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+
+        return ObjectMapper.Map<MedicalService, MedicalServiceDto>(service);
+    }
 
     [Authorize(HealthCarePermissions.MedicalServices.Delete)]
     public virtual async Task DeleteAsync(Guid id)
@@ -188,7 +207,7 @@ public class MedicalServicesAppService(
     [Authorize(HealthCarePermissions.MedicalServices.Delete)]
     public async Task DeleteByIdsAsync(List<Guid> medicalServiceIds)
         => await medicalServiceRepository.DeleteManyAsync(medicalServiceIds);
-    
+
     [Authorize(HealthCarePermissions.MedicalServices.Delete)]
     public virtual async Task DeleteAllAsync(GetMedicalServiceInput input)
         => await medicalServiceRepository.DeleteAllAsync(input.Name, input.CostMin, input.CostMax);

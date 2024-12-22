@@ -147,3 +147,21 @@
 .px-40 {
     height: 40px !important;
 }
+
+/* Custom dropdown generic */
+.e-dropdown-btn.e-custom-drop-btn {
+    width: 180px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    background-color: #0d6efd;
+    color:black !important;
+}
+
+.e-custom-drop-btn {
+    background-color: white !important;
+    color:black !important;
+}
+
+.e-dropdown-btn.e-custom-drop-btn .e-export-pdf::before {
+    font-size: 24px;
+}

@@ -30,7 +30,6 @@
 </SfBreadcrumb>
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["AppointmentOverview"]">
-    <link href="/Components/Pages/AppointmentOverview.razor.css" rel="stylesheet"/>
 </PageHeader>
 
 <div class="row py-2 px-2">
@@ -125,14 +124,13 @@
                     @* ************************* Graphs ************************* *@
                     <div class="d-flex justify-content-between border-1 bg-white rounded-1 p-2 m-0">
                         <div class="w-50">
-                            <SfAccumulationChart @ref="AccumulationChart" Width="100%" Height="380px" Title="@($"{L["AppointmentsBy"]} {L[Filter.GroupByField.ToString()]}")">
+                            <SfAccumulationChart Width="100%" Height="380px" Title="@($"{L["AppointmentsBy"]} {L[Filter.GroupByField.ToString()]}")">
                                 <AccumulationChartSeriesCollection >
                                     <AccumulationChartSeries DataSource="@AppointmentByDepartmentCollection" XName="GroupName" YName="Number">
                                         <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
 
                                     </AccumulationChartSeries>
                                 </AccumulationChartSeriesCollection>
-                                <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
                                 <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
                                 <AccumulationChartTooltipSettings Enable="true"></AccumulationChartTooltipSettings>
 
@@ -245,7 +243,6 @@
                                     <SfAccumulationChart @ref="ChartByStatus" Width="100%" Height="380px" Title="@L["AppointmentsByStatus"]">
                                         <AccumulationChartSeriesCollection>
                                             <AccumulationChartTitleStyle TextAlignment="Alignment.Center"></AccumulationChartTitleStyle>
-
                                             <AccumulationChartSeries DataSource="@AppointmentByStatusCollection" XName="GroupName" YName="Number" InnerRadius="40%">
                                                 <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside">
                                                     <AccumulationChartConnector Type="ConnectorType.Curve" Length="20px"/>
@@ -263,11 +260,8 @@
                                                 <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
                                             </AccumulationChartSeries>
                                         </AccumulationChartSeriesCollection>
-
-                                        <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
                                         <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
                                         <AccumulationChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y} USD</b>"></AccumulationChartTooltipSettings>
-
                                     </SfAccumulationChart>
                                 </div>
                             </div>
@@ -294,10 +288,8 @@
                                                 <AccumulationDataLabelSettings Visible="true" Name="Number" Position="AccumulationLabelPosition.Outside"></AccumulationDataLabelSettings>
                                             </AccumulationChartSeries>
                                         </AccumulationChartSeriesCollection>
-                                        <AccumulationChartEvents SizeChanged="@OnResize"></AccumulationChartEvents>
                                         <AccumulationChartLegendSettings Visible="true"></AccumulationChartLegendSettings>
                                         <AccumulationChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y} USD</b>"></AccumulationChartTooltipSettings>
-
                                     </SfAccumulationChart>
                                 </div>
                             </div>

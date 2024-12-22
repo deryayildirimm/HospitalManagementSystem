@@ -48,7 +48,7 @@
             <h5>@L["Duration"]: @MedicalService.Duration @L["Minutes"]</h5>
         </div>
         <div class="d-flex align-items-center gap-2 mb-1">
-            <h5>@L["ServiceCreatedAt"]: @MedicalService.CreationTime.ToShortDateString()</h5>
+            <h5>@L["ServiceCreatedAt"]: @MedicalService.ServiceCreatedAt.ToShortDateString()</h5>
         </div>
     </div>
 </div>
@@ -74,7 +74,7 @@
                                     <Template>
                                         @{
                                             var doctorContext = (context as DoctorDto);
-                                            var doctor = doctorContext?.FirstName + " " + doctorContext?.LastName;
+                                            var doctor = $"{doctorContext?.Title?.TitleName} {doctorContext?.FirstName} {doctorContext?.LastName}";
                                         }
                                         @doctor
                                     </Template>
@@ -84,7 +84,7 @@
                                     <Template>
                                         @{
                                             var doctor = (context as DoctorDto);
-                                            var department = doctor?.Department.Name ?? "No Data";
+                                            var department = doctor?.Department.Name ?? @L["NoData"];
                                         }
                                         @department
                                     </Template>

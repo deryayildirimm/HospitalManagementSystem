@@ -252,11 +252,6 @@ public partial class AppointmentOverview : HealthCareComponentBase
         await Grid.Refresh();
     }
 
-    private void OnResize(AccumulationResizeEventArgs arg)
-    {
-        AccumulationChart.Refresh();
-    }
-
     #region Filters
 
     private void SetFilters()
