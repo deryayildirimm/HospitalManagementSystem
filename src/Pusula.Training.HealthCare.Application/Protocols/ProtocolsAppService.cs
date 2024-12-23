@@ -67,25 +67,7 @@ namespace Pusula.Training.HealthCare.Protocols
             
             return ObjectMapper.Map<ProtocolWithDetails, ProtocolWithDetailsDto>(protocol);
         }
-
-        public virtual async Task<ProtocolWithDetailsDto> UpdateProtocolWithDetailsAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-        /*
-        public virtual async Task<PagedResultDto<ProtocolWithNavigationPropertiesDto>> GetMedicalServices(GetProtocolsInput input)
-        {
-            var totalCount = await protocolRepository.GetCountAsync(input.FilterText, input.Notes, input.StartTimeMin, input.StartTimeMax, input.EndTimeMin,input.EndTimeMax, input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId, input.InsuranceId);
-            var items = await protocolRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Notes, input.StartTimeMin, input.StartTimeMax,  input.EndTimeMin,input.EndTimeMax,input.PatientId, input.DepartmentId, input.ProtocolTypeId, input.DoctorId, input.InsuranceId,input.Sorting, input.MaxResultCount, input.SkipCount);
-
-            return new PagedResultDto<ProtocolWithNavigationPropertiesDto>
-            {
-                TotalCount = totalCount,
-                Items = ObjectMapper.Map<List<ProtocolWithNavigationProperties>, List<ProtocolWithNavigationPropertiesDto>>(items)
-            };
-        }
-
-        */
+        
         public virtual async Task<PagedResultDto<ProtocolPatientDepartmentListReportDto>> GetPatientsByDepartmentAsync(
             GetProtocolsInput input)
         {

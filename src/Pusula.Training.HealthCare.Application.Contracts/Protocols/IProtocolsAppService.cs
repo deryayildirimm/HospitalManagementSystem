@@ -29,7 +29,6 @@ public interface IProtocolsAppService : IApplicationService
 
     Task<ProtocolWithDetailsDto> GetProtocolDetailsAsync(Guid id);
     
-  //  Task<ProtocolWithDetailsDto> UpdateProtocolWithDetailsAsync(Guid id);
     
     Task DeleteAsync(Guid id);
 

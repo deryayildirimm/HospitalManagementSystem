@@ -31,6 +31,15 @@ public interface IProtocolRepository : IRepository<Protocol, Guid>
         CancellationToken cancellationToken = default
     );
 
+    Task<List<ProtocolWithDetails>> GetListWithAsync(
+        string sorting,
+        int skipCount,
+        int maxResultCount,
+        CancellationToken cancellationToken = default
+    );
+
+    Task<ProtocolWithDetails> GetWithAsync(Guid id, CancellationToken cancellationToken = default);
+    
     Task<List<ProtocolWithMedicalService>> GetProtocolWithMedicalServiceAsync(
       
         string? sorting = null,

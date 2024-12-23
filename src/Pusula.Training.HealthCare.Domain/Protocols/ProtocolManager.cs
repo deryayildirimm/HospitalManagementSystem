@@ -89,18 +89,11 @@ public class ProtocolManager(
             protocol.RemoveAllMedicalServices();
             return;
         }
-
-        // medical servise de search yapıyor
-        // ismi girilen tıbbi hizmeti arıyor tabloda 
-        // ve o id yi alıyor
+        
         var query = (await medicalServiceRepository.GetQueryableAsync())
             .Where(x => medicalServiceNames.Contains(x.Name))
             .Select(x => x.Id)
             .Distinct();
-
-        
-            // bu id lerden liste oluşturuyor 
-            // hiç yoksa dönüyor zaten çıkıyor metoddan 
         var medicalServiceIds = await AsyncExecuter.ToListAsync(query);
         if (!medicalServiceIds.Any())
         {
