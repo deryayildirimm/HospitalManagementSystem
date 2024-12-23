@@ -69,13 +69,15 @@ public class HealthCareApplicationAutoMapperProfile : Profile
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
         CreateMap<MedicalServiceCacheItem, MedicalServiceDto>();
         CreateMap<MedicalService, MedicalServiceCacheItem>();
-        
+
         CreateMap<Title, TitleDto>();
         CreateMap<TitleDto, TitleUpdateDto>();
         CreateMap<Title, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.TitleName));
 
-        CreateMap<Doctor, DoctorDto>();
+        CreateMap<Doctor, DoctorDto>()
+            .ForMember(dest => dest.DoctorNameLastName,
+                opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"));
         CreateMap<Doctor, DoctorExcelDto>();
         CreateMap<DoctorDto, DoctorUpdateDto>();
         CreateMap<DoctorWithDetails, DoctorWithDetailsDto>();
@@ -94,7 +96,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
             .ForMember(dest => dest.DepartmentId, opt => opt.MapFrom(src => src.Doctor.DepartmentId))
             .ForMember(dest => dest.DisplayName,
                 opt => opt.MapFrom(src => $"{src.Doctor.FirstName} {src.Doctor.LastName}"));
-        
+
         CreateMap<DoctorLeave, DoctorLeaveDto>();
         CreateMap<DoctorLeaveDto, DoctorLeaveUpdateDto>();
 
@@ -129,10 +131,11 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<IcdDto, IcdUpdateDto>();
         CreateMap<Icd, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
-        CreateMap<Icd, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
-        
+        CreateMap<Icd, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
+
         CreateMap<IcdReport, IcdReportDto>();
-        
+
         CreateMap<FamilyHistory, FamilyHistoryDto>();
         CreateMap<FamilyHistoryDto, FamilyHistoryUpdateDto>();
         CreateMap<FamilyHistory, LookupDto<Guid>>()
