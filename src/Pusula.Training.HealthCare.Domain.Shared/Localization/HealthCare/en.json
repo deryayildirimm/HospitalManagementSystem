@@ -337,6 +337,8 @@
     "ExportChartsAs":  "Export Charts As",
     "PrintCharts":  "Print Charts",
     "Menu:ManageAppointment": "Manage Appointments",
-    "NewLeave": "New Leave"
+    "NewLeave": "New Leave",
+    "AppointmentTypeCreated": "Appointment type successfully created.",
+    "AppointmentTypeUpdated": "Appointment type successfully updated."
   }
 }

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Pusula.Training.HealthCare.AppointmentTypes;
 using Syncfusion.Blazor.Grids;
+using Syncfusion.Blazor.Notifications;
 using Syncfusion.Blazor.Popups;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
@@ -35,9 +36,14 @@ public partial class AppointmentTypes : HealthCareComponentBase
     private SfDialog DeleteConfirmDialog { get; set; }
     private bool Flag { get; set; }
     private string[] PageSizes { get; set; }
+    private SfToast ToastObj { get; set; }
+    private string ToastContent { get; set; } = string.Empty;
+    private string ToastTitle { get; set; } = "Information";
+    private string ToastCssClass { get; set; } = string.Empty;
 
     public AppointmentTypes()
     {
+        ToastObj = new SfToast();
         ToolbarItems = ["Search", "Delete"];
         DeleteConfirmDialog = new SfDialog();
         Grid = new SfGrid<AppointmentTypeDto>();
@@ -92,6 +98,8 @@ public partial class AppointmentTypes : HealthCareComponentBase
             .IsGrantedAsync(HealthCarePermissions.AppointmentTypes.Delete);
     }
 
+    #region GridHandlers
+
     public void OnActionBegin(ActionEventArgs<AppointmentTypeDto> args)
     {
         if (args.RequestType.ToString() != "Delete" || !IsDeleteDialogVisible)
@@ -103,6 +111,7 @@ public partial class AppointmentTypes : HealthCareComponentBase
         DeleteConfirmDialog.ShowAsync();
         Flag = false;
     }
+
 
     public void Closed()
     {
@@ -173,6 +182,15 @@ public partial class AppointmentTypes : HealthCareComponentBase
             Refresh();
         }
     }
+    
+    private void Refresh()
+    {
+        Grid.Refresh();
+    }
+
+    #endregion
+
+    #region DialogControls
 
     private void OkClick()
     {
@@ -198,24 +216,6 @@ public partial class AppointmentTypes : HealthCareComponentBase
         IsEditDialogVisible = false;
     }
 
-    private async Task DownloadAsExcelAsync()
-    {
-        var token = (await AppointmentTypesAppService.GetDownloadTokenAsync()).Token;
-        var remoteService =
-            await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ??
-            await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        var culture = CultureInfo.CurrentUICulture.Name ?? CultureInfo.CurrentCulture.Name;
-        if (!culture.IsNullOrEmpty())
-        {
-            culture = "&culture=" + culture;
-        }
-
-        await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        NavigationManager.NavigateTo(
-            $"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/appointment-types/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Name={HttpUtility.UrlEncode(Filter.Name)}",
-            forceLoad: true);
-    }
-    
     private Task OpenCreateTypeModalAsync()
     {
         IsCreateDialogVisible = true;
@@ -227,6 +227,10 @@ public partial class AppointmentTypes : HealthCareComponentBase
         NewType = new AppointmentTypeCreateDto();
         IsCreateDialogVisible = false;
     }
+
+    #endregion
+
+    #region APICalls
 
     private async Task DeleteTypeAsync(AppointmentTypeDto input)
     {
@@ -255,6 +259,7 @@ public partial class AppointmentTypes : HealthCareComponentBase
         try
         {
             await AppointmentTypesAppService.CreateAsync(NewType);
+            await OpenToast(content: "CreatedSuccess", title: "AppointmentTypeCreated", css: "e-toast-success");
         }
         catch (Exception ex)
         {
@@ -272,6 +277,7 @@ public partial class AppointmentTypes : HealthCareComponentBase
         try
         {
             await AppointmentTypesAppService.UpdateAsync(EditingTypeId, EditingType);
+            await OpenToast(content: "UpdatedSuccess", title: "AppointmentTypeUpdated", css: "e-toast-success");
             CloseEditTypeModal();
         }
         catch (Exception ex)
@@ -285,16 +291,45 @@ public partial class AppointmentTypes : HealthCareComponentBase
         }
     }
 
-    private void Refresh()
+    private async Task DownloadAsExcelAsync()
     {
-        Grid.Refresh();
+        var token = (await AppointmentTypesAppService.GetDownloadTokenAsync()).Token;
+        var remoteService =
+            await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ??
+            await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
+        var culture = CultureInfo.CurrentUICulture.Name ?? CultureInfo.CurrentCulture.Name;
+        if (!culture.IsNullOrEmpty())
+        {
+            culture = "&culture=" + culture;
+        }
+
+        await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
+        NavigationManager.NavigateTo(
+            $"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/appointment-types/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Name={HttpUtility.UrlEncode(Filter.Name)}",
+            forceLoad: true);
     }
 
+    #endregion
+    
     public static void ExcelQueryCellInfoHandler(ExcelQueryCellInfoEventArgs<AppointmentTypeDto> args)
     {
         if (args.Column.Field == "Name")
         {
             args.Cell.Value = args.Data.Name;
         }
+    }
+
+    private async Task ShowOnClick()
+    {
+        await ToastObj.ShowAsync();
+    }
+
+    private async Task OpenToast(string content, string title, string css)
+    {
+        ToastContent = @L[content];
+        ToastTitle = @L[title];
+        ToastCssClass = css;
+        StateHasChanged();
+        await ShowOnClick();
     }
 }

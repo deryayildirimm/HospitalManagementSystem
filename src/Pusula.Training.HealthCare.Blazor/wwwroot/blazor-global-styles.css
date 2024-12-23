@@ -42,12 +42,6 @@
     width: 100%;
 }
 
-.status-div {
-    border-radius: 7px;
-    padding: 4px 8px;
-}
-
-
 /*# AppColors */
 .success-color {
     background-color: var(--bs-success);
