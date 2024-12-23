@@ -55,22 +55,6 @@ public class ProtocolController(IProtocolsAppService protocolsAppService) : Heal
     [HttpGet]
     [Route("patient-lookup")]
     public virtual Task<PagedResultDto<LookupDto<Guid>>> GetPatientLookupAsync(LookupRequestDto input) => protocolsAppService.GetPatientLookupAsync(input);
-  
-    [HttpGet]
-    [Route("department-lookup")]
-    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetDepartmentLookupAsync(LookupRequestDto input) => protocolsAppService.GetDepartmentLookupAsync(input);
-    
-    [HttpGet]
-    [Route("doctor-lookup")]
-    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetDoctorLookUpAsync(LookupRequestDto input) => protocolsAppService.GetDoctorLookUpAsync(input);
-    
-    [HttpGet]
-    [Route("protocol-type-lookup")]
-    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookUpAsync(LookupRequestDto input) => protocolsAppService.GetProtocolTypeLookUpAsync(input);
-    
-    [HttpGet]
-    [Route("insurance-lookup")]
-    public virtual Task<PagedResultDto<LookupDto<Guid>>> GetInsuranceLookUpAsync(LookupRequestDto input) => protocolsAppService.GetInsuranceLookUpAsync(input);
 
 
     [HttpPost]

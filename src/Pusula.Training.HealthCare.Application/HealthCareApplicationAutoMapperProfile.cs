@@ -53,6 +53,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
 
         CreateMap<ProtocolType, ProtocolTypeDto>();
         CreateMap<ProtocolTypeDto, ProtocolTypeUpdateDto>();
+        CreateMap<ProtocolType, ProtocolTypeExcelDto>();
         CreateMap<ProtocolType, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
 

@@ -225,7 +225,7 @@ public partial class Patients
     {
         var token = (await PatientsAppService.GetDownloadTokenAsync()).Token;
         var remoteService = await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("HealthCare") ?? await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        var culture = CultureInfo.CurrentUICulture.Name ?? CultureInfo.CurrentCulture.Name;
+        var culture = CultureInfo.CurrentUICulture.Name ;
         if (!culture.IsNullOrEmpty())
         {
             culture = "&culture=" + culture;

@@ -1,5 +1,7 @@
 ﻿@typeparam TModel
 
+@using Microsoft.Extensions.Localization
+@using Pusula.Training.HealthCare.Localization
 @using Syncfusion.Blazor.Buttons
 
 <SfDialog @bind-Visible="IsVisible" Width="400px" ShowCloseIcon="true" Header="@Title" AllowDragging="true"  EnableResize="true">
@@ -16,12 +18,13 @@
        
         </Content>
         <FooterTemplate>
-             <SfButton CssClass="e-secondary" @onclick="Close">Cancel</SfButton>
-             <SfButton CssClass="e-primary"  @onclick="SubmitForm" IsPrimary="true">Save</SfButton>
+             <SfButton CssClass="e-secondary" @onclick="Close">@L["Cancel"]</SfButton>
+             <SfButton CssClass="e-primary"  @onclick="SubmitForm" IsPrimary="true">@L["Save"]</SfButton>
         </FooterTemplate>
     </DialogTemplates>
 </SfDialog>
 
+@inject IStringLocalizer<HealthCareResource> L
 @code {
 
     [Parameter] public string Title { get; set; } = "Modal";
@@ -51,7 +54,7 @@
 
     protected override void OnParametersSet()
     {
-        EditContext = new EditContext(Model);
+        EditContext = new EditContext(Model!);
         _backendErrorMessage = string.Empty;
        
     }

@@ -89,7 +89,7 @@ namespace Pusula.Training.HealthCare
             await SeedTestRecords();
             await SeedMedicalServiceRestrictions();
             //await SeedInsurance();
-            //await SeedProtocolMedicalService();
+            await SeedProtocolMedicalService();
         }
 
         private async Task SeedProtocolType()

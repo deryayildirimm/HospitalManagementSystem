@@ -54,6 +54,9 @@
     "Protocol-Doctor Statistics" : "Protokol-Doktor Raporları",
     "Create Protocol" : "Protokol Oluştur",
     "Edit Protocol" : "Protokol Düzenle",
+    "Create Protocol Type" : "Protokol Tipi Oluştur",
+    "Edit Protocol Type" : "Protokol Tipi Düzenle ",
+    "Protocol Type" : "Protokol Tipi",
     "SelectDoctor" : "Doktor Seçiniz",
     "SelectProtocolType" : "Protokol Tipi Seçiniz",
     "SelectInsurance" : "Sigorta Seçiniz",
@@ -173,6 +176,7 @@
     "EndDateMax": "Maximum Bitiş Tarihi",
     "Search": "Ara",
     "Insurances": "Sigortalar",
-    "RecordNotFound": "Kaydı bulamadım."
+    "RecordNotFound": "Kaydı bulamadım.",
+    "Clear": "Temizle"
   }
 }

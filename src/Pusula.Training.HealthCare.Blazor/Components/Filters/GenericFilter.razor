@@ -1,4 +1,6 @@
-﻿@typeparam TFilter
+﻿@using Microsoft.Extensions.Localization
+@using Pusula.Training.HealthCare.Localization
+@typeparam TFilter
 
         @if (ShowSearch)
         {
@@ -7,10 +9,10 @@
                     <input type="text" class="form-control" placeholder="Search" @bind-value="SearchValue"/>
                 </div>
                 <div class="col-1 "  style="margin-left: 35px">
-                    <button class="btn btn-secondary" @onclick="OnSearchClicked">Search</button>
+                    <button class="btn btn-secondary" @onclick="OnSearchClicked">@L["Search"]</button>
                 </div>
                 <div class="col-1 "  style="margin-left: 10px">
-                    <button class="btn btn-danger" @onclick="OnClearFiltersClicked">Clear</button>
+                    <button class="btn btn-danger" @onclick="OnClearFiltersClicked">@L["Clear"]</button>
                 </div>
                 
                 <div class="col-3 ">
@@ -24,8 +26,10 @@
                 @ChildContent
             }
         }
+@inject IStringLocalizer<HealthCareResource> L
 
-        @code {
+@code {
+            
     [Parameter] public TFilter Filter { get; set; } = default!;
     [Parameter] public EventCallback<TFilter> OnFilterChanged { get; set; }
     [Parameter] public EventCallback OnClearFilters { get; set; } 
