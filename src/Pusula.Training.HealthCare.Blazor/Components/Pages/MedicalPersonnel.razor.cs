@@ -31,7 +31,6 @@ public partial class MedicalPersonnel
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private SfGrid<MedicalStaffWithNavigationPropertiesDto> Grid { get; set; }
     protected bool ShowAdvancedFilters { get; set; }
-    private IReadOnlyList<MedicalStaffWithNavigationPropertiesDto> MedicalStaffList { get; set; }
     private int PageSize { get; } = 10;
     private int CurrentPage { get; set; } = 1;
     private int TotalCount { get; set; }

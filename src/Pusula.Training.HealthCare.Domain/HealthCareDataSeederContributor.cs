@@ -25,6 +25,7 @@ using Pusula.Training.HealthCare.Titles;
 using Pusula.Training.HealthCare.Treatment.Examinations;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
+using Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings;
 using Pusula.Training.HealthCare.Treatment.Icds;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
@@ -45,6 +46,7 @@ namespace Pusula.Training.HealthCare
         IAppointmentTypeRepository appointmentTypeRepository,
         ITitleRepository titleRepository,
         IMedicalServiceRepository medicalServiceRepository,
+        IMedicalServiceManager medicalServiceManager,
         IRepository<Doctor> doctorRepository,
         IRepository<DoctorWorkingHour> doctorWorkingHourRepository,
         ICityRepository cityRepository,
@@ -57,6 +59,7 @@ namespace Pusula.Training.HealthCare
         IExaminationRepository examinationRepository,
         IFamilyHistoryRepository familyHistoryRepository,
         IBackgroundRepository backgroundRepository,
+        IPhysicalFindingRepository physicalFindingRepository,
         IMedicalStaffRepository medicalStaffRepository,
         IInsuranceRepository insuranceRepository,
         IRestrictionManager restrictionManager,
@@ -85,6 +88,7 @@ namespace Pusula.Training.HealthCare
             await SeedExaminations();
             await SeedFamilyHistory();
             await SeedBackground();
+            await SeedPhysicalFindings();
             await SeedTestCategoryRecords();
             await SeedTestRecords();
             await SeedMedicalServiceRestrictions();
@@ -351,14 +355,11 @@ namespace Pusula.Training.HealthCare
             foreach (var doctor in doctors)
             {
                 if (medicalServiceIndex + 1 > medicalServices.Count)
+                {
                     return;
+                }
 
                 var medicalService = medicalServices[medicalServiceIndex++];
-
-                if (medicalService == null)
-                {
-                    continue;
-                }
 
                 await restrictionManager.CreateAsync(
                     medicalService.Id,
@@ -381,21 +382,55 @@ namespace Pusula.Training.HealthCare
             var medicalServices = await medicalServiceRepository.GetListAsync(includeDetails: true);
             var departments = await departmentRepository.GetListAsync(includeDetails: true);
 
-            var medicalServiceIndex = 0;
+            var cardiology = departments.First(d => d.Name == "Cardiology");
+            var radiology = departments.First(d => d.Name == "Radiology");
+            var emergency = departments.First(d => d.Name == "Emergency");
+            var orthopedics = departments.First(d => d.Name == "Orthopedics");
+            var pediatrics = departments.First(d => d.Name == "Pediatrics");
 
-            foreach (var department in departments)
-            {
-                if (medicalServiceIndex >= medicalServices.Count)
-                {
-                    medicalServiceIndex = 0;
-                }
+            var cardiologyConsult = medicalServices.First(ms => ms.Name == "Cardiology Consultation");
+            var xray = medicalServices.First(ms => ms.Name == "X-Ray");
+            var roomVisit = medicalServices.First(ms => ms.Name == "Emergency Room Visit");
+            var physical = medicalServices.First(ms => ms.Name == "Physical Therapy Assessment");
+            var ultrasound = medicalServices.First(ms => ms.Name == "Obstetrics Ultrasound");
+            var radiologyReview = medicalServices.First(ms => ms.Name == "Radiology Review");
+            var nutrition = medicalServices.First(ms => ms.Name == "Nutrition Consultation");
+            var examination = medicalServices.First(ms => ms.Name == "Examination");
 
-                var service = medicalServices[medicalServiceIndex];
+            //cardiologyConsultation
+            await medicalServiceManager.UpdateAsync(cardiologyConsult.Id, cardiologyConsult.Name,
+                cardiologyConsult.Cost,
+                cardiologyConsult.Duration, cardiologyConsult.ServiceCreatedAt, [cardiology.Name]);
 
-                service.AddDepartment(department.Id);
-                await medicalServiceRepository.UpdateAsync(service, true);
-                medicalServiceIndex++;
-            }
+            //Xray
+            await medicalServiceManager.UpdateAsync(xray.Id, xray.Name, xray.Cost,
+                xray.Duration, xray.ServiceCreatedAt, [radiology.Name, emergency.Name]);
+
+            //roomVisit
+            await medicalServiceManager.UpdateAsync(roomVisit.Id, roomVisit.Name, roomVisit.Cost,
+                roomVisit.Duration, roomVisit.ServiceCreatedAt, [emergency.Name]);
+
+            //physicalTherapy
+            await medicalServiceManager.UpdateAsync(physical.Id, physical.Name, physical.Cost,
+                physical.Duration, physical.ServiceCreatedAt, [orthopedics.Name, emergency.Name]);
+
+            //ultrasound
+            await medicalServiceManager.UpdateAsync(ultrasound.Id, ultrasound.Name, ultrasound.Cost,
+                ultrasound.Duration, ultrasound.ServiceCreatedAt, [radiology.Name, emergency.Name, cardiology.Name]);
+
+            //radiologyReview
+            await medicalServiceManager.UpdateAsync(radiologyReview.Id, radiologyReview.Name, radiologyReview.Cost,
+                radiologyReview.Duration, radiologyReview.ServiceCreatedAt,
+                [radiology.Name, emergency.Name, cardiology.Name]);
+
+            //nutrition
+            await medicalServiceManager.UpdateAsync(nutrition.Id, nutrition.Name, nutrition.Cost,
+                nutrition.Duration, nutrition.ServiceCreatedAt, [emergency.Name, cardiology.Name]);
+
+            //examination
+            await medicalServiceManager.UpdateAsync(examination.Id, examination.Name, examination.Cost,
+                examination.Duration, examination.ServiceCreatedAt,
+                [emergency.Name, cardiology.Name, pediatrics.Name, orthopedics.Name, radiology.Name]);
         }
 
         private async Task SeedProtocolMedicalService()
@@ -636,7 +671,7 @@ namespace Pusula.Training.HealthCare
                 city.Id,
                 district.District.Id,
                 titles.First(t => t.TitleName == "Dr.").Id,
-                departments[0].Id,
+                departments.First(x => x.Name == "Cardiology").Id,
                 "Arif",
                 "Yılmaz",
                 "12345678901",
@@ -652,7 +687,7 @@ namespace Pusula.Training.HealthCare
                 city.Id,
                 district.District.Id,
                 titles.First(t => t.TitleName == "Dr.").Id,
-                departments[0].Id,
+                departments.First(x => x.Name == "Cardiology").Id,
                 "Fatma",
                 "Kara",
                 "98765432109",
@@ -668,7 +703,7 @@ namespace Pusula.Training.HealthCare
                 city.Id,
                 district.District.Id,
                 titles.First(t => t.TitleName == "Dr.").Id,
-                departments[0].Id,
+                departments.First(x => x.Name == "Radiology").Id,
                 "Mehmet",
                 "Çelik",
                 "12309876543",
@@ -684,7 +719,7 @@ namespace Pusula.Training.HealthCare
                 city.Id,
                 district.District.Id,
                 titles.First(t => t.TitleName == "Prof.").Id,
-                departments[1].Id,
+                departments.First(x => x.Name == "Emergency").Id,
                 "Merve",
                 "Şahin",
                 "23456789012",
@@ -700,7 +735,7 @@ namespace Pusula.Training.HealthCare
                 city.Id,
                 district.District.Id,
                 titles.First(t => t.TitleName == "Prof.").Id,
-                departments[1].Id,
+                departments.First(x => x.Name == "Emergency").Id,
                 "Zeynep",
                 "Demir",
                 "45678901234",
@@ -716,7 +751,7 @@ namespace Pusula.Training.HealthCare
                 city.Id,
                 district.District.Id,
                 titles.First(t => t.TitleName == "Yrd. Doç.").Id,
-                departments[3].Id,
+                departments.First(x => x.Name == "Radiology").Id,
                 "Ahmet",
                 "Aksoy",
                 "56789012345",
@@ -732,7 +767,7 @@ namespace Pusula.Training.HealthCare
                 city.Id,
                 district.District.Id,
                 titles.First(t => t.TitleName == "Dr.").Id,
-                departments[2].Id,
+                departments.First(x => x.Name == "Cardiology").Id,
                 "Elif",
                 "Çelik",
                 "67890123456",
@@ -748,7 +783,7 @@ namespace Pusula.Training.HealthCare
                 city.Id,
                 district.District.Id,
                 titles.First(t => t.TitleName == "Prof.").Id,
-                departments[4].Id,
+                departments.First(x => x.Name == "Orthopedics").Id,
                 "Mehmet",
                 "Güneş",
                 "78901234567",
@@ -764,7 +799,7 @@ namespace Pusula.Training.HealthCare
                 city.Id,
                 district.District.Id,
                 titles.First(t => t.TitleName == "Yrd. Doç.").Id,
-                departments[5].Id,
+                departments.First(x => x.Name == "Oncology").Id,
                 "Ayşe",
                 "Yıldız",
                 "89012345678",
@@ -1184,6 +1219,47 @@ namespace Pusula.Training.HealthCare
             await backgroundRepository.InsertAsync(background1, true);
             await backgroundRepository.InsertAsync(background2, true);
             await backgroundRepository.InsertAsync(background3, true);
+        }
+        
+        private async Task SeedPhysicalFindings()
+        {
+            if (await examinationRepository.GetCountAsync() == 0)
+            {
+                return;
+            }
+
+            var examinations = await examinationRepository.GetListAsync();
+
+            var physicalFinding1 = new PhysicalFinding(
+                id: Guid.NewGuid(),
+                examinationId: examinations[0].Id,
+                weight: 50,
+                height: 165,
+                bodyTemperature: 37,
+                pulse: 100
+            );
+
+            var physicalFinding2 = new PhysicalFinding(
+                id: Guid.NewGuid(),
+                examinationId: examinations[1].Id,
+                weight: 50,
+                vki: 1,
+                kbs: 3,
+                spo2: 1
+            );
+
+            var physicalFinding3 = new PhysicalFinding(
+                id: Guid.NewGuid(),
+                examinationId: examinations[2].Id,
+                weight: 150,
+                height: 195,
+                vya: 2,
+                kbd: 2
+            );
+
+            await physicalFindingRepository.InsertAsync(physicalFinding1, true);
+            await physicalFindingRepository.InsertAsync(physicalFinding2, true);
+            await physicalFindingRepository.InsertAsync(physicalFinding3, true);
         }
     }
 }

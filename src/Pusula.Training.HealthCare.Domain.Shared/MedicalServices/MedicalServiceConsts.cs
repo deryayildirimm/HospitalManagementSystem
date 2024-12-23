@@ -5,10 +5,15 @@ namespace Pusula.Training.HealthCare.MedicalServices
     public static class MedicalServiceConsts
     {
         private const string DefaultSorting = "{0}Name asc";
+        private const string DefaultDoctorSorting = "{0}FirstName asc";
 
         public static string GetDefaultSorting(bool withEntityName)
         {
             return string.Format(DefaultSorting, withEntityName ? "MedicalService." : string.Empty);
+        }
+        public static string GetDefaultDoctorSorting(bool withEntityName)
+        {
+            return string.Format(DefaultDoctorSorting, withEntityName ? "MedicalService." : string.Empty);
         }
         
         public const int NameMaxLength = 128;

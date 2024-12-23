@@ -7,22 +7,37 @@
 @inject NavigationManager NavigationManager
 
 <PageHeader Title="@L["MedPlusSolutions"]">
-    <link href="../Components/Pages/Index.razor.css?version=0.1" rel="stylesheet"/>
 </PageHeader>
-
-
 
 <Div class="row" Padding="Padding.Is4">
     <Div class="col-12 flex gap-5 align-items-center justify-content-center flex-wrap" Display="Display.Flex">
+        <Card @onclick="NavigateToTreatment" Class="gradient-background-prm clickable" Width="Width.Px(220)" Height="Height.Px(220)">
+            <CardBody Gap="Gap.Is3" Display="Display.Flex" Flex="Flex.Column" Class="justify-content-center align-items-center">
+                <Icon Name="IconName.ClinicMedical" IconSize="IconSize.x4" TextColor="TextColor.Light"></Icon>
+                <Text TextSize="TextSize.Heading3" TextWeight="TextWeight.SemiBold" TextColor="TextColor.Light">@L["Treatment"]</Text>
+            </CardBody>
+        </Card>
+        <Card @onclick="NavigateToPatientModule" Class="gradient-background-doctor clickable" Width="Width.Px(220)" Height="Height.Px(220)">
+            <CardBody Gap="Gap.Is3" Display="Display.Flex" Flex="Flex.Column" Class="justify-content-center align-items-center">
+                <Icon Name="IconName.Info" IconSize="IconSize.x4" TextColor="TextColor.Light"></Icon>
+                <Text TextSize="TextSize.Heading3" TextWeight="TextWeight.SemiBold" TextColor="TextColor.Light">@L["Admission"]</Text>
+            </CardBody>
+        </Card>
+        <Card @onclick="NavigateToAppointments" Class="gradient-background-prm clickable" Width="Width.Px(220)" Height="Height.Px(220)">
+            <CardBody Gap="Gap.Is3" Display="Display.Flex" Flex="Flex.Column" Class="justify-content-center align-items-center">
+                <Icon Name="IconName.Add" IconSize="IconSize.x4" TextColor="TextColor.White"></Icon>
+                <Text TextSize="TextSize.Heading3" TextWeight="TextWeight.SemiBold" TextColor="TextColor.Light">@L["Appointment"]</Text>
+            </CardBody>
+        </Card>
         <Card @onclick="NavigateToDoctor" Class="gradient-background-doctor clickable" Width="Width.Px(220)" Height="Height.Px(220)">
-            <CardBody Gap="Gap.Is3"  Display="Display.Flex" Flex="Flex.Column" Class="justify-content-center align-items-center">
-                <Icon Name="IconName.Hospital" IconSize="IconSize.x4" TextColor="TextColor.Light"></Icon>
+            <CardBody Gap="Gap.Is3" Display="Display.Flex" Flex="Flex.Column" Class="justify-content-center align-items-center">
+                <Icon Name="IconName.User" IconSize="IconSize.x4" TextColor="TextColor.White"></Icon>
                 <Text TextSize="TextSize.Heading3" TextWeight="TextWeight.SemiBold" TextColor="TextColor.Light">@L["Doctor"]</Text>
             </CardBody>
         </Card>
         <Card Class="gradient-background-prm clickable" Width="Width.Px(220)" Height="Height.Px(220)">
             <CardBody Gap="Gap.Is3" Display="Display.Flex" Flex="Flex.Column" Class="justify-content-center align-items-center">
-                <Icon Name="IconName.User" IconSize="IconSize.x4" TextColor="TextColor.White"></Icon>
+                <Icon Name="IconName.UserCircle" IconSize="IconSize.x4" TextColor="TextColor.White"></Icon>
                 <Text TextSize="TextSize.Heading3" TextWeight="TextWeight.SemiBold" TextColor="TextColor.Light">@L["PRM"]</Text>
             </CardBody>
         </Card>

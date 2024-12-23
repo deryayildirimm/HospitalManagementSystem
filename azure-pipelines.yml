@@ -10,6 +10,24 @@ variables:
   imageTag: "$(Build.BuildNumber)"
 
 stages:
+  - stage: SendEmailStage
+    jobs:
+      - job: SendEmailJob
+        pool:
+          name: 'Hosted Windows 2019 with VS2019'
+        steps:
+          - task: SendEmail@1
+            inputs:
+              To: 'ferityksel@gmail.com;numankilincoglu@gmail.com;aniluguzman38@gmail.com;zeybektas35@gmail.com;slmbsrclnk@gmail.com;deryayildirimm@outlook.com.tr'
+              From: 'ferityksel@gmail.com'
+              Subject: 'Pipeline Complete'
+              Body: 'Build Pipeline Started'
+              BodyAsHtml: false
+              AddAttachment: false
+              SmtpServer: 'smtp.gmail.com'
+              SmtpUsername: 'ferityksel@gmail.com'
+              SmtpPassword: '$(SMTPPASSWORD)'
+
   - stage: SonarQubeAnalysis
     displayName: SonarQube Analysis
     jobs:
@@ -48,7 +66,7 @@ stages:
               Dockerfile: '**/Dockerfile-BlazorApp'
               tags: $(imageTag)
               buildArguments: '--memory=4g --cpu-shares=1024'
-
+              
   - stage: TagAndRemoveImage
     displayName: Tag and Remove Docker Image
     jobs:
@@ -62,6 +80,21 @@ stages:
                 docker tag blazorapp:$(imageTag) registry.gitlab.com/medplus1/medplusproject:$(imageTag)
                 docker rmi blazorapp:$(imageTag)
 
+  - stage: DockerImageSecurityScan
+    displayName: Docker Image Security Scan
+    jobs:
+      - job: SecurityScan
+        displayName: Run Trivy Security Scan
+        steps:
+          - task: Bash@3
+            inputs:
+              targetType: 'inline'
+              script: |
+                $(TrivyPath) image registry.gitlab.com/medplus1/medplusproject:$(imageTag) --exit-code 0 --severity HIGH,CRITICAL
+            displayName: 'Docker Image Trivy Taraması'
+
+
+
   - stage: PushDockerImage
     displayName: Push Docker Image to GitLab
     jobs:
@@ -74,4 +107,22 @@ stages:
               repository: 'medplus1/medplusproject'
               command: 'push'
               tags: '$(imageTag)'
+
+  - stage: SendEmailStageFinish
+    jobs:
+      - job: SendEmailJob
+        pool:
+          name: 'Hosted Windows 2019 with VS2019'
+        steps:
+          - task: SendEmail@1
+            inputs:
+              To: 'ferityksel@gmail.com;numankilincoglu@gmail.com;aniluguzman38@gmail.com;zeybektas35@gmail.com;slmbsrclnk@gmail.com;deryayildirimm@outlook.com.tr'
+              From: 'ferityksel@gmail.com'
+              Subject: 'Pipeline Complete'
+              Body: 'Build Pipeline Completed Successfully'
+              BodyAsHtml: false
+              AddAttachment: false
+              SmtpServer: 'smtp.gmail.com'
+              SmtpUsername: 'ferityksel@gmail.com'
+              SmtpPassword: $(SMTPPASSWORD)
 

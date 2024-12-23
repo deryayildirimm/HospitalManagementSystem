@@ -31,6 +31,7 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
             true, 
             true, 
             true,
+            true,
             true), filterText, dateMin, dateMax, complaint, story, protocolId);
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? ExaminationConsts.GetDefaultSorting(false) : sorting);
 
@@ -62,7 +63,7 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         CancellationToken cancellationToken = default)
     {
         var query = (await GetQueryForNavigationPropertiesAsync(includeExaminationIcd: true))
-            .SelectMany(e => e.ExaminationIcd);
+            .SelectMany(e => e.ExaminationIcds);
         
         query = ApplyFilterForExaminationIcd(query, startDate, endDate, filterText, codeNumber, detail);
             
@@ -88,7 +89,7 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         CancellationToken cancellationToken = default)
     {
         var query = (await GetQueryForNavigationPropertiesAsync(includeExaminationIcd: true))
-            .SelectMany(e => e.ExaminationIcd);
+            .SelectMany(e => e.ExaminationIcds);
 
         query = ApplyFilterForExaminationIcd(query, startDate, endDate, filterText, codeNumber, detail);
             
@@ -111,9 +112,11 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
             includeProtocol: true,
             includeFamilyHistory: true,
             includeBackground: true,
+            includePhysicalFindings: true,
             includeExaminationIcd: true);
 
-        return await query.FirstOrDefaultAsync(e => e.Id == id, cancellationToken: GetCancellationToken(cancellationToken));
+        return await query.FirstOrDefaultAsync(e => e.Id == id,
+            cancellationToken: GetCancellationToken(cancellationToken));
     }
 
     public virtual async Task<Examination?> GetByProtocolIdAsync(
@@ -123,8 +126,29 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         var query = ApplyFilter(await GetQueryForNavigationPropertiesAsync(
             includeProtocol: true,
             includeFamilyHistory: true,
-            includeBackground: true), protocolId: protocolId);
+            includeBackground: true,
+            includePhysicalFindings: true,
+            includeExaminationIcd: true), protocolId: protocolId);
         return await query.FirstOrDefaultAsync(GetCancellationToken(cancellationToken));
+    }
+    
+    public virtual async Task UpdateExaminationIcdsAsync(Guid examinationId, List<Guid> icdIds, CancellationToken cancellationToken = default)
+    {
+        var dbContext = await GetDbContextAsync();
+        var existingExaminationIcds = await dbContext.Set<ExaminationIcd>()
+            .Where(ei => ei.ExaminationId == examinationId)
+            .ToListAsync(cancellationToken);
+
+        var toRemove = existingExaminationIcds.Where(ei => !icdIds.Contains(ei.IcdId)).ToList();
+        dbContext.Set<ExaminationIcd>().RemoveRange(toRemove);
+
+        var toAdd = icdIds
+            .Where(icdId => !existingExaminationIcds.Any(ei => ei.IcdId == icdId))
+            .Select(icdId => new ExaminationIcd(examinationId, icdId))
+            .ToList();
+        await dbContext.Set<ExaminationIcd>().AddRangeAsync(toAdd, cancellationToken);
+
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
     
     #region NavigationQueryCreator
@@ -133,6 +157,7 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
         bool includeProtocol = false,
         bool includeFamilyHistory = false,
         bool includeBackground = false,
+        bool includePhysicalFindings = false,
         bool includeExaminationIcd = false
         )
         =>
@@ -140,7 +165,8 @@ public class EfCoreExaminationRepository(IDbContextProvider<HealthCareDbContext>
             .IncludeIf(includeProtocol, examination => examination.Protocol)
             .IncludeIf(includeFamilyHistory, examination => examination.FamilyHistory)
             .IncludeIf(includeBackground, examination => examination.Background)
-            .IncludeIf(includeExaminationIcd, examination => examination.ExaminationIcd);
+            .IncludeIf(includePhysicalFindings, examination => examination.PhysicalFinding)
+            .IncludeIf(includeExaminationIcd, examination => examination.ExaminationIcds);
 
     #endregion
 

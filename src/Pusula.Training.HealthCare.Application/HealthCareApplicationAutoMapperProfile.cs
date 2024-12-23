@@ -25,6 +25,7 @@ using Pusula.Training.HealthCare.Treatment.Icds;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Insurances;
 using Pusula.Training.HealthCare.Restrictions;
+using Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings;
 
 namespace Pusula.Training.HealthCare;
 
@@ -73,8 +74,9 @@ public class HealthCareApplicationAutoMapperProfile : Profile
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
         CreateMap<MedicalService, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
-
-
+        CreateMap<MedicalServiceCacheItem, MedicalServiceDto>();
+        CreateMap<MedicalService, MedicalServiceCacheItem>();
+        
         CreateMap<Title, TitleDto>();
         CreateMap<TitleDto, TitleUpdateDto>();
         CreateMap<Title, LookupDto<Guid>>()
@@ -83,18 +85,26 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Doctor, DoctorDto>();
         CreateMap<Doctor, DoctorExcelDto>();
         CreateMap<DoctorDto, DoctorUpdateDto>();
+        CreateMap<DoctorWithDetails, DoctorWithDetailsDto>();
+        CreateMap<DoctorWithDetailsDto, DoctorLookupDto>();
         CreateMap<DoctorWithNavigationPropertiesDto, DoctorUpdateDto>();
         CreateMap<DoctorWithNavigationProperties, DoctorWithNavigationPropertiesDto>();
         CreateMap<DoctorDto, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.FirstName + " " + src.LastName));
-
-        CreateMap<DoctorLeave, DoctorLeaveDto>();
-        CreateMap<DoctorLeaveDto, DoctorLeaveUpdateDto>();
+        CreateMap<DoctorWithDetailsDto, DoctorLookupDto>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.DepartmentId, opt => opt.MapFrom(src => src.DepartmentId))
+            .ForMember(dest => dest.DisplayName,
+                opt => opt.MapFrom(src => $"{src.TitleName} {src.FirstName} {src.LastName}"));
         CreateMap<DoctorWithNavigationPropertiesDto, DoctorLookupDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Doctor.Id))
             .ForMember(dest => dest.DepartmentId, opt => opt.MapFrom(src => src.Doctor.DepartmentId))
             .ForMember(dest => dest.DisplayName,
                 opt => opt.MapFrom(src => $"{src.Doctor.FirstName} {src.Doctor.LastName}"));
+        
+        CreateMap<DoctorLeave, DoctorLeaveDto>();
+        CreateMap<DoctorLeaveDto, DoctorLeaveUpdateDto>();
+
         CreateMap<DoctorLeave, DoctorLeaveExcelDto>()
             .ForMember(dest => dest.DoctorName, opt => opt.MapFrom(src =>
                 $"{src.Doctor.Title.TitleName} {src.Doctor.FirstName} {src.Doctor.LastName}"))
@@ -140,6 +150,11 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Background, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
 
+        CreateMap<PhysicalFinding, PhysicalFindingDto>();
+        CreateMap<PhysicalFindingDto, PhysicalFindingUpdateDto>();
+        CreateMap<PhysicalFinding, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Id.ToString()));
+        
         CreateMap<Examination, ExaminationDto>();
         CreateMap<ExaminationDto, ExaminationUpdateDto>();
         CreateMap<Examination, LookupDto<Guid>>()
@@ -151,7 +166,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Appointment, AppointmentDto>();
         //CreateMap<AppointmentDto, AppointmentUpdateDto>();
         CreateMap<AppointmentWithNavigationProperties, AppointmentWithNavigationPropertiesDto>();
-        CreateMap<GroupedAppointmentCount, GroupedAppointmentCountDto>();
+        CreateMap<AppointmentStatistic, AppointmentStatisticDto>();
         CreateMap<AppointmentDayLookupDto, AppointmentDayItemLookupDto>()
             .ForMember(dest => dest.IsSelected, opt => opt.MapFrom(src => false));
 
@@ -202,6 +217,8 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<AppointmentType, AppointmentTypeDto>();
         CreateMap<AppointmentTypeDto, AppointmentTypeUpdateDto>();
         CreateMap<AppointmentType, AppointmentTypeExcelDto>();
+        CreateMap<AppointmentTypeCacheItem, AppointmentTypeDto>();
+        CreateMap<AppointmentType, AppointmentTypeCacheItem>();
         CreateMap<AppointmentType, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
 

@@ -1,0 +1,306 @@
+@page "/doctors/leaves"
+
+@attribute [Authorize(HealthCarePermissions.DoctorLeaves.Default)]
+@using Pusula.Training.HealthCare.Blazor.Services
+@using Pusula.Training.HealthCare.Departments
+@using Pusula.Training.HealthCare.DoctorLeaves
+@using Pusula.Training.HealthCare.Doctors
+
+@using Pusula.Training.HealthCare.Localization
+@using Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.Shared
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Volo.Abp.Http.Client
+@using SelectionType = Syncfusion.Blazor.Grids.SelectionType
+@using Syncfusion.Blazor.SplitButtons
+
+@inherits HealthCareComponentBase
+
+@inject IDoctorLeaveAppService DoctorLeaveAppService
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject IDoctorsAppService DoctorsAppService
+@inject ILookupAppService LookupAppService
+@inject NavigationManager NavigationManager
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Notifications
+
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home"/>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["DoctorLeaves"]/>
+    </BreadcrumbItems>
+</SfBreadcrumb>
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["DoctorLeaves"]">
+</PageHeader>
+
+
+@* ************************* SEARCH ************************* *@
+<div class="row py-3 px-2">
+    <div class="col-12 border-1 bg-white rounded-1 p-4">
+        <div class="row">
+            <div class="col-3 my-1">
+                <h6>@L["Search"]</h6>
+                <SfTextBox @bind-Value="@InputFilter.FilterText" Placeholder="@L["Search"]"></SfTextBox>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["StartDate"]</h6>
+                <SfDatePicker TValue="DateTime?" @bind-Value="@InputFilter.StartDate" Placeholder="@L["StartDate"]"></SfDatePicker>
+            </div>
+            <div class="col-3 my-1">
+                <h6>@L["EndDate"]</h6>
+                <SfDatePicker TValue="DateTime?" @bind-Value="@InputFilter.EndDate" Placeholder="@L["EndDate"]"></SfDatePicker>
+            </div>
+            <div class="col-3 my-1">
+                <div>
+                    <h6>@L["LeaveType"]</h6>
+                    <SfDropDownList TItem="KeyValuePair<string, EnumLeaveType>"
+                                    TValue="EnumLeaveType?"
+                                    @bind-Value="InputFilter.LeaveType"
+                                    DataSource="@LeaveTypeCollection">
+                        <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+            <div class="col-3 my-1">
+                <div>
+                    <h6>@L["Departments"]</h6>
+                    <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                    @bind-Value="InputFilter.DepartmentId"
+                                    DataSource="@DepartmentsCollection">
+                        <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid?" OnValueSelect="@OnDepartmentChange"></DropDownListEvents>
+
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+            <div class="col-3 my-1">
+                <div>
+                    <h6>@L["Doctors"]</h6>
+                    <SfDropDownList
+                        Readonly="@(!IsDoctorsEnabled)"
+                        TValue="Guid?"
+                        TItem="DoctorLookupDto"
+                        Placeholder="@L["Select"]"
+                        AllowFiltering="true"
+                        DataSource="@DoctorsCollection"
+                        @bind-Value="InputFilter.DoctorId"
+                        Width="100%">
+                        <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                    </SfDropDownList>
+                </div>
+            </div>
+        </div>
+        <div class="mt-1">
+            <SfButton CssClass="e-primary" OnClick="GetLeavesAsync">
+                <SfIcon IconCss="e-icons e-search"></SfIcon> @L["Search"]
+            </SfButton>
+            <SfButton CssClass="e-danger" OnClick="ClearFilters">
+                <SfIcon IconCss="e-icons e-filter-clear"></SfIcon> @L["ClearFilters"]
+            </SfButton>
+        </div>
+
+    </div>
+</div>
+
+@* ************************* GRID ************************* *@
+<div class="row py-3 px-2">
+    <div class="col-12 border-1 bg-white rounded-1 p-4">
+        <SfGrid
+            @ref="Grid"
+            TValue="DoctorLeaveDto"
+            AllowPaging="true"
+            AllowSorting="true"
+            Query="@FilterQuery"
+            Toolbar="@ToolbarItems">
+            <GridSelectionSettings Type="SelectionType.Multiple"></GridSelectionSettings>
+            <SfDataManager
+                AdaptorInstance="@typeof(DoctorLeaveAdaptor)"
+                Adaptor="Adaptors.CustomAdaptor">
+            </SfDataManager>
+            <GridEvents
+                TValue="DoctorLeaveDto"
+                RowEditing="RowEditingHandler"
+                RowSelected="RowSelectHandler"
+                OnToolbarClick="ToolbarClickHandler">
+            </GridEvents>
+            <GridEditSettings
+                AllowAdding="true"
+                AllowEditing="true"
+                AllowDeleting="@CanDeleteLeave">
+            </GridEditSettings>
+            <GridPageSettings
+                PageSize="@PageSize">
+            </GridPageSettings>
+            <GridColumns>
+                <GridColumn Format="dd/MM/yyyy" HeaderText="@L["Name"]" TextAlign="TextAlign.Left" Width="120">
+                    <Template>
+                        @{
+                            var leaveDto = (context as DoctorLeaveDto);
+                            <div>@($"{leaveDto?.Doctor.Title.TitleName} {leaveDto?.Doctor.FirstName} {leaveDto?.Doctor.LastName}")</div>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Format="dd/MM/yyyy" HeaderText="@L["Department"]" TextAlign="TextAlign.Left" Width="120">
+                    <Template>
+                        @{
+                            var leaveDto = (context as DoctorLeaveDto);
+                            <div>@(leaveDto?.Doctor.Department.Name)</div>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="StartDate" Format="dd/MM/yyyy" HeaderText="@L["StartDate"]" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                <GridColumn Field="EndDate" Format="dd/MM/yyyy" HeaderText="@L["EndDate"]" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+                <GridColumn HeaderText="@L["LeaveType"]" Width="110">
+                    <Template Context="context">
+                        @{
+                            var cssClasses = "status-div text-white text-center ";
+                            cssClasses += GetColorClass(((DoctorLeaveDto)context).LeaveType.ToString());
+                        }
+
+                        <div class="@cssClasses ">
+                            @($"{((DoctorLeaveDto)context).LeaveType}")
+                        </div>
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="Reason" HeaderText="@L["Reason"]" TextAlign="TextAlign.Left" Width="120"></GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+@* Create Modal *@
+<SfDialog Width="550px" CssClass="p-3" IsModal="true" Header="@L["NewLeave"]"
+          ShowCloseIcon="true" Visible="@IsAddDialogVisible">
+    <DialogEvents OnClose="@CloseAddModal"></DialogEvents>
+    <EditForm Model="@NewLeave" OnSubmit="CreateLeaveAsync">
+        <DataAnnotationsValidator/>
+        <div class="mx-3 mb-2">
+            <h6>@L["Departments"] *</h6>
+            <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid"
+                            @bind-Value="NewLeaveDepartmentId"
+                            DataSource="@DepartmentsCollection">
+                <DropDownListEvents TItem="LookupDto<Guid>" TValue="Guid" OnValueSelect="@OnAddDepartmentChange"></DropDownListEvents>
+                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+        <div class="mx-3 mb-2">
+            <h6>@L["Doctors"] *</h6>
+            <SfDropDownList
+                Readonly="@(!IsNewDoctorsEnabled)"
+                TValue="Guid"
+                TItem="DoctorLookupDto"
+                Placeholder="@L["Select"]"
+                AllowFiltering="true"
+                DataSource="@DoctorsAddCollection"
+                @bind-Value="NewLeave.DoctorId"
+                Width="100%">
+                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                <ValidationMessage For="@(() => NewLeave.DoctorId)"/>
+            </SfDropDownList>
+        </div>
+        <div class="mx-3 mb-2">
+            <h6>@L["LeaveType"] *</h6>
+            <div>
+                <SfDropDownList
+                    TItem="KeyValuePair<string, EnumLeaveType>"
+                    TValue="EnumLeaveType"
+                    @bind-Value="NewLeave.EnumLeaveType"
+                    DataSource="@LeaveTypeCollection">
+                    <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+                </SfDropDownList>
+                <ValidationMessage For="@(() => NewLeave.EnumLeaveType)"/>
+            </div>
+        </div>
+        <div class="mx-3 mb-2">
+            <h6>@L["StartDate"] *</h6>
+            <SfDateTimePicker @bind-Value="@(NewLeave.StartDate)"></SfDateTimePicker>
+            <ValidationMessage For="@(() => NewLeave.StartDate)"/>
+        </div>
+        <div class="mx-3 mb-2">
+            <h6>@L["EndDate"] *</h6>
+            <SfDateTimePicker @bind-Value="@(NewLeave.EndDate)"></SfDateTimePicker>
+            <ValidationMessage For="@(() => NewLeave.EndDate)"/>
+        </div>
+        <div class="mx-3 mb-2">
+            <h6>@L["Reason"]</h6>
+            <SfTextBox @bind-Value="@NewLeave.Reason"></SfTextBox>
+            <ValidationMessage For="@(() => NewLeave.Reason)"/>
+        </div>
+        <div class="mx-3 mb-2">
+            <SfProgressButton type="submit" CssClass="e-success e-outline e-custom" Content="Submit">
+                <ProgressButtonSpinSettings Position="SpinPosition.Right" Width="20">
+                    <SpinTemplate>
+                        <div class="template"></div>
+                    </SpinTemplate>
+                </ProgressButtonSpinSettings>
+            </SfProgressButton>
+            <SfButton type="button" CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="true" @onclick="CloseAddModal"/>
+        </div>
+    </EditForm>
+</SfDialog>
+
+@* Edit Modal *@
+<SfDialog Width="450px" IsModal="true" Header="@L["UpdateLeave"]"
+          ShowCloseIcon="true" Visible="@IsEditDialogVisible">
+    <DialogEvents OnClose="@CloseEditModal"></DialogEvents>
+    <EditForm Model="@EditingLeave" OnValidSubmit="UpdateLeaveAsync">
+        <DataAnnotationsValidator/>
+        <div class="mx-3 mb-2">
+            <h6>@L["LeaveType"]</h6>
+            <div>
+                <SfDropDownList
+                    TItem="KeyValuePair<string, EnumLeaveType>"
+                    TValue="EnumLeaveType"
+                    @bind-Value="EditingLeave.EnumLeaveType"
+                    DataSource="@LeaveTypeCollection">
+                    <DropDownListFieldSettings Text="Key" Value="Value"></DropDownListFieldSettings>
+                </SfDropDownList>
+                <ValidationMessage For="() => (EditingLeave.EnumLeaveType)"/>
+            </div>
+        </div>
+        <div class="mx-3 mb-2">
+            <h6>@L["StartDate"]</h6>
+            <SfDateTimePicker @bind-Value="@(EditingLeave.StartDate)"></SfDateTimePicker>
+        </div>
+        <div class="mx-3 mb-2">
+            <h6>@L["EndDate"]</h6>
+            <SfDateTimePicker @bind-Value="@(EditingLeave.EndDate)"></SfDateTimePicker>
+        </div>
+        <div class="mx-3 mb-2">
+            <h6>@L["Reason"]</h6>
+            <SfTextBox @bind-Value="@EditingLeave.Reason"></SfTextBox>
+        </div>
+        <div class="mx-3 mb-2">
+            <SfProgressButton type="submit" CssClass="e-success e-outline e-custom" Content="Submit">
+                <ProgressButtonSpinSettings Position="SpinPosition.Right" Width="20">
+                    <SpinTemplate>
+                        <div class="template"></div>
+                    </SpinTemplate>
+                </ProgressButtonSpinSettings>
+            </SfProgressButton>
+            <SfButton type="button" CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="true" @onclick="CloseEditModal"/>
+        </div>
+    </EditForm>
+</SfDialog>
+
+<div class="col-lg-12 control-section toast-default-section">
+    <SfToast ID="toast_default"
+             @ref="LeaveToast"
+             Title="@ToastTitle"
+             Content="@ToastContent"
+             CssClass="@ToastCssClass"
+             Timeout="5000"
+             Icon="e-meeting">
+        <ToastPosition X="Right" Y="Top"></ToastPosition>
+        <ToastButtons>
+            <ToastButton Content="@L["Close"]" OnClick="@HideToast"></ToastButton>
+        </ToastButtons>
+    </SfToast>
+</div>

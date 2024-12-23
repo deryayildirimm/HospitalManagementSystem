@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
+using Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings;
 using Volo.Abp.Application.Dtos;
 
 namespace Pusula.Training.HealthCare.Treatment.Examinations;
@@ -20,6 +21,7 @@ public class ExaminationDto : FullAuditedEntityDto<Guid>
     public string? Story { get; set; }
     public BackgroundDto? Background { get; set; }
     public FamilyHistoryDto? FamilyHistory { get; set; }
+    public PhysicalFindingDto? PhysicalFinding { get; set; }
     public List<ExaminationIcdDto> ExaminationIcd { get; set; } = null!;
     [Required]
     public Guid ProtocolId { get; set; }

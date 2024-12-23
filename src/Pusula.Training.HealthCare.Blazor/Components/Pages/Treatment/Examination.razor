@@ -35,121 +35,167 @@
 @if (CurrentExamination == null)
 {
     <EditForm Model="@NewExamination" OnValidSubmit="CreateExaminationAsync">
-        <SfForm>
-            <div class="form-row">
-                <div class="col-md-6 mb-3">
-                    <label>@L["Date"]</label>
-                    <SfDatePicker TValue="DateTime" @bind-Value="@NewExamination.Date" Placeholder="@L["SelectDate"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Complaint"]</label>
-                    <SfTextBox TValue="string" @bind-Value="@NewExamination.Complaint" Placeholder="@L["EnterComplaint"]"
-                               MaxLength="@ExaminationConsts.ComplaintMaxLength">
-                        <TextBoxEvents OnInput="() => ValidateField('Complaint')" />
-                    </SfTextBox>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["StartDate"]</label>
-                    <SfDatePicker TValue="DateTime?" @bind-Value="@NewExamination.StartDate" Placeholder="@L["SelectStartDate"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Story"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@NewExamination.Story" Placeholder="@L["EnterStory"]"
-                               MaxLength="@ExaminationConsts.StoryMaxLength">
-                        <TextBoxEvents OnInput="() => ValidateField('Story')" />
-                    </SfTextBox>
-                </div>
+        <div class="form-row">
+            <div class="col-md-6 mb-3">
+                <label>@L["Date"]</label>
+                <SfDatePicker TValue="DateTime" @bind-Value="@NewExamination.Date" Placeholder="@L["SelectDate"]"/>
             </div>
 
-            <div class="form-row">
-                <h5>@L["FamilyHistory"]</h5>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["MotherDisease"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@NewExamination.FamilyHistory.MotherDisease" Placeholder="@L["EnterMotherDisease"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["FatherDisease"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@NewExamination.FamilyHistory.FatherDisease" Placeholder="@L["EnterFatherDisease"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["SisterDisease"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@NewExamination.FamilyHistory.SisterDisease" Placeholder="@L["EnterSisterDisease"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["BrotherDisease"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@NewExamination.FamilyHistory.BrotherDisease" Placeholder="@L["EnterBrotherDisease"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["AreParentsRelated"]</label>
-                    <SfCheckBox Label="@L["Yes"]" @bind-Checked="@NewExamination.FamilyHistory.AreParentsRelated" TChecked="bool" />
-                </div>
+            <div class="col-md-6 mb-3">
+                <label>@L["Complaint"]</label>
+                <SfTextBox TValue="string" @bind-Value="@NewExamination.Complaint" Placeholder="@L["EnterComplaint"]"
+                           MaxLength="@ExaminationConsts.ComplaintMaxLength">
+                    <TextBoxEvents OnInput="() => ValidateField('Complaint')"/>
+                </SfTextBox>
             </div>
 
-            <div class="form-row">
-                <h5>@L["Background"]</h5>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Allergies"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@NewExamination.Background.Allergies" Placeholder="@L["EnterAllergies"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Medications"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@NewExamination.Background.Medications" Placeholder="@L["EnterMedications"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Habits"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@NewExamination.Background.Habits" Placeholder="@L["EnterHabits"]" />
-                </div>
+            <div class="col-md-6 mb-3">
+                <label>@L["StartDate"]</label>
+                <SfDatePicker TValue="DateTime?" @bind-Value="@NewExamination.StartDate" Placeholder="@L["SelectStartDate"]"/>
             </div>
-            
-            <div class="form-row">
-                <h5>@L["Examination ICD"]</h5>
-                <div class="col-md-6 mb-3">
-                    <label>@L["Select ICD"]</label>
-                    <SfDropDownList TItem="IcdDto" TValue="Guid" DataSource="@IcdList"
-                                    @bind-Value="@SelectedIcdId"
-                                    Placeholder="@L["SelectICD"]">
-                        <DropDownListEvents TItem="IcdDto" TValue="Guid"></DropDownListEvents>
-                        <DropDownListFieldSettings Text="CodeNumber" Value="Id"></DropDownListFieldSettings>
 
-                    </SfDropDownList>
-                    <SfButton CssClass="e-primary" Type="button" Content="@L["Add"]" OnClick="AddIcdToExamination" />
-                </div>
+            <div class="col-md-6 mb-3">
+                <label>@L["Story"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@NewExamination.Story" Placeholder="@L["EnterStory"]"
+                           MaxLength="@ExaminationConsts.StoryMaxLength">
+                    <TextBoxEvents OnInput="() => ValidateField('Story')"/>
+                </SfTextBox>
             </div>
-            
-            <div class="form-row">
-                @if (SelectedIcds.Any())
-                {
+        </div>
+
+        <div class="form-row">
+            <h5>@L["FamilyHistory"]</h5>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["MotherDisease"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@NewExamination.FamilyHistory.MotherDisease" Placeholder="@L["EnterMotherDisease"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["FatherDisease"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@NewExamination.FamilyHistory.FatherDisease" Placeholder="@L["EnterFatherDisease"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["SisterDisease"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@NewExamination.FamilyHistory.SisterDisease" Placeholder="@L["EnterSisterDisease"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["BrotherDisease"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@NewExamination.FamilyHistory.BrotherDisease" Placeholder="@L["EnterBrotherDisease"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["AreParentsRelated"]</label>
+                <SfCheckBox Label="@L["Yes"]" @bind-Checked="@NewExamination.FamilyHistory.AreParentsRelated" TChecked="bool"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <h5>@L["PhysicalFindings"]</h5>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Weight"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@NewExamination.PhysicalFinding.Weight" Placeholder="@L["EnterWeight"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Height"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@NewExamination.PhysicalFinding.Height" Placeholder="@L["EnterHeight"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["BodyTemperature"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@NewExamination.PhysicalFinding.BodyTemperature" Placeholder="@L["EnterBodyTemperature"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Pulse"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@NewExamination.PhysicalFinding.Pulse" Placeholder="@L["EnterPulse"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Vki"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@NewExamination.PhysicalFinding.Vki" Placeholder="@L["EnterVki"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Vya"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@NewExamination.PhysicalFinding.Vya" Placeholder="@L["EnterVya"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Kbs"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@NewExamination.PhysicalFinding.Kbs" Placeholder="@L["EnterKbs"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Kbd"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@NewExamination.PhysicalFinding.Kbd" Placeholder="@L["EnterKbd"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Spo2"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@NewExamination.PhysicalFinding.Spo2" Placeholder="@L["EnterSpo2"]"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <h5>@L["Background"]</h5>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Allergies"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@NewExamination.Background.Allergies" Placeholder="@L["EnterAllergies"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Medications"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@NewExamination.Background.Medications" Placeholder="@L["EnterMedications"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Habits"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@NewExamination.Background.Habits" Placeholder="@L["EnterHabits"]"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <h5>@L["Examination ICD"]</h5>
+            <div class="col-md-6 mb-3">
+                <label>@L["Select ICD"]</label>
+                <SfDropDownList TItem="IcdDto" TValue="Guid" DataSource="@IcdList"
+                                @bind-Value="@SelectedIcdId"
+                                Placeholder="@L["SelectICD"]">
+                    <DropDownListEvents TItem="IcdDto" TValue="Guid"></DropDownListEvents>
+                    <DropDownListFieldSettings Text="CodeNumber" Value="Id"></DropDownListFieldSettings>
+
+                </SfDropDownList>
+                <SfButton CssClass="e-primary" Type="button" Content="@L["Add"]" OnClick="AddIcdToExamination"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            @if (SelectedIcds.Any())
+            {
                 <div class="col-md-12">
                     <h6>@L["Selected ICDs"]</h6>
                     <ul>
                         @foreach (var icd in SelectedIcds)
                         {
-                        <li>
-                            @icd.CodeNumber - @icd.Detail
-                            <SfButton CssClass="e-danger e-small" Content="@L["Remove"]" OnClick="@(() => RemoveIcd(icd.Id))" />
-                        </li>
+                            <li>
+                                @icd.CodeNumber - @icd.Detail
+                                <SfButton CssClass="e-danger e-small" Content="@L["Remove"]" OnClick="@(() => RemoveIcd(icd.Id))"/>
+                            </li>
                         }
                     </ul>
                 </div>
-                }
-            </div>
-
-        </SfForm>
+            }
+        </div>
 
         <div class="button-row">
-            <SfButton CssClass="e-danger" Type="button" Content="@L["Cancel"]" IsPrimary="false" OnClick="CancelAsync" />
-            <SfButton CssClass="e-primary" Type="submit" Content="@L["Submit"]" IsPrimary="true" />
+            <SfButton CssClass="e-danger" Type="button" Content="@L["Cancel"]" IsPrimary="false" OnClick="CancelAsync"/>
+            <SfButton CssClass="e-primary" Type="submit" Content="@L["Submit"]" IsPrimary="true"/>
         </div>
     </EditForm>
 }
@@ -159,121 +205,167 @@
 @if (CurrentExamination != null)
 {
     <EditForm Model="@EditingExamination" OnValidSubmit="UpdateExaminationAsync">
-        <SfForm>
-            <div class="form-row">
-                <div class="col-md-6 mb-3">
-                    <label>@L["Date"]</label>
-                    <SfDatePicker TValue="DateTime" @bind-Value="@EditingExamination.Date" Placeholder="@L["SelectDate"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Complaint"]</label>
-                    <SfTextBox TValue="string" @bind-Value="@EditingExamination.Complaint" Placeholder="@L["EnterComplaint"]"
-                               MaxLength="@ExaminationConsts.ComplaintMaxLength">
-                        <TextBoxEvents OnInput="() => ValidateField('Complaint')" />
-                    </SfTextBox>
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["StartDate"]</label>
-                    <SfDatePicker TValue="DateTime?" @bind-Value="@EditingExamination.StartDate" Placeholder="@L["SelectStartDate"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Story"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@EditingExamination.Story" Placeholder="@L["EnterStory"]"
-                               MaxLength="@ExaminationConsts.StoryMaxLength">
-                        <TextBoxEvents OnInput="() => ValidateField('Story')" />
-                    </SfTextBox>
-                </div>
+        <div class="form-row">
+            <div class="col-md-6 mb-3">
+                <label>@L["Date"]</label>
+                <SfDatePicker TValue="DateTime" @bind-Value="@EditingExamination.Date" Placeholder="@L["SelectDate"]"/>
             </div>
 
-            <div class="form-row">
-                <h5>@L["FamilyHistory"]</h5>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["MotherDisease"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@EditingExamination.FamilyHistory.MotherDisease" Placeholder="@L["EnterMotherDisease"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["FatherDisease"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@EditingExamination.FamilyHistory.FatherDisease" Placeholder="@L["EnterFatherDisease"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["SisterDisease"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@EditingExamination.FamilyHistory.SisterDisease" Placeholder="@L["EnterSisterDisease"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["BrotherDisease"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@EditingExamination.FamilyHistory.BrotherDisease" Placeholder="@L["EnterBrotherDisease"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["AreParentsRelated"]</label>
-                    <SfCheckBox Label="@L["Yes"]" @bind-Checked="@EditingExamination.FamilyHistory.AreParentsRelated" TChecked="bool" />
-                </div>
+            <div class="col-md-6 mb-3">
+                <label>@L["Complaint"]</label>
+                <SfTextBox TValue="string" @bind-Value="@EditingExamination.Complaint" Placeholder="@L["EnterComplaint"]"
+                           MaxLength="@ExaminationConsts.ComplaintMaxLength">
+                    <TextBoxEvents OnInput="() => ValidateField('Complaint')"/>
+                </SfTextBox>
             </div>
 
-            <div class="form-row">
-                <h5>@L["Background"]</h5>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Allergies"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@EditingExamination.Background.Allergies" Placeholder="@L["EnterAllergies"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Medications"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@EditingExamination.Background.Medications" Placeholder="@L["EnterMedications"]" />
-                </div>
-
-                <div class="col-md-6 mb-3">
-                    <label>@L["Habits"]</label>
-                    <SfTextBox TValue="string?" @bind-Value="@EditingExamination.Background.Habits" Placeholder="@L["EnterHabits"]" />
-                </div>
+            <div class="col-md-6 mb-3">
+                <label>@L["StartDate"]</label>
+                <SfDatePicker TValue="DateTime?" @bind-Value="@EditingExamination.StartDate" Placeholder="@L["SelectStartDate"]"/>
             </div>
 
-            <div class="form-row">
-                <h5>@L["Examination ICD"]</h5>
-                <div class="col-md-6 mb-3">
-                    <label>@L["Select ICD"]</label>
-                    <SfDropDownList TItem="IcdDto" TValue="Guid" DataSource="@IcdList"
-                                    @bind-Value="@SelectedIcdId"
-                                    Placeholder="@L["SelectICD"]">
-                        <DropDownListEvents TItem="IcdDto" TValue="Guid"></DropDownListEvents>
-                        <DropDownListFieldSettings Text="CodeNumber" Value="Id"></DropDownListFieldSettings>
+            <div class="col-md-6 mb-3">
+                <label>@L["Story"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@EditingExamination.Story" Placeholder="@L["EnterStory"]"
+                           MaxLength="@ExaminationConsts.StoryMaxLength">
+                    <TextBoxEvents OnInput="() => ValidateField('Story')"/>
+                </SfTextBox>
+            </div>
+        </div>
 
-                    </SfDropDownList>
-                    <SfButton CssClass="e-primary" Type="button" Content="@L["Add"]" OnClick="AddIcdToExamination" />
+        <div class="form-row">
+            <h5>@L["FamilyHistory"]</h5>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["MotherDisease"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@EditingExamination.FamilyHistory.MotherDisease" Placeholder="@L["EnterMotherDisease"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["FatherDisease"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@EditingExamination.FamilyHistory.FatherDisease" Placeholder="@L["EnterFatherDisease"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["SisterDisease"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@EditingExamination.FamilyHistory.SisterDisease" Placeholder="@L["EnterSisterDisease"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["BrotherDisease"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@EditingExamination.FamilyHistory.BrotherDisease" Placeholder="@L["EnterBrotherDisease"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["AreParentsRelated"]</label>
+                <SfCheckBox Label="@L["Yes"]" @bind-Checked="@EditingExamination.FamilyHistory.AreParentsRelated" TChecked="bool"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <h5>@L["PhysicalFindings"]</h5>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Weight"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@EditingExamination.PhysicalFinding.Weight" Placeholder="@L["EnterWeight"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Height"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@EditingExamination.PhysicalFinding.Height" Placeholder="@L["EnterHeight"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["BodyTemperature"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@EditingExamination.PhysicalFinding.BodyTemperature" Placeholder="@L["EnterBodyTemperature"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Pulse"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@EditingExamination.PhysicalFinding.Pulse" Placeholder="@L["EnterPulse"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Vki"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@EditingExamination.PhysicalFinding.Vki" Placeholder="@L["EnterVki"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Vya"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@EditingExamination.PhysicalFinding.Vya" Placeholder="@L["EnterVya"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Kbs"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@EditingExamination.PhysicalFinding.Kbs" Placeholder="@L["EnterKbs"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Kbd"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@EditingExamination.PhysicalFinding.Kbd" Placeholder="@L["EnterKbd"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Spo2"]</label>
+                <SfNumericTextBox TValue="int?" @bind-Value="@EditingExamination.PhysicalFinding.Spo2" Placeholder="@L["EnterSpo2"]"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <h5>@L["Background"]</h5>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Allergies"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@EditingExamination.Background.Allergies" Placeholder="@L["EnterAllergies"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Medications"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@EditingExamination.Background.Medications" Placeholder="@L["EnterMedications"]"/>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label>@L["Habits"]</label>
+                <SfTextBox TValue="string?" @bind-Value="@EditingExamination.Background.Habits" Placeholder="@L["EnterHabits"]"/>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <h5>@L["Examination ICD"]</h5>
+            <div class="col-md-6 mb-3">
+                <label>@L["Select ICD"]</label>
+                <SfDropDownList TItem="IcdDto" TValue="Guid" DataSource="@IcdList"
+                                @bind-Value="@SelectedIcdId"
+                                Placeholder="@L["SelectICD"]">
+                    <DropDownListEvents TItem="IcdDto" TValue="Guid"></DropDownListEvents>
+                    <DropDownListFieldSettings Text="CodeNumber" Value="Id"></DropDownListFieldSettings>
+
+                </SfDropDownList>
+                <SfButton CssClass="e-primary" Type="button" Content="@L["Add"]" OnClick="AddIcdToExamination"/>
+            </div>
+        </div>
+        <div class="form-row">
+            @if (SelectedIcds.Any())
+            {
+                <div class="col-md-12">
+                    <h6>@L["Selected ICDs"]</h6>
+                    <ul>
+                        @foreach (var icd in SelectedIcds)
+                        {
+                            <li>
+                                @icd.CodeNumber - @icd.Detail
+                                <SfButton CssClass="e-danger e-small" Content="@L["Remove"]" OnClick="@(() => RemoveIcd(icd.Id))"/>
+                            </li>
+                        }
+                    </ul>
                 </div>
-            </div>
-            <div class="form-row">
-                @if (SelectedIcds.Any())
-                {
-                    <div class="col-md-12">
-                        <h6>@L["Selected ICDs"]</h6>
-                        <ul>
-                            @foreach (var icd in SelectedIcds)
-                            {
-                                <li>
-                                    @icd.CodeNumber - @icd.Detail
-                                    <SfButton CssClass="e-danger e-small" Content="@L["Remove"]" OnClick="@(() => RemoveIcd(icd.Id))" />
-                                </li>
-                            }
-                        </ul>
-                    </div>
-                }
-            </div>
-            
-        </SfForm>
+            }
+        </div>
+
 
         <div class="button-row">
-            <SfButton CssClass="e-danger" Type="button" Content="@L["Cancel"]" IsPrimary="false" OnClick="CancelAsync" />
-            <SfButton CssClass="e-primary" Type="submit" Content="@L["Submit"]" IsPrimary="true" />
+            <SfButton CssClass="e-danger" Type="button" Content="@L["Cancel"]" IsPrimary="false" OnClick="CancelAsync"/>
+            <SfButton CssClass="e-primary" Type="submit" Content="@L["Submit"]" IsPrimary="true"/>
         </div>
     </EditForm>
-
 }
