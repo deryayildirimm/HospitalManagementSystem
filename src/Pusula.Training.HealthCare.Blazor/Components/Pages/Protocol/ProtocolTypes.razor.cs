@@ -22,7 +22,7 @@ public partial class ProtocolTypes : HealthCareComponentBase
 {
 
     protected readonly List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
-    protected PageToolbar Toolbar { get; } = new PageToolbar();
+    protected PageToolbar Toolbar { get; set; } = new PageToolbar();
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private string CurrentSorting { get; set; } = string.Empty;
@@ -117,7 +117,6 @@ public partial class ProtocolTypes : HealthCareComponentBase
         
         EditingProtocolTypeId = type.Id;
         _selectedProtocolType = ObjectMapper.Map<ProtocolTypeDto, ProtocolTypeUpdateDto>(type);
-
         _editModal?.Show();
     }
 
@@ -146,7 +145,7 @@ public partial class ProtocolTypes : HealthCareComponentBase
         }
         catch (Exception e)
         {
-            await UiMessageService.Error(@L["An error occurred while creating the Protocol Type."]);
+            await UiMessageService.Error(@L[$"An error occurred while creating the Protocol Type. {e?.InnerException?.Message}"]);
             throw new UserFriendlyException(e.Message);
         }
         finally
@@ -174,7 +173,6 @@ public partial class ProtocolTypes : HealthCareComponentBase
 
     protected virtual ValueTask SetToolbarItemsAsync()
     {
-        Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
         Toolbar.AddButton(L["Create Protocol Type"], ShowModal, IconName.Add, requiredPolicyName: HealthCarePermissions.ProtocolTypes.Create);
         return ValueTask.CompletedTask;
     }
@@ -200,11 +198,15 @@ public partial class ProtocolTypes : HealthCareComponentBase
             culture = "&culture=" + culture;
         }
         await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/protocol-types/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Name={HttpUtility.UrlEncode(Filter.Name)}", forceLoad: true);
+        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/protocol-types/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}"
+                                     +
+                                     $"{culture}&Name={HttpUtility.UrlEncode(Filter.Name)}" 
+                                  
+            , forceLoad: true);
     }
 
     
-    private List<GridColumnDefinition> _columns = new()
+    private readonly List<GridColumnDefinition> _columns = new()
     {
         new GridColumnDefinition { Field = "Name", HeaderText = "Name", Width = "200px" },
     };
@@ -225,9 +227,7 @@ public partial class ProtocolTypes : HealthCareComponentBase
         catch (Exception ex)
         {
             await UiMessageService.Error(@L["An error occurred while deleting the Protocol Type."] + ex.Message);
-            
         }
-
         await _gridRef.RefreshGrid();
     }
    

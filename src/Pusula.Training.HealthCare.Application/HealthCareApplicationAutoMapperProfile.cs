@@ -47,6 +47,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<ProtocolPatientDepartmentListReport, ProtocolPatientDepartmentListReportDto>();
         CreateMap<ProtocolPatientDoctorListReport, ProtocolPatientDoctorListReportDto>();
         CreateMap<ProtocolDto, ProtocolUpdateDto>();
+        CreateMap<ProtocolWithDetails, ProtocolWithDetailsDto>();
         CreateMap<DepartmentStatistic, DepartmentStatisticDto>();
         CreateMap<DoctorStatistics, DoctorStatisticDto>();
         CreateMap<ProtocolWithNavigationProperties, ProtocolWithNavigationPropertiesDto>();

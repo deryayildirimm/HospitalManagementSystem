@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using Pusula.Training.HealthCare.MedicalServices;
 
 namespace Pusula.Training.HealthCare.Protocols;
 
-public class ProtocolWithDetails
+public class ProtocolWithDetailsDto
 {
     public Guid Id { get; set; }
 
@@ -16,7 +14,7 @@ public class ProtocolWithDetails
         
     public DateTime StartTime { get; set; }
     
-    public Protocol Protocol { get; set; } = null!;
+    public ProtocolDto Protocol { get; set; } = null!;
     
     public string[]? MedicalService { get; set; } 
 }

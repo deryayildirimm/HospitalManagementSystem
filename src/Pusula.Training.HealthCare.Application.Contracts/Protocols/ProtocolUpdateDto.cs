@@ -23,11 +23,13 @@ namespace Pusula.Training.HealthCare.Protocols
         
         public Guid InsuranceId { get; set; }
         
-        public PatientDto Patient { get; set; } 
-        public DepartmentDto Department { get; set; } 
-        public ProtocolTypeDto ProtocolType { get; set; } 
-        public DoctorDto Doctor { get; set; } 
-        public InsuranceDto Insurance { get; set; }
+        public string[]? MedicalServices { get; set; }
+        
+        public PatientDto? Patient { get; set; } 
+        public DepartmentDto? Department { get; set; } 
+        public ProtocolTypeDto? ProtocolType { get; set; } 
+        public DoctorDto? Doctor { get; set; } 
+        public InsuranceDto? Insurance { get; set; }
         public string ConcurrencyStamp { get; set; } = null!;
     }
 }

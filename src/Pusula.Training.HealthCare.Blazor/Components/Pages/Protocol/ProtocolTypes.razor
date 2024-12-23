@@ -25,7 +25,7 @@
 
 
 @* ************************* PAGE HEADER ************************* *@
-<PageHeader Title="@L["Protocol Types"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
+<PageHeader Title="@L["ProtocolTypes"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
 </PageHeader>
 <!--
 <SfBreadcrumb>
@@ -75,7 +75,7 @@ else
     
 }
 
-<GenericModal TModel="ProtocolTypeCreateDto" @ref="_createModal" Title="Add Protocol Type" Model="@_newProtocol" OnSaveCallback="CreateProtocolTypeAsync">
+<GenericModal TModel="ProtocolTypeCreateDto" @ref="_createModal" Title=@L["Create Protocol Type"] Model="@_newProtocol" OnSaveCallback="CreateProtocolTypeAsync">
     <div>
         <label>Name:</label>
         <SfTextBox @bind-Value="@_newProtocol.Name" Placeholder="Enter name"></SfTextBox>
@@ -83,7 +83,7 @@ else
     </div>
 </GenericModal>
 
-<GenericModal TModel="ProtocolTypeUpdateDto" @ref="_editModal" Title="Edit Protocol Type" Model="@_selectedProtocolType" OnSaveCallback="UpdateProtocolTypeAsync">
+<GenericModal TModel="ProtocolTypeUpdateDto" @ref="_editModal" Title=@L["Edit Protocol Type"] Model="@_selectedProtocolType" OnSaveCallback="UpdateProtocolTypeAsync">
     <div>
         <label>Name:</label>
         <SfTextBox @bind-Value="@_selectedProtocolType.Name" Placeholder="Enter name"></SfTextBox>

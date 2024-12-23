@@ -74,6 +74,7 @@ public class Program
             builder.Services.AddScoped<MedicalStaffAdaptor>();
             builder.Services.AddScoped<ProtocolAdaptor>();
             builder.Services.AddScoped<ProtocolTypeAdaptor>();
+            builder.Services.AddScoped<ProtocolStateService>();
             builder.Services.AddScoped<ProtocolDepartmentStatisticsAdaptor>();
             builder.Services.AddScoped<ProtocolPatientDepartmentListAdaptor>();
             builder.Services.AddScoped<ProtocolPatientDoctorListAdaptor>();

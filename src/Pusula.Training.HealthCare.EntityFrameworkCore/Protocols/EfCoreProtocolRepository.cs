@@ -8,12 +8,77 @@ using Microsoft.EntityFrameworkCore;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
 using Pusula.Training.HealthCare.EntityFrameworkCore;
+using Pusula.Training.HealthCare.GlobalExceptions;
+using Pusula.Training.HealthCare.MedicalServices;
+using Pusula.Training.HealthCare.Patients;
 
 namespace Pusula.Training.HealthCare.Protocols;
 
 public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> dbContextProvider)
     : EfCoreRepository<HealthCareDbContext, Protocol, Guid>(dbContextProvider), IProtocolRepository
 {
+    
+      public async Task<List<ProtocolWithDetails>> GetListWithAsync(
+            string sorting, 
+            int skipCount, 
+            int maxResultCount, 
+            CancellationToken cancellationToken = default
+        )
+        {
+            var query = await ApplyFilterAsync();
+            
+            return await query
+                .OrderBy(!string.IsNullOrWhiteSpace(sorting) ? sorting : nameof(MedicalService.Name))
+                .PageBy(skipCount, maxResultCount)
+                .ToListAsync(GetCancellationToken(cancellationToken));
+        }
+
+        public async Task<ProtocolWithDetails> GetWithAsync(Guid id, CancellationToken cancellationToken = default)
+        {
+            var query = await ApplyFilterAsync();
+            
+            var protocol = await query
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync(GetCancellationToken(cancellationToken));
+            
+            HealthCareGlobalException.ThrowIf(  $"Protocol with ID '{id}' not found.", 
+                protocol == null);
+
+            return protocol ?? new ProtocolWithDetails
+            {
+                Id = id,
+                PatientName = "Unknown",
+                PublishDate = DateTime.MinValue,
+                MedicalService = []
+            };
+
+        }
+
+        private async Task<IQueryable<ProtocolWithDetails>> ApplyFilterAsync()
+        {
+            return (await GetDbSetAsync())
+                .Include(protocol => protocol.ProtocolMedicalServices)
+                .ThenInclude(protocolMedicalService => protocolMedicalService.MedicalService)
+                .Select(protocol => new ProtocolWithDetails
+                {
+                    Id = protocol.Id,
+                    PatientName = protocol.Patient.FirstName + " " + protocol.Patient.LastName,
+                    PublishDate = protocol.StartTime,
+                    MedicalService = protocol.ProtocolMedicalServices
+                        .Where(protocolMedicalService => protocolMedicalService.MedicalService != null) 
+                        .Select(protocolMedicalService => protocolMedicalService.MedicalService!.Name ?? "Unknown") 
+                        .ToArray(),
+
+                    Price = protocol.ProtocolMedicalServices
+                        .Where(protocolMedicalService => protocolMedicalService.MedicalService != null) 
+                        .Sum(protocolMedicalService => (float)(protocolMedicalService.MedicalService!.Cost )) 
+                });
+        }
+        public override Task<IQueryable<Protocol>> WithDetailsAsync()
+        {
+            return base.WithDetailsAsync(x => x.ProtocolMedicalServices);
+        }
+    
     public virtual async Task DeleteAllAsync(
         string? filterText = null,
         string? note = null,
@@ -37,9 +102,10 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         await DeleteManyAsync(ids, cancellationToken: GetCancellationToken(cancellationToken));
     }
 
-    public virtual async Task<Protocol?> GetWithNavigationPropertiesAsync
-        (Guid id, CancellationToken cancellationToken = default) =>
-        await  (await GetQueryableAsync())
+    public virtual async Task<Protocol> GetWithNavigationPropertiesAsync
+        (Guid id, CancellationToken cancellationToken = default)
+    {
+        var protocol = await (await GetQueryableAsync())
             .Include(b => b.ProtocolType)
             .Include(b => b.Patient)
             .Include(b => b.Department)
@@ -47,15 +113,32 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
             .Include(b => b.Insurance)
             .FirstOrDefaultAsync(b => b.Id == id, GetCancellationToken(cancellationToken));
 
+        HealthCareGlobalException.ThrowIf(  $"Protocol with ID '{id}' not found.", 
+            protocol == null);
+        
+        return protocol!;
+    }
 
-    public virtual async Task<Protocol?> GetAsync(Guid id, CancellationToken cancellationToken = default) =>
-        await (await GetQueryableAsync())
+
+
+    public virtual async Task<Protocol> GetAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var protocol = await (await GetQueryableAsync())
             .Include(b => b.ProtocolType)
             .Include(b => b.Patient)
             .Include(b => b.Department)
             .Include(b => b.Doctor)
             .Include(b => b.Insurance)
             .FirstOrDefaultAsync(b => b.Id == id, GetCancellationToken(cancellationToken));
+
+        HealthCareGlobalException.ThrowIf(
+            $"Protocol with ID '{id}' was not found.",
+            protocol == null
+        );
+
+        return protocol!;
+    }
+       
 
 
     public virtual async Task<List<ProtocolWithNavigationProperties>> GetListWithNavigationPropertiesAsync(

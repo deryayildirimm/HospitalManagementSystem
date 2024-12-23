@@ -89,6 +89,7 @@ public partial class DepartmentProtocolReports : HealthCareComponentBase
             FilterFirst = new GetProtocolsInput();
             FilterSec = new GetProtocolsInput();
             await SetPermissionsAsync();
+            await LoadLookupsAsync();
             SetFiltersFirst();
             SetFiltersSec();
         }

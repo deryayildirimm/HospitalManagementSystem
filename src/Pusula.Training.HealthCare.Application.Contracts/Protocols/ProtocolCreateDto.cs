@@ -30,7 +30,7 @@ public class ProtocolCreateDto
     [Required(ErrorMessage = "Insurance is required.")] 
     public Guid InsuranceId { get; set; }
 
-    [CanBeNull] public string[] medicalServiceNames;
+    public string[]? MedicalServiceNames;
 
 
 

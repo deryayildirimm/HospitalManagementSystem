@@ -6,7 +6,7 @@ public class DepartmentStatisticDto
 {
     public Guid DepartmentId { get; set; }
     
-    public string DepartmentName { get; set; }
+    public string? DepartmentName { get; set; }
     
     public int  PatientCount { get; set; }
 }

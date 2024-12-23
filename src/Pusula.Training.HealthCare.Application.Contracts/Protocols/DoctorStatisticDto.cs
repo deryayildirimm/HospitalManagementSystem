@@ -6,7 +6,7 @@ public class DoctorStatisticDto
 {
     public Guid DoctorId { get; set; }
     
-    public string DoctorName { get; set; }
+    public string? DoctorName { get; set; }
     
     public int  PatientCount { get; set; }
 }

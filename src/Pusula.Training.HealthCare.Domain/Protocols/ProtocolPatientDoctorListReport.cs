@@ -9,9 +9,9 @@ public class ProtocolPatientDoctorListReport
     
     public int  PatientNumber { get; set; }
     
-    public string FullName { get; set; }
+    public string? FullName { get; set; }
     
-    public string DoctorName { get; set; }
+    public string? DoctorName { get; set; }
     
     public int  ProtocolCount { get; set; }
     

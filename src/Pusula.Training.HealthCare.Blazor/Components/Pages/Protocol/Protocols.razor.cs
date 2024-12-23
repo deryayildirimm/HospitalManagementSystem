@@ -10,12 +10,10 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using Pusula.Training.HealthCare.Blazor.Components.Modals;
 using Pusula.Training.HealthCare.Blazor.Components.Grids;
-using Pusula.Training.HealthCare.Patients;
 using Volo.Abp;
 using Syncfusion.Blazor.Data;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Shared;
-using Volo.Abp.Domain.Entities;
 
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Protocol;
@@ -24,7 +22,7 @@ public partial class Protocols
 {
 
     protected readonly List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
-    protected PageToolbar Toolbar { get; } = new PageToolbar();
+    protected PageToolbar Toolbar { get; set; } = new PageToolbar();
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private string CurrentSorting { get; set; } = string.Empty;
@@ -37,10 +35,8 @@ public partial class Protocols
     private bool IsLookupsLoaded { get; set; } 
     
     private int LookupPageSize { get; } = 50;
-
-    private GenericModal<ProtocolCreateDto> _createModal;
+    
     private GenericModal<ProtocolUpdateDto> _editModal;
-    private ProtocolCreateDto _newProtocol;
     private ProtocolUpdateDto _selectedProtocolType;
     private GenericGrid<ProtocolWithNavigationPropertiesDto> _gridRef;
     
@@ -55,10 +51,8 @@ public partial class Protocols
 
     public Protocols()
     {
-        _createModal = new GenericModal<ProtocolCreateDto>();
         _editModal = new GenericModal<ProtocolUpdateDto>();
         _gridRef = new GenericGrid<ProtocolWithNavigationPropertiesDto>();
-        _newProtocol = new ProtocolCreateDto();
         _selectedProtocolType = new ProtocolUpdateDto();
         Filter = new GetProtocolsInput
         {
@@ -75,11 +69,13 @@ public partial class Protocols
         {
             Filter = new GetProtocolsInput();
             await SetPermissionsAsync();
+            await LoadLookupsAsync();
             SetFilters();
         }
         finally
         {
             _spinnerVisible = false;
+          
         }
     }
 
@@ -119,12 +115,6 @@ public partial class Protocols
     
     #region Modals
     
-    private  Task ShowModal()
-    {
-        _newProtocol = new ProtocolCreateDto();
-        _createModal?.Show();
-        return  Task.CompletedTask;
-    }
 
     private async Task OpenEditModal(ProtocolWithNavigationPropertiesDto protocol)
     {
@@ -199,7 +189,6 @@ public partial class Protocols
     protected virtual ValueTask SetToolbarItemsAsync()
     {
         Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
-        Toolbar.AddButton(L["Create Protocol"], ShowModal, IconName.Add, requiredPolicyName: HealthCarePermissions.Protocols.Create);
         return ValueTask.CompletedTask;
     }
 
@@ -225,12 +214,25 @@ public partial class Protocols
             culture = "&culture=" + culture;
         }
         await RemoteServiceConfigurationProvider.GetConfigurationOrDefaultOrNullAsync("Default");
-        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/protocol-types/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}{culture}&Name={HttpUtility.UrlEncode(Filter.Notes)}", forceLoad: true);
+        NavigationManager.NavigateTo($"{remoteService?.BaseUrl.EnsureEndsWith('/') ?? string.Empty}api/app/protocols/as-excel-file?DownloadToken={token}&FilterText={HttpUtility.UrlEncode(Filter.FilterText)}" , forceLoad: true);
     }
 
     private void NavigateToDetail(ProtocolWithNavigationPropertiesDto protocol)
     {
-       
+
+      
+        ProtocolState.ProtocolId = protocol.Protocol.Id;
+        ProtocolState.ProtocolTypeName = protocol.ProtocolType.Name;
+        ProtocolState.PatientIdentityNumber = protocol.Patient.IdentityNumber;
+        ProtocolState.PatientGender = protocol.Patient.Gender.ToString();
+        ProtocolState.PatientBirthDate = protocol.Patient.BirthDate;
+        ProtocolState.PatientId = protocol.Patient.Id;
+        ProtocolState.DepartmentName = protocol.Department.Name;
+        ProtocolState.StartTime = protocol.Protocol.StartTime;
+        ProtocolState.DoctorName = protocol.Doctor.FirstName + " " + protocol.Doctor.LastName;
+        ProtocolState.PatientName = protocol.Patient.FirstName + " " + protocol.Patient.LastName;
+        ProtocolState.EndTime = protocol.Protocol.EndTime;
+        
         NavigationManager.NavigateTo($"/protocols/detail/{protocol.Patient.PatientNumber}");
     }
     
@@ -248,88 +250,7 @@ public partial class Protocols
 
 
     #region CRUD
-    
-    private string IdentityNumber { get; set; } = string.Empty; // Kimlik Numarası Alanı
-    private string FoundPatientName { get; set; } = string.Empty; // Bulunan hastanın adı (eğer varsa)
-    private PatientCreateDto NewPatient { get; set; } = new(); // Yeni hasta bilgileri
-    private bool IsPatientFound { get; set; } = true; // Hasta bulunup bulunmadığını takip eder
-    
-    
-    private async Task OnCheckIdentityNumberClicked()
-    {
-        
-        if (string.IsNullOrWhiteSpace(IdentityNumber) )
-        {
-            await UiMessageService.Warn("Please enter an Identity Number.");
-            return;
-        }
-        try
-        {
-            // check the patient
-            var patient = await PatientsAppService.GetPatientByIdentityAsync(IdentityNumber);
-            FoundPatientName = $"{patient.FirstName} {patient.LastName}";
-            IsPatientFound = true;
-           
-        }
-        catch (EntityNotFoundException)
-        {
-            // if patient cannot found 
-            IsPatientFound = false;
-         
-            FoundPatientName = string.Empty;
-            NewPatient = new PatientCreateDto
-            {
-                IdentityNumber = IdentityNumber // take the identitiy number 
-            };
-            // warn the user 
-            await UiMessageService.Warn("No patient found. Please fill in the patient details.");
-        }
-    }
-    private async Task CreateProtocolTypeAsync(ProtocolCreateDto protocol)
-    {
-        
-        try
-        {
-            if (!IsLookupsLoaded) // Eğer daha önce yüklenmemişse verileri çek
-            {
-                await LoadLookupsAsync();
-                IsLookupsLoaded = true; // Veriler bir kez yüklendikten sonra tekrar yüklenmesini engelle
-            }
-          
-            PatientDto patient;
-            
-            if (!IsPatientFound)
-            {
-                // creating new patient 
-                patient = await PatientsAppService.CreateAsync(NewPatient);
-            }
-            else
-            {
-                // Zaten bulunan hasta bilgisi alınır
-                patient = await PatientsAppService.GetPatientByIdentityAsync(IdentityNumber);
-                
-            }
-            
-            // create the protocol
-            _newProtocol.PatientId = patient.Id;
-            protocol = _newProtocol;
-            await ProtocolsAppService.CreateAsync(protocol);
-
-            await UiMessageService.Success("Protocol created successfully!");
-
-            await _gridRef.RefreshGrid();
-           
-        }
-        catch (Exception ex)
-        {
-            await UiMessageService.Error(@L["An error occurred while creating the Protocol."] + ex.Message);
-            throw new UserFriendlyException(ex.Message);
-        }
-
-    
-       
-    }
-
+  
     private async Task UpdateProtocolTypeAsync()
     {
         try
