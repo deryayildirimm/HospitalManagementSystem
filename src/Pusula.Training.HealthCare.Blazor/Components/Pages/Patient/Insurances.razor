@@ -5,24 +5,20 @@
 @using Pusula.Training.HealthCare.Localization
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
-
 @using Pusula.Training.HealthCare.Permissions
 @using Volo.Abp.AspNetCore.Components.Web
 @using Volo.Abp.Http.Client
 @inherits HealthCareComponentBase
 @inject IInsuranceAppService insuranceAppService
-
 @inject IUiMessageService UiMessageService
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
-
 @using Syncfusion.Blazor
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Inputs
-@using SelectionType = Syncfusion.Blazor.Grids.SelectionType
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Popups;
 @using System.ComponentModel.DataAnnotations;
@@ -107,7 +103,6 @@
 }
 else
 {
-
     @* ************************* DATA GRID ************************* *@
     <Card>
         <CardBody>
@@ -213,7 +208,7 @@ else
                         <Template>
                             @{
                                 var insurance = (context as InsuranceDto);
-                                var premiumAmount = string.Format("{0:N2} ₺", insurance!.PremiumAmount);
+                                var premiumAmount = insurance!.PremiumAmount == null ? " - " : string.Format("{0:N2} ₺", insurance!.PremiumAmount);
                                 @premiumAmount
                             }
                         </Template>
@@ -223,7 +218,7 @@ else
                         <Template>
                             @{
                                 var insurance = (context as InsuranceDto);
-                                var coverageAmount = string.Format("{0:N2} ₺", insurance!.CoverageAmount);
+                                var coverageAmount = insurance!.CoverageAmount == null ? " - " : string.Format("{0:N2} ₺", insurance!.CoverageAmount);
                                 @coverageAmount
                             }
                         </Template>
@@ -350,7 +345,6 @@ else
 
 @if (CanEditInsurance)
 {
-
     @* ************************* EDIT MODAL ************************* *@
     <SfDialog Width="800px" IsModal="true" ShowCloseIcon="true" Visible="@IsVisibleEdit">
         <DialogEvents Closed="@CloseEditInsuranceModal"></DialogEvents>

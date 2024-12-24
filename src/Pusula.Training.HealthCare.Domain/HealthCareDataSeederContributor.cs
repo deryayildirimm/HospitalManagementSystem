@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Appointments;
@@ -65,7 +64,7 @@ namespace Pusula.Training.HealthCare
         IInsuranceRepository insuranceRepository,
         IRestrictionManager restrictionManager,
         IDoctorLeaveRepository leaveRepository,
-        IRepository<Test, Guid> testRepository) : IDataSeedContributor, ITransientDependency
+        ITestRepository testRepository) : IDataSeedContributor, ITransientDependency
     {
         public async Task SeedAsync(DataSeedContext context)
         {
@@ -93,8 +92,7 @@ namespace Pusula.Training.HealthCare
             await SeedTestCategoryRecords();
             await SeedTestRecords();
             await SeedMedicalServiceRestrictions();
-            //await SeedInsurance();
-            await SeedProtocolMedicalServices();
+           await SeedProtocolMedicalServices();
         }
 
         private async Task SeedProtocolType()
@@ -910,19 +908,19 @@ namespace Pusula.Training.HealthCare
             var departments = await departmentRepository.GetListAsync();
             var protocolTypes = await protocolTypeRepository.GetListAsync();
 
-            var random = new Random();
-            var protocols = new List<Protocol>();
-            var insurances = new List<Insurance>();
-
-            foreach (var patient in patients)
-            {
-                for (int i = 0; i < 3; i++) // Her hasta için birden fazla protokol oluştur
-                {
-                    var doctor = doctors.OrderBy(d => random.Next()).FirstOrDefault();
-                    var department = departments.FirstOrDefault(d => d.Id == doctor?.DepartmentId);
-                    var protocolType = protocolTypes.OrderBy(pt => random.Next()).FirstOrDefault();
-                    var startTime = DateTime.Now.AddDays(random.Next(1, 10));
-                    var endTime = startTime.AddHours(random.Next(1, 3));
+    var random = new Random();
+    var protocols = new List<Protocol>();
+    var insurances = new List<Insurance>();
+    int num = 0;
+    foreach (var patient in patients)
+    {
+        for (int i = 0; i < 3; i++) // Her hasta için birden fazla protokol oluştur
+        {
+            var doctor = doctors.OrderBy(d => random.Next()).FirstOrDefault();
+            var department = departments.FirstOrDefault(d => d.Id == doctor?.DepartmentId);
+            var protocolType = protocolTypes.OrderBy(pt => random.Next()).FirstOrDefault();
+            var startTime = DateTime.Now.AddDays(random.Next(1, 10));
+            var endTime = startTime.AddHours(random.Next(1, 3));
 
                     if (doctor != null && department != null && protocolType != null)
                     {
@@ -940,20 +938,22 @@ namespace Pusula.Training.HealthCare
 
                         insurances.Add(insurance); // Sigortayı listeye ekliyoruz
 
-                        protocols.Add(new Protocol(
-                            id: Guid.NewGuid(),
-                            patientId: patient.Id,
-                            departmentId: department.Id,
-                            doctorId: doctor.Id,
-                            protocolTypeId: protocolType.Id,
-                            startTime: startTime,
-                            note: "Routine checkup",
-                            endTime: endTime,
-                            insuranceId: insurance.Id // Sigorta ID'si atanıyor
-                        ));
-                    }
-                }
+                protocols.Add(new Protocol(
+                    id: Guid.NewGuid(),
+                    patientId: patient.Id,
+                    departmentId: department.Id,
+                    doctorId: doctor.Id,
+                    protocolTypeId: protocolType.Id,
+                    startTime: startTime,
+                    note: "Routine checkup",
+                    endTime: endTime,
+                    insuranceId: insurance.Id // Sigorta ID'si atanıyor
+                ));
             }
+        }
+        if(num == 3) { break; }
+        num++;
+    }
 
             await insuranceRepository.InsertManyAsync(insurances, autoSave: true); // Sigortalar veri tabanına ekleniyor
             await protocolRepository.InsertManyAsync(protocols, autoSave: true); // Protokoller veri tabanına ekleniyor
