@@ -24,7 +24,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Appointment;
 
 public partial class AppointmentList : HealthCareComponentBase
 {
-    public PrintMode PrintMode { get; set; } = PrintMode.CurrentPage;
+    private PrintMode PrintMode { get; set; } = PrintMode.CurrentPage;
     private Query FilterQuery { get; set; }
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private SfGrid<AppointmentDto> Grid { get; set; }

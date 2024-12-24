@@ -13,59 +13,61 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 using Pusula.Training.HealthCare.Blazor.Components.Modals;
-using Pusula.Training.HealthCare.Lookups;
 using Pusula.Training.HealthCare.Protocols;
 using Pusula.Training.HealthCare.Shared;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
-using Volo.Abp.Domain.Entities;
-
     
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Patient;
 
 public partial class Patients
 {
     [CreatePhoneNumberValidator]
-    public string MobilePhoneNumber { get; set; } = string.Empty;
+    public string MobilePhoneNumber { get; set; } 
 
     [CreatePhoneNumberValidator]
-    public string RelativePhoneNumber { get; set; } = string.Empty;
+    public string RelativePhoneNumber { get; set; } 
 
-    protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
-    protected PageToolbar Toolbar { get; } = new PageToolbar();
+    protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems;
+    protected PageToolbar Toolbar { get; } 
     protected bool ShowAdvancedFilters { get; set; }
     private IReadOnlyList<PatientDto> PatientList { get; set; }
-    private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
+    private int PageSize { get; } 
     private int CurrentPage { get; set; } = 1;
     private int TotalCount { get; set; }
-    private string CurrentSorting { get; set; } = string.Empty;
-    public string MainCountryCode { get; set; }
+    private string CurrentSorting { get; set; } 
+    public string? MainCountryCode { get; set; }
     public string? RelativeCountryCode { get; set; }
     private bool AllPatientsSelected { get; set; }
     private bool CanCreatePatient { get; set; }
     private bool CanEditPatient { get; set; }
     private bool CanDeletePatient { get; set; }
-    private int LookupPageSize { get; } = 100;
-    private PatientCreateDto NewPatient { get; set; } = new PatientCreateDto();
+    private int LookupPageSize { get; } 
+    private PatientCreateDto NewPatient { get; set; } 
     private PatientUpdateDto EditingPatient { get; set; }
-    private Validations NewPatientValidations { get; set; } = new();
-    private Validations EditingPatientValidations { get; set; } = new();
+    private Validations NewPatientValidations { get; set; } 
+    private Validations EditingPatientValidations { get; set; } 
     private Guid EditingPatientId { get; set; }
-    private Modal CreatePatientModal { get; set; } = new();
-    private Modal EditPatientModal { get; set; } = new();
+    private Modal CreatePatientModal { get; set; } 
+    private Modal EditPatientModal { get; set; } 
     private GetPatientsInput Filter { get; set; }
-    private List<PatientDto> SelectedPatients { get; set; } = [];
-    private IEnumerable<CountryPhoneCodeDto> Nationalities = [];
-    private IEnumerable<KeyValuePair<int, string>> Genders = [];
-    private IEnumerable<KeyValuePair<int, string>> Relatives = [];
-    private IEnumerable<KeyValuePair<int, string>> PationTypes = [];
-    private IEnumerable<KeyValuePair<int, string>> InsuranceTypes = [];
-    private IEnumerable<KeyValuePair<int, string>> DiscountGroups = [];
+    private List<PatientDto> SelectedPatients { get; set; }
+    private IEnumerable<CountryPhoneCodeDto> Nationalities;
+    private IEnumerable<KeyValuePair<int, string>> Genders;
+    private IEnumerable<KeyValuePair<int, string>> Relatives;
+    private IEnumerable<KeyValuePair<int, string>> PationTypes;
+    private IEnumerable<KeyValuePair<int, string>> DiscountGroups;
 
 
     public Patients()
     {
+        MobilePhoneNumber = string.Empty;
+        RelativePhoneNumber = string.Empty;
+        NewPatient = new();
+        CreatePatientModal = new();
+        EditPatientModal = new();
+        EditingPatientValidations = new();
         EditingPatient = new PatientUpdateDto();
         _createModal = new GenericModal<ProtocolCreateDto>();
         _newProtocol = new ProtocolCreateDto();
@@ -76,6 +78,18 @@ public partial class Patients
             Sorting = CurrentSorting
         };
         PatientList = [];
+        Nationalities = [];
+        Genders = [];
+        Relatives = [];
+        PationTypes = [];
+        DiscountGroups = [];
+        SelectedPatients = [];
+        NewPatientValidations = new();
+        LookupPageSize = 100;
+        CurrentSorting = string.Empty;
+        PageSize = LimitedResultRequestDto.DefaultMaxResultCount;
+        Toolbar = new PageToolbar();
+        BreadcrumbItems = [];
     }
 
     private ProtocolCreateDto _newProtocol;

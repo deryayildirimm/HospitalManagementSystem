@@ -86,6 +86,9 @@ public partial class Appointments : HealthCareComponentBase
     private string FailureMessage { get; set; }
 
     private bool IsFirstStepValid =>
+        IsGuidValid(StepperModel.DepartmentId) &&
+        IsGuidValid(StepperModel.MedicalServiceId) &&
+        IsGuidValid(StepperModel.DoctorId) &&
         !string.IsNullOrEmpty(StepperModel.MedicalServiceName) &&
         !string.IsNullOrEmpty(StepperModel.DoctorName) &&
         !string.IsNullOrEmpty(StepperModel.DepartmentName);
@@ -97,8 +100,8 @@ public partial class Appointments : HealthCareComponentBase
 
     private bool IsThirdStepValid =>
         IsSecondStepValid &&
-        !string.IsNullOrEmpty(StepperModel.PatientName) &&
         IsGuidValid(StepperModel.AppointmentTypeId) &&
+        !string.IsNullOrEmpty(StepperModel.PatientName) &&
         !string.IsNullOrEmpty(StepperModel.HospitalName);
 
     private static bool IsGuidValid(Guid? appointmentTypeId) =>
@@ -106,12 +109,13 @@ public partial class Appointments : HealthCareComponentBase
 
     public Appointments()
     {
-        SlotErrorMessage = "";
-        FailureMessage = "";
+        SlotErrorMessage = string.Empty;
+        FailureMessage = string.Empty;
         Patient = new PatientDto();
         GetAppointmentSlotFilter = new GetAppointmentSlotInput();
         StepperModel = new AppointmentStepperModel();
         NewAppointment = new AppointmentCreateDto();
+
         DoctorsFilter = new GetDepartmentServiceDoctorsInput
         {
             DoctorFilterText = string.Empty,
@@ -122,7 +126,7 @@ public partial class Appointments : HealthCareComponentBase
 
         MedicalServiceFilter = new GetMedicalServiceInput
         {
-            Name = "",
+            Name = string.Empty,
             MaxResultCount = ServicePageSize,
             SkipCount = (ServiceCurrentPage - 1) * ServicePageSize,
             Sorting = ServiceCurrentSorting
@@ -151,7 +155,6 @@ public partial class Appointments : HealthCareComponentBase
     protected override async Task OnInitializedAsync()
     {
         await GetPatient();
-        await GetServices();
         await GetAppointmentTypes();
         await SetLookupsAsync();
         SetDayLoadCount();
@@ -246,7 +249,15 @@ public partial class Appointments : HealthCareComponentBase
     {
         try
         {
-            NewAppointment.DepartmentId = args.ItemData.Id;
+            //Reset service
+            ResetService();
+
+            //Reset appointment times
+            ResetAppointmentInfo();
+
+            //Reset stepper model
+            await OnStepperReset();
+
             StepperModel.DepartmentId = args.ItemData.Id;
             StepperModel.DepartmentName = args.ItemData.DisplayName;
             MedicalServiceFilter.DepartmentId = args.ItemData.Id;
@@ -254,10 +265,12 @@ public partial class Appointments : HealthCareComponentBase
         }
         catch (Exception e)
         {
+            ResetService();
             await UiMessageService.Error(e.Message);
         }
         finally
         {
+            DoctorsList = [];
             NewAppointment.MedicalServiceId = Guid.Empty;
             NewAppointment.DoctorId = Guid.Empty;
         }
@@ -265,24 +278,29 @@ public partial class Appointments : HealthCareComponentBase
 
     private async Task OnServiceChange(ListBoxChangeEventArgs<ServiceSelectionItem[], ServiceSelectionItem> args)
     {
-        //Reset stepper model
-        await OnStepperReset();
-
-        //Reset appointment times
-        ResetAppointmentInfo();
-
-        if (args.Value.Length > 0)
+        if (args.Value.Length == 0)
         {
-            var selectedService = args.Value[0];
-
-            StepperModel.MedicalServiceId = selectedService.Id;
-            StepperModel.MedicalServiceName = selectedService.DisplayName;
-            StepperModel.Amount = selectedService.Cost;
-            DaysLookupFilter.MedicalServiceId = selectedService.Id;
-            GetAppointmentSlotFilter.MedicalServiceId = selectedService.Id;
-            DoctorsFilter.DepartmentId = StepperModel.DepartmentId;
-            await GetDoctorsList();
+            ResetService();
+            return;
         }
+
+        var selectedService = args.Value[0];
+        StepperModel.MedicalServiceId = selectedService.Id;
+        StepperModel.MedicalServiceName = selectedService.DisplayName;
+        StepperModel.Amount = selectedService.Cost;
+        DaysLookupFilter.MedicalServiceId = selectedService.Id;
+        GetAppointmentSlotFilter.MedicalServiceId = selectedService.Id;
+        await GetDoctorsList();
+    }
+
+    private void ResetService()
+    {
+        StepperModel.MedicalServiceId = Guid.Empty;
+        DoctorsFilter.MedicalServiceId = Guid.Empty;
+        StepperModel.DoctorName = string.Empty;
+        StepperModel.MedicalServiceName = string.Empty;
+        DoctorsList = [];
+        MedicalServiceCollection = [];
     }
 
     private void OnDoctorSelect(DoctorModel item)
@@ -318,13 +336,15 @@ public partial class Appointments : HealthCareComponentBase
     {
         try
         {
-            var patient = await PatientsAppService.GetPatientByNumberAsync(PatientNo);
-            Patient = patient;
+            Patient = await PatientsAppService.GetPatientByNumberAsync(PatientNo);
             StepperModel.PatientId = Patient.Id;
-            StepperModel.PatientName = Patient.FirstName + " " + Patient.LastName;
+            StepperModel.PatientName = $"{Patient.FirstName} {Patient.LastName}";
         }
         catch (Exception e)
         {
+            Patient = new PatientDto();
+            StepperModel.PatientId = Guid.Empty;
+            StepperModel.PatientName = string.Empty;
             await UiMessageService.Error(e.Message);
         }
     }
@@ -334,9 +354,11 @@ public partial class Appointments : HealthCareComponentBase
         try
         {
             IsServiceListLoading = true;
+            var filter = new LookupRequestDto
+                { Filter = newValue, MaxResultCount = TypePageSize };
+
             AppointmentTypesCollection =
-                (await LookupAppService.GetAppointmentTypeLookupAsync(new LookupRequestDto
-                    { Filter = newValue, MaxResultCount = TypePageSize }))
+                (await LookupAppService.GetAppointmentTypeLookupAsync(filter))
                 .Items;
 
             StateHasChanged();
@@ -358,6 +380,12 @@ public partial class Appointments : HealthCareComponentBase
 
             var results =
                 (await MedicalServiceAppService.GetListAsync(MedicalServiceFilter)).Items;
+
+            if (!results.Any())
+            {
+                MedicalServiceCollection = [];
+                return;
+            }
 
             MedicalServiceCollection = results
                 .Select(y => new ServiceSelectionItem
@@ -386,8 +414,11 @@ public partial class Appointments : HealthCareComponentBase
         {
             IsDoctorListLoading = true;
             DoctorsFilter.MedicalServiceId = StepperModel.MedicalServiceId;
+            DoctorsFilter.DepartmentId = StepperModel.DepartmentId;
 
-            var doctors = (await MedicalServiceAppService.GetMedicalServiceDoctorsAsync(DoctorsFilter)).Items;
+            var doctors =
+                (await MedicalServiceAppService.GetMedicalServiceDoctorsAsync(DoctorsFilter))
+                .Items;
 
             if (!doctors.Any())
             {
@@ -433,6 +464,7 @@ public partial class Appointments : HealthCareComponentBase
             if (!slots.Any())
             {
                 AppointmentSlots = [];
+                AvailableSlotCount = 0;
                 return;
             }
 
@@ -470,35 +502,16 @@ public partial class Appointments : HealthCareComponentBase
 
         try
         {
-            var baseDate = StepperModel.AppointmentDate;
-            var start = ConvertToDateTime(baseDate, StepperModel.StartTime);
-            var end = ConvertToDateTime(baseDate, StepperModel.EndTime);
-            if (start == null || end == null)
-            {
-                return;
-            }
+            MapStepperModelToNewAppointment();
 
-            //New appointment object mapping
-            NewAppointment.DoctorId = StepperModel.DoctorId;
-            NewAppointment.DepartmentId = StepperModel.DepartmentId;
-            NewAppointment.PatientId = StepperModel.PatientId;
-            NewAppointment.MedicalServiceId = StepperModel.MedicalServiceId;
-            NewAppointment.AppointmentDate = StepperModel.AppointmentDate;
-            NewAppointment.StartTime = start.Value;
-            NewAppointment.EndTime = end.Value;
-            NewAppointment.Amount = StepperModel.Amount;
-            NewAppointment.Notes = StepperModel.Note;
-            NewAppointment.ReminderSent = StepperModel.ReminderSent;
-            NewAppointment.AppointmentTypeId = StepperModel.AppointmentTypeId;
-
-            var message = L["ConfirmMessage"];
-            var confirm = L["Confirm"];
-
-            if (!await UiMessageService.Confirm(message, confirm, options =>
+            var confirmation = await UiMessageService.Confirm(L["ConfirmMessage"], L["Confirm"],
+                options =>
                 {
                     options.ConfirmButtonText = L["Yes"];
                     options.CancelButtonText = L["No"];
-                }))
+                });
+
+            if (!confirmation)
             {
                 IsFinalResultSuccess = false;
                 return;
@@ -511,10 +524,34 @@ public partial class Appointments : HealthCareComponentBase
         catch (Exception e)
         {
             IsFinalResultSuccess = false;
+            FailureMessage = e.Message;
             await OnNextStep();
             await UiMessageService.Error(e.Message);
-            FailureMessage = e.Message;
         }
+    }
+
+    private void MapStepperModelToNewAppointment()
+    {
+        var baseDate = StepperModel.AppointmentDate;
+        var start = ConvertToDateTime(baseDate, StepperModel.StartTime);
+        var end = ConvertToDateTime(baseDate, StepperModel.EndTime);
+        if (start == null || end == null)
+        {
+            return;
+        }
+
+        //New appointment object mapping
+        NewAppointment.DoctorId = StepperModel.DoctorId;
+        NewAppointment.DepartmentId = StepperModel.DepartmentId;
+        NewAppointment.PatientId = StepperModel.PatientId;
+        NewAppointment.MedicalServiceId = StepperModel.MedicalServiceId;
+        NewAppointment.AppointmentDate = StepperModel.AppointmentDate;
+        NewAppointment.StartTime = start.Value;
+        NewAppointment.EndTime = end.Value;
+        NewAppointment.Amount = StepperModel.Amount;
+        NewAppointment.Notes = StepperModel.Note;
+        NewAppointment.ReminderSent = StepperModel.ReminderSent;
+        NewAppointment.AppointmentTypeId = StepperModel.AppointmentTypeId;
     }
 
     #endregion
@@ -539,7 +576,7 @@ public partial class Appointments : HealthCareComponentBase
 
     private async void ClearServiceSearch()
     {
-        MedicalServiceFilter.Name = "";
+        MedicalServiceFilter.Name = string.Empty;
         await GetServices();
     }
 
@@ -588,6 +625,8 @@ public partial class Appointments : HealthCareComponentBase
     }
 
     #endregion
+
+    #region AppointmentSelectors
 
     private async Task OnSelectAppointmentDay(AppointmentDayItemLookupDto item)
     {
@@ -639,16 +678,7 @@ public partial class Appointments : HealthCareComponentBase
         StepperModel.EndTime = slot.EndTime;
     }
 
-    private Task OnReminderSettingChanged(bool val)
-    {
-        StepperModel.ReminderSent = val;
-        return Task.CompletedTask;
-    }
-
-    private static DateTime? ConvertToDateTime(DateTime appointmentDate, string timeString)
-    {
-        return TimeSpan.TryParse(timeString, out var time) ? appointmentDate.Date.Add(time) : null;
-    }
+    #endregion
 
     #region StepHandlers
 
@@ -707,17 +737,23 @@ public partial class Appointments : HealthCareComponentBase
                 IsCurrentStepValid = true;
             }
 
-            if (IsCurrentStepValid)
+            if (!IsCurrentStepValid)
             {
-                ActiveStep = args.ActiveStep;
-                if (ActiveStep == 1)
-                {
-                    await GetAppointmentDays();
-                    if (DaysLookupList.Count != 0)
-                    {
-                        await OnSelectAppointmentDay(DaysLookupList.First());
-                    }
-                }
+                return;
+            }
+
+            ActiveStep = args.ActiveStep;
+
+            if (ActiveStep != 1)
+            {
+                return;
+            }
+
+            await GetAppointmentDays();
+
+            if (DaysLookupList.Count != 0)
+            {
+                await OnSelectAppointmentDay(DaysLookupList.First());
             }
         }
         catch (Exception e)
@@ -778,6 +814,21 @@ public partial class Appointments : HealthCareComponentBase
         await OnStepperReset();
         ResetAppointmentInfo();
         StateHasChanged();
+    }
+
+    #endregion
+
+    #region Helpers
+
+    private Task OnReminderSettingChanged(bool val)
+    {
+        StepperModel.ReminderSent = val;
+        return Task.CompletedTask;
+    }
+
+    private static DateTime? ConvertToDateTime(DateTime appointmentDate, string timeString)
+    {
+        return TimeSpan.TryParse(timeString, out var time) ? appointmentDate.Date.Add(time) : null;
     }
 
     #endregion

@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Laboratory
 {
     public partial class PatientReports
     {

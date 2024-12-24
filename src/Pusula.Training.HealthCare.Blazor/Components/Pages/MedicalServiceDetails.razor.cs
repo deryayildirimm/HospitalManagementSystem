@@ -441,7 +441,7 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
                 {
                     var exportProperties = new PdfExportProperties
                     {
-                        IncludeTemplateColumn = true,
+                        IncludeTemplateColumn = true
                     };
                     await RestrictionGrid.ExportToPdfAsync(exportProperties);
                     break;
@@ -464,6 +464,14 @@ public partial class MedicalServiceDetails : HealthCareComponentBase
 
         IsAddModalVisible = false;
         IsEditModalVisible = false;
+    }
+    
+    public void PdfQueryCellInfoHandler(PdfQueryCellInfoEventArgs<RestrictionDto> args)
+    {
+        if (args.Column.Field == "RestrictionDto.Department.Name")
+        {
+            args.Cell.Value = args.Data.Department.Name;
+        }
     }
 
     private async Task Refresh()

@@ -54,7 +54,7 @@
 
     protected override void OnParametersSet()
     {
-        EditContext = new EditContext(Model);
+        EditContext = new EditContext(Model!);
         _backendErrorMessage = string.Empty;
        
     }
@@ -79,7 +79,7 @@
     private async Task SubmitForm()
     {
 
-        if (!EditContext.Validate())
+        if (!(EditContext!.Validate()))
         {
             _backendErrorMessage = "Please fill all required fields correctly.";
             return;

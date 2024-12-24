@@ -48,7 +48,7 @@ else
     <div class="main-container">
         <!-- Left Side Report Table -->
         <div class="reports-section">
-            <SfGrid DataSource="@BloodTestSummaries" AllowPaging="true">
+            <SfGrid DataSource="@BloodTestSummaries" AllowPaging="true" AllowSorting="true" >
                 <GridPageSettings PageSize="2"></GridPageSettings>
                 <GridTemplates>
                     <DetailTemplate>
@@ -64,7 +64,7 @@ else
                                         </ChildContent>
                                         <ContentTemplate>
                                             <div style="padding:25px">
-                                                <SfGrid DataSource="@BloodTestResultDetails" AllowPaging="true" Query="@(new Query().Where("BloodTestId", "equal", result!.BloodTestId))">
+                                                <SfGrid DataSource="@BloodTestResultDetails" AllowFiltering="true" AllowPaging="true" Query="@(new Query().Where("BloodTestId", "equal", result!.BloodTestId))">
                                                     <GridEvents CommandClicked="OnCommandClicked" TValue="BloodTestResultDetailsDto"></GridEvents>
                                                     <GridPageSettings PageSize="3"></GridPageSettings>
                                                     <GridColumns>

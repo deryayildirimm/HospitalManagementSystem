@@ -59,9 +59,9 @@ public partial class CreateAppointment : HealthCareComponentBase
     private bool IsCreateAppointmentOpen { get; set; }
     private bool IsEditAppointmentOpen { get; set; }
     private SfToast ToastObj { get; set; }
-    private string ToastContent { get; set; } = "";
+    private string ToastContent { get; set; } = string.Empty;
     private string ToastTitle { get; set; } = "Information";
-    private string ToastCssClass { get; set; } = "";
+    private string ToastCssClass { get; set; } = string.Empty;
     private int AvailableSlotCount { get; set; } = 0;
     private Guid EditingAppointmentId { get; set; } = default;
 
@@ -303,10 +303,7 @@ public partial class CreateAppointment : HealthCareComponentBase
         try
         {
             await PatientsAppService.CreateAsync(NewPatient);
-            ToastContent = @L["PatientCreated"];
-            ToastTitle = L["Information"];
-            ToastCssClass = "e-toast-info";
-            await ShowOnClick();
+            await OpenToast(content: "PatientCreated", title: "Information", css: "e-toast-info");
         }
         catch (Exception e)
         {
@@ -348,6 +345,7 @@ public partial class CreateAppointment : HealthCareComponentBase
         try
         {
             await AppointmentAppService.UpdateAsync(EditingAppointmentId, EditingAppointment);
+            await OpenToast(content: "OperationSuccessful", title: "AppointmentUpdated", css: "e-toast-success");
             CloseEditAppointmentModal();
         }
         catch (Exception ex)
@@ -366,22 +364,14 @@ public partial class CreateAppointment : HealthCareComponentBase
         {
             if (!IsCreateAppointmentValid)
             {
-                ToastContent = @L[$"FillRequiredFields"];
-                ToastTitle = @L["ValidationError"];
-                ToastCssClass = "e-toast-danger";
-                StateHasChanged();
+                await OpenToast(content: "FillRequiredFields", title: "ValidationError", css: "e-toast-danger");
                 await ShowOnClick();
                 return;
             }
 
             await AppointmentAppService.CreateAsync(NewAppointment);
-
-            ToastContent = $"{@L[$"OperationSuccessful"]}\n{@L["AppointmentInformationWillBeSent"]}";
-            ToastTitle = @L["AppointmentCreated"];
-            ToastCssClass = "e-toast-success";
+            await OpenToast(content: "OperationSuccessful", title: "AppointmentCreated", css: "e-toast-success");
             IsCreateAppointmentOpen = false;
-            StateHasChanged();
-            await ShowOnClick();
             ResetAppointmentInfo();
         }
         catch (Exception e)
@@ -439,6 +429,7 @@ public partial class CreateAppointment : HealthCareComponentBase
 
     private async void OnPopupOpen(PopupOpenEventArgs<AppointmentCustomData> args)
     {
+        //If appointment slot occupied don't open the popup
         if (!args.Data.IsReadOnly)
         {
             IsCreateAppointmentOpen = false;
@@ -446,14 +437,11 @@ public partial class CreateAppointment : HealthCareComponentBase
             return;
         }
 
+        //If IsCreateAppointmentModelValid in ot valid, don't open the popup
         if (args.Type is PopupType.Editor or PopupType.QuickInfo && !IsCreateAppointmentModelValid)
         {
             args.Cancel = true;
-            ToastTitle = L["Error"];
-            ToastContent = @L["PatientDoctorServiceError"];
-            ToastCssClass = "e-toast-danger";
-            StateHasChanged();
-            await ShowOnClick();
+            await OpenToast(content: "PatientDoctorServiceError", title: "Error", css: "e-toast-danger");
             return;
         }
 
@@ -516,6 +504,8 @@ public partial class CreateAppointment : HealthCareComponentBase
 
     #endregion
 
+    #region OnChangeEvents
+
     private async Task OnMedicalServiceChange(SelectEventArgs<MedicalServiceDto> args)
     {
         try
@@ -566,62 +556,6 @@ public partial class CreateAppointment : HealthCareComponentBase
         }
     }
 
-    private void ResetAppointmentInfo()
-    {
-        NewAppointment.StartTime = DateTime.Today;
-        NewAppointment.EndTime = DateTime.Today;
-        NewAppointment.AppointmentTypeId = Guid.Empty;
-        NewAppointment.ReminderSent = true;
-        NewAppointment.Notes = null;
-    }
-
-    private async void OnMoreDetailsClick(MouseEventArgs args, AppointmentCustomData data)
-    {
-        await ScheduleObj.CloseQuickInfoPopupAsync();
-        await ScheduleObj.OpenEditorAsync(data, CurrentAction.Add);
-    }
-
-    private static string GetEventDetails(AppointmentCustomData? data)
-    {
-        return data?.StartTime + " - " + data?.EndTime;
-    }
-
-    private void ClosePatientSearchModal()
-    {
-        IsVisibleSearchPatient = false;
-    }
-
-    private void OpenPatientSearchModal()
-    {
-        IsVisibleSearchPatient = true;
-    }
-
-    private void SelectPatient(PatientDto? patient)
-    {
-        if (patient == null)
-        {
-            return;
-        }
-
-        SelectedPatient = patient;
-
-        NewAppointment.PatientId = patient.Id;
-        ClosePatientSearchModal();
-    }
-
-    private async Task ShowOnClick()
-    {
-        await ToastObj.ShowAsync();
-    }
-
-    private void ClearFilters()
-    {
-        SelectedPatient = new PatientDto();
-        NewAppointment = new AppointmentCreateDto();
-        MedicalServiceNameInfo = "";
-        StateHasChanged();
-    }
-
     private async Task OnLoadDaysDaysLeft()
     {
         var newStartDate = DaysLookupFilter.StartDate.AddDays(-LoadCount);
@@ -643,5 +577,72 @@ public partial class CreateAppointment : HealthCareComponentBase
         CurrentDate = item.Date;
         GetAppointmentSlotFilter.Date = item.Date;
         await GetAppointmentSlots();
+    }
+
+    private void SelectPatient(PatientDto? patient)
+    {
+        if (patient == null)
+        {
+            return;
+        }
+
+        SelectedPatient = patient;
+
+        NewAppointment.PatientId = patient.Id;
+        ClosePatientSearchModal();
+    }
+
+    #endregion
+
+    private void ResetAppointmentInfo()
+    {
+        NewAppointment.StartTime = DateTime.Today;
+        NewAppointment.EndTime = DateTime.Today;
+        NewAppointment.AppointmentTypeId = Guid.Empty;
+        NewAppointment.ReminderSent = true;
+        NewAppointment.Notes = null;
+    }
+
+    private async void OnMoreDetailsClick(MouseEventArgs args, AppointmentCustomData data)
+    {
+        await ScheduleObj.CloseQuickInfoPopupAsync();
+        await ScheduleObj.OpenEditorAsync(data, CurrentAction.Add);
+    }
+
+    private static string GetEventDetails(AppointmentCustomData? data)
+    {
+        return $"{data?.StartTime} - {data?.EndTime}";
+    }
+
+    private void ClosePatientSearchModal()
+    {
+        IsVisibleSearchPatient = false;
+    }
+
+    private void OpenPatientSearchModal()
+    {
+        IsVisibleSearchPatient = true;
+    }
+
+    private async Task ShowOnClick()
+    {
+        await ToastObj.ShowAsync();
+    }
+
+    private void ClearFilters()
+    {
+        SelectedPatient = new PatientDto();
+        NewAppointment = new AppointmentCreateDto();
+        MedicalServiceNameInfo = string.Empty;
+        StateHasChanged();
+    }
+
+    private async Task OpenToast(string content, string title, string css)
+    {
+        ToastContent = L[content];
+        ToastTitle = L[title];
+        ToastCssClass = css;
+        StateHasChanged();
+        await ShowOnClick();
     }
 }

@@ -146,7 +146,7 @@ public partial class ProtocolTypes : HealthCareComponentBase
         catch (Exception e)
         {
             await UiMessageService.Error(@L[$"An error occurred while creating the Protocol Type. {e?.InnerException?.Message}"]);
-            throw new UserFriendlyException(e.Message);
+            throw new UserFriendlyException(e!.Message);
         }
         finally
         {

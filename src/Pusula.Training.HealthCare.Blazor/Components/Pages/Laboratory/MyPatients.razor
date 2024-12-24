@@ -45,7 +45,7 @@
 else
 {
     <SfGrid DataSource="@Patients" AllowPaging="true" AllowSorting="true" AllowFiltering="true">
-        <GridPageSettings PageSize="8"></GridPageSettings>
+        <GridPageSettings PageSize="5"></GridPageSettings>
         <GridColumns>
             <GridColumn Field=@nameof(Patient.PatientNumber) HeaderText=@L["PatientNumber"] Width="120"></GridColumn>
             <GridColumn Field=@nameof(Patient.FirstName) HeaderText=@L["FirstName"] Width="120"></GridColumn>

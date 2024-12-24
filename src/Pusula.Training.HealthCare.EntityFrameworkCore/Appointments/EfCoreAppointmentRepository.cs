@@ -99,11 +99,24 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
     {
         var query = ApplyFilter(
             (await GetQueryForNavigationPropertiesAsync()),
-            doctorId, patientId, medicalServiceId, appointmentTypeId, departmentId, patientName, doctorName,
+            doctorId,
+            patientId,
+            medicalServiceId,
+            appointmentTypeId,
+            departmentId,
+            patientName,
+            doctorName,
             serviceName,
-            patientNumber, appointmentMinDate, appointmentMaxDate, startTime, endTime, status, patientType,
+            patientNumber,
+            appointmentMinDate,
+            appointmentMaxDate,
+            startTime,
+            endTime,
+            status,
+            patientType,
             reminderSent,
-            minAmount, maxAmount);
+            minAmount,
+            maxAmount);
 
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting)
             ? AppointmentConsts.GetDefaultSorting(false)
@@ -117,20 +130,41 @@ public class EfCoreAppointmentRepository(IDbContextProvider<HealthCareDbContext>
         Guid? medicalServiceId = null,
         Guid? appointmentTypeId = null,
         Guid? departmentId = null,
+        string? patientName = null,
+        string? doctorName = null,
+        string? serviceName = null,
+        int? patientNumber = null,
         DateTime? appointmentMinDate = null,
         DateTime? appointmentMaxDate = null,
         DateTime? startTime = null,
         DateTime? endTime = null,
         EnumAppointmentStatus? status = null,
+        EnumPatientTypes? patientType = null,
         bool? reminderSent = null,
         double? minAmount = null,
         double? maxAmount = null,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryForNavigationPropertiesAsync()),
-            doctorId, patientId, medicalServiceId, appointmentTypeId, departmentId, appointmentMinDate,
-            appointmentMaxDate, startTime,
-            endTime, status, reminderSent, minAmount, maxAmount);
+        var query = ApplyFilter(
+            (await GetQueryForNavigationPropertiesAsync()),
+            doctorId,
+            patientId,
+            medicalServiceId,
+            appointmentTypeId,
+            departmentId,
+            patientName,
+            doctorName,
+            serviceName,
+            patientNumber,
+            appointmentMinDate,
+            appointmentMaxDate,
+            startTime,
+            endTime,
+            status,
+            patientType,
+            reminderSent,
+            minAmount,
+            maxAmount);
 
         return await query.LongCountAsync(cancellationToken);
     }

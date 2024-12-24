@@ -383,8 +383,10 @@
     "Menu:Laboratory": "Laboratory",
     "Data is not available " : "Data is not available",
     "Total Number of Transactions" : "Total Number of Transactions",
-    "Total" : "Total"
-    
-    
+    "Total" : "Total",
+    "Menu:Laboratory": "Laboratory",
+    "AppointmentTypeCreated": "Appointment type successfully created.",
+    "AppointmentTypeUpdated": "Appointment type successfully updated.",
+    "AppointmentUpdated": "Appointment Updated"
   }
 }

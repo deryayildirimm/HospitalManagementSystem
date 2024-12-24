@@ -14,7 +14,7 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using SortDirection = Blazorise.SortDirection;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Patient
 {
     public partial class Insurances
     {
@@ -31,14 +31,12 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages
         private bool CanEditInsurance { get; set; }
         private bool CanDeleteInsurance { get; set; }
         private Guid EditingInsuranceId { get; set; }
-        private InsuranceCreateDto NewInsurance {  get; set; }
-        private InsuranceUpdateDto EditInsurance {  get; set; }
-        private SfDialog CreateInsuranceModal;
-        private SfDialog EditInsuranceModal;
+        private InsuranceCreateDto? NewInsurance {  get; set; }
+        private InsuranceUpdateDto? EditInsurance {  get; set; }
         private GetInsurancesInput Filter { get; set; }
-        private List<InsuranceDto> SelectedInsurances { get; set; } = new();
-        private List<KeyValuePair<EnumInsuranceCompanyName, string>> InsuranceCompanyNameList { get; set; }
-        private bool isLoading;
+        private List<InsuranceDto> SelectedInsurances { get; set; } = [];
+        private List<KeyValuePair<EnumInsuranceCompanyName, string>> InsuranceCompanyNameList { get; set; } = [];
+        private bool isLoading { get; set; }
         private bool IsVisibleCreate { get; set; }
         private bool IsVisibleEdit { get; set; }
 
@@ -179,7 +177,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages
 
             return Task.CompletedTask;
         }
-        private async Task DeleteDoctorAsync(InsuranceDto input)
+        private async Task DeleteInsuranceAsync(InsuranceDto input)
         {
             var confirmed = await UiMessageService.Confirm($"Are you sure you want to delete {input.InsuranceCompanyName} ?");
             if (!confirmed) return;
@@ -216,7 +214,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages
         {
             try
             {
-                await insuranceAppService.CreateAsync(NewInsurance);
+                await insuranceAppService.CreateAsync(NewInsurance!);
                 await GetInsurances();
                 CloseCreateInsuranceModal();
             }
@@ -230,7 +228,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages
         {
             try
             {
-                await insuranceAppService.UpdateAsync(EditingInsuranceId,EditInsurance);
+                await insuranceAppService.UpdateAsync(EditingInsuranceId,EditInsurance!);
                 await GetInsurances();
                 CloseEditInsuranceModal();
             }

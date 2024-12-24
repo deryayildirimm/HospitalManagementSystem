@@ -89,7 +89,8 @@ public class AppointmentManager(
         //Get the doctor's all slots for all days as a dictionary
         var slotsByDate = GetAppointmentSlotsByDate(workingHours, startDate, offset, duration);
 
-         return CreateAppointmentDayLookups(slotsByDate: slotsByDate, doctorLeaves: doctorLeaves, appointmentsByDate: appointments);
+        return CreateAppointmentDayLookups(slotsByDate: slotsByDate, doctorLeaves: doctorLeaves,
+            appointmentsByDate: appointments);
     }
 
     public virtual async Task<Appointment> CreateAsync(
@@ -133,7 +134,7 @@ public class AppointmentManager(
             endTime: endTime);
 
         //Check if appointment slot is occupied or not
-        await CheckAppointmentStatus(doctorId: doctorId, appointmentDate: appointmentDate, startTime: startTime);
+        await CheckAppointmentStatus(doctorId: doctorId, appointmentDate: appointmentDate, startTime: startTime, endTime: endTime);
 
         var appointment = new Appointment(
             id: GuidGenerator.Create(),
@@ -175,8 +176,9 @@ public class AppointmentManager(
         Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue);
         Check.Range((int)status, nameof(status), AppointmentConsts.StatusMinValue, AppointmentConsts.StatusMaxValue);
 
-        //Check if appointment slot is occupied or not
-        await CheckAppointmentStatus(doctorId: doctorId, appointmentDate: appointmentDate, startTime: startTime);
+        //Check if appointment slot is occupied or not if it's not cancelled
+        await CheckAppointmentStatus(doctorId: doctorId, appointmentDate: appointmentDate, startTime: startTime, endTime: endTime,
+            status: status);
 
         var appointment = await appointmentRepository.GetAsync(id);
 
@@ -301,14 +303,20 @@ public class AppointmentManager(
     private async Task CheckAppointmentStatus(
         Guid doctorId,
         DateTime appointmentDate,
-        DateTime startTime)
+        DateTime startTime,
+        DateTime endTime,
+        EnumAppointmentStatus? status = null)
     {
         var isAppointmentTaken = await appointmentRepository.FirstOrDefaultAsync(
             x => x.DoctorId == doctorId
                  && x.AppointmentDate.Date == appointmentDate.Date
-                 && x.StartTime == startTime);
+                 && x.StartTime >= startTime
+                 && x.StartTime <= endTime);
+
+        var isCancelledStatus = status is EnumAppointmentStatus.Cancelled;
+        var isTaken = isAppointmentTaken is not null;
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.AppointmentAlreadyTaken,
-            isAppointmentTaken is not null);
+            !isCancelledStatus && isTaken);
     }
 
     private async Task<List<DoctorLeave>> GetDoctorLeaves(
@@ -369,7 +377,7 @@ public class AppointmentManager(
             })
             .ToList();
     }
-    
+
     private List<AppointmentDayLookupDto> CreateAppointmentDayLookups(
         Dictionary<DateTime, List<AppointmentSlotBaseDto>> slotsByDate,
         IEnumerable<DoctorLeave> doctorLeaves,
