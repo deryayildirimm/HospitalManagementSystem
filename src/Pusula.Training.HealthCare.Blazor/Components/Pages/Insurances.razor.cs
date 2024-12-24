@@ -33,12 +33,12 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages
         private Guid EditingInsuranceId { get; set; }
         private InsuranceCreateDto NewInsurance {  get; set; }
         private InsuranceUpdateDto EditInsurance {  get; set; }
-        private SfDialog CreateInsuranceModal;
-        private SfDialog EditInsuranceModal;
+        private SfDialog CreateInsuranceModal {  get; set; }
+        private SfDialog EditInsuranceModal {  get; set; }
         private GetInsurancesInput Filter { get; set; }
-        private List<InsuranceDto> SelectedInsurances { get; set; } = new();
+        private List<InsuranceDto> SelectedInsurances { get; set; } = [];
         private List<KeyValuePair<EnumInsuranceCompanyName, string>> InsuranceCompanyNameList { get; set; }
-        private bool isLoading;
+        private bool isLoading { get; set; }
         private bool IsVisibleCreate { get; set; }
         private bool IsVisibleEdit { get; set; }
 

@@ -21,13 +21,13 @@ public partial class ProtocolDetail
     [Parameter]
     public int PatientNumber { get; set; }
 
-    private PatientDto patient = new PatientDto();
+    private PatientDto patient { get; set; }= new PatientDto();
 
-    private string PatientGender = "MALE";
+    private string PatientGender { get; set; }= "MALE";
 
     private bool VisibleProperty { get; set; } = true;
 
-    protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
+    protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems { get; set; } = [];
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private List<AppointmentViewModel> AppointmentList { get; set; }
     private IReadOnlyList<AppointmentDto> FetchedAppointmentList { get; set; }
@@ -40,10 +40,10 @@ public partial class ProtocolDetail
     private bool CanEditPatient { get; set; }
     private PatientCreateDto NewPatient { get; set; }
     private PatientUpdateDto EditingPatient { get; set; }
-    
+
     private ProtocolWithDetailsDto protocolWithDetails { get; set; }
 
-    private string ProtocolStatus;
+    private string ProtocolStatus { get; set; }
     
 
     private EnumAppointmentStatus? _status { get; set; } = EnumAppointmentStatus.Scheduled;
@@ -54,14 +54,11 @@ public partial class ProtocolDetail
 
     private GetAppointmentsInput FilterText { get; set; }
 
-    private IEnumerable<CountryPhoneCodeDto> Nationalities = [];
-    private IEnumerable<KeyValuePair<int, string>> Genders = [];
-    private IEnumerable<KeyValuePair<int, string>> Relatives = [];
-    private IEnumerable<KeyValuePair<int, string>> PationTypes = [];
-    private IEnumerable<KeyValuePair<int, string>> DiscountGroups = [];
-
-
-
+    private IEnumerable<CountryPhoneCodeDto> Nationalities { get; set; }= [];
+    private IEnumerable<KeyValuePair<int, string>> Genders { get; set; }= [];
+    private IEnumerable<KeyValuePair<int, string>> Relatives { get; set; }= [];
+    private IEnumerable<KeyValuePair<int, string>> PationTypes { get; set; }= [];
+    private IEnumerable<KeyValuePair<int, string>> DiscountGroups { get; set; }= [];
 
     public ProtocolDetail()
     {
@@ -320,10 +317,10 @@ public partial class ProtocolDetail
 
     public class MedicalConditionViewModel
     {
-        public string DiseaseName { get; set; }
+        public string DiseaseName { get; set; } = string.Empty;
         public DateTime DiagnosisDate { get; set; }
-        public string TreatmentStatus { get; set; }
-        public string DoctorNotes { get; set; }
+        public string TreatmentStatus { get; set; } = string.Empty;
+        public string DoctorNotes { get; set; } = string.Empty;
     }
 
     #endregion

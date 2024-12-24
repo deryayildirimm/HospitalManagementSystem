@@ -44,7 +44,7 @@ public class AppointmentController(IAppointmentAppService appointmentAppService)
         => appointmentAppService.GetAsync(id);
 
     [HttpGet]
-    [Route("{by-date}")]
+    [Route("by-date")]
     public Task<AppointmentDto> GetByDateAsync(GetAppointmentByDateInput input)
      => appointmentAppService.GetByDateAsync(input);
 
