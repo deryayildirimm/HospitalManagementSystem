@@ -380,6 +380,11 @@
     "ChooseDate": "Choose Date",
     "Clear": "Clear",
     "NewLeave": "New Leave",
-    "Menu:Laboratory": "Laboratory"
+    "Menu:Laboratory": "Laboratory",
+    "Data is not available " : "Data is not available",
+    "Total Number of Transactions" : "Total Number of Transactions",
+    "Total" : "Total"
+    
+    
   }
 }

@@ -208,6 +208,9 @@
     "Menu:LaboratoryTechnician": "Laboratuvar Teknisyeni",
     "PhoneNumber": "Telefon Numarası",
     "Reports": "Raporlar",
-    "Laboratory": "Laboratuvar"
+    "Laboratory": "Laboratuvar",
+    "Data is not available " : "Veri bulunamadı",
+    "Total Number of Transactions" : "Toplam İşlem Sayısı",
+    "Total" : "Toplam"
   }
 }

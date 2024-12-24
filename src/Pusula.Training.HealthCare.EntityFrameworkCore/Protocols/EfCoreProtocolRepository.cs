@@ -353,7 +353,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
     {
         var query = await GetQueryForNavigationPropertiesAsync();
 
-// Filtreleme işlemi
+
         query = ApplyFilter(query, filterText, note, startTimeMin, startTimeMax, endTimeMin, endTimeMax, patientId,
             departmentId, protocolTypeId, doctorId, insuranceId);
 
@@ -437,8 +437,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
 
         query = ApplyFilter(query, filterText, note, startTimeMin, startTimeMax, endTimeMin, endTimeMax, patientId,
             departmentId, protocolTypeId, doctorId, insuranceId);
-
-// Departman bazlı gruplama ve hasta sayısı hesaplama
+        
        var patientList = await query
            .GroupBy( p => new 
            { 

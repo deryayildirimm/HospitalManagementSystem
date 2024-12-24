@@ -187,18 +187,7 @@ public partial class PatientDetail
         await EditPatientModal.Hide();
     }
 
-    #region bunu appointment dilmesi için dönüştürücez
 
-    private async Task DeletePatientAsync(PatientDto input)
-    {
-
-        var confirmed = await UiMessageService.Confirm($"Are you sure you want to delete {input.FirstName} {input.LastName}?");
-        if (!confirmed) return;
-
-        await PatientsAppService.DeleteAsync(input.Id);
-
-    }
-    #endregion
 
     #region statuye göre veri çekme 
 
@@ -286,9 +275,6 @@ public partial class PatientDetail
     }
 
     #region Fake Data For MedicalCondition
-
-
-
 
     private List<MedicalConditionViewModel> MedicalConditions = new()
     {

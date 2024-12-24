@@ -18,8 +18,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
 
     [NotNull]
     public virtual DateTime StartTime { get; private set; }
-
- 
+    
     public virtual DateTime? EndTime { get; private set; }
     public Guid PatientId { get; private set; }
     public virtual Patient Patient { get;  set; } = null!; 

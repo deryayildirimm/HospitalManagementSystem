@@ -1,6 +1,6 @@
 @page "/protocols/detail/{PatientNumber:int}"
 
-@attribute [Authorize(HealthCarePermissions.Patients.Default)]
+@attribute [Authorize(HealthCarePermissions.Protocols.Default)]
 @using Pusula.Training.HealthCare.Countries
 @using Pusula.Training.HealthCare.Patients
 @using Pusula.Training.HealthCare.Localization
@@ -81,25 +81,25 @@
         <div class="left-box" style="margin-right: -285px">
             <div class="patient-card">
                 <div class="card-header">
-                <h4 style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 10px;"> <strong>Hasta Adı : @ProtocolState?.PatientName</strong> </h4>
-                <h5> <strong>Identity Number :</strong>@ProtocolState?.PatientIdentityNumber <span style="margin-left: 10px">@ProtocolState?.PatientGender</span> </h5>
-                <h5> <strong>Protokol Type:</strong>@ProtocolState?.ProtocolTypeName </h5>
-                <h5> <strong>Department:</strong>@ProtocolState?.DepartmentName </h5>
-                <h5> <strong>Doctor Name: </strong>@ProtocolState?.DoctorName </h5>
-                <h5><strong>Başlangıç Tarihi:</strong> @ProtocolState?.StartTime</h5>
-                <h5><strong>Bitiş Tarihi:</strong> @ProtocolState?.EndTime</h5>
+                <h4 style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 10px;"> <strong>@L["Patient Name "]@ProtocolState?.PatientName</strong> </h4>
+                <h5> <strong>@L["Identity Number : "]</strong>@ProtocolState?.PatientIdentityNumber <span style="margin-left: 10px">@ProtocolState?.PatientGender</span> </h5>
+                <h5> <strong>@L["Protocol Type: "]</strong>@ProtocolState?.ProtocolTypeName </h5>
+                <h5> <strong>@L["Department :"]</strong>@ProtocolState?.DepartmentName </h5>
+                <h5> <strong>@L["Doctor Name "]</strong>@ProtocolState?.DoctorName </h5>
+                <h5><strong>@L["Start Time "]</strong> @ProtocolState?.StartTime</h5>
+                <h5><strong>@L["End Time "]</strong> @ProtocolState?.EndTime</h5>
                 </div>
             </div>
         </div>
         <div class="left-box" style="width: 50%">
             <div class="patient-card">
                 <div class="card-header">
-                    <h3 > <strong>Protokol Özeti</strong> </h3>
-                    <h4> <strong>Toplam İşlem Sayısı:</strong> @protocolWithDetails?.MedicalService?.Length   </h4>
-                    <h4><strong>Toplam Tutar:</strong>@protocolWithDetails?.Price </h4>
+                    <h3 > <strong>@L["Protocol "]</strong> </h3>
+                    <h4> <strong>@L["Total Number of Transactions "]</strong> @protocolWithDetails?.MedicalService?.Length   </h4>
+                    <h4><strong>@L["Total :"]</strong>@protocolWithDetails?.Price </h4>
                 </div>
                 <div class="card-header">
-                    <h4 > <strong>İlgili İşlemler</strong> </h4>
+                    <h4 > <strong>@L["İlgili İşlemler "]</strong> </h4>
                     @if (MedicalServices.Any())
                     {
                         @foreach (var service in MedicalServices)
@@ -115,8 +115,7 @@
                 </div>
             </div>
             <div class="btn-wrapper">
-                <a href=""> + Protokolü Düzenle</a>
-                <a href=""> + Yeni İşlem Ekle</a>
+              
             </div>
         </div>
     </div>
@@ -136,7 +135,7 @@
                 </ul>
             </div>
             <SfGrid TValue="AppointmentViewModel" DataSource="AppointmentList" AllowPaging="true">
-                @if (AppointmentList == null || !AppointmentList.Any())
+                @if ( !AppointmentList.Any())
                 {
                     <p>Veri bulunamadı.</p>
                 }
