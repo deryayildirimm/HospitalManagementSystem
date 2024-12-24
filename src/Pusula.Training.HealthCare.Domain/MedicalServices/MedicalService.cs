@@ -40,7 +40,6 @@ public class MedicalService : FullAuditedAggregateRoot<Guid>
         SetCost(cost);
         SetServiceCreatedAt(serviceCreatedAt);
         SetDuration(duration);
-        DepartmentMedicalServices = new List<DepartmentMedicalService>();
     }
 
     public void SetName(string name)
