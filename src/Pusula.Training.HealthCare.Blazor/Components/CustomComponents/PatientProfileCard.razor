@@ -1,0 +1,63 @@
+﻿@using Pusula.Training.HealthCare.Patients
+
+<div class="profile-card-container">
+    <div class="e-card e-custom-card">
+        <div class="e-card-header">
+            <div class="e-avatar e-avatar-circle">
+                <img src="/images/avatar.jpg" alt="Profile Image" />
+            </div>
+        </div>
+        <div class="e-card-header-caption">
+            <div class="e-card-header-title">@Patient.FirstName @Patient.LastName</div>
+            <div class="e-card-header-sub-title">
+                <span>@Age</span>
+                @if (Patient.Nationality != null)
+                {
+                    <span> | @Patient.Nationality</span>
+                }
+            </div>
+        </div>
+        <div class="e-card-content">
+            <table class="e-profile-details">
+                <tr>
+                    <td>
+                        <div class="profile-row">Weight</div>
+                        <div class="profile-value">70 KG</div>
+                    </td>
+                    <td>
+                        <div class="profile-row">Height</div>
+                        <div class="profile-value">165 cm</div>
+                    </td>
+                    <td>
+                        <div class="profile-row">Goal</div>
+                        <div class="profile-value">65 KG</div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="profile-row">Blood Group</div>
+                        <div class="profile-value">O+</div>
+                    </td>
+                    <td>
+                        <div class="profile-row">Allergies</div>
+                        <div class="profile-value">Peanuts</div>
+                    </td>
+                    <td>
+                        <div class="profile-row">Last Visit</div>
+                        <div class="profile-value">12/15/2024</div>
+                    </td>
+                </tr>
+            </table>
+            <div class="additional-info">
+                <h4>Medical Notes</h4>
+                <p>Patient has a history of high blood pressure. Regular monitoring recommended.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public PatientDto Patient { get; set; } = null!;
+
+    private int Age => DateTime.Now.Year - Patient.BirthDate.Year;
+}

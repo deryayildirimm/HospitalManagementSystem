@@ -25,6 +25,7 @@
   <ItemGroup>
     <PackageReference Include="Syncfusion.Blazor.Buttons" Version="27.2.5" />
     <PackageReference Include="Syncfusion.Blazor.Cards" Version="27.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.Charts" Version="27.2.3" />
     <PackageReference Include="Syncfusion.Blazor.DataForm" Version="27.2.3" />
     <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="27.2.3" />
     <PackageReference Include="Syncfusion.Blazor.Grid" Version="27.2.3" />
@@ -71,6 +72,8 @@
     <Content Remove="Logs\**" />
     <EmbeddedResource Remove="Logs\**" />
     <None Remove="Logs\**" />
+    <None Remove="Components\CustomComponents\BloodTestStatus.razor.css" />
+    <None Remove="Components\CustomComponents\PatientProfileCard.razor.css" />
     <None Include="wwwroot\js\WindowHelper.js" />
     <None Include="wwwroot\PatientDetail.css" />
     <None Include="wwwroot\styles\login.css">
@@ -95,6 +98,11 @@
 
   <ItemGroup>
     <AdditionalFiles Include="Themes\LeptonXLite\Layouts\Account\Default.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Components\CustomComponents\BloodTestStatus.razor.css" />
+    <Content Include="Components\CustomComponents\PatientProfileCard.razor.css" />
   </ItemGroup>
 
 </Project>

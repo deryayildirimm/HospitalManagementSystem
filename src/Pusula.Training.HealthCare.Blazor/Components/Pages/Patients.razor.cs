@@ -127,7 +127,6 @@ public partial class Patients
         //   patientService.SetPatient(patientDto);
         NavigationManager.NavigateTo($"/patients/{patientDto.PatientNumber}/detail");
     }
-
     
     protected virtual async Task SearchAsync()
     {
@@ -232,7 +231,6 @@ public partial class Patients
         await PatientsAppService.UpdateAsync(input.Id, revertPatient);
         await GetPatientsAsync();
     }
-
 
     private async Task CreatePatientAsync()
     {
@@ -342,7 +340,6 @@ public partial class Patients
 
     protected virtual async Task OnGenderChangedAsync(int? gender)
     {
-        //Filter.Gender = gender;
         await SearchAsync();
     }
 
@@ -450,5 +447,4 @@ public partial class Patients
                      .ToList();
         return Task.CompletedTask;
     }
-
 }

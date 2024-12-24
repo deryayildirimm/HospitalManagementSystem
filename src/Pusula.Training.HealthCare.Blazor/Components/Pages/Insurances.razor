@@ -100,319 +100,337 @@
     </CardBody>
 </Card>
 
-@* ************************* DATA GRID ************************* *@
-<Card>
-    <CardBody>
-        @if (SelectedInsurances.Any())
-        {
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                @if (AllInsurancesSelected)
-                {
-                    <p class="lead mb-0">
-                        @L["AllItemsAreSelected", TotalCount]
-                    </p>
-                }
-                else
-                {
-                    <p class="lead mb-0">
-                        @if (SelectedInsurances.Count > 1)
+@if (isLoading)
+{
+    <SfSpinner @bind-Visible="@isLoading">
+    </SfSpinner>
+}
+else
+{
 
-                        {
-                            @L["NumberOfItemsOnThisPageAreSelected", SelectedInsurances.Count]
-                        }
-                        else
-                        {
-                            @L["OneItemOnThisPageIsSelected"]
-                        }
-                    </p>
-                }
-
-                <div>
-                    @if ((SelectedInsurances.Count == PageSize || SelectedInsurances.Count == InsuranceList.Count) && TotalCount > SelectedInsurances.Count)
+    @* ************************* DATA GRID ************************* *@
+    <Card>
+        <CardBody>
+            @if (SelectedInsurances.Any())
+            {
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    @if (AllInsurancesSelected)
                     {
-                        if (!AllInsurancesSelected)
-                        {
-                            <SfButton OnClick="SelectAllItems" CssClass="mx-1 btn-outline-secondary">@L["SelectAllItems", TotalCount]</SfButton>
-                        }
-                        else
-                        {
-                            <SfButton OnClick="ClearSelection" CssClass="mx-1 btn-outline-secondary">@L["ClearSelection"]</SfButton>
-                        }
+                        <p class="lead mb-0">
+                            @L["AllItemsAreSelected", TotalCount]
+                        </p>
+                    }
+                    else
+                    {
+                        <p class="lead mb-0">
+                            @if (SelectedInsurances.Count > 1)
+
+                            {
+                                @L["NumberOfItemsOnThisPageAreSelected", SelectedInsurances.Count]
+                            }
+                            else
+                            {
+                                @L["OneItemOnThisPageIsSelected"]
+                            }
+                        </p>
                     }
 
+                    <div>
+                        @if ((SelectedInsurances.Count == PageSize || SelectedInsurances.Count == InsuranceList.Count) && TotalCount > SelectedInsurances.Count)
+                        {
+                            if (!AllInsurancesSelected)
+                            {
+                                <SfButton OnClick="SelectAllItems" CssClass="mx-1 btn-outline-secondary">@L["SelectAllItems", TotalCount]</SfButton>
+                            }
+                            else
+                            {
+                                <SfButton OnClick="ClearSelection" CssClass="mx-1 btn-outline-secondary">@L["ClearSelection"]</SfButton>
+                            }
+                        }
 
-                    <SfButton CssClass="e-danger" OnClick="DeleteSelectedInsurancesAsync">@L["Delete"]</SfButton>
-                    @*<Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedDoctorsAsync">
+
+                        <SfButton CssClass="e-danger" OnClick="DeleteSelectedInsurancesAsync">@L["Delete"]</SfButton>
+                        @*<Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedDoctorsAsync">
                 <Icon Name="@IconName.Delete" /> @L["Delete"]
                 </Button>*@
+                    </div>
                 </div>
-            </div>
 
-            <hr class="my-1 mx-0" />
-        }
+                <hr class="my-1 mx-0" />
+            }
 
-        <SfGrid TItem="DoctorWithNavigationPropertiesDto"
-                DataSource="InsuranceList"
-                AllowPaging="true"
-                AllowSorting="true"
-                SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
-            <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
-            <GridEvents PageChanging="PageChangingHandler" PageChanged="PageChangedHandler" TValue="InsuranceDto"></GridEvents>
-            <GridColumns>
-                @if (CanDeleteInsurance && InsuranceList.Any())
-                {
-                    <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
-                }
-
-                <GridColumn HeaderText="@L["InsuranceCompanyName"]" width="175">
-                    <Template>
-                        @{
-                            var insurance = (context as InsuranceDto);
-                            var insuranceCompanyName = insurance!.InsuranceCompanyName.ToString();
-                            @insuranceCompanyName
-                        }
-                    </Template>
-                </GridColumn>
-
-                <GridColumn HeaderText="@L["PolicyNumber"]" width="175">
-                    <Template>
-                        @{
-                            var insurance = (context as InsuranceDto);
-                            var policyNumber = insurance!.PolicyNumber;
-                            @policyNumber;
-                        }
-                    </Template>
-                </GridColumn>
-
-                <GridColumn HeaderText="@L["StartDate"]" width="175">
-                    <Template>
-                        @{
-                            var insurance = (context as InsuranceDto);
-                            var startDate = insurance!.StartDate;
-                            if (startDate.HasValue)
-                            {
-                                @startDate.Value.ToString("yyyy-MM-dd")
-                            }
-                        }
-                    </Template>
-                </GridColumn>
-
-                <GridColumn HeaderText="@L["EndDate"]" width="175">
-                    <Template>
-                        @{
-                            var insurance = (context as InsuranceDto);
-                            var endDate = insurance!.EndDate;
-                            if (endDate.HasValue)
-                            {
-                                @endDate.Value.ToString("yyyy-MM-dd")
-                            }
-                        }
-                    </Template>
-                </GridColumn>
-
-                <GridColumn HeaderText="@L["PremiumAmount"]" width="175">
-                    <Template>
-                        @{
-                            var insurance = (context as InsuranceDto);
-                            var premiumAmount = string.Format("{0:N2} ₺", insurance!.PremiumAmount);
-                            @premiumAmount
-                        }
-                    </Template>
-                </GridColumn>
-
-                <GridColumn HeaderText="@L["CoverageAmount"]" width="175">
-                    <Template>
-                        @{
-                            var insurance = (context as InsuranceDto);
-                            var coverageAmount = string.Format("{0:N2} ₺", insurance!.CoverageAmount);
-                            @coverageAmount
-                        }
-                    </Template>
-                </GridColumn>
-
-                <GridColumn HeaderText="@L["Description"]" width="175">
-                    <Template>
-                        @{
-                            var insurance = (context as InsuranceDto);
-                            var description = insurance!.Description;
-                            @description;
-                        }
-                    </Template>
-                </GridColumn>
-
-                <style>
-                    .white-icon {
-                        color: white !important;
+            <SfGrid TItem="DoctorWithNavigationPropertiesDto"
+                    DataSource="InsuranceList"
+                    AllowPaging="true"
+                    AllowSorting="true"
+                    SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
+                <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
+                <GridEvents PageChanging="PageChangingHandler" PageChanged="PageChangedHandler" TValue="InsuranceDto"></GridEvents>
+                <GridColumns>
+                    @if (CanDeleteInsurance && InsuranceList.Any())
+                    {
+                        <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
                     }
-                </style>
 
-                <GridColumn Width="150">
-                    <HeaderTemplate>
-                        <div style="text-align: center;">
-                            @L["Actions"]
-                        </div>
-                    </HeaderTemplate>
-                    <Template>
-                        @{
-                            var insurance = (context as InsuranceDto);
+                    <GridColumn HeaderText="@L["InsuranceCompanyName"]" width="175">
+                        <Template>
+                            @{
+                                var insurance = (context as InsuranceDto);
+                                var insuranceCompanyName = insurance!.InsuranceCompanyName.ToString();
+                                @insuranceCompanyName
+                            }
+                        </Template>
+                    </GridColumn>
+
+                    <GridColumn HeaderText="@L["PolicyNumber"]" width="175">
+                        <Template>
+                            @{
+                                var insurance = (context as InsuranceDto);
+                                var policyNumber = insurance!.PolicyNumber;
+                                @policyNumber
+                                ;
+                            }
+                        </Template>
+                    </GridColumn>
+
+                    <GridColumn HeaderText="@L["StartDate"]" width="175">
+                        <Template>
+                            @{
+                                var insurance = (context as InsuranceDto);
+                                var startDate = insurance!.StartDate;
+                                if (startDate.HasValue)
+                                {
+                                    @startDate.Value.ToString("yyyy-MM-dd")
+                                }
+                            }
+                        </Template>
+                    </GridColumn>
+
+                    <GridColumn HeaderText="@L["EndDate"]" width="175">
+                        <Template>
+                            @{
+                                var insurance = (context as InsuranceDto);
+                                var endDate = insurance!.EndDate;
+                                if (endDate.HasValue)
+                                {
+                                    @endDate.Value.ToString("yyyy-MM-dd")
+                                }
+                            }
+                        </Template>
+                    </GridColumn>
+
+                    <GridColumn HeaderText="@L["PremiumAmount"]" width="175">
+                        <Template>
+                            @{
+                                var insurance = (context as InsuranceDto);
+                                var premiumAmount = string.Format("{0:N2} ₺", insurance!.PremiumAmount);
+                                @premiumAmount
+                            }
+                        </Template>
+                    </GridColumn>
+
+                    <GridColumn HeaderText="@L["CoverageAmount"]" width="175">
+                        <Template>
+                            @{
+                                var insurance = (context as InsuranceDto);
+                                var coverageAmount = string.Format("{0:N2} ₺", insurance!.CoverageAmount);
+                                @coverageAmount
+                            }
+                        </Template>
+                    </GridColumn>
+
+                    <GridColumn HeaderText="@L["Description"]" width="175">
+                        <Template>
+                            @{
+                                var insurance = (context as InsuranceDto);
+                                var description = insurance!.Description;
+                                @description
+                                ;
+                            }
+                        </Template>
+                    </GridColumn>
+
+                    <style>
+                        .white-icon {
+                            color: white !important;
                         }
-                        <div class="d-flex justify-content-around">
-                            <SfButton CssClass="e-primary" OnClick="@(args => OpenEditModal(insurance))">
-                                <span class="e-icons e-edit white-icon"></span>
-                            </SfButton>
-                            <SfButton CssClass="e-danger" OnClick="@(args => DeleteDoctorAsync(insurance))">
-                                <span class="e-icons e-delete white-icon"></span>
-                            </SfButton>
-                        </div>
-                    </Template>
-                </GridColumn>
+                    </style>
 
-            </GridColumns>
-        </SfGrid>
-    </CardBody>
-</Card>
+                    <GridColumn Width="150">
+                        <HeaderTemplate>
+                            <div style="text-align: center;">
+                                @L["Actions"]
+                            </div>
+                        </HeaderTemplate>
+                        <Template>
+                            @{
+                                var insurance = (context as InsuranceDto);
+                            }
+                            <div class="d-flex justify-content-around">
+                                <SfButton CssClass="e-primary" OnClick="@(args => OpenEditModal(insurance!))">
+                                    <span class="e-icons e-edit white-icon"></span>
+                                </SfButton>
+                                <SfButton CssClass="e-danger" OnClick="@(args => DeleteDoctorAsync(insurance!))">
+                                    <span class="e-icons e-delete white-icon"></span>
+                                </SfButton>
+                            </div>
+                        </Template>
+                    </GridColumn>
 
-@* ************************* CREATE MODAL ************************* *@
-<SfDialog Width="800px" IsModal="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleCreate">
-    <DialogEvents Closed="@CloseCreateInsuranceModal"></DialogEvents>
-    <DialogTemplates>
-        <Header>
-            <div style="display: flex; align-items: center; justify-content: center; padding: 10px; border-radius: 8px; color: white;">
-                <SfIcon Name="Syncfusion.Blazor.Buttons.IconName.CircleAdd" Size="Syncfusion.Blazor.Buttons.IconSize.Large"
-                        Style="margin-right: 15px;"></SfIcon>
-                <h2 style="margin: 0; font-weight: bold; font-size: 1.5rem; text-align: center;">
-                    @L["CreateInsurance"]
-                </h2>
-            </div>
-        </Header>
-    </DialogTemplates>
+                </GridColumns>
+            </SfGrid>
+        </CardBody>
+    </Card>
+}
 
-    <EditForm Model="@NewInsurance" OnValidSubmit="CreateInsuranceAsync">
-        <DataAnnotationsValidator />
-        <Blazorise.ValidationSummary />
+@if (CanCreateInsurance)
+{
+    @* ************************* CREATE MODAL ************************* *@
+    <SfDialog Width="800px" IsModal="true" ShowCloseIcon="true" @bind-Visible="@IsVisibleCreate">
+        <DialogEvents Closed="@CloseCreateInsuranceModal"></DialogEvents>
+        <DialogTemplates>
+            <Header>
+                <div style="display: flex; align-items: center; justify-content: center; padding: 10px; border-radius: 8px; color: white;">
+                    <SfIcon Name="Syncfusion.Blazor.Buttons.IconName.CircleAdd" Size="Syncfusion.Blazor.Buttons.IconSize.Large"
+                            Style="margin-right: 15px;"></SfIcon>
+                    <h2 style="margin: 0; font-weight: bold; font-size: 1.5rem; text-align: center;">
+                        @L["CreateInsurance"]
+                    </h2>
+                </div>
+            </Header>
+        </DialogTemplates>
 
-        <div class="form-row">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label>@L["InsuranceCompanyName"]</label>
-                    <SfDropDownList TValue="EnumInsuranceCompanyName" @bind-Value="@NewInsurance.InsuranceCompanyName" DataSource="@InsuranceCompanyNameList"
-                                    Placeholder="@L["InsuranceCompanyName"]" TItem="KeyValuePair<EnumInsuranceCompanyName, string>">
-                        <DropDownListFieldSettings Text="Value" Value="Key"></DropDownListFieldSettings>
-                        <ValidationMessage For="@(() => NewInsurance!.InsuranceCompanyName)" style="color:red" />
-                    </SfDropDownList>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label>@L["PolicyNumber"]</label>
-                    <SfTextBox TValue="string" @bind-Value="@NewInsurance.PolicyNumber" Placeholder="@L["PolicyNumber"]" />
-                    <ValidationMessage For="@(() => NewInsurance!.PolicyNumber)" style="color:red" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label>@L["PremiumAmount"]</label>
-                    <SfNumericTextBox TValue="decimal?" @bind-Value="@NewInsurance.PremiumAmount" Placeholder="@L["PremiumAmount"]" ValidateDecimalOnType="true" />
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label>@L["CoverageAmount"]</label>
-                    <SfNumericTextBox TValue="decimal?" @bind-Value="@NewInsurance.CoverageAmount" Placeholder="@L["CoverageAmount"]" ValidateDecimalOnType="true" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label>@L["StartDate"]</label>
-                    <SfDatePicker TValue="DateTime?" @bind-Value="@NewInsurance.StartDate" Placeholder="@L["StartDate"]" />
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label>@L["EndDate"]</label>
-                    <SfDatePicker TValue="DateTime?" @bind-Value="@NewInsurance.EndDate" Placeholder="@L["EndDate"]" />
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12 mb-3">
-                    <label>@L["Description"]</label>
-                    <SfTextBox Multiline=true TValue="string" @bind-Value="@NewInsurance.Description" Placeholder="@L["Description"]" />
-                </div>
-            </div>
-        </div>
-    </EditForm>
+        <EditForm Model="@NewInsurance" OnValidSubmit="CreateInsuranceAsync">
+            <DataAnnotationsValidator />
+            <Blazorise.ValidationSummary />
 
-    <DialogFooter>
-        <div style="display: flex; justify-content: flex-end; width: 100%; gap: 10px;">
-            <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseCreateInsuranceModal" />
-            <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="CreateInsuranceAsync" />
-        </div>
-    </DialogFooter>
-</SfDialog>
-
-@* ************************* EDIT MODAL ************************* *@
-<SfDialog Width="800px" IsModal="true" ShowCloseIcon="true" Visible="@IsVisibleEdit">
-    <DialogEvents Closed="@CloseEditInsuranceModal"></DialogEvents>
-    <DialogTemplates>
-        <Header>
-            <div style="display: flex; align-items: center; justify-content: center; padding: 10px; border-radius: 8px; color: white;">
-                <SfIcon Name="Syncfusion.Blazor.Buttons.IconName.Edit" Size="Syncfusion.Blazor.Buttons.IconSize.Large"
-                        Style="margin-right: 15px;"></SfIcon>
-                <h2 style="margin: 0; font-weight: bold; font-size: 1.5rem; text-align: center;">
-                    @L["UpdateInsurance"]
-                </h2>
-            </div>
-        </Header>
-    </DialogTemplates>
-
-    <EditForm Model="@EditInsurance" OnValidSubmit="UpdateInsuranceAsync">
-        <DataAnnotationsValidator />
-        <Blazorise.ValidationSummary />
-        <div class="form-row">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label>@L["InsuranceCompanyName"]</label>
-                    <SfDropDownList TValue="EnumInsuranceCompanyName" @bind-Value="@EditInsurance.InsuranceCompanyName" DataSource="@InsuranceCompanyNameList"
-                                    Placeholder="@L["InsuranceCompanyName"]" TItem="KeyValuePair<EnumInsuranceCompanyName, string>">
-                        <DropDownListFieldSettings Text="Value" Value="Key"></DropDownListFieldSettings>
-                        <ValidationMessage For="@(() => EditInsurance!.InsuranceCompanyName)" style="color:red" />
-                    </SfDropDownList>
+            <div class="form-row">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>@L["InsuranceCompanyName"]</label>
+                        <SfDropDownList TValue="EnumInsuranceCompanyName" @bind-Value="@NewInsurance.InsuranceCompanyName" DataSource="@InsuranceCompanyNameList"
+                                        Placeholder="@L["InsuranceCompanyName"]" TItem="KeyValuePair<EnumInsuranceCompanyName, string>">
+                            <DropDownListFieldSettings Text="Value" Value="Key"></DropDownListFieldSettings>
+                            <ValidationMessage For="@(() => NewInsurance!.InsuranceCompanyName)" style="color:red" />
+                        </SfDropDownList>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>@L["PolicyNumber"]</label>
+                        <SfTextBox TValue="string" @bind-Value="@NewInsurance.PolicyNumber" Placeholder="@L["PolicyNumber"]" />
+                        <ValidationMessage For="@(() => NewInsurance!.PolicyNumber)" style="color:red" />
+                    </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label>@L["PolicyNumber"]</label>
-                    <SfTextBox TValue="string" @bind-Value="@EditInsurance.PolicyNumber" Placeholder="@L["PolicyNumber"]" />
-                    <ValidationMessage For="@(() => EditInsurance!.PolicyNumber)" style="color:red" />
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>@L["PremiumAmount"]</label>
+                        <SfNumericTextBox TValue="decimal?" @bind-Value="@NewInsurance.PremiumAmount" Placeholder="@L["PremiumAmount"]" ValidateDecimalOnType="true" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>@L["CoverageAmount"]</label>
+                        <SfNumericTextBox TValue="decimal?" @bind-Value="@NewInsurance.CoverageAmount" Placeholder="@L["CoverageAmount"]" ValidateDecimalOnType="true" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>@L["StartDate"]</label>
+                        <SfDatePicker TValue="DateTime?" @bind-Value="@NewInsurance.StartDate" Placeholder="@L["StartDate"]" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>@L["EndDate"]</label>
+                        <SfDatePicker TValue="DateTime?" @bind-Value="@NewInsurance.EndDate" Placeholder="@L["EndDate"]" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label>@L["Description"]</label>
+                        <SfTextBox Multiline=true TValue="string" @bind-Value="@NewInsurance.Description" Placeholder="@L["Description"]" />
+                    </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label>@L["PremiumAmount"]</label>
-                    <SfNumericTextBox TValue="decimal?" @bind-Value="@EditInsurance.PremiumAmount" Placeholder="@L["PremiumAmount"]" ValidateDecimalOnType="true" />
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label>@L["CoverageAmount"]</label>
-                    <SfNumericTextBox TValue="decimal?" @bind-Value="@EditInsurance.CoverageAmount" Placeholder="@L["CoverageAmount"]" ValidateDecimalOnType="true" />
-                </div>
+        </EditForm>
+
+        <DialogFooter>
+            <div style="display: flex; justify-content: flex-end; width: 100%; gap: 10px;">
+                <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseCreateInsuranceModal" />
+                <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="CreateInsuranceAsync" />
             </div>
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label>@L["StartDate"]</label>
-                    <SfDatePicker TValue="DateTime?" @bind-Value="@EditInsurance.StartDate" Placeholder="@L["StartDate"]" />
+        </DialogFooter>
+    </SfDialog>
+}
+
+@if (CanEditInsurance)
+{
+
+    @* ************************* EDIT MODAL ************************* *@
+    <SfDialog Width="800px" IsModal="true" ShowCloseIcon="true" Visible="@IsVisibleEdit">
+        <DialogEvents Closed="@CloseEditInsuranceModal"></DialogEvents>
+        <DialogTemplates>
+            <Header>
+                <div style="display: flex; align-items: center; justify-content: center; padding: 10px; border-radius: 8px; color: white;">
+                    <SfIcon Name="Syncfusion.Blazor.Buttons.IconName.Edit" Size="Syncfusion.Blazor.Buttons.IconSize.Large"
+                            Style="margin-right: 15px;"></SfIcon>
+                    <h2 style="margin: 0; font-weight: bold; font-size: 1.5rem; text-align: center;">
+                        @L["UpdateInsurance"]
+                    </h2>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label>@L["EndDate"]</label>
-                    <SfDatePicker TValue="DateTime?" @bind-Value="@EditInsurance.EndDate" Placeholder="@L["EndDate"]" />
+            </Header>
+        </DialogTemplates>
+
+        <EditForm Model="@EditInsurance" OnValidSubmit="UpdateInsuranceAsync">
+            <DataAnnotationsValidator />
+            <Blazorise.ValidationSummary />
+            <div class="form-row">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>@L["InsuranceCompanyName"]</label>
+                        <SfDropDownList TValue="EnumInsuranceCompanyName" @bind-Value="@EditInsurance.InsuranceCompanyName" DataSource="@InsuranceCompanyNameList"
+                                        Placeholder="@L["InsuranceCompanyName"]" TItem="KeyValuePair<EnumInsuranceCompanyName, string>">
+                            <DropDownListFieldSettings Text="Value" Value="Key"></DropDownListFieldSettings>
+                            <ValidationMessage For="@(() => EditInsurance!.InsuranceCompanyName)" style="color:red" />
+                        </SfDropDownList>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>@L["PolicyNumber"]</label>
+                        <SfTextBox TValue="string" @bind-Value="@EditInsurance.PolicyNumber" Placeholder="@L["PolicyNumber"]" />
+                        <ValidationMessage For="@(() => EditInsurance!.PolicyNumber)" style="color:red" />
+                    </div>
                 </div>
-            </div>
-            <div class="row">
-                <div class="col-md-12 mb-3">
-                    <label>@L["Description"]</label>
-                    <SfTextBox Multiline=true TValue="string" @bind-Value="@EditInsurance.Description" Placeholder="@L["Description"]" />
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>@L["PremiumAmount"]</label>
+                        <SfNumericTextBox TValue="decimal?" @bind-Value="@EditInsurance.PremiumAmount" Placeholder="@L["PremiumAmount"]" ValidateDecimalOnType="true" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>@L["CoverageAmount"]</label>
+                        <SfNumericTextBox TValue="decimal?" @bind-Value="@EditInsurance.CoverageAmount" Placeholder="@L["CoverageAmount"]" ValidateDecimalOnType="true" />
+                    </div>
                 </div>
-            </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label>@L["StartDate"]</label>
+                        <SfDatePicker TValue="DateTime?" @bind-Value="@EditInsurance.StartDate" Placeholder="@L["StartDate"]" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label>@L["EndDate"]</label>
+                        <SfDatePicker TValue="DateTime?" @bind-Value="@EditInsurance.EndDate" Placeholder="@L["EndDate"]" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label>@L["Description"]</label>
+                        <SfTextBox Multiline=true TValue="string" @bind-Value="@EditInsurance.Description" Placeholder="@L["Description"]" />
+                    </div>
+                </div>
 
 
-        </div>
-    </EditForm>
+            </div>
+        </EditForm>
 
-    <DialogFooter>
-        <div style="display: flex; justify-content: flex-end; width: 100%; gap: 10px;">
-            <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseEditInsuranceModal" />
-            <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="UpdateInsuranceAsync" />
-        </div>
-    </DialogFooter>
-</SfDialog>
+        <DialogFooter>
+            <div style="display: flex; justify-content: flex-end; width: 100%; gap: 10px;">
+                <SfButton CssClass="e-danger" Content="@L["Cancel"]" IsPrimary="false" OnClick="CloseEditInsuranceModal" />
+                <SfButton CssClass="e-primary" Content="@L["Submit"]" IsPrimary="true" OnClick="UpdateInsuranceAsync" />
+            </div>
+        </DialogFooter>
+    </SfDialog>
+}

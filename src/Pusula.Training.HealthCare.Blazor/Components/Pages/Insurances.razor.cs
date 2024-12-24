@@ -38,12 +38,13 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages
         private GetInsurancesInput Filter { get; set; }
         private List<InsuranceDto> SelectedInsurances { get; set; } = new();
         private List<KeyValuePair<EnumInsuranceCompanyName, string>> InsuranceCompanyNameList { get; set; }
-
+        private bool isLoading;
         private bool IsVisibleCreate { get; set; }
         private bool IsVisibleEdit { get; set; }
 
         public Insurances()
         {
+            isLoading = true;
             IsVisibleCreate = false;
             IsVisibleEdit = false;
             Filter = new GetInsurancesInput
@@ -58,9 +59,11 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages
         protected override async Task OnInitializedAsync()
         {
             await SetPermissionsAsync();
+            isLoading = true;
             await SearchAsync();
             await GetInsuranceCompanyNameList();
             await GetInsurances();
+            isLoading = false;
         }
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -161,10 +164,11 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages
 
             return Task.CompletedTask;
         }
-        private async Task ClearSelection()
+        private Task ClearSelection()
         {
             SelectedInsurances.Clear();
             AllInsurancesSelected = false;
+            return Task.CompletedTask;
         }
         private Task SelectedInsurancesRowsChanged()
         {
@@ -246,12 +250,13 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages
             IsVisibleEdit = false;
         }
 
-        private async Task GetInsuranceCompanyNameList()
+        private Task GetInsuranceCompanyNameList()
         {
             InsuranceCompanyNameList = Enum.GetValues(typeof(EnumInsuranceCompanyName))
                 .Cast<EnumInsuranceCompanyName>()
                 .Select(s => new { Key = s, Value = s.GetDisplayName().ToString() })
                 .ToDictionary(d => d.Key, d => d.Value).ToList();
+            return Task.CompletedTask;
         }
     }
 }

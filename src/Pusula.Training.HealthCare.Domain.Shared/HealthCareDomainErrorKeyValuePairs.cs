@@ -39,4 +39,21 @@ public static class HealthCareDomainErrorKeyValuePairs
     public static KeyValuePair<string, string> InvalidDownloadToken =
         KeyValuePair.Create(HealthCareDomainErrorCodes.InvalidDownloadToken_CODE, "The provided download token is invalid.");
 
+    public static KeyValuePair<string, string> DoctorInformationsRequired =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.DoctorInformationsRequired, "Doctor information is required.");
+
+    public static KeyValuePair<string, string> PatientInformationsRequired =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.PatientInformationsRequired, "Patient information is required.");
+    
+    public static KeyValuePair<string, string> CategoryInformationsRequired =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.CategoryInformationsRequired, "Category information is required.");
+
+    public static KeyValuePair<string, string> TestCategoryInformationsRequired =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.TestCategoryInformationsRequired, "Test Category information is required.");
+
+    public static KeyValuePair<string, string> TestInformationsRequired =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.TestInformationsRequired, "Test information is required.");
+
+    public static KeyValuePair<string, string> BloodTestInformationsRequired =
+        KeyValuePair.Create(HealthCareDomainErrorCodes.BloodTestInformationsRequired, "Blood Test information is required.");
 }

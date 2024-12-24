@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using Pusula.Training.HealthCare.BloodTests.Categories;
 using Pusula.Training.HealthCare.BloodTests.Category;
 using System;
 using System.Threading.Tasks;
@@ -10,8 +11,8 @@ namespace Pusula.Training.HealthCare.Controllers.BloodTests.Categories
 {
     [RemoteService]
     [Area("app")]
-    [ControllerName("TestCategory")]
-    [Route("api/app/bloodtest/testcategory")]
+    [ControllerName("TestCategories")]
+    [Route("api/app/bloodtest/test-categories")]
     public class TestCategoryController(ITestCategoryAppService testCategoryAppService) : HealthCareController, ITestCategoryAppService
     {
         [HttpGet]
@@ -19,6 +20,12 @@ namespace Pusula.Training.HealthCare.Controllers.BloodTests.Categories
         public Task<TestCategoryDto> GetAsync(Guid id) => testCategoryAppService.GetAsync(id);
 
         [HttpGet]
-        public async Task<PagedResultDto<TestCategoryDto>> GetListAsync(GetTestCategoriesInput input) => await testCategoryAppService.GetListAsync(input);
+        public Task<PagedResultDto<TestCategoryDto>> GetListAsync(GetTestCategoriesInput input) => testCategoryAppService.GetListAsync(input);
+
+        [HttpPost]
+        public Task<TestCategoryDto> CreateAsync(TestCategoryCreateDto input) => testCategoryAppService.CreateAsync(input);
+
+        [HttpPut]
+        public Task<TestCategoryDto> UpdateAsync(TestCategoryUpdateDto input) => testCategoryAppService.UpdateAsync(input);
     }
 }

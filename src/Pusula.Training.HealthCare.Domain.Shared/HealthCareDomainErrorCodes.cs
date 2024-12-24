@@ -24,8 +24,16 @@ public static class HealthCareDomainErrorCodes
     public const string DepartmentsNotFound = "HealthCareError:DepartmentsNotFound";
 
     public const string DateNotInPastException = "HealthCareError:DateNotInPast";
+
+    public const string DoctorInformationsRequired = "HealthCareError:DoctorInformationsRequired";
+    public const string PatientInformationsRequired = "HealthCareError:PatientInformationsRequired";
+    public const string CategoryInformationsRequired = "HealthCareError:CategoryInformationsRequired";
+    public const string TestCategoryInformationsRequired = "HealthCareError:TestCategoryInformationsRequired";
+    public const string TestInformationsRequired = "HealthCareError:TestInformationsRequired";
+    public const string BloodTestInformationsRequired = "HealthCareError:BloodTestInformationsRequired";
     
    
+
     /*  ERROR MESSAGES */
     public const string InvalidDateRange_MESSAGE = "InvalidDateRange";
     public const string InvalidDownloadToken_MESSAGE = "The provided download token is invalid.";
