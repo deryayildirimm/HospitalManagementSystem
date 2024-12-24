@@ -244,7 +244,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Laboratory
         {
             BloodTestsForPending = await GetBloodTestsForPending(new GetBloodTestsInput
             {
-                FilterText = SearchValueBelow,
+                FilterText = SearchValueUp,
             });
         }
 

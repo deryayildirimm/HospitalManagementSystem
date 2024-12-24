@@ -24,7 +24,7 @@ public class ExaminationUpdateDto
     public BackgroundUpdateDto Background { get; set; } = new BackgroundUpdateDto();
     public FamilyHistoryUpdateDto FamilyHistory { get; set; } = new FamilyHistoryUpdateDto();
     public PhysicalFindingUpdateDto PhysicalFinding { get; set; } = new PhysicalFindingUpdateDto();
-    public ICollection<ExaminationIcdDto>? ExaminationIcd { get; set; }
+    public ICollection<ExaminationIcdDto>? ExaminationIcds { get; set; }
     public List<Guid> IcdIds { get; set; } = new List<Guid>();
     [Required]
     public Guid ProtocolId { get; set; }
