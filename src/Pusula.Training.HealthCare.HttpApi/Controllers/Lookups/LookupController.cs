@@ -38,9 +38,27 @@ public class LookupController(ILookupAppService lookupAppService) : HealthCareCo
     [Route("cities")]
     public Task<PagedResultDto<LookupDto<Guid>>> GetCityLookupAsync(LookupRequestDto input)
         => lookupAppService.GetCityLookupAsync(input);
-
+    
+    
     [HttpGet]
     [Route("districts")]
     public Task<PagedResultDto<LookupDto<Guid>>> GetDistrictLookupAsync(LookupRequestDto input)
         => lookupAppService.GetDistrictLookupAsync(input);
+    
+    [HttpGet]
+    [Route("protocoltypes")]
+    public Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookupAsync(LookupRequestDto input)
+        => lookupAppService.GetProtocolTypeLookupAsync(input);
+    
+    [HttpGet]
+    [Route("doctors")]
+    public Task<PagedResultDto<LookupDto<Guid>>> GetDoctorLookupAsync(LookupRequestDto input)
+        => lookupAppService.GetDoctorLookupAsync(input);
+    
+    [HttpGet]
+    [Route("insurances")]
+    public Task<PagedResultDto<LookupDto<Guid>>> GetInsuranceLookupAsync(LookupRequestDto input)
+        => lookupAppService.GetInsuranceLookupAsync(input);
+    
+    
 }

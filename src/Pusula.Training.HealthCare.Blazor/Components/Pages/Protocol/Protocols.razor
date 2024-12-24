@@ -1,0 +1,188 @@
+@page "/protocols"
+
+@attribute [Authorize(HealthCarePermissions.Protocols.Default)]
+@using Pusula.Training.HealthCare.Shared
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Syncfusion.Blazor.Calendars
+
+@using Pusula.Training.HealthCare.Blazor.Components.Grids
+@using Pusula.Training.HealthCare.Blazor.Components.Modals
+@using Pusula.Training.HealthCare.Blazor.Components.Filters
+@using Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.ProtocolTypes
+@using Volo.Abp.Http.Client
+@using Pusula.Training.HealthCare.Blazor.Services
+@using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Protocols
+@inherits HealthCareComponentBase
+@inject IProtocolTypesAppService ProtocolTypesAppService
+@inject IProtocolsAppService ProtocolsAppService
+@inject IPatientsAppService PatientsAppService
+@inject IUiMessageService UiMessageService
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+@inject ILookupAppService LookupAppService
+@inject ProtocolStateService ProtocolState
+
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["Protocol"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
+
+</PageHeader>
+@* ************************* SEARCH ************************* *@
+
+<div class="row py-3 px-2">
+<div class="col-12 border-1 bg-white p-4" style="box-shadow:0 4px 8px rgba(0,0,0,0.2); ">
+    <div class="row">
+
+    <GenericFilter TFilter="GetProtocolsInput"
+                   Filter="@Filter"
+                   GetSearchValue="filter => filter.FilterText ?? string.Empty"
+                   SetSearchValue="(filter, value) => filter.FilterText = value"
+                   OnFilterChanged="HandleFilterChanged"
+                   OnClearFilters="ClearFilters">
+        <div class="col-3 my-1">
+            <h6>@L["StartMinDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.StartTimeMin" Placeholder="@L["StartMinDate"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <h6>@L["StartMaxDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.StartTimeMax" Placeholder="@L["StartMaxDate"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <h6>@L["EndMinDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.EndTimeMin" Placeholder="@L["EndTimeMin"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <h6>@L["EndMaxDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@Filter.EndTimeMax" Placeholder="@L["EndTimeMax"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <div>
+                <h6>@L["Departments"]</h6>
+                <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                @bind-Value="Filter.DepartmentId"
+                                DataSource="@DepartmentsCollection">
+                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
+            </div>
+        </div>
+
+        <div class="col-3 my-1">
+            <div>
+                <h6>@L["Doctors"]</h6>
+                <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                @bind-Value="Filter.DoctorId"
+                                DataSource="@DoctorsCollection">
+                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
+            </div>
+        </div>
+
+        <div class="col-3 my-1">
+            <div>
+                <h6>@L["ProtocolType"]</h6>
+                <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                @bind-Value="Filter.ProtocolTypeId"
+                                DataSource="@ProtocolTypesCollection">
+                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
+            </div>
+        </div>
+
+        <div class="col-3 my-1">
+            <div>
+                <h6>@L["Insurance"]</h6>
+                <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                                @bind-Value="Filter.InsuranceId"
+                                DataSource="@InsuranceCollections">
+                    <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+                </SfDropDownList>
+            </div>
+        </div>
+    </GenericFilter>
+
+</div>
+</div>
+</div>
+
+  @if (_spinnerVisible)
+  {
+    <SfSpinner  Label="Loading..." Type="SpinnerType.Material" CssClass="e-spinner" Visible="_spinnerVisible" />
+}
+else
+{
+  
+    <GenericGrid TModel="ProtocolWithNavigationPropertiesDto"
+                 @ref="_gridRef"
+                 Columns="@_columns" 
+                 OnEdit="OpenEditModal"
+                 PageSize="10"
+                 Query="@FilterQuery"
+                 OnDelete="DeleteProtocolTypeAsync"
+                 ShowDetailButton="true"
+                 OnDetailClicked="NavigateToDetail"
+                 AdaptorInstance="@typeof(ProtocolAdaptor)"
+                 AdaptorType="Adaptors.CustomAdaptor"></GenericGrid>
+                 
+}
+
+<!-- Update Modal -->
+
+<GenericModal TModel="ProtocolUpdateDto" @ref="_editModal" Title="@L["Edit Protocol"]"  Model="@_selectedProtocolType" OnSaveCallback="UpdateProtocolTypeAsync">
+
+    <div class="form-group">
+        <label>@L["Patient"]</label>
+        <SfTextBox TValue="string" Value="@_selectedProtocolType.Patient.FirstName" Readonly="true" />
+    </div>
+    <div class="form-group">
+        <label>@L["StartTime"]</label>
+        <SfDatePicker TValue="DateTime" Placeholder="@L["SelectStartTime"]" @bind-Value="_selectedProtocolType.StartTime">
+        </SfDatePicker>
+    </div>
+
+    <!-- End Time -->
+    <div class="form-group">
+        <label>@L["EndTime"]</label>
+        <SfDatePicker TValue="DateTime?" Placeholder="@L["SelectEndTime"]" @bind-Value="_selectedProtocolType.EndTime">
+        </SfDatePicker>
+    </div>
+
+    <!-- Department -->
+    <div class="form-group">
+        <label>@L["Department"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectDepartment"]"
+                        DataSource="@DepartmentsCollection" TItem="LookupDto<Guid>" @bind-Value="_selectedProtocolType.DepartmentId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
+
+    <!-- Doctor -->
+    <div class="form-group">
+        <label>@L["Doctor"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectDoctor"]"
+                        DataSource="@DoctorsCollection" TItem="LookupDto<Guid>" @bind-Value="_selectedProtocolType.DoctorId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
+
+    <!-- Protocol Type -->
+    <div class="form-group">
+        <label>@L["ProtocolType"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectProtocolType"]"
+                        DataSource="@ProtocolTypesCollection" TItem="LookupDto<Guid>" @bind-Value="_selectedProtocolType.ProtocolTypeId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
+
+    <!-- Insurance -->
+    <div class="form-group">
+        <label>@L["Insurance"]</label>
+        <SfDropDownList TValue="Guid" Placeholder="@L["SelectInsurance"]"
+                        DataSource="@InsuranceCollections" TItem="LookupDto<Guid>" @bind-Value="_selectedProtocolType.InsuranceId">
+            <DropDownListFieldSettings Value="Id" Text="DisplayName"></DropDownListFieldSettings>
+        </SfDropDownList>
+    </div>
+</GenericModal>
+  

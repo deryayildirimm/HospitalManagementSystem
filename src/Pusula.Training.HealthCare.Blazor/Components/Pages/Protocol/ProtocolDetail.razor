@@ -7,6 +7,7 @@
 @using Syncfusion.Blazor.Spinner
 @using global::Pusula.Training.HealthCare.Appointments
 @using global::Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.Blazor.Services
 @using Pusula.Training.HealthCare.Protocols
 @using Volo.Abp.AspNetCore.Components.Messages
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
@@ -23,6 +24,7 @@
 @inject IPatientsAppService PatientsAppService
 @inject IAppointmentAppService AppointmentAppService
 @inject IProtocolsAppService ProtocolsAppService
+@inject ProtocolStateService ProtocolState
 
 @inject IUiMessageService UiMessageService
 @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
@@ -76,35 +78,44 @@
 
 <div class="hero-section">
     <div class="hero-wrapper" style="box-shadow:0 4px 8px rgba(0,0,0,0.2) ">
-        <div class="right-box">
+        <div class="left-box" style="margin-right: -285px">
             <div class="patient-card">
                 <div class="card-header">
-                    <h4 > <strong>Protokol Adı: Tedavi Takip Protokolü</strong> </h4>
-                    <h5> <strong>Protokol ID:</strong>12345-abcde-67890    </h5>
-
-                    <h5><strong>Durum:</strong>Aktif </h5>
-                    <h5><strong>Başlangıç Tarihi:</strong> 01.12.2024</h5>
+                <h4 style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 10px;"> <strong>Hasta Adı : @ProtocolState?.PatientName</strong> </h4>
+                <h5> <strong>Identity Number :</strong>@ProtocolState?.PatientIdentityNumber <span style="margin-left: 10px">@ProtocolState?.PatientGender</span> </h5>
+                <h5> <strong>Protokol Type:</strong>@ProtocolState?.ProtocolTypeName </h5>
+                <h5> <strong>Department:</strong>@ProtocolState?.DepartmentName </h5>
+                <h5> <strong>Doctor Name: </strong>@ProtocolState?.DoctorName </h5>
+                <h5><strong>Başlangıç Tarihi:</strong> @ProtocolState?.StartTime</h5>
+                <h5><strong>Bitiş Tarihi:</strong> @ProtocolState?.EndTime</h5>
                 </div>
             </div>
         </div>
-        <div class="left-box">
+        <div class="left-box" style="width: 50%">
             <div class="patient-card">
                 <div class="card-header">
-                    <h4 > <strong>Protokol Özeti</strong> </h4>
-                    <h5> <strong>Toplam İşlem Sayısı:</strong>2    </h5>
-                    <h5><strong>Toplam Tutar:</strong>800 TL</h5>
-
+                    <h3 > <strong>Protokol Özeti</strong> </h3>
+                    <h4> <strong>Toplam İşlem Sayısı:</strong> @protocolWithDetails?.MedicalService?.Length   </h4>
+                    <h4><strong>Toplam Tutar:</strong>@protocolWithDetails?.Price </h4>
                 </div>
                 <div class="card-header">
-
                     <h4 > <strong>İlgili İşlemler</strong> </h4>
-                    <h5> <strong>001 Kan Testi </strong>20.11.2024    200TL   </h5>
-                    <h5><strong>002  MR Çekimi </strong>25.11.2024    600 TL</h5>
-
+                    @if (MedicalServices.Any())
+                    {
+                        @foreach (var service in MedicalServices)
+                        {
+                            <h5>@service</h5>
+                        }
+                    }
+                    else
+                    {
+                    <p>No medical services available.</p>
+                    }
+                 
                 </div>
             </div>
             <div class="btn-wrapper">
-                <a href="/"> + Protokolü Düzenle</a>
+                <a href=""> + Protokolü Düzenle</a>
                 <a href=""> + Yeni İşlem Ekle</a>
             </div>
         </div>

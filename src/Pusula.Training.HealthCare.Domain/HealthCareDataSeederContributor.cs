@@ -93,7 +93,7 @@ namespace Pusula.Training.HealthCare
             await SeedTestRecords();
             await SeedMedicalServiceRestrictions();
             //await SeedInsurance();
-            //await SeedProtocolMedicalService();
+           await SeedProtocolMedicalServices();
         }
 
         private async Task SeedProtocolType()
@@ -103,6 +103,15 @@ namespace Pusula.Training.HealthCare
                 new ProtocolType(guidGenerator.Create(), "Ayakta"),
                 new ProtocolType(guidGenerator.Create(), "Yatış"),
                 new ProtocolType(guidGenerator.Create(), "Kontrol"),
+                new ProtocolType(guidGenerator.Create(), "Acil"),
+                new ProtocolType(guidGenerator.Create(), "Poliklinik"),
+                new ProtocolType(guidGenerator.Create(), "Ameliyat"),
+                new ProtocolType(guidGenerator.Create(), "Fizik Tedavi"),
+                new ProtocolType(guidGenerator.Create(), "Diyetisyen"),
+                new ProtocolType(guidGenerator.Create(), "Radyoloji"),
+                new ProtocolType(guidGenerator.Create(), "Laboratuvar"),
+                new ProtocolType(guidGenerator.Create(), "Psikiyatri"),
+                new ProtocolType(guidGenerator.Create(), "Göz Muayenesi")
             };
 
             await protocolTypeRepository.InsertManyAsync(types, autoSave: true);
@@ -433,116 +442,193 @@ namespace Pusula.Training.HealthCare
                 [emergency.Name, cardiology.Name, pediatrics.Name, orthopedics.Name, radiology.Name]);
         }
 
-        private async Task SeedProtocolMedicalService()
+        private async Task SeedProtocolMedicalServices()
         {
-            if (await medicalServiceRepository.GetCountAsync() == 0
-                || await protocolRepository.GetCountAsync() == 0)
+            // Eğer protokol ya da tıbbi hizmet tablosunda veri yoksa işlemi sonlandır
+            if (await protocolRepository.GetCountAsync() == 0 || await medicalServiceRepository.GetCountAsync() == 0)
             {
                 return;
             }
 
-            var medicalServices = await medicalServiceRepository.GetListAsync();
+            // Protokoller ve tıbbi hizmetler alınıyor
             var protocols = await protocolRepository.GetListAsync();
+            var medicalServices = await medicalServiceRepository.GetListAsync();
+
+            // Eğer protokol ya da tıbbi hizmet bulunamazsa işlemi sonlandır
+            if (!protocols.Any() || !medicalServices.Any())
+            {
+                throw new Exception("No protocols or medical services found. Ensure the data is seeded correctly.");
+            }
+
+            var random = new Random();
 
             foreach (var protocol in protocols)
             {
-                var random = new Random();
+                // Eğer ProtocolMedicalServices koleksiyonu null ise, yeni bir liste oluştur
+                protocol.ProtocolMedicalServices ??= new List<ProtocolMedicalService>();
 
-                var randomServices = medicalServices
-                    .OrderBy(ms => random.Next())
-                    .Distinct()
-                    .Take(2)
-                    .ToList();
+                // Rastgele 5 tıbbi hizmet seç
+                var selectedServices = medicalServices.OrderBy(_ => random.Next()).Take(5).ToList();
 
-                foreach (var service in randomServices)
+                foreach (var service in selectedServices)
                 {
-                    var protocolMedicalService = new ProtocolMedicalService
+                    // Eğer seçilen hizmet daha önce eklenmemişse ekle
+                    if (!protocol.ProtocolMedicalServices.Any(pms => pms.MedicalServiceId == service.Id))
                     {
-                        MedicalServiceId = service.Id,
-                        ProtocolId = protocol.Id
-                    };
-
-                    service.ProtocolMedicalServices.Add(protocolMedicalService);
+                        protocol.ProtocolMedicalServices.Add(new ProtocolMedicalService
+                        {
+                            ProtocolId = protocol.Id,
+                            MedicalServiceId = service.Id
+                        });
+                    }
                 }
-            }
 
-            await protocolRepository.UpdateManyAsync(protocols, true);
+                // Protokolü güncelle
+                await protocolRepository.UpdateAsync(protocol, true);
+            }
         }
 
-        private async Task SeedPatientRecords()
-        {
-            if (await patientRepository.GetCountAsync() > 0)
-            {
-                return;
-            }
+    private async Task SeedPatientRecords()
+{
+    if (await patientRepository.GetCountAsync() > 0)
+    {
+        return;
+    }
 
-            var patient1 = new Patient(
-                Guid.NewGuid(),
-                1,
-                "Hasan",
-                "Kuru",
-                EnumGender.MALE,
-                new DateTime(1990, 1, 1),
-                "76863495742",
-                "SS3278363",
-                "Turkey",
-                "+12345678901",
-                EnumPatientTypes.VIP,
-                "Fatma",
-                "Aykut",
-                "ali.yilmaz@example.com",
-                EnumRelative.FATHER,
-                "+12344678901",
-                "İstanbul",
-                EnumDiscountGroup.STAFF
-            );
+    var patient1 = new Patient(
+        Guid.NewGuid(),
+        1,
+        "Hasan",
+        "Kuru",
+        EnumGender.MALE,
+        new DateTime(1990, 1, 1),
+        "76863495742",
+        "SS3278363",
+        "Turkey",
+        "+12345678901",
+        EnumPatientTypes.VIP,
+        "Fatma",
+        "Aykut",
+        "hasan.kuru@example.com",
+        EnumRelative.FATHER,
+        "+12344678901",
+        "İstanbul",
+        EnumDiscountGroup.STAFF
+    );
 
-            var patient2 = new Patient(
-                Guid.NewGuid(),
-                2,
-                "Liam",
-                "O'Connor",
-                EnumGender.MALE,
-                new DateTime(1985, 5, 10),
-                "5712930A",
-                "61348019X",
-                "Ireland",
-                "+98765432109",
-                EnumPatientTypes.NORMAL,
-                "Sofia",
-                "Anthony",
-                "liam.oconnor@example.com",
-                EnumRelative.MOTHER,
-                "+09876543210",
-                string.Empty,
-                EnumDiscountGroup.STAFF
-            );
+    var patient2 = new Patient(
+        Guid.NewGuid(),
+        2,
+        "Liam",
+        "O'Connor",
+        EnumGender.MALE,
+        new DateTime(1985, 5, 10),
+        "5712930A",
+        "61348019X",
+        "Ireland",
+        "+98765432109",
+        EnumPatientTypes.NORMAL,
+        "Sofia",
+        "Anthony",
+        "liam.oconnor@example.com",
+        EnumRelative.MOTHER,
+        "+09876543210",
+        string.Empty,
+        EnumDiscountGroup.STAFF
+    );
 
-            var patient3 = new Patient(
-                Guid.NewGuid(),
-                3,
-                "Lukas",
-                "Müller",
-                EnumGender.FEMALE,
-                new DateTime(1992, 3, 15),
-                "5841728374",
-                "C2692630",
-                "Germany",
-                "+12312312345",
-                EnumPatientTypes.VIP,
-                "Emma",
-                "Max",
-                "lukas.müller@example.com",
-                EnumRelative.FATHER,
-                "+11223344556",
-                string.Empty,
-                EnumDiscountGroup.CONTRACTED
-            );
+    var patient3 = new Patient(
+        Guid.NewGuid(),
+        3,
+        "Lukas",
+        "Müller",
+        EnumGender.FEMALE,
+        new DateTime(1992, 3, 15),
+        "5841728374",
+        "C2692630",
+        "Germany",
+        "+12312312345",
+        EnumPatientTypes.VIP,
+        "Emma",
+        "Max",
+        "lukas.muller@example.com",
+        EnumRelative.FATHER,
+        "+11223344556",
+        string.Empty,
+        EnumDiscountGroup.CONTRACTED
+    );
 
-            await patientRepository.InsertAsync(patient1, true);
-            await patientRepository.InsertAsync(patient2, true);
-            await patientRepository.InsertAsync(patient3, true);
-        }
+    var patient4 = new Patient(
+        Guid.NewGuid(),
+        4,
+        "Emily",
+        "Brown",
+        EnumGender.FEMALE,
+        new DateTime(1995, 7, 20),
+        "3920485723",
+        "QW8394820",
+        "USA",
+        "+14567891234",
+        EnumPatientTypes.NORMAL,
+        "Oliver",
+        "Grace",
+        "emily.brown@example.com",
+        EnumRelative.MOTHER,
+        "+15467891235",
+        "New York",
+        EnumDiscountGroup.NONE
+    );
+
+    var patient5 = new Patient(
+        Guid.NewGuid(),
+        5,
+        "Isabella",
+        "Garcia",
+        EnumGender.FEMALE,
+        new DateTime(1998, 9, 30),
+        "8291749283",
+        "WZ9384930",
+        "Spain",
+        "+34912345678",
+        EnumPatientTypes.VIP,
+        "Carlos",
+        "Maria",
+        "isabella.garcia@example.com",
+        EnumRelative.MOTHER,
+        "+34987654321",
+        "Madrid",
+        EnumDiscountGroup.CONTRACTED
+    );
+
+    var patient6 = new Patient(
+        Guid.NewGuid(),
+        6,
+        "Ethan",
+        "Wang",
+        EnumGender.MALE,
+        new DateTime(1987, 4, 12),
+        "4729381029",
+        "XY7283940",
+        "China",
+        "+861234567890",
+        EnumPatientTypes.NORMAL,
+        "Mei",
+        "Li",
+        "ethan.wang@example.com",
+        EnumRelative.FATHER,
+        "+861987654321",
+        "Beijing",
+        EnumDiscountGroup.STAFF
+    );
+
+    await patientRepository.InsertAsync(patient1, true);
+    await patientRepository.InsertAsync(patient2, true);
+    await patientRepository.InsertAsync(patient3, true);
+    await patientRepository.InsertAsync(patient4, true);
+    await patientRepository.InsertAsync(patient5, true);
+    await patientRepository.InsertAsync(patient6, true);
+}
+
 
         private async Task SeedTestCategoryRecords()
         {
@@ -821,31 +907,34 @@ namespace Pusula.Training.HealthCare
             await doctorRepository.InsertAsync(d9, true);
         }
 
-        private async Task SeedProtocols()
+    private async Task SeedProtocols()
+{
+    if (await protocolRepository.GetCountAsync() > 0)
+    {
+        return;
+    }
+
+    var patients = await patientRepository.GetListAsync();
+    var doctors = await doctorRepository.GetListAsync();
+    var departments = await departmentRepository.GetListAsync();
+    var protocolTypes = await protocolTypeRepository.GetListAsync();
+
+    var random = new Random();
+    var protocols = new List<Protocol>();
+    var insurances = new List<Insurance>();
+
+    foreach (var patient in patients)
+    {
+        for (int i = 0; i < 3; i++) // Her hasta için birden fazla protokol oluştur
         {
-            // Doktorlar, hastalar, protokol türleri ve departmanlar kontrol ediliyor
-            var doctors = await doctorRepository.GetListAsync();
-            var patients = await patientRepository.GetListAsync();
-            var protocolTypes = await protocolTypeRepository.GetListAsync();
-            var departments = await departmentRepository.GetListAsync();
+            var doctor = doctors.OrderBy(d => random.Next()).FirstOrDefault();
+            var department = departments.FirstOrDefault(d => d.Id == doctor?.DepartmentId);
+            var protocolType = protocolTypes.OrderBy(pt => random.Next()).FirstOrDefault();
+            var startTime = DateTime.Now.AddDays(random.Next(1, 10));
+            var endTime = startTime.AddHours(random.Next(1, 3));
 
-            if (!doctors.Any() || !patients.Any() || !protocolTypes.Any() || !departments.Any())
+            if (doctor != null && department != null && protocolType != null)
             {
-                throw new Exception("Doctors, Patients, ProtocolTypes, or Departments are missing. Seed them first.");
-            }
-
-            var random = new Random();
-            var protocols = new List<Protocol>();
-            var insurances = new List<Insurance>();
-
-            foreach (var patient in patients)
-            {
-                var doctor = doctors[random.Next(doctors.Count)];
-                var department = departments[random.Next(departments.Count)];
-                var protocolType = protocolTypes[random.Next(protocolTypes.Count)];
-                var startTime = DateTime.Now.AddDays(random.Next(1, 10));
-                var endTime = startTime.AddHours(1);
-
                 // Protokole özel bir sigorta oluşturuluyor
                 var insurance = new Insurance(
                     id: Guid.NewGuid(),
@@ -872,10 +961,12 @@ namespace Pusula.Training.HealthCare
                     insuranceId: insurance.Id // Sigorta ID'si atanıyor
                 ));
             }
-
-            await insuranceRepository.InsertManyAsync(insurances, autoSave: true); // Sigortalar veri tabanına ekleniyor
-            await protocolRepository.InsertManyAsync(protocols, autoSave: true); // Protokoller veri tabanına ekleniyor
         }
+    }
+
+    await insuranceRepository.InsertManyAsync(insurances, autoSave: true); // Sigortalar veri tabanına ekleniyor
+    await protocolRepository.InsertManyAsync(protocols, autoSave: true); // Protokoller veri tabanına ekleniyor
+}
 
         private async Task SeedDoctorLeaves()
         {

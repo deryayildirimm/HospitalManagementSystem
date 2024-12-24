@@ -13,7 +13,7 @@ using Pusula.Training.HealthCare.Blazor.Models;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Patient;
 
 public partial class PatientDetail
 {
@@ -85,37 +85,12 @@ public partial class PatientDetail
 
         }
     }
-    /*
-    public async Task OnClicked(ClickEventArgs<PatientDto> Args)
-    {
-        if (Args.Item.Text == "Add")
-        {
-       //     await Grid.AddRecordAsync();
-        }
-        if (Args.Item.Text == "Edit")
-        {
-         //   await Grid.StartEditAsync();
-        }
-        if (Args.Item.Text == "Delete")
-        {
-         //   await Grid.DeleteRecordAsync();
-        }
-        if (Args.Item.Text == "Update")
-        {
-          //  await Grid.EndEditAsync();
-        }
-        if (Args.Item.Text == "Cancel")
-        {
-           // await Grid.CloseEditAsync();
-        }
-    }
-    */
+   
     #region Fetch Patient
     private async Task GetPatientAsync()
     {
         try
         {
-            // patient Number ile alıcaz normalde 
             patient = await PatientsAppService.GetPatientByNumberAsync(PatientNumber);
             PatientGender = patient.Gender.ToString();
         }
@@ -190,9 +165,7 @@ public partial class PatientDetail
 
     }
     #endregion
-
-
-
+    
     private async Task OpenEditPatientModalAsync(PatientDto input)
     {
         await GetNationalitiesListAsync();
@@ -225,19 +198,6 @@ public partial class PatientDetail
         await PatientsAppService.DeleteAsync(input.Id);
 
     }
-    #endregion
-    #region randevu iptali için metod şu anlık boş
-
-    private async Task DeleteAppointmentAsync(AppointmentDto input)
-    {
-        var confirmed = await UiMessageService.Confirm($"Are you sure you want to delete this ?");
-        if (!confirmed) return;
-
-        //
-
-
-    }
-
     #endregion
 
     #region statuye göre veri çekme 
@@ -357,10 +317,10 @@ public partial class PatientDetail
 
     public class MedicalConditionViewModel
     {
-        public string DiseaseName { get; set; }
-        public DateTime DiagnosisDate { get; set; }
-        public string TreatmentStatus { get; set; }
-        public string DoctorNotes { get; set; }
+        public string? DiseaseName { get; set; }
+        public DateTime? DiagnosisDate { get; set; }
+        public string? TreatmentStatus { get; set; }
+        public string? DoctorNotes { get; set; }
     }
 
     #endregion

@@ -279,7 +279,7 @@ public class HealthCareDbContext :
                     .IsRequired(false)
                     .HasForeignKey(x => x.MedicalServiceId);
 
-                b.HasIndex(x => new { x.MedicalServiceId, x.ProtocolId }).IsUnique();
+                b.HasIndex(x => new { x.MedicalServiceId, x.ProtocolId });
             });
 
             builder.Entity<Doctor>(b =>

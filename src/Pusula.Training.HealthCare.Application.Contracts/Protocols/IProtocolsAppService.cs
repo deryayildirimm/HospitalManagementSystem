@@ -11,22 +11,25 @@ namespace Pusula.Training.HealthCare.Protocols;
 public interface IProtocolsAppService : IApplicationService
 {
     Task<PagedResultDto<ProtocolWithNavigationPropertiesDto>> GetListAsync(GetProtocolsInput input);
-
     Task<ProtocolDto> GetWithNavigationPropertiesAsync(Guid id);
 
     Task<ProtocolDto> GetAsync(Guid id);
 
     Task<PagedResultDto<LookupDto<Guid>>> GetPatientLookupAsync(LookupRequestDto input);
+    
+    Task<PagedResultDto<LookupDto<Guid>>> GetMedicalServiceLookupAsync(LookupRequestDto input);
+    
+    Task<PagedResultDto<DepartmentStatisticDto>> GetDepartmentPatientStatisticsAsync(GetProtocolsInput input);
+    
+    Task<PagedResultDto<DoctorStatisticDto>> GetDoctorPatientStatisticsAsync(GetProtocolsInput input);
+    
+    Task<PagedResultDto<ProtocolPatientDepartmentListReportDto>> GetPatientsByDepartmentAsync(GetProtocolsInput input);
+    
+    Task<PagedResultDto<ProtocolPatientDoctorListReportDto>> GetPatientsByDoctorAsync(GetProtocolsInput input);
 
-    Task<PagedResultDto<LookupDto<Guid>>> GetDepartmentLookupAsync(LookupRequestDto input);
+    Task<ProtocolWithDetailsDto> GetProtocolDetailsAsync(Guid id);
     
-    Task<PagedResultDto<LookupDto<Guid>>> GetDoctorLookUpAsync(LookupRequestDto input);
     
-    Task<PagedResultDto<LookupDto<Guid>>> GetInsuranceLookUpAsync(LookupRequestDto input);
-    
-    Task<PagedResultDto<LookupDto<Guid>>> GetProtocolTypeLookUpAsync(LookupRequestDto input);
-    
-
     Task DeleteAsync(Guid id);
 
     Task<ProtocolDto> CreateAsync(ProtocolCreateDto input);
@@ -37,6 +40,6 @@ public interface IProtocolsAppService : IApplicationService
     Task DeleteByIdsAsync(List<Guid> protocolIds);
 
     Task DeleteAllAsync(GetProtocolsInput input);
-    Task<Pusula.Training.HealthCare.Shared.DownloadTokenResultDto> GetDownloadTokenAsync();
+    Task<DownloadTokenResultDto> GetDownloadTokenAsync();
 
 }

@@ -7,6 +7,7 @@ using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Shared;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
+using Volo.Abp.Content;
 
 namespace Pusula.Training.HealthCare.Controllers.ProtocolTypes;
 
@@ -44,6 +45,11 @@ public class ProtocolTypeController(IProtocolTypesAppService typesAppService): H
     [HttpGet]
     [Route("download-token")]
     public virtual Task<DownloadTokenResultDto> GetDownloadTokenAsync() => typesAppService.GetDownloadTokenAsync();
+    
+    [HttpGet]
+    [Route("as-excel-file")]
+    public virtual Task<IRemoteStreamContent> GetListAsExcelFileAsync(ProtocolTypeExcelDownloadDto input)
+        => typesAppService.GetListAsExcelFileAsync(input);
   
     [HttpDelete]
     [Route("")]

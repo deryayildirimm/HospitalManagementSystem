@@ -1,0 +1,110 @@
+﻿@page "/protocols-report-department"
+
+@attribute [Authorize(HealthCarePermissions.Protocols.Default)]
+@using Pusula.Training.HealthCare.Localization
+@using Pusula.Training.HealthCare.Shared
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Pusula.Training.HealthCare.Blazor.Components.Grids
+@using Pusula.Training.HealthCare.Blazor.Components.Filters
+@using Pusula.Training.HealthCare.Permissions
+@using Volo.Abp.AspNetCore.Components.Web
+@using Volo.Abp.Http.Client
+@using Pusula.Training.HealthCare.Blazor.Services
+@using Pusula.Training.HealthCare.Protocols
+@inherits HealthCareComponentBase
+@inject IProtocolsAppService ProtocolsAppService
+@inject ILookupAppService LookupAppService
+
+@using Syncfusion.Blazor.Calendars
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["Report Page - Department"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
+
+</PageHeader>
+
+@* ************************* SEARCH ************************* *@
+
+<div class="row py-3 px-2">
+<div class="col-12 border-1 bg-white p-4" style="box-shadow:0 4px 8px rgba(0,0,0,0.2); ">
+    <div class="row">
+    <GenericFilter TFilter="GetProtocolsInput"
+                   Filter="@FilterFirst"
+                   ShowSearch="true"
+                   GetSearchValue="filter => filter?.FilterText ?? string.Empty"
+                   SetSearchValue="(filter, value) => filter.FilterText = value"
+                   OnFilterChanged="HandleFilterChanged"
+                   OnClearFilters="ClearFilters">
+        <div class="col-3 my-1">
+            <h6>@L["StartMinDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@FilterFirst.StartTimeMin" Placeholder="@L["StartMinDate"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <h6>@L["StartMaxDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@FilterFirst.StartTimeMax" Placeholder="@L["StartMaxDate"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <h6>@L["EndMinDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@FilterFirst.EndTimeMin" Placeholder="@L["EndTimeMin"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <h6>@L["EndMaxDate"]</h6>
+            <SfDatePicker TValue="DateTime?" @bind-Value="@FilterFirst.EndTimeMax" Placeholder="@L["EndTimeMax"]"></SfDatePicker>
+        </div>
+        <div class="col-3 my-1">
+            <h6>@L["Departments"]</h6>
+            <SfDropDownList TItem="LookupDto<Guid>" TValue="Guid?"
+                            @bind-Value="FilterFirst.DepartmentId"
+                            DataSource="@DepartmentsCollection">
+                <DropDownListFieldSettings Text="DisplayName" Value="Id"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+    </GenericFilter>
+    </div>
+</div>
+</div>
+
+
+
+@if (_spinnerVisible)
+  {
+    <SfSpinner  Label="Loading..." Type="SpinnerType.Material" CssClass="e-spinner" Visible="_spinnerVisible" />
+}
+else
+{
+
+    <div style="display: flex; gap: 20px;">
+        <div style="flex: 1;">
+            <h3>Department Grid</h3>
+            <GenericGrid TModel="DepartmentStatisticDto"
+                         @ref="_gridRefFirst"
+                         Columns="@_columnsFirst"
+                         PageSize="5"
+                         Query="@FirstQuery"
+                         ShowActions ="false"
+                         AdaptorInstance="@typeof(ProtocolDepartmentStatisticsAdaptor)"
+                         AdaptorType="Adaptors.CustomAdaptor"></GenericGrid>
+        </div>
+
+        <div style="flex: 1;">
+            <h3>Patient Grid</h3>
+            <GenericGrid TModel="ProtocolPatientDepartmentListReportDto"
+                         @ref="_gridRefSec"
+                         Columns="@_columnsSec"
+                         PageSize="5"
+                         Query="@FirstQuery"
+                         ShowActions ="false"
+                         ShowDetailButton="true"
+                         OnDetailClicked="NavigateToDetail"
+                         AdaptorInstance="@typeof(ProtocolPatientDepartmentListAdaptor)"
+                         AdaptorType="Adaptors.CustomAdaptor"></GenericGrid>
+        </div>
+    </div>
+ 
+}
+

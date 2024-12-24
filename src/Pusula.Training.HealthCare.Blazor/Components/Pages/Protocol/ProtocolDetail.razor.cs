@@ -10,10 +10,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.Blazor.Models;
+using Pusula.Training.HealthCare.Protocols;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Protocol;
 
 public partial class ProtocolDetail
 {
@@ -30,6 +31,8 @@ public partial class ProtocolDetail
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private List<AppointmentViewModel> AppointmentList { get; set; }
     private IReadOnlyList<AppointmentDto> FetchedAppointmentList { get; set; }
+    
+    private IReadOnlyList<string> MedicalServices { get; set; }
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private int TotalCount { get; set; }
@@ -37,6 +40,11 @@ public partial class ProtocolDetail
     private bool CanEditPatient { get; set; }
     private PatientCreateDto NewPatient { get; set; }
     private PatientUpdateDto EditingPatient { get; set; }
+    
+    private ProtocolWithDetailsDto protocolWithDetails { get; set; }
+
+    private string ProtocolStatus;
+    
 
     private EnumAppointmentStatus? _status { get; set; } = EnumAppointmentStatus.Scheduled;
 
@@ -57,8 +65,10 @@ public partial class ProtocolDetail
 
     public ProtocolDetail()
     {
+        protocolWithDetails = new ProtocolWithDetailsDto();
         NewPatient = new PatientCreateDto();
         EditingPatient = new PatientUpdateDto();
+        ProtocolStatus = string.Empty;
         FilterText = new GetAppointmentsInput
         {
             MaxResultCount = PageSize,
@@ -67,6 +77,8 @@ public partial class ProtocolDetail
         };
 
         AppointmentList = [];
+        FetchedAppointmentList = [];
+        MedicalServices = [];
     }
 
     protected override async Task OnInitializedAsync()
@@ -85,39 +97,16 @@ public partial class ProtocolDetail
 
         }
     }
-    /*
-    public async Task OnClicked(ClickEventArgs<PatientDto> Args)
-    {
-        if (Args.Item.Text == "Add")
-        {
-       //     await Grid.AddRecordAsync();
-        }
-        if (Args.Item.Text == "Edit")
-        {
-         //   await Grid.StartEditAsync();
-        }
-        if (Args.Item.Text == "Delete")
-        {
-         //   await Grid.DeleteRecordAsync();
-        }
-        if (Args.Item.Text == "Update")
-        {
-          //  await Grid.EndEditAsync();
-        }
-        if (Args.Item.Text == "Cancel")
-        {
-           // await Grid.CloseEditAsync();
-        }
-    }
-    */
+ 
     #region Fetch Patient
     private async Task GetPatientAsync()
     {
         try
         {
-            // patient Number ile alıcaz normalde 
-            patient = await PatientsAppService.GetPatientByNumberAsync(PatientNumber);
-            PatientGender = patient.Gender.ToString();
+            protocolWithDetails = await ProtocolsAppService.GetProtocolDetailsAsync(ProtocolState.ProtocolId);
+            MedicalServices = protocolWithDetails.MedicalService!.ToList();
+            ProtocolStatus = ProtocolState?.HasValidProtocol == true ? "Aktif" : "Pasif";
+
         }
         catch (Exception e)
         {
@@ -179,7 +168,7 @@ public partial class ProtocolDetail
             DoctorName = x.Doctor?.FirstName + " " + x.Doctor?.LastName ?? "Unknown",
             Date = x?.AppointmentDate.Date.ToString("dd MMMM yyyy") ?? DateTime.MinValue.ToString("dd MMMM yyyy"),
             Status = x?.Status ?? EnumAppointmentStatus.Scheduled,
-            Service = x.MedicalService?.Name ?? "Not Available"
+            Service = x?.MedicalService?.Name ?? "Not Available"
 
         }).ToList();
 
@@ -213,31 +202,6 @@ public partial class ProtocolDetail
         await EditPatientModal.Hide();
     }
 
-    #region bunu appointment dilmesi için dönüştürücez
-
-    private async Task DeletePatientAsync(PatientDto input)
-    {
-
-        var confirmed = await UiMessageService.Confirm($"Are you sure you want to delete {input.FirstName} {input.LastName}?");
-        if (!confirmed) return;
-
-        await PatientsAppService.DeleteAsync(input.Id);
-
-    }
-    #endregion
-    #region randevu iptali için metod şu anlık boş
-
-    private async Task DeleteAppointmentAsync(AppointmentDto input)
-    {
-        var confirmed = await UiMessageService.Confirm($"Are you sure you want to delete this ?");
-        if (!confirmed) return;
-
-        //
-
-
-    }
-
-    #endregion
 
     #region statuye göre veri çekme 
 

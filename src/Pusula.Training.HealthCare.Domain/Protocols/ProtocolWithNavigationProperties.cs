@@ -1,9 +1,7 @@
-using System.Net.Sockets;
 using Pusula.Training.HealthCare.Departments;
 using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.Insurances;
 using Pusula.Training.HealthCare.Patients;
-using Pusula.Training.HealthCare.ProtocolTypes;
 using ProtocolType = Pusula.Training.HealthCare.ProtocolTypes.ProtocolType;
 
 namespace Pusula.Training.HealthCare.Protocols;
