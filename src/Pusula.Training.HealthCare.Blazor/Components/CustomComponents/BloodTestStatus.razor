@@ -1,0 +1,30 @@
+﻿@using Pusula.Training.HealthCare.BloodTests
+
+<div class="status-container">
+    <div class="status-item @DynamicCssClass">
+        <img src="@IconPath" class="status-icon" alt="Status: @Status"/>
+        <span class="status-text">@Status</span>
+    </div>
+</div>
+
+@code {
+    [Parameter] public BloodResultStatus Status { get; set; }
+
+    private string DynamicCssClass =>
+        Status switch
+        {
+            BloodResultStatus.Normal => "normal",
+            BloodResultStatus.High => "high",
+            BloodResultStatus.Low => "low",
+            _ => ""
+        };
+
+    private string IconPath =>
+        Status switch
+        {
+            BloodResultStatus.Normal => "/images/BloodResultStatus/normal.png",  
+            BloodResultStatus.High => "/images/BloodResultStatus/high.png",
+            BloodResultStatus.Low => "/images/BloodResultStatus/low.png",
+            _ => ""  
+        };
+}

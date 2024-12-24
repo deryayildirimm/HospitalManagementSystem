@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Pusula.Training.HealthCare.BloodTests
@@ -8,10 +9,12 @@ namespace Pusula.Training.HealthCare.BloodTests
         [Required]
         public BloodTestStatus Status { get; set; }
         [Required]
-        public DateTime DateCreated { get; set; }
-        public DateTime DateCompleted { get; set; }
-        public Guid DoctorId { get; set; }
-        public Guid PatientId { get; set; }
-        public Guid TestCategoryId { get; set; }
+        public virtual DateTime DateCreated { get; set; }
+        [Required]
+        public virtual Guid DoctorId { get; set; }
+        [Required]
+        public virtual Guid PatientId { get; set; }
+        public virtual DateTime DateCompleted { get; set; }
+        public virtual List<Guid> TestCategoryIdList { get; set; } = new List<Guid>();
     }
 }

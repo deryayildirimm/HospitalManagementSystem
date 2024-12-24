@@ -9,46 +9,35 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Volo.Abp;
-using Volo.Abp.Application.Dtos;
-
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages;
 
 public partial class MyPatients
 {
-    private GetDoctorsInput DoctorsInput { get; set; } = new();
     private IReadOnlyList<PatientDto> Patients { get; set; }
     private IReadOnlyList<TestCategoryDto>? Categories { get; set; }
-    private List<Guid>? SelectedCategoryIds { get; set; } 
+    private List<Guid>? SelectedCategoryIds { get; set; }
     private PatientDto? Patient { get; set; }
     private GetPatientsInput Filter { get; set; } = new();
     private bool CanCreateBloodTest { get; set; }
-    private bool Disabled => SelectedCategoryIds?.Count == 0; 
-    private bool IsDialogVisible = false;
-    private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
-    private int CurrentPage { get; set; } = 1;
-    private int TotalCount { get; set; }
-    private string CurrentSorting { get; set; } = string.Empty;
-    private DoctorWithNavigationPropertiesDto DoctorWithNavigation { get; set; }
-    private string DoctorNameInfo { get; set; }
-    private Guid DoctorId { get; set; } 
+    private bool Disabled => SelectedCategoryIds?.Count == 0;
+    private bool IsVisibleChooseTestDialog = false;
+    private Guid DoctorId { get; set; }
+    private bool isLoading;
 
     public MyPatients()
     {
-        Filter = new GetPatientsInput
-        {
-            MaxResultCount = PageSize,
-            SkipCount = (CurrentPage - 1) * PageSize,
-            Sorting = CurrentSorting
-        };
+        isLoading = true;
         Patients = [];
     }
 
     protected override async Task OnInitializedAsync()
     {
         await SetPermissionsAsync();
+        isLoading = true;
         await GetPatientsAsync();
         await GetDoctor();
+        isLoading = false;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -59,6 +48,11 @@ public partial class MyPatients
         }
     }
 
+    protected void NavigateToDetail(PatientDto patient)
+    {
+        NavigationManager.NavigateTo($"/doctor/my-patients/reports/{patient.PatientNumber}");
+    }
+
     private async Task SetPermissionsAsync()
     {
         CanCreateBloodTest = await AuthorizationService
@@ -67,18 +61,13 @@ public partial class MyPatients
 
     private async Task GetPatientsAsync()
     {
-        Filter.MaxResultCount = PageSize;
-        Filter.SkipCount = (CurrentPage - 1) * PageSize;
-        Filter.Sorting = CurrentSorting;
-
         var result = await PatientsAppService.GetListAsync(Filter);
         Patients = result.Items;
-        TotalCount = (int)result.TotalCount;
 
         await ClearSelectedCategories();
     }
 
-    private async Task OpenDialog(PatientDto input)
+    private async Task OpenChooseTestDialog(PatientDto input)
     {
         var getTestCategoriesInput = new GetTestCategoriesInput();
         var categoriesResult = await testCategoryAppService.GetListAsync(getTestCategoriesInput);
@@ -87,13 +76,13 @@ public partial class MyPatients
         SelectedCategoryIds = [];
 
         Patient = await PatientsAppService.GetAsync(input.Id);
-        IsDialogVisible = true;
+        IsVisibleChooseTestDialog = true;
     }
 
     private async Task CloseDialog()
     {
         await ClearSelectedCategories();
-        IsDialogVisible = false;
+        IsVisibleChooseTestDialog = false;
     }
 
     private async Task ChooseBloodTests()
@@ -101,19 +90,17 @@ public partial class MyPatients
         try
         {
             var date = DateTime.Now;
-            foreach (var items in SelectedCategoryIds!)
+            await BloodTestAppService.CreateAsync(new BloodTestCreateDto
             {
-                var bloodTest = await BloodTestAppService.CreateAsync(new BloodTestCreateDto
-                {
-                    DoctorId = DoctorId,
-                    PatientId = Patient!.Id,
-                    TestCategoryId = items,
-                    Status = BloodTestStatus.Requested,
-                    DateCreated = date
-                });
-            }
-                await GetPatientsAsync();
-                await CloseDialog();
+                DoctorId = DoctorId,
+                PatientId = Patient!.Id,
+                Status = BloodTestStatus.Requested,
+                DateCreated = date,
+                TestCategoryIdList = SelectedCategoryIds!
+            });
+
+            await GetPatientsAsync();
+            await CloseDialog();
         }
         catch (Exception ex)
         {
@@ -125,11 +112,11 @@ public partial class MyPatients
     {
         if (SelectedCategoryIds!.Contains(categoryId))
         {
-            SelectedCategoryIds.Remove(categoryId); 
+            SelectedCategoryIds.Remove(categoryId);
         }
         else
         {
-            SelectedCategoryIds.Add(categoryId); 
+            SelectedCategoryIds.Add(categoryId);
         }
     }
 
@@ -148,7 +135,7 @@ public partial class MyPatients
     {
         try
         {
-            var doctors = (await DoctorAppService.GetListAsync(DoctorsInput)).Items;
+            var doctors = (await DoctorAppService.GetListAsync(new GetDoctorsInput())).Items;
 
             if (doctors.Any())
             {

@@ -3,8 +3,7 @@
 public static class HealthCareDomainErrorCodes
 {
     /* You can add your business exception error codes here, as constants */
-
-
+    
     public const string GuidNotValid = "HealthCareError:GuidNotValid";
     public const string PatientAlreadyExist = "HealthCareError:PatientAlreadyExist";
 
@@ -39,6 +38,13 @@ public static class HealthCareDomainErrorCodes
     public const string DepartmentsNotFound = "HealthCareError:DepartmentsNotFound";
 
     public const string DateNotInPastException = "HealthCareError:DateNotInPast";
+
+    public const string DoctorInformationsRequired = "HealthCareError:DoctorInformationsRequired";
+    public const string PatientInformationsRequired = "HealthCareError:PatientInformationsRequired";
+    public const string CategoryInformationsRequired = "HealthCareError:CategoryInformationsRequired";
+    public const string TestCategoryInformationsRequired = "HealthCareError:TestCategoryInformationsRequired";
+    public const string TestInformationsRequired = "HealthCareError:TestInformationsRequired";
+    public const string BloodTestInformationsRequired = "HealthCareError:BloodTestInformationsRequired";
     public const string PatientNotFound = "HealthCareError:PatientNotFound";
 
     
@@ -46,6 +52,7 @@ public static class HealthCareDomainErrorCodes
     public const string ExaminationIcdExists = "HealthCareError:ExaminationIcdAlreadyExist";
     public const string ExaminationIcdNotFound = "HealthCareError:ExaminationIcdNotFound";
    
+
     /*  ERROR MESSAGES */
     public const string InvalidDateRange_MESSAGE = "InvalidDateRange";
     public const string InvalidDownloadToken_MESSAGE = "The provided download token is invalid.";

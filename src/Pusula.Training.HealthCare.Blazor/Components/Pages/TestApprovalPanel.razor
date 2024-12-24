@@ -1,0 +1,316 @@
+﻿@page "/TestApprovalPanel"
+
+@attribute [Authorize(HealthCarePermissions.BloodTests.Edit)]
+@using Pusula.Training.HealthCare.Blazor.Models.TestApprovalPanel
+@using Pusula.Training.HealthCare.BloodTests
+@using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Permissions
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Cards
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Spinner
+@using Syncfusion.Blazor.Navigations
+@inject IBloodTestAppService bloodTestAppService
+@inherits HealthCareComponentBase
+
+
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home" Text=@L["Home"] Url="/"></Syncfusion.Blazor.Navigations.BreadcrumbItem>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["TestApprovalPanel"]></Syncfusion.Blazor.Navigations.BreadcrumbItem>
+    </BreadcrumbItems>
+</SfBreadcrumb>
+
+<div class="control-section">
+
+    @if (isLoading && CanEditBloodTest)
+    {
+        <SfSpinner @bind-Visible="@isLoading">
+        </SfSpinner>
+    }
+    else
+    {
+        <SfGrid DataSource="@BloodTestList" AllowPaging="true" AllowSorting="true" AllowFiltering="true">
+            <GridPageSettings PageSize="10"></GridPageSettings>
+            <GridColumns>
+                <GridColumn Field=@nameof(BloodTestData.PatientNumber) HeaderText=@L["PatientNumber"] Width="120" TextAlign="TextAlign.Center"></GridColumn>
+                <GridColumn Field=@nameof(BloodTestData.PatientId) HeaderText=@L["IdentityNumber"] Width="120" TextAlign="TextAlign.Center"></GridColumn>
+                <GridColumn Field=@nameof(BloodTestData.PatientName) HeaderText=@L["PatientName"] Width="120" TextAlign="TextAlign.Center"></GridColumn>
+                <GridColumn Field=@nameof(BloodTestData.DoctorName) HeaderText=@L["DoctorName"] Width="120" TextAlign="TextAlign.Center"></GridColumn>
+                <GridColumn Field=@nameof(BloodTestData.DateCreated) HeaderText=@L["DateCreated"] Width="120" TextAlign="TextAlign.Center"></GridColumn>
+                <GridColumn Field=@nameof(BloodTestData.Status) HeaderText=@L["Status"] Width="120" TextAlign="TextAlign.Center"></GridColumn>
+                <GridColumn HeaderText=@L["Actions"] Width="150" TextAlign="TextAlign.Center">
+                    <Template Context="context">
+                        <ejs-button class="btn btn-danger" @onclick="() => OpenDetailsDialog((BloodTestData)context)">@L["Details"]</ejs-button>
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+
+    }
+</div>
+
+@******************* BLOODTEST DETAILS MODAL *************************@
+<SfDialog Width="900" ShowCloseIcon="false" IsModal="true" @bind-Visible="@IsVisibleDetailsDialog">
+    <DialogTemplates>
+        <Header>
+            <div class="modal-header">
+                @L["BloodTestDetails"]
+                <ejs-button class="custom-close-btn" @onclick="CloseDetailsDialog">X</ejs-button>
+            </div>
+        </Header>
+        <Content>
+            @if (CurrentBloodTest != null)
+            {
+                <div class='modal-container'>
+                    <div class='row e-card-layout'>
+                        <div class="col-lg-12">
+                            <SfCard class="custom-card">
+                                <CardContent>
+                                    <div class="card-section">
+                                        <h2 class="card-header">Blood Test</h2>
+                                        <p class="card-subtitle">Comprehensive analysis for your health</p>
+                                        <div class="avatar-container">
+                                            @{
+                                                if (CurrentBloodTest.Patient.Gender == EnumGender.MALE)
+                                                {
+                                                    <img src="/images/avatar_male.jpg" class="TempImage" />
+                                                }
+                                                else
+                                                {
+                                                    <img src="/images/avatar_femalee.jpg" class="TempImage" />
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+
+                                    <div class="patient-info">
+                                        <h3>@L["PatientInformation"]</h3>
+                                        <table class="info-table">
+                                            <tr>
+                                                <td class="label">@L["FirstName"]:</td>
+                                                <td>@CurrentBloodTest.Patient.FirstName</td>
+                                                <td class="label">@L["LastName"]:</td>
+                                                <td>@CurrentBloodTest.Patient.LastName</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="label">@L["BirthDate"]:</td>
+                                                <td>@CurrentBloodTest.Patient.BirthDate.ToString("MM.dd.yyyy")</td>
+                                                <td class="label">@L["Gender"]:</td>
+                                                <td>@CurrentBloodTest.Patient.Gender</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    <div class="doctor-info">
+                                        <h3>@L["DoctorInformation"]</h3>
+                                        <table class="info-table">
+                                            <tr>
+                                                <td class="label">@L["Name&Title"]:</td>
+                                                <td>@CurrentBloodTest.Doctor.Title.TitleName @CurrentBloodTest.Doctor.FirstName @CurrentBloodTest.Doctor.LastName</td>
+                                                <td class="label">@L["Department"]:</td>
+                                                <td>@CurrentBloodTest.Doctor.Department.Name</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+                                    @if (expandedCards.ContainsKey(CurrentBloodTest) && expandedCards[CurrentBloodTest])
+                                    {
+                                        <div class="test-categories-container">
+                                            <h3>@L["TestCategorieswithPrices"]</h3>
+                                            <ul class="category-list">
+                                                @foreach (var category in CurrentBloodTest.BloodTestCategories!)
+                                                {
+                                                    <li class="category-item">
+                                                        <span class="category-name">@category.TestCategory.Name</span>
+                                                        <span class="category-price">@($"{category.TestCategory.Price} ₺")</span>
+                                                    </li>
+                                                }
+                                            </ul>
+                                            <div class="total-price">
+                                                <strong>@L["TotalPrice"]:</strong>
+                                                @($"{CurrentBloodTest.BloodTestCategories.Sum(c => c.TestCategory.Price)} ₺")
+                                            </div>
+
+                                            <div class="approval-actions">
+                                                <ejs-button class="btn btn-approve" @onclick="UpdateStatusAsync">
+                                                    @L["Approvement"]
+                                                </ejs-button>
+                                                <ejs-button class="btn btn-cancel" @onclick="CancelBloodTest">
+                                                    @L["Cancel"]
+                                                </ejs-button>
+                                            </div>
+                                        </div>
+                                    }
+                                </CardContent>
+
+                                <Syncfusion.Blazor.Cards.CardFooter>
+                                    <CardFooterContent>
+                                        <div class="footer-btn">
+                                            <SfButton CssClass="e-primary" @onclick="@(() => ToggleExpand(CurrentBloodTest))">
+                                                @(expandedCards.ContainsKey(CurrentBloodTest) && expandedCards[CurrentBloodTest] ? @L["CloseDetails"] : @L["ViewDetails"])
+                                            </SfButton>
+                                        </div>
+                                    </CardFooterContent>
+                                </Syncfusion.Blazor.Cards.CardFooter>
+                            </SfCard>
+                        </div>
+                    </div>
+                </div>
+            }
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+<style>
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.6rem;
+        font-weight: bold;
+        padding: 5px 10px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .modal-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .custom-close-btn {
+        background: none;
+        border: none;
+        font-size: 1.4rem;
+        color: #e74c3c;
+        cursor: pointer;
+    }
+
+    .custom-card {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .avatar-container {
+        display: flex;
+        justify-content: center;
+        margin: 10px 0;
+    }
+
+    .TempImage {
+        height: 120px;
+        width: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #3498db;
+    }
+
+    .card-header {
+        text-align: center;
+        font-size: 1.8rem;
+        color: #2C3E50;
+    }
+
+    .card-subtitle {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #7f8c8d;
+    }
+
+    .patient-info, .doctor-info {
+        margin-top: 30px;
+    }
+
+        .patient-info h3, .doctor-info h3 {
+            color: #2980b9;
+            font-size: 1.4rem;
+        }
+
+    .info-table {
+        width: 100%;
+        margin-top: 15px;
+        border-collapse: collapse;
+    }
+
+        .info-table td {
+            padding: 12px;
+            font-size: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+    .label {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .test-categories-container {
+        background: #f9f9f9;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .category-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .footer-btn {
+        text-align: center;
+        margin: 6px 0;
+    }
+
+    .e-primary {
+        background-color: #3498db;
+        color: white;
+        padding: 6px 18px;
+        border-radius: 6px;
+        transition: 0.3s;
+    }
+
+        .e-primary:hover {
+            background-color: #2980b9;
+        }
+
+    .approval-actions {
+        display: flex;
+        justify-content: center;
+        margin-top: 2px;
+        gap: 15px;
+    }
+
+    .btn-approve, .btn-cancel {
+        padding: 8px 20px;
+        font-size: 14px;
+        border-radius: 8px;
+        min-width: 120px;
+        text-transform: uppercase;
+    }
+
+    .btn-approve {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-cancel {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-approve:hover {
+        background-color: #45a049;
+    }
+
+    .btn-cancel:hover {
+        background-color: #e53935;
+    }
+
+</style>

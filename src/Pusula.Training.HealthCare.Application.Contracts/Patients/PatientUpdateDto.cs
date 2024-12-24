@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using Pusula.Training.HealthCare.Validators;
 using System;
 using System.ComponentModel.DataAnnotations;

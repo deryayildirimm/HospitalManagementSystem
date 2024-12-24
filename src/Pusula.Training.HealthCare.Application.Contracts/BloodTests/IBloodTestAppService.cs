@@ -9,19 +9,12 @@ namespace Pusula.Training.HealthCare.BloodTests
 {
     public interface IBloodTestAppService : IApplicationService
     {
-        Task<PagedResultDto<BloodTestWithNavigationPropertiesDto>> GetListAsync(GetBloodTestsInput input);
-
-        Task<BloodTestWithNavigationPropertiesDto> GetWithNavigationPropertiesAsync(Guid id);
-
+        Task<PagedResultDto<BloodTestDto>> GetListAsync(GetBloodTestsInput input);
         Task<BloodTestDto> GetAsync(Guid id);
-
         Task<BloodTestDto> CreateAsync(BloodTestCreateDto input);
-
         Task<BloodTestDto> UpdateAsync(BloodTestUpdateDto input);
-
         Task<IRemoteStreamContent> GetListAsExcelFileAsync(BloodTestExcelDownloadDto input);
         Task<Pusula.Training.HealthCare.Shared.DownloadTokenResultDto> GetDownloadTokenAsync();
-        Task BulkUpdateStatusAsync(List<BloodTestUpdateDto> updateDtos);
-
+        Task<List<Guid>> GetCategoryIdsAsync(Guid id);
     }
 }

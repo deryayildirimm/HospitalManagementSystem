@@ -243,18 +243,28 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("Status");
 
-                    b.Property<Guid>("TestCategoryId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DoctorId");
 
                     b.HasIndex("PatientId");
 
+                    b.ToTable("AppBloodTests", (string)null);
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.BloodTestCategory", b =>
+                {
+                    b.Property<Guid>("BloodTestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("TestCategoryId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("BloodTestId", "TestCategoryId");
+
                     b.HasIndex("TestCategoryId");
 
-                    b.ToTable("AppBloodTests", (string)null);
+                    b.ToTable("AppBloodTestCategories", (string)null);
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Categories.TestCategory", b =>
@@ -330,7 +340,80 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.ToTable("AppTestCategories", (string)null);
                 });
 
-            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Tests.BloodTestResult", b =>
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Reports.BloodTestReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BloodTestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("ConcurrencyStamp");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("CreationTime");
+
+                    b.Property<Guid?>("CreatorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("CreatorId");
+
+                    b.Property<Guid?>("DeleterId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("DeleterId");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("DeletionTime");
+
+                    b.Property<string>("ExtraProperties")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("ExtraProperties");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("LastModificationTime");
+
+                    b.Property<Guid?>("LastModifierId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("LastModifierId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BloodTestId")
+                        .IsUnique();
+
+                    b.ToTable("AppBloodTestReports", (string)null);
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Reports.BloodTestReportResult", b =>
+                {
+                    b.Property<Guid>("BloodTestReportId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("BloodTestResultId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("BloodTestReportId", "BloodTestResultId");
+
+                    b.HasIndex("BloodTestResultId");
+
+                    b.ToTable("AppBloodTestReportResults", (string)null);
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Results.BloodTestResult", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
@@ -338,9 +421,6 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.Property<int>("BloodResultStatus")
                         .HasColumnType("integer")
                         .HasColumnName("BloodResultStatus");
-
-                    b.Property<Guid>("BloodTestId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -378,8 +458,6 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasColumnName("Value");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BloodTestId");
 
                     b.HasIndex("TestId");
 
@@ -1432,8 +1510,7 @@ namespace Pusula.Training.HealthCare.Migrations
 
                     b.HasIndex("ProtocolId");
 
-                    b.HasIndex("MedicalServiceId", "ProtocolId")
-                        .IsUnique();
+                    b.HasIndex("MedicalServiceId", "ProtocolId");
 
                     b.ToTable("AppProtocolMedicalServices", (string)null);
                 });
@@ -3816,47 +3893,84 @@ namespace Pusula.Training.HealthCare.Migrations
 
             modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.BloodTest", b =>
                 {
-                    b.HasOne("Pusula.Training.HealthCare.Doctors.Doctor", null)
+                    b.HasOne("Pusula.Training.HealthCare.Doctors.Doctor", "Doctor")
                         .WithMany()
                         .HasForeignKey("DoctorId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Pusula.Training.HealthCare.Patients.Patient", null)
+                    b.HasOne("Pusula.Training.HealthCare.Patients.Patient", "Patient")
                         .WithMany()
                         .HasForeignKey("PatientId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Pusula.Training.HealthCare.BloodTests.Categories.TestCategory", null)
-                        .WithMany()
-                        .HasForeignKey("TestCategoryId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
+                    b.Navigation("Doctor");
+
+                    b.Navigation("Patient");
                 });
 
-            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Tests.BloodTestResult", b =>
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.BloodTestCategory", b =>
                 {
-                    b.HasOne("Pusula.Training.HealthCare.BloodTests.BloodTest", null)
-                        .WithMany()
+                    b.HasOne("Pusula.Training.HealthCare.BloodTests.BloodTest", "BloodTest")
+                        .WithMany("BloodTestCategories")
                         .HasForeignKey("BloodTestId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Pusula.Training.HealthCare.BloodTests.Tests.Test", null)
+                    b.HasOne("Pusula.Training.HealthCare.BloodTests.Categories.TestCategory", "TestCategory")
                         .WithMany()
-                        .HasForeignKey("TestId")
+                        .HasForeignKey("TestCategoryId");
+
+                    b.Navigation("BloodTest");
+
+                    b.Navigation("TestCategory");
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Reports.BloodTestReport", b =>
+                {
+                    b.HasOne("Pusula.Training.HealthCare.BloodTests.BloodTest", "BloodTest")
+                        .WithOne("BloodTestReport")
+                        .HasForeignKey("Pusula.Training.HealthCare.BloodTests.Reports.BloodTestReport", "BloodTestId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("BloodTest");
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Reports.BloodTestReportResult", b =>
+                {
+                    b.HasOne("Pusula.Training.HealthCare.BloodTests.Reports.BloodTestReport", "BloodTestReport")
+                        .WithMany("Results")
+                        .HasForeignKey("BloodTestReportId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Pusula.Training.HealthCare.BloodTests.Results.BloodTestResult", "BloodTestResult")
+                        .WithMany()
+                        .HasForeignKey("BloodTestResultId");
+
+                    b.Navigation("BloodTestReport");
+
+                    b.Navigation("BloodTestResult");
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Results.BloodTestResult", b =>
+                {
+                    b.HasOne("Pusula.Training.HealthCare.BloodTests.Tests.Test", "Test")
+                        .WithMany()
+                        .HasForeignKey("TestId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Test");
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Tests.Test", b =>
                 {
-                    b.HasOne("Pusula.Training.HealthCare.BloodTests.Categories.TestCategory", null)
+                    b.HasOne("Pusula.Training.HealthCare.BloodTests.Categories.TestCategory", "TestCategory")
                         .WithMany()
                         .HasForeignKey("TestCategoryId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("TestCategory");
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Departments.DepartmentMedicalService", b =>
@@ -4237,6 +4351,18 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasForeignKey("TenantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.BloodTest", b =>
+                {
+                    b.Navigation("BloodTestCategories");
+
+                    b.Navigation("BloodTestReport");
+                });
+
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Reports.BloodTestReport", b =>
+                {
+                    b.Navigation("Results");
                 });
 
             modelBuilder.Entity("Pusula.Training.HealthCare.Departments.Department", b =>

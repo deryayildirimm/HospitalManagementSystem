@@ -70,7 +70,7 @@ public class HealthCareMenuContributor : IMenuContributor
                     icon: "fa-solid fa-calendar")
                 )
         );
-
+        
         context.Menu.AddItem(
             new ApplicationMenuItem(
                     name: HealthCareMenus.Appointments,
@@ -140,21 +140,38 @@ public class HealthCareMenuContributor : IMenuContributor
         
         context.Menu.AddItem(
             new ApplicationMenuItem(
-                HealthCareMenus.BloodTests,
-                l["Menu:BloodTests"],
-                url: "/bloodtest",
-                icon: "fa-solid fa-droplet",
-                requiredPermissionName: HealthCarePermissions.BloodTests.Edit)
-        );
-
-        context.Menu.AddItem(
-            new ApplicationMenuItem(
-                HealthCareMenus.MyPatients,
-                l["Menu:MyPatients"],
-                url: "/doctor/my-patients",
-                icon: "fa-solid fa-receipt",
-                requiredPermissionName: HealthCarePermissions.Doctors.Default)
-        );
+                    name: HealthCareMenus.Laboratory,
+                    displayName: l["Menu:Laboratory"],
+                    icon: "fa-solid fa-medkit",
+                    requiredPermissionName: HealthCarePermissions.BloodTests.Create
+                )
+                .AddItem(
+                    new ApplicationMenuItem(
+                        HealthCareMenus.MyPatients,
+                        l["Menu:MyPatients"],
+                        url: "/doctor/my-patients",
+                        icon: "fa-solid fa-receipt",
+                        requiredPermissionName: HealthCarePermissions.Doctors.Default)
+                )
+                
+                .AddItem(
+                new ApplicationMenuItem(
+                    HealthCareMenus.TestApprovalPanel,
+                    l["Menu:TestApprovalPanel"],
+                    url: "/TestApprovalPanel",
+                    icon: "fa-solid fa-list-check",
+                    requiredPermissionName: HealthCarePermissions.BloodTests.Edit)
+                )
+                
+                .AddItem(
+                    new ApplicationMenuItem(
+                        HealthCareMenus.TestApprovalPanel,
+                        l["Menu:LaboratoryTechnician"],
+                        url: "/laboratorytechnician",
+                        icon: "fa-solid fa-flask-vial",
+                        requiredPermissionName: HealthCarePermissions.BloodTests.Edit)
+                )
+                );
 
         context.Menu.AddItem(
             new ApplicationMenuItem(
