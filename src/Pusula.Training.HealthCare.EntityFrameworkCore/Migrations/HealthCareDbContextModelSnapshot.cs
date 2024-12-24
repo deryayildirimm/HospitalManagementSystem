@@ -413,7 +413,7 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.ToTable("AppBloodTestReportResults", (string)null);
                 });
 
-            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Tests.BloodTestResult", b =>
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Results.BloodTestResult", b =>
                 {
                     b.Property<Guid>("Id")
                         .HasColumnType("uuid");
@@ -1510,8 +1510,7 @@ namespace Pusula.Training.HealthCare.Migrations
 
                     b.HasIndex("ProtocolId");
 
-                    b.HasIndex("MedicalServiceId", "ProtocolId")
-                        .IsUnique();
+                    b.HasIndex("MedicalServiceId", "ProtocolId");
 
                     b.ToTable("AppProtocolMedicalServices", (string)null);
                 });
@@ -3944,7 +3943,7 @@ namespace Pusula.Training.HealthCare.Migrations
                         .HasForeignKey("BloodTestReportId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Pusula.Training.HealthCare.BloodTests.Tests.BloodTestResult", "BloodTestResult")
+                    b.HasOne("Pusula.Training.HealthCare.BloodTests.Results.BloodTestResult", "BloodTestResult")
                         .WithMany()
                         .HasForeignKey("BloodTestResultId");
 
@@ -3953,7 +3952,7 @@ namespace Pusula.Training.HealthCare.Migrations
                     b.Navigation("BloodTestResult");
                 });
 
-            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Tests.BloodTestResult", b =>
+            modelBuilder.Entity("Pusula.Training.HealthCare.BloodTests.Results.BloodTestResult", b =>
                 {
                     b.HasOne("Pusula.Training.HealthCare.BloodTests.Tests.Test", "Test")
                         .WithMany()

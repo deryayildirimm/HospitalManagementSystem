@@ -17,6 +17,7 @@ public class HealthCareMenus
     public const string LaboratoryTechnician = Prefix + ".LaboratoryTechnician";
     public const string MyPatients = Prefix + ".MyPatients";
     public const string MedicalStaff = Prefix + ".MedicalStaff";
+    public const string Laboratory = Prefix + ".Laboratory";
     
     public const string Appointments = Prefix + ".Appointments";
     public const string AppointmentTypes = Prefix + ".AppointmentTypes";
