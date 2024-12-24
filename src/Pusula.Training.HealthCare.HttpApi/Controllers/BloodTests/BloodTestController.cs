@@ -14,15 +14,11 @@ namespace Pusula.Training.HealthCare.Controllers.BloodTests
     [RemoteService]
     [Area("app")]
     [ControllerName("BloodTests")]
-    [Route("api/app/bloodtests")]
+    [Route("api/app/blood-tests")]
     public class BloodTestController(IBloodTestAppService bloodTestAppService) : HealthCareController, IBloodTestAppService
     {
         [HttpGet]
-        public Task<PagedResultDto<BloodTestWithNavigationPropertiesDto>> GetListAsync(GetBloodTestsInput input) => bloodTestAppService.GetListAsync(input);
-
-        [HttpGet]
-        [Route("with-navigation-properties/{id}")]
-        public Task<BloodTestWithNavigationPropertiesDto> GetWithNavigationPropertiesAsync(Guid id) => bloodTestAppService.GetWithNavigationPropertiesAsync(id);
+        public Task<PagedResultDto<BloodTestDto>> GetListAsync(GetBloodTestsInput input) => bloodTestAppService.GetListAsync(input);
 
         [HttpGet]
         [Route("{id}")]
@@ -43,8 +39,8 @@ namespace Pusula.Training.HealthCare.Controllers.BloodTests
         [Route("download-token")]
         public Task<DownloadTokenResultDto> GetDownloadTokenAsync() => bloodTestAppService.GetDownloadTokenAsync();
 
-        [HttpPost]
-        [Route("api/app/blood-tests/bulk-update-status")]
-        public Task BulkUpdateStatusAsync(List<BloodTestUpdateDto> updateDtos) => bloodTestAppService.BulkUpdateStatusAsync(updateDtos);
+        [HttpGet]
+        [Route("{id}/category-ids")]
+        public Task<List<Guid>> GetCategoryIdsAsync(Guid id) => bloodTestAppService.GetCategoryIdsAsync(id);
     }
 }

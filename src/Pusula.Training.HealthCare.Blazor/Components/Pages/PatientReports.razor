@@ -1,0 +1,404 @@
+﻿@page "/doctor/my-patients/reports/{PatientNumber:int}"
+
+@attribute [Authorize(HealthCarePermissions.Doctors.Default)]
+@using Pusula.Training.HealthCare.Blazor.Models.PatientReport
+@using Pusula.Training.HealthCare.BloodTests.Reports
+@using Pusula.Training.HealthCare.Localization
+@using Pusula.Training.HealthCare.Patients
+@using Volo.Abp.AspNetCore.Components.Web
+@using Pusula.Training.HealthCare.BloodTests
+@using Pusula.Training.HealthCare.BloodTests.Category
+@using Pusula.Training.HealthCare.BloodTests.Tests
+@using Pusula.Training.HealthCare.Doctors
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@using Volo.Abp.Application.Dtos
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Cards
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Data
+@using Pusula.Training.HealthCare.Permissions
+@using Syncfusion.Blazor.Charts
+@inherits HealthCareComponentBase
+@inject IPatientsAppService PatientsAppService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject NavigationManager NavigationManager
+@inject BloodTestReportAppService bloodTestReportService
+@inject Microsoft.AspNetCore.Components.NavigationManager UriHelper
+
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home" Text=@L["Home"] Url="/"></Syncfusion.Blazor.Navigations.BreadcrumbItem>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["MyPatients"] Url="/doctor/my-patients"></Syncfusion.Blazor.Navigations.BreadcrumbItem>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["Reports"]></Syncfusion.Blazor.Navigations.BreadcrumbItem>
+    </BreadcrumbItems>
+</SfBreadcrumb>
+
+<h3 style="text-align:center">Patient Reports</h3>
+
+@if (isLoading)
+{
+    <SfSpinner @bind-Visible="@isLoading">
+    </SfSpinner>
+}
+else
+{
+    <div class="main-container">
+        <!-- Left Side Report Table -->
+        <div class="reports-section">
+            <SfGrid DataSource="@BloodTestSummaries" AllowPaging="true">
+                <GridPageSettings PageSize="2"></GridPageSettings>
+                <GridTemplates>
+                    <DetailTemplate>
+                        @{
+                            var result = (context as BloodTestSummaryDto);
+                        }
+                        <div style="padding:20px">
+                            <SfTab>
+                                <TabItems>
+                                    <TabItem>
+                                        <ChildContent>
+                                            <TabHeader Text="Details"></TabHeader>
+                                        </ChildContent>
+                                        <ContentTemplate>
+                                            <div style="padding:25px">
+                                                <SfGrid DataSource="@BloodTestResultDetails" AllowPaging="true" Query="@(new Query().Where("BloodTestId", "equal", result!.BloodTestId))">
+                                                    <GridEvents CommandClicked="OnCommandClicked" TValue="BloodTestResultDetailsDto"></GridEvents>
+                                                    <GridPageSettings PageSize="3"></GridPageSettings>
+                                                    <GridColumns>
+                                                        <GridColumn Field=@nameof(BloodTestResultDetailsDto.TestName) HeaderText="Test Name" Width="160"></GridColumn>
+                                                        <GridColumn Field=@nameof(BloodTestResultDetailsDto.Value) HeaderText="Value" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                                        <GridColumn Field=@nameof(BloodTestResultDetailsDto.Interval) HeaderText="Interval" TextAlign="TextAlign.Center" Width="120"></GridColumn>
+                                                        <GridColumn Field=@nameof(BloodTestResultDetailsDto.BloodResultStatus) HeaderText="Result Status" TextAlign="TextAlign.Center" Width="160">
+                                                            <Template Context="Details">
+                                                                @if (Details != null)
+                                                                {
+                                                                    var category = (BloodTestResultDetailsDto)Details;
+                                                                    <BloodTestStatus Status="@category.BloodResultStatus" />
+                                                                }
+                                                            </Template>
+                                                        </GridColumn>
+                                                        <GridColumn HeaderText="Actions" Width="160">
+                                                            <Template Context="Details">
+                                                                <button class="btn btn-custom-gray"
+                                                                        @onclick="() => OpenGraphicModal((BloodTestResultDetailsDto)Details)">
+                                                                    <i class="fas fa-chart-line"></i> Details
+                                                                </button>
+                                                            </Template>
+                                                        </GridColumn>
+                                                    </GridColumns>
+                                                </SfGrid>
+                                            </div>
+                                        </ContentTemplate>
+                                    </TabItem>
+                                </TabItems>
+                            </SfTab>
+                        </div>
+                    </DetailTemplate>
+                </GridTemplates>
+                <GridColumns>
+                    <GridColumn Field=@nameof(BloodTestSummaryDto.DateCreated) HeaderText="Test Date" Format="dd.MM.yyyy" Width="150"></GridColumn>
+                    <GridColumn Width="150"></GridColumn>
+                    <GridColumn Width="150"></GridColumn>
+                    <GridColumn Field=@nameof(BloodTestSummaryDto.Status) HeaderText="Status" Width="120"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+        @if (Patient != null)
+        {
+            <!-- Right Side Profile Card -->
+            <div class="profile-card-container">
+                <div class="e-card e-custom-card">
+                    <div class="e-card-header">
+                        <div class="e-avatar e-avatar-circle">
+                            <img src="https://localhost:44398/images/avatar.jpg" class="TempImage" />
+                        </div>
+                    </div>
+                    <div class="e-card-header-caption">
+                        <div class="e-card-header-title">
+                            @Patient.FirstName @Patient.LastName
+                        </div>
+                        <div class="e-card-header-sub-title">
+                            @{
+                                var date = DateTime.Now.Year;
+                                var birthDate = Patient.BirthDate.Year;
+                                var age = date - birthDate;
+                                <span>@age</span>
+                                if (Patient.Nationality != null)
+                                {
+                                    <span> | @Patient.Nationality</span>
+                                }
+                            }
+                        </div>
+                    </div>
+                    <div class="e-card-content">
+                        <table class="e-profile-details">
+                            <tr>
+                                <td>
+                                    <div class="profile-row">Weight</div>
+                                    <div class="profile-value">70 KG</div>
+                                </td>
+                                <td>
+                                    <div class="profile-row">Height</div>
+                                    <div class="profile-value">165 cm</div>
+                                </td>
+                                <td>
+                                    <div class="profile-row">Goal</div>
+                                    <div class="profile-value">65 KG</div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="profile-row">Blood Group</div>
+                                    <div class="profile-value">O+</div>
+                                </td>
+                                <td>
+                                    <div class="profile-row">Allergies</div>
+                                    <div class="profile-value">Peanuts</div>
+                                </td>
+                                <td>
+                                    <div class="profile-row">Last Visit</div>
+                                    <div class="profile-value">12/15/2024</div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="additional-info">
+                            <h4>Medical Notes</h4>
+                            <p>Patient has a history of high blood pressure. Regular monitoring recommended.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!--**************GRAPHIC MODAL******************-->
+<SfDialog Width="800" ShowCloseIcon="false" IsModal="true" @bind-Visible="@IsVisibleModal" OnOverlayClick="CloseGraphicModal" CssClass="custom-modal">
+    <DialogTemplates>
+        <Header>
+            <div class="dialog-header">
+                <span class="dialog-title">Test Results Chart</span>
+                <ejs-button class="custom-close-btn" @onclick="CloseGraphicModal">&times;</ejs-button>
+            </div>
+        </Header>
+        <Content>
+            <div class="chart-section">
+                <SfChart Title="Blood Test Results" Width="@Width">
+                    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" EdgeLabelPlacement="EdgeLabelPlacement.Shift">
+                        <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+                    </ChartPrimaryXAxis>
+                    <ChartPrimaryYAxis Title="Result Value" Minimum="0" Maximum="300" Interval="15">
+                        <ChartAxisLineStyle Width="0"></ChartAxisLineStyle>
+                        <ChartAxisMajorTickLines Width="0"></ChartAxisMajorTickLines>
+                    </ChartPrimaryYAxis>
+                    <ChartTooltipSettings Enable="true"></ChartTooltipSettings>
+                    <ChartSeriesCollection>
+                        <ChartSeries DataSource="@ChartData" Name="Test Result" XName="Period" Width="2" Opacity="1" YName="Value" Type="ChartSeriesType.Line">
+                            <ChartMarker Visible="true" Width="8" Height="8" IsFilled="true" Shape="ChartShape.Circle"></ChartMarker>
+                        </ChartSeries>
+                    </ChartSeriesCollection>
+                </SfChart>
+            </div>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Cancel" CssClass="custom-button cancel-button" OnClick="@(() => CloseGraphicModal())" />
+    </DialogButtons>
+</SfDialog>
+
+<style>
+    .main-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .reports-section {
+        flex: 2;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        overflow-y: auto; 
+    }
+
+    .custom-modal {
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .dialog-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #eaeaea;
+    }
+
+    .dialog-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        text-align: center;
+    }
+
+    .custom-close-btn {
+        background: transparent;
+        color: #555;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        margin-left: auto;
+    }
+
+    .chart-section {
+        padding: 20px;
+    }
+
+    .custom-button {
+        padding: 12px 25px;
+        font-size: 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .cancel-button {
+        background-color: #ff4d4f;
+        color: white;
+        border: none;
+    }
+
+        .cancel-button:hover {
+            background-color: #d9363e;
+        }
+
+    .btn-custom-gray {
+        background-color: #6c757d; 
+        color: white; 
+        border: none; 
+        border-radius: 12px; 
+        padding: 6px 14px; 
+        font-size: 13px; 
+        font-weight: 600; 
+        display: inline-flex;
+        align-items: center; 
+        gap: 8px; 
+        cursor: pointer; 
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+        transition: background-color 0.2s ease-in-out; 
+    }
+
+        .btn-custom-gray:hover {
+            background-color: #5a6268; 
+            color: #f8f9fa; 
+        }
+
+        .btn-custom-gray i {
+            font-size: 16px; 
+        }
+
+    .sf-grid {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+
+        .sf-grid th, .sf-grid td {
+            padding: 10px;
+            text-align: left; 
+        }
+
+        .sf-grid .e-center-align {
+            text-align: center; 
+        }
+
+        .sf-grid .e-right-align {
+            text-align: right;
+        }
+
+    .profile-card-container {
+        flex: 1;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        background-color: #f9f9f9;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        position: sticky;
+        top: 20px;
+        height: fit-content;
+    }
+
+    .e-card {
+        border: none;
+        text-align: center;
+    }
+
+    .e-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        margin: 0 auto;
+        border: 2px solid #ccc;
+    }
+
+        .e-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+    .e-card-header-title {
+        font-weight: 600;
+        font-size: 22px;
+        color: #303343;
+        margin-top: 15px;
+    }
+
+    .e-card-header-sub-title {
+        font-size: 16px;
+        color: #56648A;
+    }
+
+    .e-profile-details {
+        width: 100%;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .profile-row {
+        font-weight: 500;
+        font-size: 14px;
+        color: #56648A;
+    }
+
+    .profile-value {
+        font-weight: 600;
+        font-size: 16px;
+        margin-top: 5px;
+        color: #303343;
+    }
+
+    .additional-info {
+        margin-top: 20px;
+        text-align: left;
+    }
+
+        .additional-info h4 {
+            font-weight: 600;
+            font-size: 16px;
+            color: #303343;
+            margin-bottom: 10px;
+        }
+
+        .additional-info p {
+            font-size: 14px;
+            color: #56648A;
+            line-height: 1.5;
+        }
+</style>

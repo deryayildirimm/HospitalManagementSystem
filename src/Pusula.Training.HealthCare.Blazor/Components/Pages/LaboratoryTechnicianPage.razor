@@ -1,0 +1,569 @@
+﻿@page "/LaboratoryTechnician"
+
+@attribute [Authorize(HealthCarePermissions.BloodTests.Default)]
+@using Pusula.Training.HealthCare.Blazor.Models.LaboratoryTechnicianPage
+@using Pusula.Training.HealthCare.BloodTests
+@using Pusula.Training.HealthCare.BloodTests.Reports
+@using Pusula.Training.HealthCare.BloodTests.Results
+@using Pusula.Training.HealthCare.BloodTests.Tests
+@using Pusula.Training.HealthCare.Localization
+@using Pusula.Training.HealthCare.Permissions
+@using Syncfusion.Blazor.Calendars
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Syncfusion.Blazor.Cards
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Navigations
+@using Volo.Abp.Http.Client
+@inherits HealthCareComponentBase
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+@inject BloodTestAppService bloodTestService
+@inject TestAppService testAppService
+@inject BloodTestResultAppService bloodTestResultService
+@inject BloodTestReportAppService bloodTestReportService
+
+<SfBreadcrumb>
+    <BreadcrumbItems>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home" Text=@L["Home"] Url="/"></Syncfusion.Blazor.Navigations.BreadcrumbItem>
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["LaboratoryTechnician"]></Syncfusion.Blazor.Navigations.BreadcrumbItem>
+    </BreadcrumbItems>
+</SfBreadcrumb>
+
+<h3 style="text-align:center; margin-top:-16px;">@L["LaboratoryTechnicianPage"]</h3>
+
+@if (isLoading)
+{
+    <SfSpinner @bind-Visible="@isLoading">
+    </SfSpinner>
+}
+else
+{
+    <div class="container mt-3">
+        <div class="row" style="margin-top:-15px">
+            <!-- Pending Blood Tests Card -->
+            <div class="col-md-4">
+                <SfCard ID="PendingBloodTestsCard">
+                    <Syncfusion.Blazor.Cards.CardHeader Title=@L["PendingBloodTests"] />
+                    <CardContent>
+                        <div class="card-text">
+                            <span class="count">@BloodTestsForPending.Count()</span>
+                            <span class="info">Tests Pending</span>
+                        </div>
+                    </CardContent>
+                </SfCard>
+            </div>
+
+            <!-- In Progress Blood Tests Card -->
+            <div class="col-md-4">
+                <SfCard ID="InProgressBloodTestsCard">
+                    <Syncfusion.Blazor.Cards.CardHeader Title=@L["InProgressBloodTests"] />
+                    <CardContent>
+                        <div class="card-text">
+                            <span class="count">@BloodTestsForInProgress.Count()</span>
+                            <span class="info">Tests In Progress</span>
+                        </div>
+                    </CardContent>
+                </SfCard>
+            </div>
+
+            <!-- Completed Blood Tests Card -->
+            <div class="col-md-4">
+                <SfCard ID="CompletedBloodTestsCard">
+                    <Syncfusion.Blazor.Cards.CardHeader Title=@L["CompletedBloodTests"] />
+                    <CardContent>
+                        <div class="card-text">
+                            <span class="count">@BloodTestsForCompleted.Count()</span>
+                            <span class="info">Tests Completed</span>
+                        </div>
+                    </CardContent>
+                </SfCard>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <!-- Pending Blood Tests Table -->
+            <div class="col-lg-9">
+                <h4>@L["PendingBloodTests"]</h4>
+                <SfGrid TValue="BloodTestViewModel" DataSource="@BloodTestsForPending" AllowPaging="true" AllowSorting="true">
+                    <GridPageSettings PageSize="3"></GridPageSettings>
+                    <GridColumns>
+                        <GridColumn Field="@nameof(BloodTestViewModel.PatientNumber)" HeaderText=@L["PatientNumber"] TextAlign="TextAlign.Center"></GridColumn>
+                        <GridColumn Field="@nameof(BloodTestViewModel.PatientName)" HeaderText=@L["PatientName"] TextAlign="TextAlign.Left"></GridColumn>
+                        <GridColumn Field="@nameof(BloodTestViewModel.PatientLastName)" HeaderText=@L["PatientSurname"] TextAlign="TextAlign.Left"></GridColumn>
+                        <GridColumn Field="@nameof(BloodTestViewModel.BloodTestDateCreated)" HeaderText=@L["RequestedDate"] TextAlign="TextAlign.Center"></GridColumn>
+                        <GridColumn Field="@nameof(BloodTestViewModel.BloodTestStatus)" HeaderText=@L["Status"] TextAlign="TextAlign.Center">
+                            <Template>
+                                @{
+                                    var category = (context as BloodTestViewModel);
+                                    if (category!.BloodTestStatus == Pusula.Training.HealthCare.BloodTests.BloodTestStatus.PendingTest)
+                                    {
+                                        <div class="status-badge status-bydesign">
+                                            @category.BloodTestStatus
+                                        </div>
+                                    }
+                                }
+
+                            </Template>
+                        </GridColumn>
+                        <GridColumn HeaderText="Actions">
+                            <Template Context="context">
+                                <ejs-button class="btn btn-danger" @onclick="() => UpdatePendingStatus((BloodTestViewModel)context)">@L["In Progress"]</ejs-button>
+                            </Template>
+                        </GridColumn>
+                    </GridColumns>
+                </SfGrid>
+            </div>
+
+            <!-- Filtering Panel -->
+            <div class="col-lg-3">
+                <div class="property-section">
+                    <div class="property-panel-header">Filter Options</div>
+                    <div class="property-panel-content">
+                        <table class="table">
+                            <tr>
+                                <td>
+                                    <SfTextBox Placeholder="Search Patient" ShowClearButton="true" Width="200px" @bind-Value="SearchValueUp"></SfTextBox>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="button-container">
+                                    <SfButton Content="Search" OnClick="UpFilterBloodTests"></SfButton>
+                                    <SfButton Content="Reset" OnClick="UpResetFilters"></SfButton>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="row" style="margin-top:-10px">
+            <!-- Create/Edit Blood Tests Table -->
+            <h4>@L["Create/EditBloodTests"]</h4>
+            <div class="col-lg-9">
+                <SfTab CssClass="default-tab">
+                    <TabAnimationSettings>
+                        <TabAnimationPrevious Effect=AnimationEffect.None></TabAnimationPrevious>
+                        <TabAnimationNext Effect=AnimationEffect.None></TabAnimationNext>
+                    </TabAnimationSettings>
+                    <TabItems>
+                        <TabItem>
+                            <ChildContent>
+                                <TabHeader Text=@L["Create"]></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <SfGrid TValue="BloodTestViewModel" DataSource="@BloodTestsForInProgress" AllowPaging="true" AllowSorting="true">
+                                    <GridPageSettings PageSize="3"></GridPageSettings>
+                                    <GridColumns>
+                                        <GridColumn Field="@nameof(BloodTestViewModel.PatientNumber)" HeaderText=@L["PatientNumber"] TextAlign="TextAlign.Center"></GridColumn>
+                                        <GridColumn Field="@nameof(BloodTestViewModel.PatientName)" HeaderText=@L["PatientName"] TextAlign="TextAlign.Left"></GridColumn>
+                                        <GridColumn Field="@nameof(BloodTestViewModel.PatientLastName)" HeaderText=@L["PatientSurname"] TextAlign="TextAlign.Left"></GridColumn>
+                                        <GridColumn Field="@nameof(BloodTestViewModel.BloodTestDateCreated)" HeaderText=@L["RequestedDate"] TextAlign="TextAlign.Center"></GridColumn>
+                                        <GridColumn Field="@nameof(BloodTestViewModel.BloodTestStatus)" HeaderText=@L["Status"] TextAlign="TextAlign.Center">
+                                            <Template>
+                                                @{
+                                                    var category = (context as BloodTestViewModel);
+                                                    @if (category!.BloodTestStatus == Pusula.Training.HealthCare.BloodTests.BloodTestStatus.InProgress)
+                                                    {
+                                                        <div class="status-badge status-inprogress">
+                                                            @category.BloodTestStatus
+                                                        </div>
+                                                    }
+
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="Actions">
+                                            <Template Context="context">
+                                                <ejs-button class="btn btn-danger" @onclick="() => OpenCreateTestResultModal((BloodTestViewModel)context)">@L["Create"]</ejs-button>
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </ContentTemplate>
+                        </TabItem>
+                        <TabItem>
+                            <ChildContent>
+                                <TabHeader Text=@L["Edit"]></TabHeader>
+                            </ChildContent>
+                            <ContentTemplate>
+                                <SfGrid TValue="BloodTestViewModel" DataSource="@BloodTestsForCompleted" AllowPaging="true" AllowSorting="true">
+                                    <GridPageSettings PageSize="3"></GridPageSettings>
+                                    <GridColumns>
+                                        <GridColumn Field="@nameof(BloodTestViewModel.PatientNumber)" HeaderText=@L["PatientNumber"] TextAlign="TextAlign.Center"></GridColumn>
+                                        <GridColumn Field="@nameof(BloodTestViewModel.PatientName)" HeaderText=@L["PatientName"] TextAlign="TextAlign.Left"></GridColumn>
+                                        <GridColumn Field="@nameof(BloodTestViewModel.PatientLastName)" HeaderText=@L["PatientSurname"] TextAlign="TextAlign.Left"></GridColumn>
+                                        <GridColumn Field="@nameof(BloodTestViewModel.BloodTestDateCreated)" HeaderText=@L["RequestedDate"] TextAlign="TextAlign.Center"></GridColumn>
+                                        <GridColumn Field="@nameof(BloodTestViewModel.BloodTestStatus)" HeaderText=@L["Status"] TextAlign="TextAlign.Center">
+                                            <Template>
+                                                @{
+                                                    var category = (context as BloodTestViewModel);
+                                                    @if (category!.BloodTestStatus == Pusula.Training.HealthCare.BloodTests.BloodTestStatus.Completed)
+                                                    {
+                                                        <div class="status-badge status-completed">
+                                                            @category.BloodTestStatus
+                                                        </div>
+                                                    }
+                                                }
+                                            </Template>
+                                        </GridColumn>
+                                        <GridColumn HeaderText="Actions">
+                                            <Template Context="context">
+                                                <ejs-button class="btn btn-danger" @onclick="() => OpenEditTestResultModal((BloodTestViewModel)context)">@L["Edit"]</ejs-button>
+                                            </Template>
+                                        </GridColumn>
+                                    </GridColumns>
+                                </SfGrid>
+                            </ContentTemplate>
+                        </TabItem>
+                    </TabItems>
+                </SfTab>
+            </div>
+
+            <!-- Filtering Panel -->
+            <div class="col-lg-3" style="margin-top:-40px">
+                <div class="property-section">
+                    <div class="property-panel-header">Filter Options</div>
+                    <div class="property-panel-content">
+                        <table class="table">
+                            <tr>
+                                <td>
+                                    <SfTextBox Placeholder="Search Patient" ShowClearButton="true" Width="200px"
+                                               @bind-Value="SearchValueBelow">
+                                    </SfTextBox>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="button-container">
+                                    <SfButton Content="Search" OnClick="BelowFilterBloodTests"></SfButton>
+                                    <SfButton Content="Reset" OnClick="BelowResetFilters"></SfButton>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+
+@* ************************* CREATE MODAL ************************* *@
+@if (CanCreateBloodTest)
+{
+    <SfDialog Width="900" ShowCloseIcon="false" IsModal="true" @bind-Visible="@IsVisibleCreate" OnOverlayClick="CloseDialog" CssClass="custom-dialog">
+        <DialogTemplates>
+            <Header>
+                <div class="dialog-header">
+                    <span class="dialog-title">Kan Testi Sonuç Girişi</span>
+                    <ejs-button class="custom-close-btn" @onclick="CloseCreateTestResultModal">&times;</ejs-button>
+                </div>
+            </Header>
+            <Content>
+                <div class="dialog-content">
+                    @foreach (var testInput in TestInputs)
+                    {
+                        <div class="form-group">
+                            <label for="@testInput.TestId" class="form-label">
+                                @testInput.Name <span class="range">(Normal Aralık: @testInput.MinValue - @testInput.MaxValue)</span>
+                            </label>
+                            <input type="number"
+                                   class="form-control custom-input"
+                                   id="@testInput.TestId"
+                                   @bind="testInput.Value"
+                                   placeholder="@("Sonuç giriniz")" />
+                        </div>
+                    }
+                </div>
+            </Content>
+        </DialogTemplates>
+        <DialogButtons>
+            <DialogButton Content=@L["Kaydet"] CssClass="custom-button save-button" OnClick="@SaveTestResults" />
+            <DialogButton Content=@L["İptal"] CssClass="custom-button cancel-button" OnClick="@CloseCreateTestResultModal" />
+        </DialogButtons>
+    </SfDialog>
+}
+
+@* ************************* EDIT MODAL ************************* *@
+@if (CanEditBloodTest)
+{
+    <SfDialog Width="900" ShowCloseIcon="false" IsModal="true" @bind-Visible="@IsVisibleEdit" OnOverlayClick="CloseDialog" CssClass="custom-dialog">
+        <DialogTemplates>
+            <Header>
+                <div class="dialog-header">
+                    <span class="dialog-title">Kan Testi Sonuç Girişi</span>
+                    <ejs-button class="custom-close-btn" @onclick="CloseEditTestResultModal">&times;</ejs-button>
+                </div>
+            </Header>
+            <Content>
+                <div class="dialog-content">
+                    @foreach (var testInput in TestInputs)
+                    {
+                        <div class="form-group">
+                            <label for="@testInput.TestId" class="form-label">
+                                @testInput.Name <span class="range">(Normal Aralık: @testInput.MinValue - @testInput.MaxValue)</span>
+                            </label>
+                            <input type="number"
+                                   class="form-control custom-input"
+                                   id="@testInput.TestId"
+                                   @bind="testInput.Value"
+                                   placeholder="@("Sonuç giriniz")" />
+                        </div>
+                    }
+                </div>
+            </Content>
+        </DialogTemplates>
+        <DialogButtons>
+            <DialogButton Content=@L["Kaydet"] CssClass="custom-button save-button" OnClick="@UpdateTestResults" />
+            <DialogButton Content=@L["İptal"] CssClass="custom-button cancel-button" OnClick="@CloseEditTestResultModal" />
+        </DialogButtons>
+    </SfDialog>
+}
+
+<style>
+    .default-tab {
+        border: 1px solid #d7d7d7;
+    }
+
+        .default-tab .e-content .e-item {
+            padding: 10px;
+            text-align: justify;
+        }
+
+    .default-tab-control-section {
+        margin: 20px 20% 20px 20%;
+    }
+
+    .lpx-content-container .lpx-content {
+        padding: 0;
+        margin: 0 auto;
+    }
+
+    .container {
+        width: 80%;
+        margin: auto;
+        padding: 0px;
+    }
+
+    .sf-card {
+        margin: 16px;
+        padding: 16px;
+        text-align: center;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease-in-out;
+    }
+
+        .sf-card:hover {
+            transform: translateY(-4px);
+        }
+
+    .sf-card-header {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #333;
+    }
+
+    .card-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+        .card-text .count {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .card-text .info {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+    #CompletedBloodTestsCard {
+        background-color: #e0ffcd;
+        border: 1px solid #b6cdbd;
+        margin-bottom: 5px;
+    }
+
+    #PendingBloodTestsCard {
+        background-color: #e3f2fd;
+        border: 1px solid #b6dafc;
+    }
+
+    #InProgressBloodTestsCard {
+        background-color: #fef7e0;
+        border: 1px solid #fbd984;
+    }
+
+    .property-section {
+        margin: 16px 0;
+        padding: 16px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .property-panel-header {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: #333;
+    }
+
+    .property-panel-content {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .button-container {
+        display: flex;
+        gap: 12px; /* Butonlar arasındaki mesafeyi ayarlamak için */
+    }
+
+    .table {
+        width: 100%;
+        border-spacing: 0;
+        border-collapse: separate;
+    }
+
+        .table td {
+            padding: 8px 12px;
+        }
+
+    .sf-textbox {
+        width: 100%;
+    }
+
+    .sf-button {
+        width: 100%;
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+        .sf-button:hover {
+            background-color: #0056b3;
+        }
+
+    .status-badge {
+        display: inline-block;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .status-inprogress {
+        background-color: #fdf3c4;
+        color: #d48806;
+        border: 1px solid #fae1a0;
+    }
+
+
+    .status-completed {
+        background-color: #d9f7be;
+        color: #389e0d;
+        border: 1px solid #a0d911;
+    }
+
+
+    .status-bydesign {
+        background-color: #d0e6fa;
+        color: #13c2c2;
+        border: 1px solid #87e8de;
+    }
+
+    .custom-dialog {
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .dialog-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 1.8rem;
+        font-weight: bold;
+        padding: 15px;
+    }
+
+    .single-border {
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .dialog-title {
+        flex-grow: 1;
+        text-align: center;
+        font-size: 2rem;
+    }
+
+    .custom-close-btn {
+        background-color: transparent;
+        color: #333;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+    }
+
+    .dialog-content {
+        padding: 20px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+        .form-label .range {
+            font-weight: 400;
+            font-size: 1rem;
+            color: #666;
+        }
+
+    .custom-input {
+        padding: 12px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        width: 100%;
+    }
+
+    .custom-button {
+        padding: 14px 22px;
+        font-size: 1rem;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .save-button {
+        background-color: green;
+        color: white;
+    }
+
+    .cancel-button {
+        background-color: crimson;
+        color: white;
+    }
+</style>

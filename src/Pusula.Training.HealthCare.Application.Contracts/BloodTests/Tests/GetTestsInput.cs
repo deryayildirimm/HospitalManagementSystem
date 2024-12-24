@@ -11,7 +11,6 @@ namespace Pusula.Training.HealthCare.BloodTests.Tests
         public double? MaxValue { get; set; }
 
         public Guid? TestCategoryId { get; set; }
-
         public GetTestsInput() { }
     }
 }
