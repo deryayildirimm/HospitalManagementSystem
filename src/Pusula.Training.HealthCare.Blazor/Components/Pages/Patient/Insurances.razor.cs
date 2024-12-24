@@ -35,7 +35,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Patient
         private InsuranceUpdateDto? EditInsurance {  get; set; }
         private GetInsurancesInput Filter { get; set; }
         private List<InsuranceDto> SelectedInsurances { get; set; } = [];
-        private List<KeyValuePair<EnumInsuranceCompanyName, string>> InsuranceCompanyNameList { get; set; }
+        private List<KeyValuePair<EnumInsuranceCompanyName, string>> InsuranceCompanyNameList { get; set; } = [];
         private bool isLoading { get; set; }
         private bool IsVisibleCreate { get; set; }
         private bool IsVisibleEdit { get; set; }
