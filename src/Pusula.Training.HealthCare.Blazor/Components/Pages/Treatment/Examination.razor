@@ -7,6 +7,7 @@
 @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
 
 @using Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.Protocols
 @using Volo.Abp.AspNetCore.Components.Web
 @using Pusula.Training.HealthCare.Treatment.Examinations
 @using Pusula.Training.HealthCare.Treatment.Icds
@@ -19,17 +20,48 @@
 @inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
 @inject NavigationManager NavigationManager
 @inject ProtocolStateService ProtocolStateService
+@inject IProtocolsAppService ProtocolsAppService
 @inject IIcdsAppService IcdsAppService
 
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Calendars
-@using Syncfusion.Blazor.DropDowns;
+@using IconName = Syncfusion.Blazor.Buttons.IconName
+@using IconSize = Syncfusion.Blazor.Buttons.IconSize
 
 @* ************************* PAGE HEADER ************************* *@
 <PageHeader Title="@L["Examination"]" BreadcrumbItems="BreadcrumbItems">
 
 </PageHeader>
 
+@* ************************* PATIENT DETAILS ************************* *@
+<div class="hero-section">
+    <div class="hero-wrapper d-flex justify-content-around p-3" style="box-shadow:0 4px 8px rgba(0,0,0,0.2) ">
+        <div class="right-box">
+
+            <Figure Size="FigureSize.Is256x256">
+                <FigureImage Source="@GetAvatarUrl(PatientGender)" AlternateText="empty-256x256" Style="border-radius: 50%; cursor: pointer; transition: transform 0.3s ease, all 0.3s ease;
+                               height: auto; width: auto; overflow: auto "
+                             onmouseover="this.style.transform='scale(1.1)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.2)';"
+                             onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 1px 3px rgba(0,0,0,0.1)';" />
+            </Figure>
+
+        </div>
+        <div class="left-box">
+            <div class="patient-card">
+                <div class="card-header">
+                    <h4> <strong>@Patient?.FirstName @Patient?.LastName</strong> </h4>
+                    <h5> <strong>Identity Number :</strong>@Patient?.IdentityNumber      <span style="margin-left: 10px">@Patient?.Gender</span>  </h5>
+
+                    <h5><strong>Birth Date:</strong> @Patient?.BirthDate.ToString("dd.MM.yyyy") </h5>
+                    <h5><strong>Phone:</strong> @Patient?.MobilePhoneNumber</h5>
+                    <h5><strong>Nationality:</strong> @Patient?.Nationality</h5>
+                    <h5><strong>Patient Number:</strong> @Patient?.PatientNumber</h5>
+                    <h5><strong>Address:</strong> @Patient?.Address</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @* ************************* CREATE EXAMINATION ************************* *@
 @if (CurrentExamination == null)
@@ -215,7 +247,6 @@
                 <label>@L["Complaint"]</label>
                 <SfTextBox TValue="string" @bind-Value="@EditingExamination.Complaint" Placeholder="@L["EnterComplaint"]"
                            MaxLength="@ExaminationConsts.ComplaintMaxLength">
-                    <TextBoxEvents OnInput="() => ValidateField('Complaint')"/>
                 </SfTextBox>
             </div>
 
@@ -228,7 +259,6 @@
                 <label>@L["Story"]</label>
                 <SfTextBox TValue="string?" @bind-Value="@EditingExamination.Story" Placeholder="@L["EnterStory"]"
                            MaxLength="@ExaminationConsts.StoryMaxLength">
-                    <TextBoxEvents OnInput="() => ValidateField('Story')"/>
                 </SfTextBox>
             </div>
         </div>

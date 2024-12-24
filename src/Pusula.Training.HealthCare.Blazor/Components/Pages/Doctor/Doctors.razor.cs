@@ -13,12 +13,10 @@ using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Shared;
 using Syncfusion.Blazor.Buttons;
 using Syncfusion.Blazor.Data;
-using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using Syncfusion.Blazor.DropDowns;
 using Syncfusion.Blazor.Grids;
 using Volo.Abp;
-using SortDirection = Blazorise.SortDirection;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Doctor;
 
@@ -116,13 +114,28 @@ public partial class Doctors
         CanEditDoctor = await AuthorizationService.IsGrantedAsync(HealthCarePermissions.Doctors.Edit);
         CanDeleteDoctor = await AuthorizationService.IsGrantedAsync(HealthCarePermissions.Doctors.Delete);
     }
-
     private async Task SetLookupsAsync()
     {
-        CitiesCollection = (await DoctorsAppService.GetCityLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items.ToList();
-        
-        TitlesCollection = (await DoctorsAppService.GetTitleLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items.ToList();
-        DepartmentsCollection = (await DoctorsAppService.GetDepartmentLookupAsync(new() { SkipCount = 0, MaxResultCount = 1000 })).Items.ToList();
+        try
+        {
+            CitiesCollection =
+                (await LookupAppService.GetCityLookupAsync(new LookupRequestDto
+                    { MaxResultCount = 1000 }))
+                .Items;
+
+            DepartmentsCollection =
+                (await LookupAppService.GetDepartmentLookupAsync(new LookupRequestDto
+                    { MaxResultCount = 1000 }))
+                .Items;
+
+            TitlesCollection = (await LookupAppService.GetTitleLookupAsync(new LookupRequestDto
+                    { MaxResultCount = 1000 }))
+                .Items;
+        }
+        catch (Exception e)
+        {
+            await UiMessageService.Error(e.Message);
+        }
     }
     
     private async Task GetDoctorsAsync()
