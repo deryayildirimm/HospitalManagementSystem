@@ -90,7 +90,6 @@
     "Menu:MedicalServices": "Medical Services",
     "Menu:Appointment": "Appointments",
     "Menu:DoctorList": "Doctor List",
-    "Menu:Insurance": "Insurance",
     "Menu:AppointmentList": "Appointment List",
     "Menu:AppointmentsOverview": "Appointments Overview",
     "Menu:Appointments": "Appointments",
@@ -357,8 +356,8 @@
     "ExportChartsAs":  "Export Charts As",
     "PrintCharts":  "Print Charts",
     "Menu:ManageAppointment": "Manage Appointments",
-    "NewLeave": "New Leave"
     "ChooseDate": "Choose Date",
-    "Clear": "Clear"
+    "Clear": "Clear",
+    "NewLeave": "New Leave"
   }
 }

@@ -138,8 +138,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
 
         return protocol!;
     }
-       
-
+    
 
     public virtual async Task<List<ProtocolWithNavigationProperties>> GetListWithNavigationPropertiesAsync(
         string? filterText = null,
@@ -269,8 +268,6 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         return await query
             .GroupBy(a => a.Department.Id)
             .LongCountAsync(cancellationToken);
-            
-       
     }
 
     // case -> departman bazlı kaç kişi gelmiş 
@@ -295,14 +292,13 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
         query = ApplyFilterForReports(query, departmentName, patientId, departmentId, protocolTypeId, doctorId, insuranceId, startTimeMin, startTimeMax, endTimeMin, endTimeMax);
         
         // bu departmana kaç kişi gelmiş -> benzersiz olarak düşünmek lazım , bu nedenle distinct eklemek mantıklı 
-        // kaldırdım distinct i kaç kişi gelmiş diyor yani kaç protokol açılmış işte 
         return await query
             .GroupBy(a => a.Department.Id)
             .Select(g => new DepartmentStatistic
             {
                 DepartmentId = g.Key,
                 DepartmentName = g.First().Department.Name,
-                PatientCount = g.Select(p => p.PatientId).Count(), // benzersiz hasta sayısını elde edebilmek içim
+                PatientCount = g.Select(p => p.PatientId).Distinct().Count(), 
             })
             .OrderBy(d => d.DepartmentName)
             .PageBy(skipCount, maxResultCount)
@@ -393,9 +389,6 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
     
     #region Departman bazlı patient listesi
     
-    // burada gruplama yapmışım ama kullanmıycam bunu galiba. 
-    // diğer metodlar da çalışırsa sadeleştiricez sonra 
-    // bi deniyoruz bakalım bir şey olacak mı 
       public virtual async Task<long> GetGPatientsCountByDepartmentAsync(
         string? departmentName = null,
         Guid? patientId = null,
@@ -441,7 +434,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
     {
         var query = await GetQueryForNavigationPropertiesAsync();
 
-// Filtreleme işlemi
+
         query = ApplyFilter(query, filterText, note, startTimeMin, startTimeMax, endTimeMin, endTimeMax, patientId,
             departmentId, protocolTypeId, doctorId, insuranceId);
 
@@ -451,7 +444,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
            { 
               
               p.Patient.Id ,
-              p.Patient.PatientNumber, // Hasta numarası
+              p.Patient.PatientNumber, 
               p.Patient.FirstName,
               p.Patient.LastName,
               DepartmentName = p.Protocol.Department.Name 
@@ -459,9 +452,9 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
            .Select( g => new ProtocolPatientDepartmentListReport
            {
                PatientId = g.Key.Id,
-               PatientNumber = g.Key.PatientNumber, // Görünmesi için
+               PatientNumber = g.Key.PatientNumber, 
                FullName = g.Key.FirstName + " " + g.Key.LastName,
-               DepartmentName = g.Key.DepartmentName, // Departman ismini döndürüyoruz
+               DepartmentName = g.Key.DepartmentName, 
                ProtocolCount = g.Count(),
                LastVisit = g.Max(x => x.Protocol.StartTime)
                
@@ -527,7 +520,7 @@ public class EfCoreProtocolRepository(IDbContextProvider<HealthCareDbContext> db
             {
                 DoctorId = g.Key,
                 DoctorName = g.First().Doctor.FirstName +" " + g.First().Doctor.LastName,
-                PatientCount = g.Select(p => p.PatientId).Count(), 
+                PatientCount = g.Select(p => p.PatientId).Distinct().Count(), 
                 
             })
             .OrderBy(d => d.DoctorName)

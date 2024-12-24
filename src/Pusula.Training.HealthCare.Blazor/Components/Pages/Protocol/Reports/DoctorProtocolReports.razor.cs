@@ -113,7 +113,6 @@ public partial class DoctorProtocolReports : HealthCareComponentBase
 
     protected virtual ValueTask SetToolbarItemsAsync()
     {
-        Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
         
         return ValueTask.CompletedTask;
     }
