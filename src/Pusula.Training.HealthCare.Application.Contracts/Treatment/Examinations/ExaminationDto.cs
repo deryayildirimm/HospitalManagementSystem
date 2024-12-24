@@ -22,7 +22,7 @@ public class ExaminationDto : FullAuditedEntityDto<Guid>
     public BackgroundDto? Background { get; set; }
     public FamilyHistoryDto? FamilyHistory { get; set; }
     public PhysicalFindingDto? PhysicalFinding { get; set; }
-    public List<ExaminationIcdDto> ExaminationIcd { get; set; } = null!;
+    public ICollection<ExaminationIcdDto> ExaminationIcds { get; set; } = null!;
     [Required]
     public Guid ProtocolId { get; set; }
     public ProtocolDto Protocol { get; set; } = null!;

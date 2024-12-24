@@ -28,8 +28,7 @@ public partial class Examination
     private Guid SelectedIcdId { get; set; }
     private IReadOnlyList<IcdDto> IcdList { get; set; }
     private List<IcdDto> SelectedIcds { get; set; } = new();
-    private PatientDto Patient = new PatientDto();
-    private List<AppointmentViewModel> AppointmentList { get; set; }
+    private PatientDto Patient { get; set; }
 
     private string PatientGender = "MALE";
     private bool VisibleProperty { get; set; } = true;
@@ -51,9 +50,9 @@ public partial class Examination
         var icds = await IcdsAppService.GetListAsync(getIcdsInput);
         IcdList = icds.Items;
         
-        if (EditingExamination.ExaminationIcd != null)
+        if (EditingExamination.ExaminationIcds != null)
         {
-            SelectedIcds = EditingExamination.ExaminationIcd
+            SelectedIcds = EditingExamination.ExaminationIcds
                 .Select(e => new IcdDto { Id = e.IcdId, CodeNumber = e.Icd.CodeNumber, Detail = e.Icd.Detail })
                 .ToList();
         }
@@ -99,7 +98,6 @@ public partial class Examination
     {
         try
         {
-            // patient Number ile alıcaz normalde 
             var Protocol = await ProtocolsAppService.GetAsync(ProtocolId);
             Patient = Protocol.Patient;
             PatientGender = Patient.Gender.ToString();

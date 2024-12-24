@@ -35,7 +35,7 @@
 
 @* ************************* PATIENT DETAILS ************************* *@
 <div class="hero-section">
-    <div class="hero-wrapper d-flex justify-content-between" style="box-shadow:0 4px 8px rgba(0,0,0,0.2) ">
+    <div class="hero-wrapper d-flex justify-content-around p-3" style="box-shadow:0 4px 8px rgba(0,0,0,0.2) ">
         <div class="right-box">
 
             <Figure Size="FigureSize.Is256x256">
@@ -247,7 +247,6 @@
                 <label>@L["Complaint"]</label>
                 <SfTextBox TValue="string" @bind-Value="@EditingExamination.Complaint" Placeholder="@L["EnterComplaint"]"
                            MaxLength="@ExaminationConsts.ComplaintMaxLength">
-                    <TextBoxEvents OnInput="() => ValidateField('Complaint')"/>
                 </SfTextBox>
             </div>
 
@@ -260,7 +259,6 @@
                 <label>@L["Story"]</label>
                 <SfTextBox TValue="string?" @bind-Value="@EditingExamination.Story" Placeholder="@L["EnterStory"]"
                            MaxLength="@ExaminationConsts.StoryMaxLength">
-                    <TextBoxEvents OnInput="() => ValidateField('Story')"/>
                 </SfTextBox>
             </div>
         </div>
