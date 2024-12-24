@@ -17,8 +17,7 @@ public class ExaminationManager(
     IExaminationRepository examinationRepository,
     FamilyHistoryManager familyHistoryManager,
     BackgroundManager backgroundManager,
-    PhysicalFindingManager physicalFindingManager,
-    IIcdRepository icdRepository) : DomainService
+    PhysicalFindingManager physicalFindingManager) : DomainService
 {
     public virtual async Task<Examination> CreateAsync(
         Guid protocolId,

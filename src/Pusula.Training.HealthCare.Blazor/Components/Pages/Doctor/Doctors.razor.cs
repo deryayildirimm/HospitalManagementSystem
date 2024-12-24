@@ -44,11 +44,11 @@ public partial class Doctors
     private DoctorUpdateDto EditingDoctor { get; set; }
     private Guid EditingDoctorId { get; set; }
     private GetDoctorsInput Filter { get; set; }
-    private List<KeyValuePair<EnumGender, string>> Genders { get; set; }
-    private IReadOnlyList<LookupDto<Guid>> CitiesCollection { get; set; }
-    private IReadOnlyList<LookupDto<Guid>> DistrictsCollection { get; set; }
-    private IReadOnlyList<LookupDto<Guid>> TitlesCollection { get; set; }
-    private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; }
+    private List<KeyValuePair<EnumGender, string>> Genders { get; set; } = [];
+    private IReadOnlyList<LookupDto<Guid>> CitiesCollection { get; set; } = [];
+    private IReadOnlyList<LookupDto<Guid>> DistrictsCollection { get; set; } = [];
+    private IReadOnlyList<LookupDto<Guid>> TitlesCollection { get; set; } = [];
+    private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; } = [];
 
     private bool Flag { get; set; }
     private bool IsVisibleCreate { get; set; }
@@ -76,7 +76,7 @@ public partial class Doctors
     {
         await SetPermissionsAsync();
         await SetLookupsAsync();
-        await GetGendersListAsync();
+        GetGendersListAsync();
         SetFilters();
     }
 
@@ -331,7 +331,7 @@ public partial class Doctors
     {
         IsVisibleCreate = true;
         
-        await GetGendersListAsync();
+        GetGendersListAsync();
         NewDoctor = new DoctorCreateDto();
     }
 
@@ -364,7 +364,7 @@ public partial class Doctors
         }
     }
 
-    private async Task GetGendersListAsync()
+    private void GetGendersListAsync()
     {
         Genders = Enum.GetValues(typeof(EnumGender))
             .Cast<EnumGender>()
