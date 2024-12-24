@@ -52,7 +52,7 @@ namespace Pusula.Training.HealthCare.Patients
             string? nationality = null, string? mobilePhoneNumber = null, EnumPatientTypes? patientType = null, string? mothersName = null, string? fathersName = null, 
             string? emailAddress = null, EnumRelative? relative = null, string? relativePhoneNumber = null, string? address = null, EnumDiscountGroup? discountGroup = null)
         {
-            SetId(id);
+            Id = id;
             SetPatientNumber(patientNumber);
             SetFirstName(firstName);
             SetLastName(lastName);
@@ -70,11 +70,6 @@ namespace Pusula.Training.HealthCare.Patients
             SetAddress(address);
             SetDiscountGroup(discountGroup);
             SetGender(gender);
-        }
-
-        public void SetId(Guid id)
-        {
-            Id = id;
         }
 
         public void SetPatientNumber(int patientNumber)

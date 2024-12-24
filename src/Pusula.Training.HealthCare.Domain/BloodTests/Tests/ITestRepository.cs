@@ -8,17 +8,7 @@ namespace Pusula.Training.HealthCare.BloodTests.Tests
 {
     public interface ITestRepository : IRepository<Test, Guid>
     {
-        Task<TestWithNavigationProperties> GetWithNavigationPropertiesAsync(Guid id, CancellationToken cancellationToken = default);
-        Task<List<TestWithNavigationProperties>> GetListWithNavigationPropertiesAsync(
-            string? filterText = null,
-            string? name = null,
-            double? minValue = null,
-            double? maxValue = null,
-            Guid? testCategoryId = null,
-            string? sorting = null,
-            int maxResultCount = int.MaxValue,
-            int skipCount = 0,
-            CancellationToken cancellationToken = default);
+        Task<Test?> GetWithNavigationPropertiesAsync(Guid id, CancellationToken cancellationToken = default);
 
         Task<List<Test>> GetListAsync(
             string? filterText = null,
@@ -37,6 +27,10 @@ namespace Pusula.Training.HealthCare.BloodTests.Tests
             double? minValue = null,
             double? maxValue = null,
             Guid? testCategoryId = null,
+            CancellationToken cancellationToken = default);
+
+        Task<List<Test>> GetListByCategoriesAsync(
+            List<Guid> categoryIds,
             CancellationToken cancellationToken = default);
     }
 }

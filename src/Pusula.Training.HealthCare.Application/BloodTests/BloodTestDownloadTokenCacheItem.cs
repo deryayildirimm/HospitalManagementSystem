@@ -1,7 +1,8 @@
-﻿namespace Pusula.Training.HealthCare.BloodTests
+﻿using Pusula.Training.HealthCare.Shared;
+
+namespace Pusula.Training.HealthCare.BloodTests
 {
-    public class BloodTestDownloadTokenCacheItem
+    public class BloodTestDownloadTokenCacheItem : BaseTokenCacheItem
     {
-        public string Token { get; set; } = null!;
     }
 }

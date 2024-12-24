@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
 using MiniExcelLibs;
+using Pusula.Training.HealthCare.GlobalExceptions;
+using Pusula.Training.HealthCare.Patients;
 using Pusula.Training.HealthCare.Permissions;
 using Pusula.Training.HealthCare.Shared;
 using System;
@@ -16,48 +18,40 @@ using Volo.Abp.Content;
 
 namespace Pusula.Training.HealthCare.BloodTests
 {
+    [RemoteService(IsEnabled =false)]
+    [Authorize(HealthCarePermissions.BloodTests.Default)]
     public class BloodTestAppService(
         IBloodTestRepository bloodTestRepository,
         IBloodTestManager bloodTestManager,
         IDistributedCache<BloodTestDownloadTokenCacheItem, string> downloadTokenCache) : HealthCareAppService, IBloodTestAppService
     {
-        public virtual async Task<PagedResultDto<BloodTestWithNavigationPropertiesDto>> GetListAsync(GetBloodTestsInput input)
+        
+        public virtual async Task<PagedResultDto<BloodTestDto>> GetListAsync(GetBloodTestsInput input)
         {
             var totalCount = await bloodTestRepository.GetCountAsync(input.FilterText, input.Status, input.DateCreatedMin, input.DateCreatedMax,
-                input.DateCompletedMin, input.DateCompletedMax, input.DoctorId, input.PatientId, input.TestCategoryId);
-            var items = await bloodTestRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Status, input.DateCreatedMin, input.DateCreatedMax, 
-                input.DateCompletedMin, input.DateCompletedMax, input.DoctorId, input.PatientId, input.TestCategoryId, input.Sorting, input.MaxResultCount, input.SkipCount);
-
-            return new PagedResultDto<BloodTestWithNavigationPropertiesDto>
+                input.DateCompletedMin, input.DateCompletedMax, input.DoctorId, input.PatientId);
+            var items = await bloodTestRepository.GetListAsync(input.FilterText, input.Status, input.DateCreatedMin, input.DateCreatedMax,
+                input.DateCompletedMin, input.DateCompletedMax, input.DoctorId, input.PatientId, input.Sorting, input.MaxResultCount, input.SkipCount);
+            return new PagedResultDto<BloodTestDto>
             {
                 TotalCount = totalCount,
-                Items = ObjectMapper.Map<List<BloodTestWithNavigationProperties>, List<BloodTestWithNavigationPropertiesDto>>(items)
+                Items = ObjectMapper.Map<List<BloodTest>, List<BloodTestDto>>(items)
             };
         }
-
-        public virtual async Task<BloodTestWithNavigationPropertiesDto> GetWithNavigationPropertiesAsync(Guid id)
-            => ObjectMapper.Map<BloodTestWithNavigationProperties, BloodTestWithNavigationPropertiesDto>(await bloodTestRepository.GetWithNavigationPropertiesAsync(id));
-
-        public virtual async Task<BloodTestDto> GetAsync(Guid id) => ObjectMapper.Map<BloodTest, BloodTestDto>(await bloodTestRepository.GetAsync(id));
-
+        
+        public virtual async Task<BloodTestDto> GetAsync(Guid id)
+        {
+            var result = await bloodTestRepository.GetWithNavigationPropertiesAsync(id);
+            return ObjectMapper.Map<BloodTest, BloodTestDto>(result!);
+        }
 
         [Authorize(HealthCarePermissions.BloodTests.Create)]
         public virtual async Task<BloodTestDto> CreateAsync(BloodTestCreateDto input)
         {
-            if (input.DoctorId == default)
-            {
-                throw new UserFriendlyException(L["The {0} field is required.", L["Doctor"]]);
-            }
-            if (input.PatientId == default)
-            {
-                throw new UserFriendlyException(L["The {0} field is required.", L["Patient"]]);
-            }
-            if (input.TestCategoryId == default)
-            {
-                throw new UserFriendlyException(L["The {0} field is required.", L["TestCategory"]]);
-            }
+            HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorInformationsRequired, input.DoctorId == default);
+            HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.PatientInformationsRequired, input.PatientId == default);
 
-            var bloodTest = await bloodTestManager.CreateAsync(input.DoctorId, input.PatientId, input.TestCategoryId, input.Status, input.DateCreated, input.DateCompleted);
+            var bloodTest = await bloodTestManager.CreateAsync(input.DoctorId, input.PatientId, input.Status, input.DateCreated, input.DateCompleted, input.TestCategoryIdList);
 
             return ObjectMapper.Map<BloodTest, BloodTestDto>(bloodTest);
         }
@@ -65,20 +59,10 @@ namespace Pusula.Training.HealthCare.BloodTests
         [Authorize(HealthCarePermissions.BloodTests.Edit)]
         public virtual async Task<BloodTestDto> UpdateAsync(BloodTestUpdateDto input)
         {
-            if (input.DoctorId == default)
-            {
-                throw new UserFriendlyException(L["The {0} field is required.", L["Doctor"]]);
-            }
-            if (input.PatientId == default)
-            {
-                throw new UserFriendlyException(L["The {0} field is required.", L["Patient"]]);
-            }
-            if (input.TestCategoryId == default)
-            {
-                throw new UserFriendlyException(L["The {0} field is required.", L["TestCategory"]]);
-            }
+            HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorInformationsRequired,input.DoctorId == default);
+            HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.PatientInformationsRequired,input.PatientId == default);
 
-            var bloodTest = await bloodTestManager.UpdateAsync(input.Id, input.DoctorId, input.PatientId, input.Status, input.DateCreated, input.DateCompleted);
+            var bloodTest = await bloodTestManager.UpdateAsync(input.Id, input.DoctorId, input.PatientId, input.Status, input.DateCreated, input.DateCompleted, input.TestCategoryIdList);
 
             return ObjectMapper.Map<BloodTest, BloodTestDto>(bloodTest);
         }
@@ -91,15 +75,13 @@ namespace Pusula.Training.HealthCare.BloodTests
                 throw new AbpAuthorizationException("Invalid download token: " + input.DownloadToken);
             }
 
-            var bloodTest = await bloodTestRepository.GetListWithNavigationPropertiesAsync(input.FilterText, input.Status, input.DateCreatedMin, input.DateCreatedMax, 
-                input.DateCompletedMin, input.DateCompletedMax, input.DoctorId, input.PatientId, input.TestCategoryId);
+            var bloodTest = await bloodTestRepository.GetListAsync(input.FilterText, input.Status, input.DateCreatedMin, input.DateCreatedMax, 
+                input.DateCompletedMin, input.DateCompletedMax, input.DoctorId, input.PatientId);
             var items = bloodTest.Select(e => new
             {
-                e.BloodTest.DateCreated,
-                e.BloodTest.DateCompleted,
+                e.BloodTestCategories,
                 Doctor = e.Doctor?.FirstName,
                 Patient = e.Patient?.FirstName,
-                Category = e.TestCategory?.Name,
             });
             var memoryStream = new MemoryStream();
             await memoryStream.SaveAsAsync(items);
@@ -126,21 +108,11 @@ namespace Pusula.Training.HealthCare.BloodTests
             };
         }
 
-        public async Task BulkUpdateStatusAsync(List<BloodTestUpdateDto> updateDtos)
+        public async Task<List<Guid>> GetCategoryIdsAsync(Guid id)
         {
-            foreach (var dto in updateDtos)
-            {
-                await bloodTestManager.UpdateAsync(
-                    dto.Id,              
-                    dto.DoctorId,        
-                    dto.PatientId,       
-                    dto.Status,          
-                    dto.DateCreated,     
-                    dto.DateCompleted    
-                );
-            }
-        }
+            HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.CategoryInformationsRequired, id == default);
 
-
+            return await bloodTestRepository.GetCategoryIdsAsync(id);
+        }        
     }
 }

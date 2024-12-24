@@ -1,0 +1,79 @@
+﻿.profile-card-container {
+        flex: 1;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        background-color: #f9f9f9;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        position: sticky;
+        top: 20px; 
+        height: fit-content; 
+    }
+    .e-card {
+        border: none;
+        text-align: center;
+    }
+
+    .e-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        margin: 0 auto;
+        border: 2px solid #ccc;
+    }
+
+        .e-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+    .e-card-header-title {
+        font-weight: 600;
+        font-size: 22px;
+        color: #303343;
+        margin-top: 15px;
+    }
+
+    .e-card-header-sub-title {
+        font-size: 16px;
+        color: #56648A;
+    }
+
+    .e-profile-details {
+        width: 100%;
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .profile-row {
+        font-weight: 500;
+        font-size: 14px;
+        color: #56648A;
+    }
+
+    .profile-value {
+        font-weight: 600;
+        font-size: 16px;
+        margin-top: 5px;
+        color: #303343;
+    }
+
+    .additional-info {
+        margin-top: 20px;
+        text-align: left;
+    }
+
+        .additional-info h4 {
+            font-weight: 600;
+            font-size: 16px;
+            color: #303343;
+            margin-bottom: 10px;
+        }
+
+        .additional-info p {
+            font-size: 14px;
+            color: #56648A;
+            line-height: 1.5;
+        }

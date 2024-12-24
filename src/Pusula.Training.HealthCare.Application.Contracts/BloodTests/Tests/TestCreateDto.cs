@@ -11,7 +11,7 @@ namespace Pusula.Training.HealthCare.BloodTests.Tests
         public virtual double MinValue { get; set; } 
         [Required]
         public virtual double MaxValue { get; set; }
-
+        [Required]
         public virtual Guid TestCategoryId { get; set; }
     }
 }

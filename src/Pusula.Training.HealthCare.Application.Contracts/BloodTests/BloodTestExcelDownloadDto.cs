@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Pusula.Training.HealthCare.BloodTests
 {
@@ -13,7 +14,7 @@ namespace Pusula.Training.HealthCare.BloodTests
         public DateTime? DateCompletedMax { get; set; }
         public Guid? DoctorId { get; set; }
         public Guid? PatientId { get; set; }
-        public Guid? TestCategoryId { get; set; }
+        public virtual List<BloodTestCategoryDto> BloodTestCategory { get; set; } = new List<BloodTestCategoryDto>();
         public BloodTestExcelDownloadDto() { }
     }
 }

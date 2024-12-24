@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using Pusula.Training.HealthCare.Lookups;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using Volo.Abp.BlazoriseUI.Components;
@@ -179,19 +180,19 @@ public partial class MyProtocols
 
     private async Task GetDepartmentCollectionLookupAsync(string? newValue = null)
     {
-        DepartmentsCollection = (await ProtocolsAppService.GetDepartmentLookupAsync(new LookupRequestDto { Filter = newValue })).Items;
+        DepartmentsCollection = (await LookupAppService.GetDepartmentLookupAsync(new LookupRequestDto { Filter = newValue })).Items;
     }
     
     private async Task GetDoctorCollectionLookupAsync(string? newValue = null)
     {
-        DoctorsCollection = (await ProtocolsAppService.GetDoctorLookUpAsync(new LookupRequestDto { Filter = newValue })).Items;
+        DoctorsCollection = (await LookupAppService.GetDoctorLookupAsync(new LookupRequestDto { Filter = newValue })).Items;
     }
 
     #region protocoltype lookup
   
     private async Task GetProtocolTypeCollectionLookupAsync(string? newValue = null)
     {
-        ProtocolTypesCollection = (await ProtocolsAppService.GetProtocolTypeLookUpAsync(new LookupRequestDto { Filter = newValue })).Items;
+        ProtocolTypesCollection = (await LookupAppService.GetProtocolTypeLookupAsync(new LookupRequestDto { Filter = newValue })).Items;
     }
     
 

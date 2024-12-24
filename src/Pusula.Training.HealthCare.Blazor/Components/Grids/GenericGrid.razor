@@ -1,0 +1,145 @@
+﻿@typeparam TModel
+
+@using Syncfusion.Blazor.Buttons
+
+<SfGrid @ref="_gridRef" TValue="TModel" AllowPaging="true" AllowSorting="true" AllowFiltering="false" Query="@Query"  >
+    <SfDataManager AdaptorInstance="@AdaptorInstance" Adaptor="AdaptorType" >
+    </SfDataManager>
+    <GridPageSettings PageSize="@PageSize" ></GridPageSettings>
+    <GridEditSettings AllowAdding="false" AllowDeleting="false" AllowEditing="false"></GridEditSettings>
+    <div style="padding: 15px; box-shadow:0 4px 8px rgba(0,0,0,0.2);  " > 
+        
+    <GridColumns  >
+        @foreach (var column in Columns)
+        {
+          
+            <GridColumn Field="@column.Field" HeaderText="@column.HeaderText" Width="@column.Width" TextAlign="TextAlign.Left" HeaderTextAlign="TextAlign.Justify"   >
+              
+            </GridColumn>
+           
+          
+        }
+        @if (ShowDetailButton)
+        {
+        <GridColumn HeaderText="Details" Width="100px" TextAlign="TextAlign.Justify" HeaderTextAlign="TextAlign.Justify">
+            <Template >
+                <SfButton IconCss="e-icons e-eye" CssClass="e-flat e-primary" @onclick="() => OnDetailClicked.InvokeAsync((TModel)context)">
+                    Details
+                </SfButton>
+            </Template>
+        </GridColumn>
+        }
+        @if (ShowActions)
+        {
+        <GridColumn HeaderText="Actions" Width="120px" HeaderTextAlign="TextAlign.Justify" >
+            <GridCommandColumns>
+                <GridCommandColumn Type="CommandButtonType.Edit"
+                                   ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-edit", CssClass = "e-primary" })">
+                </GridCommandColumn>
+                <GridCommandColumn Type="CommandButtonType.Delete"
+                                   ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-delete", CssClass = "e-danger" })">
+                </GridCommandColumn>
+                <GridCommandColumn Type="CommandButtonType.Save"
+                                   ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-save", CssClass = "e-flat" })">
+                </GridCommandColumn>
+                <GridCommandColumn Type="CommandButtonType.Cancel"
+                                   ButtonOption="@(new CommandButtonOptions { IconCss = "e-icons e-cancel-icon", CssClass = "e-flat" })">
+                </GridCommandColumn>
+            </GridCommandColumns>
+        </GridColumn>
+        }
+    </GridColumns>
+    </div>
+    <GridEvents CommandClicked="OnCommandClicked" TValue="TModel"></GridEvents>
+</SfGrid>
+
+<SfDialog @bind-Visible="IsDeletePopupVisible" AllowDragging="true" Width="300px" ShowCloseIcon="true" Header="Delete Confirmation">
+    <DialogTemplates>
+        <Content>
+            Are you sure you want to delete this item?
+        </Content>
+        <FooterTemplate>
+            <SfButton CssClass="e-secondary" @onclick="CancelDelete">No</SfButton>
+            <SfButton CssClass="e-danger" @onclick="ConfirmDelete">Yes</SfButton>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+
+@code {
+    
+    [Parameter] public List<GridColumnDefinition> Columns { get; set; } =  new(3);
+    [Parameter] public EventCallback<TModel> OnEdit { get; set; }
+    [Parameter] public EventCallback<TModel> OnDelete { get; set; }
+    [Parameter] public Type? AdaptorInstance { get; set; }
+    [Parameter] public Adaptors AdaptorType { get; set; } = Adaptors.CustomAdaptor;
+    [Parameter] public int PageSize { get; set; } = 8; 
+    [Parameter] public string? Filter { get; set; }    // DataManagerRequest için parametre kontrolü
+    [Parameter] public Query Query { get; set; }  = new Query();
+    [Parameter] public bool ShowActions { get; set; } = true; // Actions sütununu kontrol eder
+    
+    // for detail button 
+    [Parameter] public bool ShowDetailButton { get; set; } 
+    [Parameter] public EventCallback<TModel> OnDetailClicked { get; set; }
+
+    private bool IsDeletePopupVisible { get; set; } = false;
+    private TModel? SelectedItemToDelete { get; set; }
+    private SfGrid<TModel>? _gridRef; // Grid için @ref
+ 
+
+
+    #region Grid içindeki olayları yakalamak için  -> OnCommandClicked
+    //Bu event, doğrudan grid bileşenine bağlıdır ve bu event'le etkileşime geçmeden gridin içinden hangi butona basıldığını bilemeyiz.
+    // Yani, OnCommandClicked, gridin kendi olayını yakalayarak dışarıya doğru bir köprü görevi görür.
+    private void OnCommandClicked(CommandClickEventArgs<TModel> args)
+    {
+        if (args.CommandColumn.Type == CommandButtonType.Edit)
+        {
+            OnEdit.InvokeAsync(args.RowData);
+        }
+        else if (args.CommandColumn.Type == CommandButtonType.Delete)
+        {
+            SelectedItemToDelete = args.RowData;
+            IsDeletePopupVisible = true;
+        }
+    }
+
+    #endregion
+  
+    private async Task ConfirmDelete()
+    {
+        if (OnDelete.HasDelegate) 
+            await OnDelete.InvokeAsync(SelectedItemToDelete);
+      
+        IsDeletePopupVisible = false;
+    }
+
+    private void CancelDelete()
+    {
+        SelectedItemToDelete = default;
+        IsDeletePopupVisible = false;
+    }
+
+    public async Task RefreshGrid()
+    {
+        if (_gridRef != null)
+            await _gridRef.Refresh();
+    }
+}
+
+<style>
+    .e-content{
+        padding: 15px;
+        font-size: large;
+        margin: 10px;
+    }
+    .e-row {
+     /*   padding: 35px; */
+        }
+    .e-rowcell{
+    
+    }
+    
+    
+  
+</style>

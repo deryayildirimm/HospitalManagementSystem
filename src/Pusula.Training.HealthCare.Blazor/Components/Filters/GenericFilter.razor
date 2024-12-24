@@ -1,0 +1,67 @@
+﻿@using Microsoft.Extensions.Localization
+@using Pusula.Training.HealthCare.Localization
+@typeparam TFilter
+
+        @if (ShowSearch)
+        {
+            <div class="col-12 " style="display: flex; justify-content: flex-start; background-color: #f3f3f36e; padding: 10px">
+                <div class="col-3  ">
+                    <input type="text" class="form-control" placeholder="Search" @bind-value="SearchValue"/>
+                </div>
+                <div class="col-1 "  style="margin-left: 35px">
+                    <button class="btn btn-secondary" @onclick="OnSearchClicked">@L["Search"]</button>
+                </div>
+                <div class="col-1 "  style="margin-left: 10px">
+                    <button class="btn btn-danger" @onclick="OnClearFiltersClicked">@L["Clear"]</button>
+                </div>
+                
+                <div class="col-3 ">
+                    <button class="btn btn-link" @onclick="() => _showAdvancedFilters = !_showAdvancedFilters">
+                        @(!_showAdvancedFilters ? "See Advanced Filters" : "Hide Advanced Filters")
+                    </button>
+                </div>
+            </div>
+            @if (_showAdvancedFilters)
+            {
+                @ChildContent
+            }
+        }
+@inject IStringLocalizer<HealthCareResource> L
+
+@code {
+            
+    [Parameter] public TFilter Filter { get; set; } = default!;
+    [Parameter] public EventCallback<TFilter> OnFilterChanged { get; set; }
+    [Parameter] public EventCallback OnClearFilters { get; set; } 
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public bool ShowSearch { get; set; } = true;
+
+    [Parameter] public Func<TFilter, string>? GetSearchValue { get; set; }
+    [Parameter] public Action<TFilter, string>? SetSearchValue { get; set; }
+
+    private bool _showAdvancedFilters = false;
+
+    private async Task OnSearchClicked()
+    {
+        if (OnFilterChanged.HasDelegate)
+        {
+            await OnFilterChanged.InvokeAsync(Filter);
+        }
+    }
+    
+    private async Task OnClearFiltersClicked()
+    {
+        if (OnClearFilters.HasDelegate)
+        {
+            await OnClearFilters.InvokeAsync(); // Dışarıdaki ClearFilter metodunu tetiklemek için
+        }
+    }
+
+    private string SearchValue
+    {
+        get => GetSearchValue!.Invoke(Filter);
+        set => SetSearchValue?.Invoke(Filter, value);
+    }
+
+}
+

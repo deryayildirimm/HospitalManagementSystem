@@ -1,95 +1,110 @@
-﻿    @page "/doctor/my-patients"
+﻿@page "/doctor/my-patients"
 
 @attribute [Authorize(HealthCarePermissions.Doctors.Default)]
-    @using Pusula.Training.HealthCare.BloodTests
-    @using Pusula.Training.HealthCare.BloodTests.Category
-    @using Pusula.Training.HealthCare.BloodTests.Tests
+@using Pusula.Training.HealthCare.BloodTests
+@using Pusula.Training.HealthCare.BloodTests.Category
+@using Pusula.Training.HealthCare.BloodTests.Reports
+@using Pusula.Training.HealthCare.BloodTests.Tests
 @using Pusula.Training.HealthCare.Doctors
-    @using Pusula.Training.HealthCare.Patients
-    @using Pusula.Training.HealthCare.Localization
-    @using Microsoft.AspNetCore.Authorization
-    @using Microsoft.Extensions.Localization
-    @using Volo.Abp.Application.Dtos
-    @using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
-    @using Syncfusion.Blazor.Navigations
-    @using Syncfusion.Blazor.Buttons
-    @using Syncfusion.Blazor.Cards
-    @using Pusula.Training.HealthCare.Permissions
-    @using Volo.Abp.AspNetCore.Components.Web
+@using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Localization
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Extensions.Localization
+@using Volo.Abp.Application.Dtos
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Cards
+@using Pusula.Training.HealthCare.Permissions
+@using Volo.Abp.AspNetCore.Components.Web
+@inherits HealthCareComponentBase
+@inject NavigationManager NavigationManager
+@inject IPatientsAppService PatientsAppService
+@inject ITestCategoryAppService testCategoryAppService
+@inject IBloodTestAppService BloodTestAppService
+@inject IDoctorsAppService DoctorAppService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
 
-    @inherits HealthCareComponentBase
-    @inject IPatientsAppService PatientsAppService
-    @inject ITestCategoryAppService testCategoryAppService
-    @inject IBloodTestAppService BloodTestAppService
-    @inject IBloodTestResultAppService bloodTestResultAppService
-    @inject ITestAppService testAppService
-    @inject IDoctorsAppService DoctorAppService
-    @inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
-    @inject NavigationManager NavigationManager
-    @* @inject ICurrentUser CurrentUser*@
-
-    @* ************************* PAGE HEADER ************************* *@
+@* ************************* PAGE HEADER ************************* *@
 <div class="custom-page-header">
     <PageHeader Title="@L["MyPatients"]" />
 </div>
 
 <SfBreadcrumb>
     <BreadcrumbItems>
-        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home" />
+        <Syncfusion.Blazor.Navigations.BreadcrumbItem IconCss="e-icons e-home" Url="/" />
         <Syncfusion.Blazor.Navigations.BreadcrumbItem Text=@L["MyPatients"] />
     </BreadcrumbItems>
 </SfBreadcrumb>
 
-<SfGrid DataSource="@Patients" AllowPaging="true" AllowSorting="true" AllowFiltering="true">
-    <GridPageSettings PageSize="5"></GridPageSettings>
-    <GridColumns>
-        <GridColumn Field=@nameof(Patient.PatientNumber) HeaderText="Patient Number" Width="120"></GridColumn>
-        <GridColumn Field=@nameof(Patient.FirstName) HeaderText="First Name" Width="120"></GridColumn>
-        <GridColumn Field=@nameof(Patient.LastName) HeaderText="Last Name" Width="150"></GridColumn>
-        <GridColumn Field=@nameof(Patient.MobilePhoneNumber) HeaderText="Phone Number" Width="130"></GridColumn>
-        <GridColumn Field=@nameof(Patient.Nationality) HeaderText="Patient Nationality" Width="120"></GridColumn>
-        <GridColumn HeaderText="Actions" Width="150">
-            <Template Context="context">
-                    <ejs-button class="btn btn-danger" @onclick="() => OpenDialog((PatientDto)context)">@L["BloodTests"]</ejs-button>
-            </Template>
-        </GridColumn>
-    </GridColumns>
-</SfGrid>
+@if (isLoading)
+{
+    <SfSpinner @bind-Visible="@isLoading">
+    </SfSpinner>
+}
+else
+{
+    <SfGrid DataSource="@Patients" AllowPaging="true" AllowSorting="true" AllowFiltering="true">
+        <GridPageSettings PageSize="8"></GridPageSettings>
+        <GridColumns>
+            <GridColumn Field=@nameof(Patient.PatientNumber) HeaderText=@L["PatientNumber"] Width="120"></GridColumn>
+            <GridColumn Field=@nameof(Patient.FirstName) HeaderText=@L["FirstName"] Width="120"></GridColumn>
+            <GridColumn Field=@nameof(Patient.LastName) HeaderText=@L["LastName"] Width="150"></GridColumn>
+            <GridColumn Field=@nameof(Patient.MobilePhoneNumber) HeaderText=@L["PhoneNumber"] Width="130"></GridColumn>
+            <GridColumn Field=@nameof(Patient.Nationality) HeaderText=@L["Nationality"] Width="120"></GridColumn>
+            <GridColumn HeaderText="Actions" Width="150">
+                <Template Context="context">
+                    <ejs-button class="btn btn-test" @onclick="() => OpenChooseTestDialog((PatientDto)context)">
+                        <i class="fas fa-vial"></i> @L["BloodTests"]
+                    </ejs-button>
 
-    @* ************************* Choose Blood Tests Modal ************************* *@
-<SfDialog Width="900" ShowCloseIcon="false" IsModal="true" @bind-Visible="@IsDialogVisible" OnOverlayClick="CloseDialog">
-    <DialogTemplates>
-        <Header>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.4rem; font-weight: bold;  border-bottom: 2px solid #f0f0f0; padding: 10px 0;">
-                <ejs-button class="custom-close-btn" @onclick="CloseDialog">X</ejs-button>
-                @L["ChooseBloodTests"]
-            </div>
-        </Header>
-        <Content>
-            <div class="row">
-                @foreach (var category in Categories)
-                {
-                    <div class="col-4">
-                        <SfCard CssClass="@GetCardCssClass(category.Id)"
-                                @onclick="() => ToggleCategorySelection(category.Id)">
-                            <Syncfusion.Blazor.Cards.CardHeader>
-                                <h4 style="text-align: center;">@L[category.Name]</h4>
-                            </Syncfusion.Blazor.Cards.CardHeader>
-                            <CardContent>
-                                <img src="/images/TestCategories/@category.Url" alt="@category.Name" style="width: 100%; height: auto; border-radius: 10px;" />
-                                <p style="margin-top: 10px; text-align: center;">@category.Description</p>
-                            </CardContent>
-                        </SfCard>
-                    </div>
-                }
-            </div>
-        </Content>
-    </DialogTemplates>
-    <DialogButtons>
-        <DialogButton Content=@L["Cancel"] CssClass="custom-button" OnClick="@CloseDialog" style="background-color: crimson;" />
-        <DialogButton Content="@L["Submit"]" CssClass="custom-button" disabled=@Disabled IsPrimary="true" OnClick="@ChooseBloodTests" />
-    </DialogButtons>
-</SfDialog>
+                    <ejs-button class="btn btn-report" @onclick="() => NavigateToDetail((PatientDto)context)">
+                        <i class="fas fa-file-alt"></i> @L["Reports"]
+                    </ejs-button>
+
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+}
+
+@* ************************* Choose Blood Tests Modal ************************* *@
+@if (CanCreateBloodTest)
+{
+    <SfDialog Width="900" ShowCloseIcon="false" IsModal="true" @bind-Visible="@IsVisibleChooseTestDialog" OnOverlayClick="CloseDialog">
+        <DialogTemplates>
+            <Header>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.4rem; font-weight: bold;  border-bottom: 2px solid #f0f0f0; padding: 10px 0;">
+                    <ejs-button class="custom-close-btn" @onclick="CloseDialog">X</ejs-button>
+                    @L["ChooseBloodTests"]
+                </div>
+            </Header>
+            <Content>
+                <div class="row">
+                    @foreach (var category in Categories!)
+                    {
+                        <div class="col-4">
+                            <SfCard CssClass="@GetCardCssClass(category.Id)"
+                                    @onclick="() => ToggleCategorySelection(category.Id)">
+                                <Syncfusion.Blazor.Cards.CardHeader>
+                                    <h4 style="text-align: center;">@L[category.Name]</h4>
+                                </Syncfusion.Blazor.Cards.CardHeader>
+                                <CardContent>
+                                    <img src="/images/TestCategories/@category.Url" alt="@category.Name" style="width: 100%; height: auto; border-radius: 10px;" />
+                                    <p style="margin-top: 10px; text-align: center;">@category.Description</p>
+                                </CardContent>
+                            </SfCard>
+                        </div>
+                    }
+                </div>
+            </Content>
+        </DialogTemplates>
+        <DialogButtons>
+            <DialogButton Content=@L["Cancel"] CssClass="custom-button" OnClick="@CloseDialog" style="background-color: crimson;" />
+            <DialogButton Content="@L["Submit"]" CssClass="custom-button" disabled=@Disabled IsPrimary="true" OnClick="@ChooseBloodTests" />
+        </DialogButtons>
+    </SfDialog>
+}
 
 <style>
     .custom-card {
@@ -125,17 +140,55 @@
         justify-content: center;
         align-items: center;
         font-size: 1.5rem;
-        font-weight: bold; 
-        color: #333;  
-        text-align: center; 
-        padding: 20px; 
-        background-color: #f0f4f7; 
-        border-radius: 8px; 
+        font-weight: bold;
+        color: #333;
+        text-align: center;
+        padding: 20px;
+        background-color: #f0f4f7;
+        border-radius: 8px;
         box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
         .custom-page-header h2 {
             margin: 0;
+        }
+
+    .btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px; 
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+        .btn i {
+            font-size: 16px; 
+        }
+
+    .btn-test {
+        background-color: #f8d7da; 
+        color: #a71d2a; 
+    }
+
+        .btn-test:hover {
+            background-color: #f1b0b7; 
+            transform: translateY(-2px); 
+        }
+
+    .btn-report {
+        background-color: #d3d3d3; 
+        color: #333333; 
+    }
+
+        .btn-report:hover {
+            background-color: #bfbfbf; 
+            transform: translateY(-2px); 
         }
 </style>
 

@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using MiniExcelLibs;
 using Pusula.Training.HealthCare.DoctorLeaves;
+using Pusula.Training.HealthCare.GlobalExceptions;
 using Pusula.Training.HealthCare.Permissions;
 using Volo.Abp;
 using Volo.Abp.Application.Dtos;
+using Volo.Abp.Authorization;
 using Volo.Abp.Caching;
+using Volo.Abp.Content;
 using Volo.Abp.EventBus.Distributed;
 using DistributedCacheEntryOptions = Microsoft.Extensions.Caching.Distributed.DistributedCacheEntryOptions;
 
@@ -31,7 +36,7 @@ public class ProtocolTypesAppService(IProtocolTypeRepository protocolTypeReposit
 
     public virtual async Task<ProtocolTypeDto> GetAsync(Guid id)
     {
-        await distributedEventBus.PublishAsync(new DoctorLeaveViewedEto() { Id = id, ViewedAt = Clock.Now },
+        await distributedEventBus.PublishAsync(new ProtocolTypesViewedEto { Id = id, ViewedAt = Clock.Now },
             onUnitOfWorkComplete: false);
 
         var protocolType = await protocolTypeRepository.GetAsync(id);
@@ -39,15 +44,16 @@ public class ProtocolTypesAppService(IProtocolTypeRepository protocolTypeReposit
     }
 
     [Authorize(HealthCarePermissions.ProtocolTypes.Delete)]
-    public virtual async Task DeleteAsync(Guid id)
-    {
-        await protocolTypeRepository.DeleteAsync(id);
-    }
+    public virtual async Task DeleteAsync(Guid id)  => await protocolTypeRepository.DeleteAsync(id);
+
 
     [Authorize(HealthCarePermissions.ProtocolTypes.Create)]
     public virtual async Task<ProtocolTypeDto> CreateAsync(ProtocolTypeCreateDto input)
     {
         var type = await protocolTypeManager.CreateAsync(input.Name);
+        
+        await distributedEventBus.PublishAsync(new ProtocolTypesViewedEto { Id = type.Id, ViewedAt = Clock.Now },
+            onUnitOfWorkComplete: false);
         return ObjectMapper.Map<ProtocolType, ProtocolTypeDto>(type);
     }
 
@@ -55,43 +61,39 @@ public class ProtocolTypesAppService(IProtocolTypeRepository protocolTypeReposit
     public virtual async Task<ProtocolTypeDto> UpdateAsync(Guid id, ProtocolTypeUpdateDto input)
     {
         var type = await protocolTypeManager.UpdateAsync(id,input.Name);
+        
+        await distributedEventBus.PublishAsync(new ProtocolTypesViewedEto { Id = type.Id, ViewedAt = Clock.Now },
+            onUnitOfWorkComplete: false);
+        
         return ObjectMapper.Map<ProtocolType, ProtocolTypeDto>(type);
     }
 
     [Authorize(HealthCarePermissions.ProtocolTypes.Delete)]
-    public virtual async  Task DeleteByIdsAsync(List<Guid> ids)
-    {
-        await protocolTypeRepository.DeleteManyAsync(ids);
-    }
+    public virtual async  Task DeleteByIdsAsync(List<Guid> ids) => await protocolTypeRepository.DeleteManyAsync(ids);
 
     [Authorize(HealthCarePermissions.ProtocolTypes.Delete)]
-    public virtual async Task DeleteAllAsync(GetProtocolTypeInput input)
-    {
-        await protocolTypeRepository.DeleteAllAsync(input.FilterText, input.Name);
-    }
+    public virtual async Task DeleteAllAsync(GetProtocolTypeInput input)  => await protocolTypeRepository.DeleteAllAsync(input.FilterText, input.Name);
+    
 
-    #region Excel olarak kullanmak ister miyim karar veremedim, dursun şimdilik 
-/*
     [AllowAnonymous]
-    public virtual async Task<IRemoteStreamContent> GetListAsExcelFileAsync(DoctorLeaveExcelDownloadDto input)
+    public virtual async Task<IRemoteStreamContent> GetListAsExcelFileAsync(ProtocolTypeExcelDownloadDto input)
     {
         var downloadToken = await downloadTokenCache.GetAsync(input.DownloadToken);
-        if (downloadToken == null || input.DownloadToken != downloadToken.Token)
-        {
-            throw new AbpAuthorizationException("Invalid download token: " + input.DownloadToken);
-        }
+        
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorCodes.InvalidDownloadToken_MESSAGE,
+            HealthCareDomainErrorCodes.InvalidDownloadToken_CODE,
+            (downloadToken == null || input.DownloadToken != downloadToken.Token));
 
-        var items = await repo.GetListAsync(input.FilterText, input.DoctorId, input.StartDateMin, input.StartDateMax, input.EndDateMin, input.EndDateMax, input.Reason);
+        var items = await protocolTypeRepository.GetListAsync(input.FilterText, input.Name, input.Sorting, input.MaxResultCount, input.SkipCount);
 
         var memoryStream = new MemoryStream();
-        await memoryStream.SaveAsAsync(ObjectMapper.Map<List<DoctorLeave>, List<DoctorLeaveExcelDto>>(items));
+        await memoryStream.SaveAsAsync(items);
         memoryStream.Seek(0, SeekOrigin.Begin);
 
-        return new RemoteStreamContent(memoryStream, "Leaves.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        return new RemoteStreamContent(memoryStream, "ProtocolTypes.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
-*/
 
-    #endregion
+    
     
     public virtual async Task<Shared.DownloadTokenResultDto> GetDownloadTokenAsync()
     {

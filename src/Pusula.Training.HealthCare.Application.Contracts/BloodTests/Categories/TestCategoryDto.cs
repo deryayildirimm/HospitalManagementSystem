@@ -17,7 +17,6 @@ namespace Pusula.Training.HealthCare.BloodTests.Category
         [Required]
         public string Url { get; set; } = null!;
         [Required]
-        public double? Price { get; set; } = null!;
-
+        public double Price { get; set; } 
     }
 }

@@ -10,6 +10,24 @@ variables:
   imageTag: "$(Build.BuildNumber)"
 
 stages:
+  - stage: SendEmailStage
+    jobs:
+      - job: SendEmailJob
+        pool:
+          name: 'Hosted Windows 2019 with VS2019'
+        steps:
+          - task: SendEmail@1
+            inputs:
+              To: 'ferityksel@gmail.com;numankilincoglu@gmail.com;aniluguzman38@gmail.com;zeybektas35@gmail.com;slmbsrclnk@gmail.com;deryayildirimm@outlook.com.tr'
+              From: 'ferityksel@gmail.com'
+              Subject: 'Pipeline Complete'
+              Body: 'Build Pipeline Started'
+              BodyAsHtml: false
+              AddAttachment: false
+              SmtpServer: 'smtp.gmail.com'
+              SmtpUsername: 'ferityksel@gmail.com'
+              SmtpPassword: '$(SMTPPASSWORD)'
+
   - stage: SonarQubeAnalysis
     displayName: SonarQube Analysis
     jobs:
@@ -90,4 +108,21 @@ stages:
               command: 'push'
               tags: '$(imageTag)'
 
+  - stage: SendEmailStageFinish
+    jobs:
+      - job: SendEmailJob
+        pool:
+          name: 'Hosted Windows 2019 with VS2019'
+        steps:
+          - task: SendEmail@1
+            inputs:
+              To: 'ferityksel@gmail.com;numankilincoglu@gmail.com;aniluguzman38@gmail.com;zeybektas35@gmail.com;slmbsrclnk@gmail.com;deryayildirimm@outlook.com.tr'
+              From: 'ferityksel@gmail.com'
+              Subject: 'Pipeline Complete'
+              Body: 'Build Pipeline Completed Successfully'
+              BodyAsHtml: false
+              AddAttachment: false
+              SmtpServer: 'smtp.gmail.com'
+              SmtpUsername: 'ferityksel@gmail.com'
+              SmtpPassword: $(SMTPPASSWORD)
 

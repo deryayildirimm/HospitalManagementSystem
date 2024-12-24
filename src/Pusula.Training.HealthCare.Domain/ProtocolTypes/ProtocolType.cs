@@ -1,5 +1,4 @@
 ﻿using System;
-using JetBrains.Annotations;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -7,7 +6,7 @@ namespace Pusula.Training.HealthCare.ProtocolTypes;
 
 public class ProtocolType : AuditedAggregateRoot<Guid>
 {
-    [NotNull]
+  
     public virtual string Name { get; private set; }
 
     protected ProtocolType()
@@ -17,7 +16,7 @@ public class ProtocolType : AuditedAggregateRoot<Guid>
     
     public ProtocolType(Guid id, string name)
     {
-        Id = id;
+        SetId(id);
         SetName(name);
     }
     
@@ -27,6 +26,11 @@ public class ProtocolType : AuditedAggregateRoot<Guid>
         Name = name;
     }
     
+    private void SetId(Guid id)
+    {
+        Check.NotNull(id, nameof(id));
+        Id = id;
+    }
     
     
     

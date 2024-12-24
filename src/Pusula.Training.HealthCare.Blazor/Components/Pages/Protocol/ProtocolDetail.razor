@@ -1,0 +1,478 @@
+@page "/protocols/detail/{PatientNumber:int}"
+
+@attribute [Authorize(HealthCarePermissions.Patients.Default)]
+@using Pusula.Training.HealthCare.Countries
+@using Pusula.Training.HealthCare.Patients
+@using Pusula.Training.HealthCare.Localization
+@using Syncfusion.Blazor.Spinner
+@using global::Pusula.Training.HealthCare.Appointments
+@using global::Pusula.Training.HealthCare.Permissions
+@using Pusula.Training.HealthCare.Blazor.Services
+@using Pusula.Training.HealthCare.Protocols
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Cards
+
+@using Volo.Abp.AspNetCore.Components.Web
+@using IconName = Syncfusion.Blazor.Buttons.IconName
+@using IconSize = Syncfusion.Blazor.Buttons.IconSize
+
+@using Volo.Abp.Http.Client
+@inherits HealthCareComponentBase
+@inject IPatientsAppService PatientsAppService
+@inject IAppointmentAppService AppointmentAppService
+@inject IProtocolsAppService ProtocolsAppService
+@inject ProtocolStateService ProtocolState
+
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> LH
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+@inject ICountryAppService CountryAppService
+
+<link href="PatientDetail.css?v=1.0" rel="stylesheet" />
+
+@* ************************* PAGE HEADER ************************* *@
+<div style="visibility: hidden; display: inline; position: absolute;   top: -9999px;
+    left: -9999px;
+    width: 0;
+    height: 0;
+    overflow: hidden;" >
+    <PageHeader Title="@L["Patient Detail"]" BreadcrumbItems="BreadcrumbItems">
+    </PageHeader>
+</div>
+
+
+<header style="visibility: hidden; display: inline; position: absolute;   top: -9999px;
+    left: -9999px;
+    width: 0;
+    height: 0;
+    overflow: hidden;">
+    <div class="header-wrapper">
+        <div class="logo">
+            <a href="">Patient Detail</a>
+        </div>
+
+        <ul class="active-mobile">
+            <li><a href="">Home</a></li>
+            <li><a href="">About</a></li>
+            <li><a href="">Contact</a></li>
+            <li><a href="">Pricing</a></li>
+            <li><a href="">FAQ</a></li>
+            <li><a href="">Blog <i class="fa-solid fa-caret-down"></i> </a>
+              
+            </li>
+            <li><a href="">Portfolio <i class="fa-solid fa-caret-down"></i> </a>
+               
+            </li>
+        </ul>
+    </div>
+</header>
+
+<SfSpinner Size="40"  Type="@SpinnerType.Bootstrap" Visible="@VisibleProperty" Label="Loading...." /> 
+
+@if (!VisibleProperty)
+{
+
+<div class="hero-section">
+    <div class="hero-wrapper" style="box-shadow:0 4px 8px rgba(0,0,0,0.2) ">
+        <div class="left-box" style="margin-right: -285px">
+            <div class="patient-card">
+                <div class="card-header">
+                <h4 style="box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); padding: 10px;"> <strong>Hasta Adı : @ProtocolState?.PatientName</strong> </h4>
+                <h5> <strong>Identity Number :</strong>@ProtocolState?.PatientIdentityNumber <span style="margin-left: 10px">@ProtocolState?.PatientGender</span> </h5>
+                <h5> <strong>Protokol Type:</strong>@ProtocolState?.ProtocolTypeName </h5>
+                <h5> <strong>Department:</strong>@ProtocolState?.DepartmentName </h5>
+                <h5> <strong>Doctor Name: </strong>@ProtocolState?.DoctorName </h5>
+                <h5><strong>Başlangıç Tarihi:</strong> @ProtocolState?.StartTime</h5>
+                <h5><strong>Bitiş Tarihi:</strong> @ProtocolState?.EndTime</h5>
+                </div>
+            </div>
+        </div>
+        <div class="left-box" style="width: 50%">
+            <div class="patient-card">
+                <div class="card-header">
+                    <h3 > <strong>Protokol Özeti</strong> </h3>
+                    <h4> <strong>Toplam İşlem Sayısı:</strong> @protocolWithDetails?.MedicalService?.Length   </h4>
+                    <h4><strong>Toplam Tutar:</strong>@protocolWithDetails?.Price </h4>
+                </div>
+                <div class="card-header">
+                    <h4 > <strong>İlgili İşlemler</strong> </h4>
+                    @if (MedicalServices.Any())
+                    {
+                        @foreach (var service in MedicalServices)
+                        {
+                            <h5>@service</h5>
+                        }
+                    }
+                    else
+                    {
+                    <p>No medical services available.</p>
+                    }
+                 
+                </div>
+            </div>
+            <div class="btn-wrapper">
+                <a href=""> + Protokolü Düzenle</a>
+                <a href=""> + Yeni İşlem Ekle</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="main-section">
+    <div class="main-wrapper">
+    
+        <div class="box">
+            <div class="header-wrapper">
+                <ul class="active-mobile" style="float: left">
+                    <li><a @onclick="async () => await ScheduledApp()" style="cursor: pointer" >Scheduled</a></li>
+                    <li><a @onclick="async () => await CompletedApp()" style="cursor: pointer" >Completed</a></li>
+                    <li><a @onclick="async () => await CancelledApp() " style="cursor: pointer" >Cancelled  </a>
+                    </li>
+             
+                </ul>
+            </div>
+            <SfGrid TValue="AppointmentViewModel" DataSource="AppointmentList" AllowPaging="true">
+                @if (AppointmentList == null || !AppointmentList.Any())
+                {
+                    <p>Veri bulunamadı.</p>
+                }
+                else
+                {
+                    <h5>
+                        <strong>@_status</strong> 
+                    </h5>
+
+                }
+                <GridPageSettings PageSize="5"></GridPageSettings>
+                <GridColumns>
+                    
+                    <GridColumn Field="@nameof(AppointmentViewModel.DoctorName)" HeaderText="Doctor Name"></GridColumn>
+                    <GridColumn Field="@nameof(AppointmentViewModel.Date)" HeaderText="Date"></GridColumn>
+                    <GridColumn Field="@nameof(AppointmentViewModel.Service)" HeaderText="Service"></GridColumn>
+                    <GridColumn Field="@nameof(AppointmentViewModel.Status)" HeaderText="Status"></GridColumn>
+
+                </GridColumns>
+            </SfGrid>
+
+        </div>
+   
+        <div class="box">
+
+            <div class="header-wrapper">
+                <ul class="active-mobile" style="float: left">
+                    <li><a >Medical Conditions </a></li>
+                </ul>
+            </div>
+            <SfGrid TValue="MedicalConditionViewModel" DataSource="MedicalConditions" AllowPaging="true" AllowSorting="true">
+                <GridPageSettings PageSize="5"></GridPageSettings>
+                <GridColumns>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.DiseaseName)" HeaderText="Disease Name"  TextAlign="TextAlign.Left"></GridColumn>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.DiagnosisDate)" HeaderText="Diagnosis Date"  TextAlign="TextAlign.Center" Format="dd.MM.yyyy"></GridColumn>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.TreatmentStatus)" HeaderText="Treatment Status"  TextAlign="TextAlign.Center"></GridColumn>
+                    <GridColumn Field="@nameof(MedicalConditionViewModel.DoctorNotes)" HeaderText="Doctor's Notes"  TextAlign="TextAlign.Left"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+     
+        <div class="box">
+           
+        </div>
+
+
+    </div>
+        <div class="box">
+
+        </div>
+     
+    </div>
+
+
+
+
+}
+@* ************************* EDIT MODAL ************************* *@
+<Modal @ref="EditPatientModal" Closing="@EditPatientModal.CancelClosingModalWhenFocusLost">
+    <ModalContent Centered="true" Size="ModalSize.ExtraLarge">
+        <EditForm method="post" Model="EditingPatient" OnValidSubmit="UpdatePatientAsync" FormName="update" Enhance>
+
+            <ModalHeader>
+                <ModalTitle style="display: inline-flex; align-items: center;">
+                    <Icon Name="@("fa-arrows-rotate")"  Style="margin-right:5px;"></Icon>
+                    <Heading Size="HeadingSize.Is1" style="margin: 0;">@L["UpdatePatient"] </Heading>
+                </ModalTitle>
+                <CloseButton Clicked=@(async()=>await CloseEditPatientModalAsync()) />
+            </ModalHeader>
+
+            <ModalBody>
+                <Validations @ref="@EditingPatientValidations"
+                             Mode="ValidationMode.Auto"
+                             Model="@EditingPatient"
+                             ValidateOnLoad="false">
+
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is5">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        @L["Nationality"]
+                                    </FieldLabel>
+                                    <Select TValue="string" @bind-SelectedValue="@EditingPatient.Nationality">
+                                        @foreach (var item in Nationalities)
+                                        {
+                                            <SelectItem TValue="string" Value="@item.Country">
+                                                @item.Country
+                                            </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is5">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["IdentityNumber/PassportNumber"]
+                                    </FieldLabel>
+                                    <TextEdit @bind-Text="@EditingPatient.IdentityNumber" MaxLength="PatientConsts.IdentityNumberLength">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is2">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["BirthDate"]
+                                    </FieldLabel>
+                                    <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingPatient.BirthDate">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </DateEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                    </Row>
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is5">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["FirstName"]
+                                    </FieldLabel>
+                                    <TextEdit @bind-Text="@EditingPatient.FirstName" MaxLength="PatientConsts.NameMaxLength">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is5">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["LastName"]
+                                    </FieldLabel>
+                                    <TextEdit @bind-Text="@EditingPatient.LastName" MaxLength="PatientConsts.LastNameMaxLength">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is2">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        <Icon Class="fa-circle" style="color:red; font-size:5px; vertical-align: middle; margin-right:5px;" />
+                                        @L["Gender"]
+                                    </FieldLabel>
+                                    <Select TValue="EnumGender" @bind-SelectedValue="@EditingPatient.Gender" style="text-overflow: ellipsis;">
+                                        @foreach (var item in Genders)
+                                        {
+                                            <SelectItem TValue="EnumGender" Value="@(Enum.Parse<EnumGender>(item.Key.ToString()))">
+                                                @item.Value
+                                            </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                    </Row>
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center; vertical-align: middle;">
+                                        @L["PhoneNo"]
+                                    </FieldLabel>
+                                    <TextEdit @bind-Text="@EditingPatient.MobilePhoneNumber" MaxLength="PatientConsts.MobilePhoneNumberMaxLength" style="margin-top: 0px;">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center; vertical-align: middle;">
+                                        @L["RelativePhoneNo"]
+                                    </FieldLabel>
+                                    <TextEdit @bind-Text="@EditingPatient.RelativePhoneNumber" MaxLength="PatientConsts.MobilePhoneNumberMaxLength" style="margin-top: 0px;"
+                                              @onchange="OnRelativePhoneNumberChanged">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>@L["PatienttoRelative"]</FieldLabel>
+                                    <Select TValue="EnumRelative" @bind-SelectedValue="@EditingPatient.Relative" style="text-overflow: ellipsis; margin-top: 0px;"
+                                            disabled="@(string.IsNullOrWhiteSpace(EditingPatient.RelativePhoneNumber))">
+                                        @foreach (var item in Relatives)
+                                        {
+                                            <SelectItem TValue="EnumRelative" Value="@(Enum.Parse<EnumRelative>(item.Key.ToString()))">
+                                                @item.Value
+                                            </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                    </Row>
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>@L["EmailAddress"]</FieldLabel>
+                                    <TextEdit @bind-Text="@EditingPatient.EmailAddress" MaxLength="PatientConsts.EmailAddressMaxLength" Role="TextRole.Email">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel> @L["MothersName"]</FieldLabel>
+                                    <TextEdit @bind-Text="@EditingPatient.MothersName" MaxLength="PatientConsts.NameMaxLength">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>@L["FathersName"]</FieldLabel>
+                                    <TextEdit @bind-Text="@EditingPatient.FathersName" MaxLength="PatientConsts.NameMaxLength">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </TextEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                    </Row>
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel style="display: inline-flex; align-items: center;">
+                                        @L["PatientType"]
+                                    </FieldLabel>
+                                    <Select TValue="EnumPatientTypes" @bind-SelectedValue="@EditingPatient.PatientType" style="text-overflow: ellipsis;">
+                                        @foreach (var item in PationTypes)
+                                        {
+                                            <SelectItem TValue="EnumPatientTypes" Value="@(Enum.Parse<EnumPatientTypes>(item.Key.ToString()))">
+                                                @item.Value
+                                            </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                        <Column ColumnSize="ColumnSize.Is4">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>
+                                        @L["DiscountGroup"]
+                                    </FieldLabel>
+                                    <Select TValue="EnumDiscountGroup" @bind-SelectedValue="@EditingPatient.DiscountGroup" style="text-overflow: ellipsis;">
+                                        @foreach (var item in DiscountGroups)
+                                        {
+                                            <SelectItem TValue="EnumDiscountGroup" Value="@(Enum.Parse<EnumDiscountGroup>(item.Key.ToString()))">
+                                                @item.Value
+                                            </SelectItem>
+                                        }
+                                    </Select>
+                                </Field>
+                            </Validation>
+                        </Column>
+                    </Row>
+                    <Row>
+                        <Column ColumnSize="ColumnSize.Is12">
+                            <Validation MessageLocalizer="@LH.Localize">
+                                <Field>
+                                    <FieldLabel>
+                                        @L["Address"]
+                                    </FieldLabel>
+                                    <MemoEdit Rows="3" @bind-Text="EditingPatient.Address" MaxLength="PatientConsts.AddressMaxLength">
+                                        <Feedback>
+                                            <ValidationError />
+                                        </Feedback>
+                                    </MemoEdit>
+                                </Field>
+                            </Validation>
+                        </Column>
+                    </Row>
+                </Validations>
+            </ModalBody>
+
+            <ModalFooter>
+                <Row class="justify-content-between align-items-center" style="width: 100%;">
+                    <Column>
+                        <Div style="display: flex; align-items: center; color: gray; font-style: italic; background-color: #f9f9f9; padding: 8px; border-radius: 5px;">
+                            <Icon class="fa-circle" style="color: red; font-size: 6px; margin-right: 5px;" />
+                            <Paragraph style="margin: 0;">
+                                @L["The fields shown in red are required to be filled"]
+                            </Paragraph>
+                        </Div>
+                    </Column>
+                    <Column class="text-end">
+                        <Button Color="Color.Danger" Clicked="CloseEditPatientModalAsync">
+                            @L["Cancel"]
+                        </Button>
+                        <Button Type="Blazorise.ButtonType.Submit" Form="CreatePatientForm" Clicked="UpdatePatientAsync" Color="Color.Info">
+                            @L["Submit"]
+                        </Button>
+                    </Column>
+                </Row>
+            </ModalFooter>
+
+        </EditForm>
+    </ModalContent>
+</Modal>

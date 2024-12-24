@@ -179,9 +179,25 @@ public static class HealthCarePermissions
         public const string Delete = Default + ".Delete";
     }
 
+    public static class PhysicalFindings
+    {
+        public const string Default = GroupName + ".PhysicalFindings";
+        public const string Edit = Default + ".Edit";
+        public const string Create = Default + ".Create";
+        public const string Delete = Default + ".Delete";
+    }
+
     public static class Examinations
     {
         public const string Default = GroupName + ".Examinations";
+        public const string Edit = Default + ".Edit";
+        public const string Create = Default + ".Create";
+        public const string Delete = Default + ".Delete";
+    }
+
+    public static class LaboratoryTechnicians
+    {
+        public const string Default = GroupName + ".LaboratoryTechnicians";
         public const string Edit = Default + ".Edit";
         public const string Create = Default + ".Create";
         public const string Delete = Default + ".Delete";

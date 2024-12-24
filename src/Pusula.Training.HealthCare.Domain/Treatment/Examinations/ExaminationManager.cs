@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
 using Pusula.Training.HealthCare.Treatment.Examinations.FamilyHistories;
+using Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings;
 using Pusula.Training.HealthCare.Treatment.Icds;
 using Volo.Abp;
 using Volo.Abp.Domain.Services;
@@ -15,8 +17,8 @@ public class ExaminationManager(
     IExaminationRepository examinationRepository,
     FamilyHistoryManager familyHistoryManager,
     BackgroundManager backgroundManager,
-    IIcdRepository icdRepository,
-    IUnitOfWorkManager unitOfWorkManager) : DomainService
+    PhysicalFindingManager physicalFindingManager,
+    IIcdRepository icdRepository) : DomainService
 {
     public virtual async Task<Examination> CreateAsync(
         Guid protocolId,
@@ -30,9 +32,18 @@ public class ExaminationManager(
         string? allergies,
         string? medications,
         string? habits,
+        int? weight,
+        int? height,
+        int? bodyTemperature,
+        int? pulse,
+        int? vki,
+        int? vya,
+        int? kbs,
+        int? kbd,
+        int? spo2,
         DateTime? startDate,
         string? story,
-        List<Guid>? icdIds = null
+        ICollection<Guid>? icdIds = null
     )
     {
         Check.NotNullOrWhiteSpace(protocolId.ToString(), nameof(protocolId));
@@ -49,32 +60,29 @@ public class ExaminationManager(
             story
         );
 
-        var newExamination = await examinationRepository.InsertAsync(examination);
-        await unitOfWorkManager.Current!.SaveChangesAsync();
+        var newExamination = await examinationRepository.InsertAsync(examination, true);
 
-        await AddExaminationIcd(icdIds, examination);
+        await SetExaminationIcds(examination, icdIds);
 
         await familyHistoryManager.CreateAsync(newExamination.Id, areParentsRelated, motherDisease, fatherDisease,
             sisterDisease, brotherDisease);
         await backgroundManager.CreateAsync(newExamination.Id, allergies, medications, habits);
+        await physicalFindingManager.CreateAsync(newExamination.Id, weight, height, bodyTemperature, pulse, vki, vya,
+            kbs, kbd, spo2);
 
         return await examinationRepository.GetAsync(newExamination.Id);
     }
 
-    private async Task AddExaminationIcd(List<Guid>? icdIds, Examination examination)
+    private async Task SetExaminationIcds(Examination examination, IEnumerable<Guid>? icdKeys)
     {
-        if (icdIds != null && icdIds.Count != 0)
+        if (icdKeys == null || !icdKeys.Any())
         {
-            var icds = await icdRepository.GetListAsync(x => icdIds.Contains(x.Id));
-            foreach (var icd in icds)
-            {
-                examination.AddIcd(new ExaminationIcd
-                {
-                    ExaminationId = examination.Id,
-                    IcdId = icd.Id,
-                });
-            }
+            await examinationRepository.UpdateExaminationIcdsAsync(examination.Id, new List<Guid>());
+            return;
         }
+
+        var icdIds = icdKeys.Distinct().ToList();
+        await examinationRepository.UpdateExaminationIcdsAsync(examination.Id, icdIds);
     }
 
     public virtual async Task<Examination> UpdateAsync(
@@ -90,9 +98,18 @@ public class ExaminationManager(
         string? allergies,
         string? medications,
         string? habits,
+        int? weight,
+        int? height,
+        int? bodyTemperature,
+        int? pulse,
+        int? vki,
+        int? vya,
+        int? kbs,
+        int? kbd,
+        int? spo2,
         DateTime? startDate,
         string? story,
-        List<Guid>? icdIds = null
+        ICollection<Guid>? icdIds = null
     )
     {
         Check.NotNullOrWhiteSpace(protocolId.ToString(), nameof(protocolId));
@@ -110,33 +127,14 @@ public class ExaminationManager(
         examination.SetStartDate(startDate);
         examination.SetStory(story);
 
-        await UpdateExaminationIcds(icdIds, examination);
+        await SetExaminationIcds(examination, icdIds);
 
         await familyHistoryManager.UpdateAsync(examination.FamilyHistory!.Id, id, areParentsRelated, motherDisease,
             fatherDisease, sisterDisease, brotherDisease);
         await backgroundManager.UpdateAsync(examination.Background!.Id, id, allergies, medications, habits);
-
+        await physicalFindingManager.UpdateAsync(examination.PhysicalFinding!.Id, id, weight, height, 
+            bodyTemperature, pulse, vki, vya, kbs, kbd, spo2);
+        
         return await examinationRepository.UpdateAsync(examination);
-    }
-
-    private async Task UpdateExaminationIcds(List<Guid>? icdIds, Examination examination)
-    {
-        var currentIcdIds = examination.ExaminationIcd.Select(e => e.IcdId).ToList();
-        var newIcdIds = icdIds ?? new List<Guid>();
-
-        foreach (var icdId in currentIcdIds.Where(icdId => !newIcdIds.Contains(icdId)))
-        {
-            examination.RemoveIcd(icdId);
-        }
-
-        var icdsToAdd = await icdRepository.GetListAsync(x => newIcdIds.Contains(x.Id) && !currentIcdIds.Contains(x.Id));
-        foreach (var icd in icdsToAdd)
-        {
-            examination.AddIcd(new ExaminationIcd
-            {
-                ExaminationId = examination.Id,
-                IcdId = icd.Id,
-            });
-        }
     }
 }

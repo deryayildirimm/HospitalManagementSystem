@@ -36,6 +36,9 @@ using Pusula.Training.HealthCare.Treatment.Icds;
 using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Insurances;
 using Pusula.Training.HealthCare.Restrictions;
+using Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings;
+using Pusula.Training.HealthCare.BloodTests.Reports;
+using Pusula.Training.HealthCare.BloodTests.Results;
 
 namespace Pusula.Training.HealthCare.EntityFrameworkCore;
 
@@ -64,6 +67,8 @@ public class HealthCareDbContext :
     public DbSet<TestCategory> TestCategories { get; set; } = null!;
     public DbSet<Test> Tests { get; set; } = null!;
     public DbSet<BloodTestResult> BloodTestResults { get; set; } = null!;
+    public DbSet<BloodTestReport> BloodTestReports { get; set; } = null!;
+
     public DbSet<Insurance> Insurances { get; set; } = null!;
     public DbSet<Restriction> Restrictions { get; set; } = null!;
 
@@ -72,6 +77,7 @@ public class HealthCareDbContext :
     public DbSet<Examination> Examinations { get; set; } = null!;
     public DbSet<FamilyHistory> FamilyHistories { get; set; } = null!;
     public DbSet<Background> Backgrounds { get; set; } = null!;
+    public DbSet<PhysicalFinding> PhysicalFindings { get; set; } = null!;
 
     public DbSet<Appointment> Appointments { get; set; } = null!;
     public DbSet<AppointmentType> AppointmentTypes { get; set; } = null!;
@@ -277,7 +283,7 @@ public class HealthCareDbContext :
                     .IsRequired(false)
                     .HasForeignKey(x => x.MedicalServiceId);
 
-                b.HasIndex(x => new { x.MedicalServiceId, x.ProtocolId }).IsUnique();
+                b.HasIndex(x => new { x.MedicalServiceId, x.ProtocolId });
             });
 
             builder.Entity<Doctor>(b =>
@@ -513,11 +519,13 @@ public class HealthCareDbContext :
                 b.Property(x => x.Status).HasColumnName(nameof(BloodTest.Status)).IsRequired();
                 b.Property(x => x.DateCreated).HasColumnName(nameof(BloodTest.DateCreated));
                 b.Property(x => x.DateCompleted).HasColumnName(nameof(BloodTest.DateCompleted));
-                b.HasOne<Doctor>().WithMany().IsRequired().HasForeignKey(x => x.DoctorId)
+                b.HasOne(x => x.Doctor).WithMany().IsRequired(false).HasForeignKey(x => x.DoctorId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Patient>().WithMany().IsRequired().HasForeignKey(x => x.PatientId)
+                b.HasOne(x => x.Patient).WithMany().IsRequired(false).HasForeignKey(x => x.PatientId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<TestCategory>().WithMany().IsRequired().HasForeignKey(x => x.TestCategoryId)
+                b.HasMany(x => x.BloodTestCategories).WithOne().IsRequired().HasForeignKey(x => x.BloodTestId)
+                    .OnDelete(DeleteBehavior.NoAction);
+                b.HasOne(d => d.BloodTestReport).WithOne(d => d.BloodTest).IsRequired().HasForeignKey<BloodTestReport>(d => d.BloodTestId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
@@ -533,15 +541,22 @@ public class HealthCareDbContext :
                 b.Property(x => x.Price).HasColumnName(nameof(TestCategory.Price)).IsRequired();
             });
 
-            builder.Entity<Test>(b =>
+            builder.Entity<BloodTestCategory>(b =>
             {
-                b.ToTable(HealthCareConsts.DbTablePrefix + "Tests", HealthCareConsts.DbSchema);
+                b.ToTable(HealthCareConsts.DbTablePrefix + "BloodTestCategories", HealthCareConsts.DbSchema);
                 b.ConfigureByConvention();
-                b.Property(x => x.Name).HasColumnName(nameof(TestCategory.Name)).IsRequired()
-                    .HasMaxLength(BloodTestConst.TestNameMax);
-                b.Property(x => x.MinValue).HasColumnName(nameof(Test.MinValue)).IsRequired();
-                b.Property(x => x.MaxValue).HasColumnName(nameof(Test.MaxValue)).IsRequired();
-                b.HasOne<TestCategory>().WithMany().IsRequired().HasForeignKey(x => x.TestCategoryId)
+
+                b.HasKey(x => new { x.BloodTestId, x.TestCategoryId });
+
+                b.HasOne(x => x.BloodTest).WithMany(x => x.BloodTestCategories).IsRequired().HasForeignKey(x => x.BloodTestId);
+                b.HasOne(x => x.TestCategory).WithMany().IsRequired(false).HasForeignKey(x => x.TestCategoryId);                
+            });
+
+            builder.Entity<BloodTestReport>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "BloodTestReports", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.HasMany(x => x.Results).WithOne().IsRequired().HasForeignKey(x => x.BloodTestReportId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
@@ -552,9 +567,30 @@ public class HealthCareDbContext :
                 b.Property(x => x.Value).HasColumnName(nameof(BloodTestResult.Value)).IsRequired();
                 b.Property(x => x.BloodResultStatus).HasColumnName(nameof(BloodTestResult.BloodResultStatus))
                     .IsRequired();
-                b.HasOne<BloodTest>().WithMany().IsRequired().HasForeignKey(x => x.BloodTestId)
+                b.HasOne(x => x.Test).WithMany().IsRequired(false).HasForeignKey(x => x.TestId)
                     .OnDelete(DeleteBehavior.NoAction);
-                b.HasOne<Test>().WithMany().IsRequired().HasForeignKey(x => x.TestId)
+            });
+
+            builder.Entity<BloodTestReportResult>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "BloodTestReportResults", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+
+                b.HasKey(x => new { x.BloodTestReportId, x.BloodTestResultId });
+
+                b.HasOne(x => x.BloodTestReport).WithMany(x => x.Results).IsRequired(false).HasForeignKey(x => x.BloodTestReportId);
+                b.HasOne(x => x.BloodTestResult).WithMany().IsRequired(false).HasForeignKey(x => x.BloodTestResultId);
+            });
+
+            builder.Entity<Test>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "Tests", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.Name).HasColumnName(nameof(TestCategory.Name)).IsRequired()
+                    .HasMaxLength(BloodTestConst.TestNameMax);
+                b.Property(x => x.MinValue).HasColumnName(nameof(Test.MinValue)).IsRequired();
+                b.Property(x => x.MaxValue).HasColumnName(nameof(Test.MaxValue)).IsRequired();
+                b.HasOne(x => x.TestCategory).WithMany().IsRequired().HasForeignKey(x => x.TestCategoryId)
                     .OnDelete(DeleteBehavior.NoAction);
             });
 
@@ -597,12 +633,17 @@ public class HealthCareDbContext :
                     .WithOne(d => d.Examination)
                     .IsRequired()
                     .HasForeignKey<Background>(d => d.ExaminationId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                    .OnDelete(DeleteBehavior.Cascade);
                 b.HasOne(d => d.FamilyHistory)
                     .WithOne(d => d.Examination)
                     .IsRequired()
                     .HasForeignKey<FamilyHistory>(d => d.ExaminationId)
-                    .OnDelete(DeleteBehavior.NoAction);
+                    .OnDelete(DeleteBehavior.Cascade);
+                b.HasOne(d => d.PhysicalFinding)
+                    .WithOne(d => d.Examination)
+                    .IsRequired()
+                    .HasForeignKey<PhysicalFinding>(d => d.ExaminationId)
+                    .OnDelete(DeleteBehavior.Cascade);
                 b.HasOne(d => d.Protocol)
                     .WithOne()
                     .IsRequired()
@@ -618,14 +659,16 @@ public class HealthCareDbContext :
                 b.HasKey(x => new { x.ExaminationId, x.IcdId });
 
                 b.HasOne(ei => ei.Examination)
-                    .WithMany(e => e.ExaminationIcd)
+                    .WithMany(e => e.ExaminationIcds)
                     .IsRequired(false)
-                    .HasForeignKey(ei => ei.ExaminationId);
+                    .HasForeignKey(ei => ei.ExaminationId)
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 b.HasOne(ei => ei.Icd)
                     .WithMany()
                     .IsRequired(false)
-                    .HasForeignKey(ei => ei.IcdId);
+                    .HasForeignKey(ei => ei.IcdId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.Entity<FamilyHistory>(b =>
@@ -653,6 +696,21 @@ public class HealthCareDbContext :
                     .HasMaxLength(BackgroundConsts.MedicationsMaxLength);
                 b.Property(x => x.Habits).HasColumnName(nameof(Background.Habits))
                     .HasMaxLength(BackgroundConsts.HabitsMaxLength);
+            });
+            
+            builder.Entity<PhysicalFinding>(b =>
+            {
+                b.ToTable(HealthCareConsts.DbTablePrefix + "PhysicalFindings", HealthCareConsts.DbSchema);
+                b.ConfigureByConvention();
+                b.Property(x => x.Weight).HasColumnName(nameof(PhysicalFinding.Weight));
+                b.Property(x => x.Height).HasColumnName(nameof(PhysicalFinding.Height));
+                b.Property(x => x.BodyTemperature).HasColumnName(nameof(PhysicalFinding.BodyTemperature));
+                b.Property(x => x.Pulse).HasColumnName(nameof(PhysicalFinding.Pulse));
+                b.Property(x => x.Vki).HasColumnName(nameof(PhysicalFinding.Vki));
+                b.Property(x => x.Vya).HasColumnName(nameof(PhysicalFinding.Vya));
+                b.Property(x => x.Kbs).HasColumnName(nameof(PhysicalFinding.Kbs));
+                b.Property(x => x.Kbd).HasColumnName(nameof(PhysicalFinding.Kbd));
+                b.Property(x => x.Spo2).HasColumnName(nameof(PhysicalFinding.Spo2));
             });
         }
     }
