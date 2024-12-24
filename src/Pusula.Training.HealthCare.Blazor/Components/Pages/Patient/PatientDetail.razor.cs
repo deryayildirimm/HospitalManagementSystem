@@ -20,16 +20,16 @@ public partial class PatientDetail
     [Parameter]
     public int PatientNumber { get; set; }
 
-    private PatientDto patient = new PatientDto();
+    private PatientDto patient  { get; set; } = new PatientDto();
 
-    private string PatientGender = "MALE";
+    private string PatientGender { get; set; }  = "MALE";
 
     private bool VisibleProperty { get; set; } = true;
 
-    protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = [];
+    protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems { get; set; } = [];
     protected PageToolbar Toolbar { get; } = new PageToolbar();
     private List<AppointmentViewModel> AppointmentList { get; set; }
-    private IReadOnlyList<AppointmentDto> FetchedAppointmentList { get; set; }
+    private IReadOnlyList<AppointmentDto> FetchedAppointmentList { get; set; } = [];
     private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
     private int CurrentPage { get; set; } = 1;
     private int TotalCount { get; set; }
@@ -46,14 +46,11 @@ public partial class PatientDetail
 
     private GetAppointmentsInput FilterText { get; set; }
 
-    private IEnumerable<CountryPhoneCodeDto> Nationalities = [];
-    private IEnumerable<KeyValuePair<int, string>> Genders = [];
-    private IEnumerable<KeyValuePair<int, string>> Relatives = [];
-    private IEnumerable<KeyValuePair<int, string>> PationTypes = [];
-    private IEnumerable<KeyValuePair<int, string>> DiscountGroups = [];
-
-
-
+    private IEnumerable<CountryPhoneCodeDto> Nationalities { get; set; } = [];
+    private IEnumerable<KeyValuePair<int, string>> Genders { get; set; }  = [];
+    private IEnumerable<KeyValuePair<int, string>> Relatives { get; set; } = [];
+    private IEnumerable<KeyValuePair<int, string>> PationTypes { get; set; } = [];
+    private IEnumerable<KeyValuePair<int, string>> DiscountGroups { get; set; } = [];
 
     public PatientDetail()
     {
@@ -186,19 +183,6 @@ public partial class PatientDetail
     {
         await EditPatientModal.Hide();
     }
-
-    #region bunu appointment dilmesi için dönüştürücez
-
-    private async Task DeletePatientAsync(PatientDto input)
-    {
-
-        var confirmed = await UiMessageService.Confirm($"Are you sure you want to delete {input.FirstName} {input.LastName}?");
-        if (!confirmed) return;
-
-        await PatientsAppService.DeleteAsync(input.Id);
-
-    }
-    #endregion
 
     #region statuye göre veri çekme 
 

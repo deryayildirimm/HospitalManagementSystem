@@ -70,24 +70,9 @@
                             <GridSelectionSettings Type="SelectionType.Multiple"></GridSelectionSettings>
                             <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
                             <GridColumns>
-                                <GridColumn HeaderText="@L["Doctor"]" width="260px">
-                                    <Template>
-                                        @{
-                                            var doctorContext = (context as DoctorDto);
-                                            var doctor = $"{doctorContext?.Title?.TitleName} {doctorContext?.FirstName} {doctorContext?.LastName}";
-                                        }
-                                        @doctor
-                                    </Template>
+                                <GridColumn Field="DoctorNameLastName" HeaderText="@L["Doctor"]" width="260px">
                                 </GridColumn>
-
-                                <GridColumn HeaderText="@L["Department"]">
-                                    <Template>
-                                        @{
-                                            var doctor = (context as DoctorDto);
-                                            var department = doctor?.Department.Name ?? @L["NoData"];
-                                        }
-                                        @department
-                                    </Template>
+                                <GridColumn Field="Department.Name" HeaderText="@L["Department"]">
                                 </GridColumn>
                             </GridColumns>
                         </SfGrid>
@@ -131,17 +116,10 @@
                                 TValue="RestrictionDto">
                             </GridEvents>
                             <GridColumns>
-                                <GridColumn HeaderText="@L["Doctor"]" width="145px">
-                                    <Template Context="context">
-                                        @($"{((RestrictionDto)context).Doctor?.FirstName} {((RestrictionDto)context).Doctor?.LastName}")
-                                    </Template>
+                                <GridColumn Field="Doctor.DoctorNameLastName" HeaderText="@L["Doctor"]" width="145px">
                                 </GridColumn>
-
-                                <GridColumn HeaderText="@L["Department"]">
-                                    <Template Context="context">
-                                        @($"{((RestrictionDto)context).Department.Name}")
-                                    </Template>
-                                </GridColumn>
+                                <GridColumn Field="Department.Name" HeaderText="@L["Department"]"></GridColumn>
+                                <GridColumn Field="MedicalService.Name" HeaderText="@L["MedicalService"]"></GridColumn>
                                 <GridColumn HeaderText="@L["MinAge"]" Field="MinAge"></GridColumn>
                                 <GridColumn HeaderText="@L["MaxAge"]" Field="MaxAge"></GridColumn>
                                 <GridColumn HeaderText="@L["Gender"]" Field="AllowedGender"></GridColumn>
