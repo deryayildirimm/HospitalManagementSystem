@@ -381,6 +381,7 @@
     "NewLeave": "New Leave",
     "Menu:Laboratory": "Laboratory",
     "AppointmentTypeCreated": "Appointment type successfully created.",
-    "AppointmentTypeUpdated": "Appointment type successfully updated."
+    "AppointmentTypeUpdated": "Appointment type successfully updated.",
+    "AppointmentUpdated": "Appointment Updated"
   }
 }
