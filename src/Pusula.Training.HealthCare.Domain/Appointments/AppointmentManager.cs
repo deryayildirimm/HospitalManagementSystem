@@ -89,7 +89,8 @@ public class AppointmentManager(
         //Get the doctor's all slots for all days as a dictionary
         var slotsByDate = GetAppointmentSlotsByDate(workingHours, startDate, offset, duration);
 
-         return CreateAppointmentDayLookups(slotsByDate: slotsByDate, doctorLeaves: doctorLeaves, appointmentsByDate: appointments);
+        return CreateAppointmentDayLookups(slotsByDate: slotsByDate, doctorLeaves: doctorLeaves,
+            appointmentsByDate: appointments);
     }
 
     public virtual async Task<Appointment> CreateAsync(
@@ -175,8 +176,11 @@ public class AppointmentManager(
         Check.Range(amount, nameof(amount), MedicalServiceConsts.CostMinValue);
         Check.Range((int)status, nameof(status), AppointmentConsts.StatusMinValue, AppointmentConsts.StatusMaxValue);
 
-        //Check if appointment slot is occupied or not
-        await CheckAppointmentStatus(doctorId: doctorId, appointmentDate: appointmentDate, startTime: startTime);
+        //Check if appointment slot is occupied or not if it's not cancelled
+        if (status is not EnumAppointmentStatus.Cancelled)
+        {
+            await CheckAppointmentStatus(doctorId: doctorId, appointmentDate: appointmentDate, startTime: startTime);
+        }
 
         var appointment = await appointmentRepository.GetAsync(id);
 
@@ -369,7 +373,7 @@ public class AppointmentManager(
             })
             .ToList();
     }
-    
+
     private List<AppointmentDayLookupDto> CreateAppointmentDayLookups(
         Dictionary<DateTime, List<AppointmentSlotBaseDto>> slotsByDate,
         IEnumerable<DoctorLeave> doctorLeaves,
