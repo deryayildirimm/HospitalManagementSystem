@@ -209,8 +209,6 @@ else
                             @{
                                 var insurance = (context as InsuranceDto);
                                 var premiumAmount = insurance!.PremiumAmount == null ? " - " : string.Format("{0:N2} ₺", insurance!.PremiumAmount);
-
-                                premiumAmount = string.Format("{0:N2} ₺", insurance!.PremiumAmount);
                                 @premiumAmount
                             }
                         </Template>

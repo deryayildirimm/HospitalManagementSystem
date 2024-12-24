@@ -345,6 +345,7 @@ public partial class CreateAppointment : HealthCareComponentBase
         try
         {
             await AppointmentAppService.UpdateAsync(EditingAppointmentId, EditingAppointment);
+            await OpenToast(content: "OperationSuccessful", title: "AppointmentUpdated", css: "e-toast-success");
             CloseEditAppointmentModal();
         }
         catch (Exception ex)
