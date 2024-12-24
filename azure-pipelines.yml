@@ -18,7 +18,7 @@ stages:
         steps:
           - task: SendEmail@1
             inputs:
-              To: 'ferityksel@gmail.com'
+              To: 'ferityksel@gmail.com;numankilincoglu@gmail.com;aniluguzman38@gmail.com;zeybektas35@gmail.com;slmbsrclnk@gmail.com;deryayildirimm@outlook.com.tr'
               From: 'ferityksel@gmail.com'
               Subject: 'Pipeline Complete'
               Body: 'Build Pipeline Started'
@@ -26,7 +26,7 @@ stages:
               AddAttachment: false
               SmtpServer: 'smtp.gmail.com'
               SmtpUsername: 'ferityksel@gmail.com'
-              SmtpPassword: $(SMTPPASSWORD)
+              SmtpPassword: '$(SMTPPASSWORD)'
 
   - stage: SonarQubeAnalysis
     displayName: SonarQube Analysis
@@ -116,7 +116,7 @@ stages:
         steps:
           - task: SendEmail@1
             inputs:
-              To: 'ferityksel@gmail.com'
+              To: 'ferityksel@gmail.com;numankilincoglu@gmail.com;aniluguzman38@gmail.com;zeybektas35@gmail.com;slmbsrclnk@gmail.com;deryayildirimm@outlook.com.tr'
               From: 'ferityksel@gmail.com'
               Subject: 'Pipeline Complete'
               Body: 'Build Pipeline Completed Successfully'

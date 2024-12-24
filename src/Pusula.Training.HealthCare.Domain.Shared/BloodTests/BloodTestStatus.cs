@@ -9,8 +9,8 @@ namespace Pusula.Training.HealthCare.BloodTests
     public enum BloodTestStatus
     {
         Requested = 1,    
-        InProgress = 2,   
-        PendingResults = 3,
+        PendingTest = 2,
+        InProgress = 3,   
         Completed = 4,    
         Cancelled = 5     
     }

@@ -52,12 +52,10 @@ namespace Pusula.Training.HealthCare.BloodTests.Categories
             string? url = null,
             double? price = null) =>
             query
-                .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => e.Name.ToLower().Contains(filterText!.ToLower()))
-                .WhereIf(!string.IsNullOrWhiteSpace(name), e => e.Description.ToLower().Contains(name!.ToLower()))
-                .WhereIf(!string.IsNullOrWhiteSpace(description), e => e.Name.ToLower().Contains(description!.ToLower()))
-                .WhereIf(!string.IsNullOrWhiteSpace(url), e => e.Url.ToLower().Contains(url!.ToLower()))
+                .WhereIf(!string.IsNullOrWhiteSpace(filterText), e => EF.Functions.ILike(e.Name, $"%{filterText}%"))
+                .WhereIf(!string.IsNullOrWhiteSpace(name), e => EF.Functions.ILike(e.Name, $"%{filterText}%"))
+                .WhereIf(!string.IsNullOrWhiteSpace(description), e => EF.Functions.ILike(e.Description, $"%{filterText}%"))
+                .WhereIf(!string.IsNullOrWhiteSpace(url), e => EF.Functions.ILike(e.Url, $"%{filterText}%"))
                 .WhereIf(price.HasValue, e => e.Price == price);
-
-
     }
 }

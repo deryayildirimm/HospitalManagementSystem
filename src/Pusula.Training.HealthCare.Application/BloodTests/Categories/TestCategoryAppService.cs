@@ -27,6 +27,21 @@ namespace Pusula.Training.HealthCare.BloodTests.Categories
         }
 
         public virtual async Task<TestCategoryDto> GetAsync(Guid id) => ObjectMapper.Map<TestCategory, TestCategoryDto>(await testCategoryRepository.GetAsync(id));
-        
+
+        [Authorize(HealthCarePermissions.TestCategories.Create)]
+        public virtual async Task<TestCategoryDto> CreateAsync(TestCategoryCreateDto input)
+        {
+            var result = await testCategoryManager.CreateAsync(input.Name, input.Description, input.Url, input.Price);
+
+            return ObjectMapper.Map<TestCategory, TestCategoryDto>(result);
+        }
+
+        [Authorize(HealthCarePermissions.TestCategories.Edit)]
+        public virtual async Task<TestCategoryDto> UpdateAsync(TestCategoryUpdateDto input)
+        {
+            var result = await testCategoryManager.UpdateAsync(input.Id, input.Name, input.Description, input.Url, input.Price);
+
+            return ObjectMapper.Map<TestCategory, TestCategoryDto>(result);
+        }
     }
 }

@@ -1,0 +1,104 @@
+﻿@typeparam TModel
+
+@using Microsoft.Extensions.Localization
+@using Pusula.Training.HealthCare.Localization
+@using Syncfusion.Blazor.Buttons
+
+<SfDialog @bind-Visible="IsVisible" Width="400px" ShowCloseIcon="true" Header="@Title" AllowDragging="true"  EnableResize="true">
+    <DialogTemplates>
+        <Content> 
+            <EditForm  EditContext="@EditContext" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+            <!--    bu kısım formun üstünde liste halinde gösteriyor 
+                     <Microsoft.AspNetCore.Components.Forms.ValidationSummary />
+            -->   
+                @ChildContent
+              
+            </EditForm>
+       
+        </Content>
+        <FooterTemplate>
+             <SfButton CssClass="e-secondary" @onclick="Close">@L["Cancel"]</SfButton>
+             <SfButton CssClass="e-primary"  @onclick="SubmitForm" IsPrimary="true">@L["Save"]</SfButton>
+        </FooterTemplate>
+    </DialogTemplates>
+</SfDialog>
+
+@inject IStringLocalizer<HealthCareResource> L
+@code {
+
+    [Parameter] public string Title { get; set; } = "Modal";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public TModel? Model { get; set; }
+    [Parameter] public EventCallback<TModel> OnSaveCallback { get; set; }
+    
+    public bool IsVisible { get; set; } = false;
+
+    private EditContext? EditContext { get; set; }
+
+    private string? _backendErrorMessage;
+
+    public void Close() => IsVisible = false;
+
+    public void Show()
+    {
+        IsVisible = true;
+        StateHasChanged();
+    }
+
+    private void Hide()
+    {
+        IsVisible = false;
+        StateHasChanged();
+    }
+
+    protected override void OnParametersSet()
+    {
+        EditContext = new EditContext(Model!);
+        _backendErrorMessage = string.Empty;
+       
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            if (OnSaveCallback.HasDelegate)
+            {
+                await OnSaveCallback.InvokeAsync(Model);
+                Close();
+            }
+        }
+        catch (Exception ex)
+        {
+            _backendErrorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+
+    private async Task SubmitForm()
+    {
+
+        if (!(EditContext!.Validate()))
+        {
+            _backendErrorMessage = "Please fill all required fields correctly.";
+            return;
+        }
+
+        try
+        {
+            await HandleValidSubmit();
+        }
+        catch (Exception ex)
+        {
+            _backendErrorMessage = $"Backend error: {ex.Message}";
+        }
+    }
+
+    private void CloseModal() => Hide();
+}
+
+
+  
+    
+

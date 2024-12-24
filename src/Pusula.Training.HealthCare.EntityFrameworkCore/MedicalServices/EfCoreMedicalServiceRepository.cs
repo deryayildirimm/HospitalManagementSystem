@@ -74,7 +74,7 @@ public class EfCoreMedicalServiceRepository(IDbContextProvider<HealthCareDbConte
         int skipCount = 0,
         CancellationToken cancellationToken = default)
     {
-        var query = ApplyFilter((await GetQueryableAsync()), 
+        var query = ApplyFilter((await GetQueryableAsync()),
             departmentId: departmentId);
 
         query = query.OrderBy(string.IsNullOrWhiteSpace(sorting)

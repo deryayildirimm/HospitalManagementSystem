@@ -26,6 +26,8 @@ using Pusula.Training.HealthCare.ProtocolTypes;
 using Pusula.Training.HealthCare.Insurances;
 using Pusula.Training.HealthCare.Restrictions;
 using Pusula.Training.HealthCare.Treatment.Examinations.PhysicalFindings;
+using Pusula.Training.HealthCare.BloodTests.Reports;
+using Pusula.Training.HealthCare.BloodTests.Results;
 
 namespace Pusula.Training.HealthCare;
 
@@ -45,11 +47,17 @@ public class HealthCareApplicationAutoMapperProfile : Profile
 
         CreateMap<Protocol, ProtocolDto>();
         CreateMap<Protocol, ProtocolExcelDto>();
+        CreateMap<ProtocolPatientDepartmentListReport, ProtocolPatientDepartmentListReportDto>();
+        CreateMap<ProtocolPatientDoctorListReport, ProtocolPatientDoctorListReportDto>();
         CreateMap<ProtocolDto, ProtocolUpdateDto>();
+        CreateMap<ProtocolWithDetails, ProtocolWithDetailsDto>();
+        CreateMap<DepartmentStatistic, DepartmentStatisticDto>();
+        CreateMap<DoctorStatistics, DoctorStatisticDto>();
         CreateMap<ProtocolWithNavigationProperties, ProtocolWithNavigationPropertiesDto>();
 
         CreateMap<ProtocolType, ProtocolTypeDto>();
         CreateMap<ProtocolTypeDto, ProtocolTypeUpdateDto>();
+        CreateMap<ProtocolType, ProtocolTypeExcelDto>();
         CreateMap<ProtocolType, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
 
@@ -70,13 +78,15 @@ public class HealthCareApplicationAutoMapperProfile : Profile
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.Name));
         CreateMap<MedicalServiceCacheItem, MedicalServiceDto>();
         CreateMap<MedicalService, MedicalServiceCacheItem>();
-        
+
         CreateMap<Title, TitleDto>();
         CreateMap<TitleDto, TitleUpdateDto>();
         CreateMap<Title, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.TitleName));
 
-        CreateMap<Doctor, DoctorDto>();
+        CreateMap<Doctor, DoctorDto>()
+            .ForMember(dest => dest.DoctorNameLastName,
+                opt => opt.MapFrom(src => $"{src.FirstName} {src.LastName}"));
         CreateMap<Doctor, DoctorExcelDto>();
         CreateMap<DoctorDto, DoctorUpdateDto>();
         CreateMap<DoctorWithDetails, DoctorWithDetailsDto>();
@@ -95,7 +105,7 @@ public class HealthCareApplicationAutoMapperProfile : Profile
             .ForMember(dest => dest.DepartmentId, opt => opt.MapFrom(src => src.Doctor.DepartmentId))
             .ForMember(dest => dest.DisplayName,
                 opt => opt.MapFrom(src => $"{src.Doctor.FirstName} {src.Doctor.LastName}"));
-        
+
         CreateMap<DoctorLeave, DoctorLeaveDto>();
         CreateMap<DoctorLeaveDto, DoctorLeaveUpdateDto>();
 
@@ -130,10 +140,11 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<IcdDto, IcdUpdateDto>();
         CreateMap<Icd, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
-        CreateMap<Icd, LookupDto<Guid>>().ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
-        
+        CreateMap<Icd, LookupDto<Guid>>()
+            .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.CodeNumber));
+
         CreateMap<IcdReport, IcdReportDto>();
-        
+
         CreateMap<FamilyHistory, FamilyHistoryDto>();
         CreateMap<FamilyHistoryDto, FamilyHistoryUpdateDto>();
         CreateMap<FamilyHistory, LookupDto<Guid>>()
@@ -179,12 +190,11 @@ public class HealthCareApplicationAutoMapperProfile : Profile
         CreateMap<Doctor, LookupDto<Guid>>()
             .ForMember(dest => dest.DisplayName, opt => opt.MapFrom(src => src.FirstName));
 
-        CreateMap<TestCategory, TestCategoryDto>();
         CreateMap<BloodTest, BloodTestDto>();
-        CreateMap<BloodTestWithNavigationProperties, BloodTestWithNavigationPropertiesDto>();
-
+        CreateMap<BloodTestCategory, BloodTestCategoryDto>();
+        CreateMap<TestCategory, TestCategoryDto>();
+ 
         CreateMap<BloodTestResult, BloodTestResultDto>();
-        CreateMap<BloodTestResultWithNavigationProperties, BloodTestResultWithNavigationPropertiesDto>();
 
         CreateMap<Restriction, RestrictionDto>();
         CreateMap<Restriction, RestrictionUpdateDto>();
@@ -204,7 +214,11 @@ public class HealthCareApplicationAutoMapperProfile : Profile
                 opt => opt.MapFrom(src => src.AllowedGender.ToString()));
 
         CreateMap<Test, TestDto>();
-        CreateMap<TestWithNavigationProperties, TestWithNavigationPropertiesDto>();
+
+        CreateMap<BloodTestReport, BloodTestReportDto>();
+        CreateMap<BloodTestReportResult, BloodTestReportResultDto>();
+        CreateMap<BloodTestResult, BloodTestResultDto>();
+
 
         CreateMap<Insurance, InsuranceDto>();
 

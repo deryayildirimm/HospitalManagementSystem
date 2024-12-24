@@ -43,13 +43,15 @@ public partial class Icds : HealthCareComponentBase
     private SfDialog DeleteConfirmDialog { get; set; }
     private bool Flag { get; set; }
     private GetIcdsInput Filter { get; set; }
-    private List<IcdDto> SelectedIcds { get; set; } = new();
+    private List<IcdDto> SelectedIcds { get; set; } = [];
     private bool IsVisibleCreate { get; set; }
     private bool IsVisibleEdit { get; set; }
 
         
     public Icds()
     {
+        CreateIcdModal = new SfDialog();
+        EditIcdModal = new SfDialog();
         Grid = new SfGrid<IcdDto>();
         DeleteConfirmDialog = new SfDialog();
         IsVisibleCreate = false;
