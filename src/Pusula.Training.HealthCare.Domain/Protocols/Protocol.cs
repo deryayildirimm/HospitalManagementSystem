@@ -22,24 +22,24 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
  
     public virtual DateTime? EndTime { get; private set; }
     public Guid PatientId { get; private set; }
-    public virtual Patient Patient { get;  set; }
+    public virtual Patient Patient { get;  set; } = null!; 
     public Guid DepartmentId { get; private set; }
     
-    public virtual Department Department { get;  set; }
+    public virtual Department Department { get;  set; } = null!; 
     
     public Guid ProtocolTypeId { get; private set; }
     
-    public virtual ProtocolType ProtocolType { get; set; }
+    public virtual ProtocolType ProtocolType { get; set; } = null!; 
     
     public Guid DoctorId { get; private set; }
     
-    public virtual Doctor Doctor { get; init; }
+    public virtual Doctor Doctor { get; init; } = null!; 
     
     public Guid InsuranceId { get; private set; }
+
+    public virtual Insurance Insurance { get; init; } = null!; 
     
-    public virtual Insurance Insurance { get; init; } 
-    
-    public IList<ProtocolMedicalService> ProtocolMedicalServices { get;  set; } 
+    public IList<ProtocolMedicalService> ProtocolMedicalServices { get;  private set; } 
        
 
 
@@ -62,7 +62,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         SetProtocolTypeId(protocolTypeId);
         SetInsuranceId(insuranceId);
         SetNote(note);
-        
+        ProtocolMedicalServices = new List<ProtocolMedicalService>();
     }
     
     // add medical service 

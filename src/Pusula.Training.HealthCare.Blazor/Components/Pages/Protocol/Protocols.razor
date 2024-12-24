@@ -134,7 +134,7 @@ else
 
     <div class="form-group">
         <label>@L["Patient"]</label>
-        <SfTextBox TValue="string" Value="@_selectedProtocolType.Patient.FirstName" Readonly="true" />
+        <SfTextBox TValue="string" Value="@_selectedProtocolType?.Patient?.FirstName" Readonly="true" />
     </div>
     <div class="form-group">
         <label>@L["StartTime"]</label>
