@@ -8,7 +8,7 @@ namespace Pusula.Training.HealthCare.Validators;
 public class CreatePhoneNumberValidator : ValidationAttribute
 {
     private const string PhoneNumberPattern = @"^\d{5,10}$";
-
+    
     protected override ValidationResult IsValid(object? value, ValidationContext validationContext)
     {
         var displayName = validationContext.DisplayName;

@@ -331,7 +331,7 @@
                                         <FieldLabel style="display: inline-flex; align-items: center;">
                                             @L["Nationality"]
                                         </FieldLabel>
-                                        <Select TValue="string" @bind-SelectedValue="@NewPatient.Nationality" onchange="@OnNationalityChangedAsync">
+                                        <Select TValue="string" @bind-SelectedValue="@NewPatient.Nationality" @onchange="OnNationalityChangedAsync">
                                             @foreach (var item in Nationalities)
                                             {
                                                 <SelectItem TValue="string" Value="@item.Country">

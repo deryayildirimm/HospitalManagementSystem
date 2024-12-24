@@ -150,28 +150,18 @@ else
 
 
                         <SfButton CssClass="e-danger" OnClick="DeleteSelectedInsurancesAsync">@L["Delete"]</SfButton>
-                        @*<Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedDoctorsAsync">
-                <Icon Name="@IconName.Delete" /> @L["Delete"]
-                </Button>*@
                     </div>
                 </div>
 
                 <hr class="my-1 mx-0" />
             }
 
-            <SfGrid TItem="DoctorWithNavigationPropertiesDto"
-                    DataSource="InsuranceList"
+            <SfGrid DataSource="InsuranceList"
                     AllowPaging="true"
-                    AllowSorting="true"
-                    SelectionSettings="new GridSelectionSettings() { Type = SelectionType.Multiple }">
+                    AllowSorting="true">
                 <GridPageSettings PageSize="@PageSize" CurrentPage="@CurrentPage"></GridPageSettings>
                 <GridEvents PageChanging="PageChangingHandler" PageChanged="PageChangedHandler" TValue="InsuranceDto"></GridEvents>
                 <GridColumns>
-                    @if (CanDeleteInsurance && InsuranceList.Any())
-                    {
-                        <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
-                    }
-
                     <GridColumn HeaderText="@L["InsuranceCompanyName"]" width="175">
                         <Template>
                             @{
@@ -270,7 +260,7 @@ else
                                 <SfButton CssClass="e-primary" OnClick="@(args => OpenEditModal(insurance!))">
                                     <span class="e-icons e-edit white-icon"></span>
                                 </SfButton>
-                                <SfButton CssClass="e-danger" OnClick="@(args => DeleteDoctorAsync(insurance!))">
+                                <SfButton CssClass="e-danger" OnClick="@(args => DeleteInsuranceAsync(insurance!))">
                                     <span class="e-icons e-delete white-icon"></span>
                                 </SfButton>
                             </div>
@@ -308,7 +298,7 @@ else
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label>@L["InsuranceCompanyName"]</label>
-                        <SfDropDownList TValue="EnumInsuranceCompanyName" @bind-Value="@NewInsurance.InsuranceCompanyName" DataSource="@InsuranceCompanyNameList"
+                        <SfDropDownList TValue="EnumInsuranceCompanyName" @bind-Value="@NewInsurance!.InsuranceCompanyName" DataSource="@InsuranceCompanyNameList"
                                         Placeholder="@L["InsuranceCompanyName"]" TItem="KeyValuePair<EnumInsuranceCompanyName, string>">
                             <DropDownListFieldSettings Text="Value" Value="Key"></DropDownListFieldSettings>
                             <ValidationMessage For="@(() => NewInsurance!.InsuranceCompanyName)" style="color:red" />
@@ -383,7 +373,7 @@ else
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label>@L["InsuranceCompanyName"]</label>
-                        <SfDropDownList TValue="EnumInsuranceCompanyName" @bind-Value="@EditInsurance.InsuranceCompanyName" DataSource="@InsuranceCompanyNameList"
+                        <SfDropDownList TValue="EnumInsuranceCompanyName" @bind-Value="@EditInsurance!.InsuranceCompanyName" DataSource="@InsuranceCompanyNameList"
                                         Placeholder="@L["InsuranceCompanyName"]" TItem="KeyValuePair<EnumInsuranceCompanyName, string>">
                             <DropDownListFieldSettings Text="Value" Value="Key"></DropDownListFieldSettings>
                             <ValidationMessage For="@(() => EditInsurance!.InsuranceCompanyName)" style="color:red" />
@@ -421,8 +411,6 @@ else
                         <SfTextBox Multiline=true TValue="string" @bind-Value="@EditInsurance.Description" Placeholder="@L["Description"]" />
                     </div>
                 </div>
-
-
             </div>
         </EditForm>
 

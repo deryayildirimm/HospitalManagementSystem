@@ -5,7 +5,7 @@ public partial class Index
     
     private void NavigateToDoctor()
     {
-        NavigationManager.NavigateTo("/appointments/reports/doctor-appointments");
+        NavigationManager.NavigateTo("/doctor/my-patients");
     }
 
     private void NavigateToAppointments()
@@ -21,5 +21,15 @@ public partial class Index
     private void NavigateToTreatment()
     {
         NavigationManager.NavigateTo("/my-protocols");
+    }
+    
+    private void NavigateToLaboratory()
+    {
+        NavigationManager.NavigateTo("/LaboratoryTechnician");
+    }
+
+    private void NavigateToTestApprovalPanel()
+    {
+        NavigationManager.NavigateTo("/TestApprovalPanel");
     }
 }
