@@ -184,6 +184,8 @@ public partial class PatientDetail
         await EditPatientModal.Hide();
     }
 
+
+
     #region statuye göre veri çekme 
 
     protected virtual async Task CompletedApp()
@@ -270,9 +272,6 @@ public partial class PatientDetail
     }
 
     #region Fake Data For MedicalCondition
-
-
-
 
     private List<MedicalConditionViewModel> MedicalConditions = new()
     {
