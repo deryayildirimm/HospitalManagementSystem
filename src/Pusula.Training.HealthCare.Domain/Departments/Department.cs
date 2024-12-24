@@ -2,6 +2,7 @@ using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Pusula.Training.HealthCare.Doctors;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities.Auditing;
 
@@ -9,14 +10,17 @@ namespace Pusula.Training.HealthCare.Departments;
 
 public class Department : FullAuditedAggregateRoot<Guid>
 {
-    [NotNull] public virtual string Name { get; protected set; }
+    [NotNull] public virtual string Name { get; protected set; } = null!;
 
-    public virtual ICollection<DepartmentMedicalService> DepartmentMedicalServices { get; protected set; }
+    public virtual ICollection<Doctor> Doctors { get; protected set; } = null!;
+
+    public virtual ICollection<DepartmentMedicalService> DepartmentMedicalServices { get; protected set; } = null!;
 
     protected Department()
     {
         Name = string.Empty;
         DepartmentMedicalServices = new Collection<DepartmentMedicalService>();
+        Doctors = new Collection<Doctor>();
     }
 
     public Department(Guid id, string name)

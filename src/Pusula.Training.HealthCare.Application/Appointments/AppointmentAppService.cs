@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Dynamic.Core;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Distributed;
@@ -42,7 +41,7 @@ public class AppointmentAppService(
     public virtual async Task<PagedResultDto<AppointmentSlotDto>> GetAvailableSlotsAsync(GetAppointmentSlotInput input)
     {
         var availableSlots = await appointmentManager
-            .GetAppointmentSlotsAsync(input.DoctorId, input.MedicalServiceId, input.Date);
+            .GetAppointmentSlotsAsync(input.DoctorId, input.MedicalServiceId, input.Date, input.ExcludeNotAvailable);
 
         return new PagedResultDto<AppointmentSlotDto>(
             availableSlots.Count,
@@ -97,10 +96,11 @@ public class AppointmentAppService(
         };
     }
 
-    public virtual async Task<PagedResultDto<DepartmentAppointmentCountDto>> GetCountByDepartmentsAsync(GetAppointmentsInput input)
+    public virtual async Task<PagedResultDto<AppointmentStatisticDto>> GetCountByGroupAsync(
+        GetAppointmentsInput input)
     {
-        
-        var count = await appointmentRepository.GetGroupCountByDepartmentsAsync(
+        var count = await appointmentRepository.GetGroupCountByAsync(
+            groupByField: input.GroupByField,
             doctorId: input.DoctorId,
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
@@ -119,8 +119,9 @@ public class AppointmentAppService(
             reminderSent: input.ReminderSent,
             minAmount: input.MinAmount,
             maxAmount: input.MaxAmount);
-        
-        var items = await appointmentRepository.GetGroupByDepartmentsAsync(
+
+        var items = await appointmentRepository.GetGroupByListAsync(
+            groupByField: input.GroupByField,
             doctorId: input.DoctorId,
             patientId: input.PatientId,
             medicalServiceId: input.MedicalServiceId,
@@ -142,11 +143,11 @@ public class AppointmentAppService(
             input.Sorting,
             input.MaxResultCount,
             input.SkipCount);
-        
-        return new PagedResultDto<DepartmentAppointmentCountDto>
+
+        return new PagedResultDto<AppointmentStatisticDto>
         {
             TotalCount = count,
-            Items = ObjectMapper.Map<List<DepartmentAppointmentCount>, List<DepartmentAppointmentCountDto>>(items)
+            Items = ObjectMapper.Map<List<AppointmentStatistic>, List<AppointmentStatisticDto>>(items)
         };
     }
 
@@ -154,8 +155,22 @@ public class AppointmentAppService(
     {
         await distributedEventBus.PublishAsync(new AppointmentsViewedEto { Id = id, ViewedAt = Clock.Now },
             onUnitOfWorkComplete: false);
-
         return ObjectMapper.Map<Appointment, AppointmentDto>(await appointmentRepository.GetAsync(id));
+    }
+
+    public virtual async Task<AppointmentDto> GetByDateAsync(GetAppointmentByDateInput input)
+    {
+        var item = await appointmentRepository.GetByDateAsync(
+            input.DoctorId,
+            input.MedicalServiceId,
+            input.StartTime,
+            input.EndTime,
+            input.AppointmentDate);
+
+        await distributedEventBus.PublishAsync(new AppointmentsViewedEto { Id = item.Id, ViewedAt = Clock.Now },
+            onUnitOfWorkComplete: false);
+
+        return ObjectMapper.Map<Appointment, AppointmentDto>(item);
     }
 
     [Authorize(HealthCarePermissions.Appointments.Delete)]
@@ -167,6 +182,7 @@ public class AppointmentAppService(
         await appointmentRepository.DeleteAsync(id);
     }
 
+    [Authorize(HealthCarePermissions.Appointments.Create)]
     public virtual async Task<AppointmentDto> CreateAsync(AppointmentCreateDto input)
     {
         var appointment = await appointmentManager.CreateAsync(
@@ -194,13 +210,15 @@ public class AppointmentAppService(
     {
         var appointment = await appointmentManager.UpdateAsync(
             id,
+            input.DoctorId,
             input.AppointmentDate,
             input.StartTime,
             input.EndTime,
             input.Status,
             input.ReminderSent,
             input.Amount,
-            input.Notes
+            input.Notes,
+            input.CancellationNotes
         );
 
         await distributedEventBus.PublishAsync(new ApointmentUpdatedEto { Id = appointment.Id, UpdatedAt = Clock.Now },
@@ -251,9 +269,7 @@ public class AppointmentAppService(
 
     [Authorize(HealthCarePermissions.Appointments.Delete)]
     public virtual async Task DeleteByIdsAsync(List<Guid> appointmentIds)
-    {
-        await appointmentRepository.DeleteManyAsync(appointmentIds);
-    }
+        => await appointmentRepository.DeleteManyAsync(appointmentIds);
 
     [Authorize(HealthCarePermissions.Appointments.Delete)]
     public virtual async Task DeleteAllAsync(GetAppointmentsInput input)

@@ -13,9 +13,7 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Authorization;
 using Volo.Abp.Caching;
 using Volo.Abp.Content;
-using System.Linq;
-using System.Linq.Dynamic.Core;
-using Pusula.Training.HealthCare.Exceptions;
+using Pusula.Training.HealthCare.Doctors;
 using Pusula.Training.HealthCare.GlobalExceptions;
 using Volo.Abp.Domain.Repositories;
 
@@ -25,20 +23,28 @@ namespace Pusula.Training.HealthCare.MedicalServices;
 [Authorize(HealthCarePermissions.MedicalServices.Default)]
 public class MedicalServicesAppService(
     IMedicalServiceRepository medicalServiceRepository,
-    IDepartmentRepository departmentRepository,
     MedicalServiceManager medicalServiceManager,
-    IDistributedCache<MedicalServiceDownloadTokenCacheItem, string> downloadCache
+    IDistributedCache<MedicalServiceDownloadTokenCacheItem, string> downloadCache,
+    IDistributedCache<MedicalServiceCacheItem> medicalServiceCache
 ) : HealthCareAppService, IMedicalServicesAppService
 {
     public virtual async Task<PagedResultDto<MedicalServiceDto>> GetListAsync(GetMedicalServiceInput input)
     {
         var totalCount =
-            await medicalServiceRepository.GetCountAsync(input.Name, input.CostMin, input.CostMax, input.ServiceDateMin,
+            await medicalServiceRepository.GetCountAsync(
+                input.DepartmentId, input.Name, input.CostMin, input.CostMax, input.ServiceDateMin,
                 input.ServiceDateMax);
 
-        var items = await medicalServiceRepository.GetListAsync(input.Name,
-            input.CostMin, input.CostMax, input.ServiceDateMin, input.ServiceDateMax, input.Sorting,
-            input.MaxResultCount, input.SkipCount);
+        var items = await medicalServiceRepository.GetListAsync(
+            input.DepartmentId,
+            input.Name,
+            input.CostMin,
+            input.CostMax,
+            input.ServiceDateMin,
+            input.ServiceDateMax,
+            input.Sorting,
+            input.MaxResultCount,
+            input.SkipCount);
 
         return new PagedResultDto<MedicalServiceDto>
         {
@@ -47,11 +53,26 @@ public class MedicalServicesAppService(
         };
     }
 
+    public virtual async Task<PagedResultDto<MedicalServiceDto>> GetMedicalServiceByDepartmentIdAsync(
+        GetServiceByDepartmentInput input)
+    {
+        var items = await medicalServiceRepository.GetMedicalServiceListByDepartmentIdAsync(input.DepartmentId,
+            input.Sorting,
+            input.MaxResultCount, input.SkipCount);
+
+        return new PagedResultDto<MedicalServiceDto>
+        {
+            TotalCount = items.Count,
+            Items = ObjectMapper.Map<List<MedicalService>, List<MedicalServiceDto>>(items)
+        };
+    }
+
     public async Task<PagedResultDto<MedicalServiceWithDepartmentsDto>> GetMedicalServiceWithDepartmentsAsync(
         GetMedicalServiceInput input)
     {
         var totalCount =
-            await medicalServiceRepository.GetCountAsync(input.Name, input.CostMin, input.CostMax, input.ServiceDateMin,
+            await medicalServiceRepository.GetCountAsync(
+                input.DepartmentId, input.Name, input.CostMin, input.CostMax, input.ServiceDateMin,
                 input.ServiceDateMax);
 
         var items = await medicalServiceRepository.GetMedicalServiceWithDepartmentsAsync(input.Name,
@@ -65,16 +86,66 @@ public class MedicalServicesAppService(
         };
     }
 
+    public virtual async Task<MedicalServiceWithDoctorsDto> GetMedicalServiceWithDoctorsAsync(
+        GetMedicalServiceWithDoctorsInput input)
+    {
+        var result = await medicalServiceRepository.GetMedicalServiceWithDoctorsAsync(
+            input.MedicalServiceId,
+            input.DepartmentId,
+            input.Name,
+            input.CostMin,
+            input.CostMax,
+            input.ServiceDateMin,
+            input.ServiceDateMax,
+            input.Sorting,
+            input.MaxResultCount,
+            input.SkipCount);
+
+        return ObjectMapper.Map<MedicalServiceWithDoctors, MedicalServiceWithDoctorsDto>(result);
+    }
+
+    public virtual async Task<PagedResultDto<DoctorWithDetailsDto>> GetMedicalServiceDoctorsAsync(
+        GetDepartmentServiceDoctorsInput input)
+    {
+        var result = await medicalServiceRepository.GetMedicalServiceDoctorsAsync(
+            input.MedicalServiceId,
+            input.DepartmentId,
+            input.DoctorFilterText,
+            input.Sorting,
+            input.MaxResultCount,
+            input.SkipCount);
+
+        return new PagedResultDto<DoctorWithDetailsDto>
+        {
+            TotalCount = result.Count,
+            Items = ObjectMapper.Map<List<DoctorWithDetails>, List<DoctorWithDetailsDto>>(result)
+        };
+    }
+
     public virtual async Task<MedicalServiceDto> GetAsync(Guid id)
     {
-        return ObjectMapper.Map<MedicalService, MedicalServiceDto>(await medicalServiceRepository.GetAsync(id));
+        var cacheToken = $"MedicalService:{id}";
+        var cacheResult = await medicalServiceCache.GetAsync(cacheToken);
+        if (cacheResult != null)
+        {
+            return ObjectMapper.Map<MedicalServiceCacheItem, MedicalServiceDto>(cacheResult);
+        }
+
+        var service = await medicalServiceRepository.GetAsync(id);
+
+        await medicalServiceCache.SetAsync(cacheToken,
+            ObjectMapper.Map<MedicalService, MedicalServiceCacheItem>(service),
+            new DistributedCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(5)
+            });
+
+        return ObjectMapper.Map<MedicalService, MedicalServiceDto>(service);
     }
 
     [Authorize(HealthCarePermissions.MedicalServices.Delete)]
     public virtual async Task DeleteAsync(Guid id)
-    {
-        await medicalServiceRepository.DeleteAsync(id);
-    }
+        => await medicalServiceRepository.DeleteAsync(id);
 
     [Authorize(HealthCarePermissions.MedicalServices.Create)]
     public virtual async Task<MedicalServiceDto> CreateAsync(MedicalServiceCreateDto input)
@@ -93,11 +164,10 @@ public class MedicalServicesAppService(
         return ObjectMapper.Map<MedicalService, MedicalServiceDto>(medicalService);
     }
 
-
     [Authorize(HealthCarePermissions.MedicalServices.Edit)]
     public virtual async Task<MedicalServiceDto> UpdateAsync(Guid id, MedicalServiceUpdateDto input)
     {
-         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorNotWorking,
+        HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DoctorNotWorking,
             await medicalServiceRepository.FirstOrDefaultAsync(x => x.Name == input.Name && x.Id != id) is not null);
 
         var medicalService = await medicalServiceManager.UpdateAsync(
@@ -122,7 +192,8 @@ public class MedicalServicesAppService(
             throw new AbpAuthorizationException("Invalid download token: " + input.DownloadToken);
         }
 
-        var items = await medicalServiceRepository.GetListAsync(input.MedicalServiceName,
+        var items = await medicalServiceRepository.GetListAsync(input.DepartmentId,
+            input.MedicalServiceName,
             input.CostMin, input.CostMax, input.ServiceDateMin, input.ServiceDateMax);
 
         var memoryStream = new MemoryStream();
@@ -133,9 +204,9 @@ public class MedicalServicesAppService(
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     }
 
+    [Authorize(HealthCarePermissions.MedicalServices.Delete)]
     public async Task DeleteByIdsAsync(List<Guid> medicalServiceIds)
         => await medicalServiceRepository.DeleteManyAsync(medicalServiceIds);
-
 
     [Authorize(HealthCarePermissions.MedicalServices.Delete)]
     public virtual async Task DeleteAllAsync(GetMedicalServiceInput input)

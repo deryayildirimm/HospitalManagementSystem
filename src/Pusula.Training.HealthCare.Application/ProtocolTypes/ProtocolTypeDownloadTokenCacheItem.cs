@@ -1,6 +1,8 @@
-﻿namespace Pusula.Training.HealthCare.ProtocolTypes;
+﻿using Pusula.Training.HealthCare.Shared;
 
-public class ProtocolTypeDownloadTokenCacheItem
+namespace Pusula.Training.HealthCare.ProtocolTypes;
+
+public class ProtocolTypeDownloadTokenCacheItem : BaseTokenCacheItem
 {
-    public string Token { get; set; } = null!;
+   
 }

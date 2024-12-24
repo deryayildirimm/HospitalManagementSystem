@@ -3,7 +3,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Pusula.Training.HealthCare.Appointments;
 using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Cities;
-using Volo.Abp.Uow;
 using Volo.Abp.AuditLogging.EntityFrameworkCore;
 using Volo.Abp.BackgroundJobs.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore;
@@ -25,6 +24,7 @@ using Pusula.Training.HealthCare.DoctorWorkingHours;
 using Pusula.Training.HealthCare.MedicalPersonnel;
 using Pusula.Training.HealthCare.MedicalServices;
 using Pusula.Training.HealthCare.ProtocolTypes;
+using Pusula.Training.HealthCare.Restrictions;
 using Pusula.Training.HealthCare.Titles;
 using Pusula.Training.HealthCare.Treatment.Examinations;
 using Pusula.Training.HealthCare.Treatment.Examinations.Backgrounds;
@@ -78,7 +78,7 @@ public class HealthCareEntityFrameworkCoreModule : AbpModule
             options.AddRepository<Appointment, EfCoreAppointmentRepository>();
             options.AddRepository<AppointmentType, EfCoreAppointmentTypeRepository>();
             options.AddRepository<DoctorWorkingHour, EfCoreDoctorWorkingHourRepository>();
-
+            options.AddRepository<Restriction, EfCoreRestrictionRepository>();
             options.AddRepository<Examination, EfCoreExaminationRepository>();
             options.AddRepository<FamilyHistory, EfCoreFamilyHistoryRepository>();
             options.AddRepository<Background, EfCoreBackgroundRepository>();

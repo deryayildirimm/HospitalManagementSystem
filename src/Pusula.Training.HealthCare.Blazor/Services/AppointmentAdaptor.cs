@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Appointments;
@@ -23,7 +22,7 @@ public class AppointmentAdaptor(IAppointmentAppService appointmentAppService) : 
             var filter = string.IsNullOrEmpty(filterJson)
                 ? new GetAppointmentsInput { MaxResultCount = dataManagerRequest!.Take, SkipCount = dataManagerRequest!.Skip }
                 : JsonSerializer.Deserialize<GetAppointmentsInput>(filterJson);
-
+    
             filter!.Sorting = dataManagerRequest!.Sorted is { Count: > 0 }
                 ? $"{dataManagerRequest.Sorted[0].Name} {dataManagerRequest.Sorted[0].Direction}"
                 : null;

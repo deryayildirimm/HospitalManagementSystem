@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Volo.Abp;
-using Volo.Abp.Data;
 using Volo.Abp.Domain.Services;
 
 namespace Pusula.Training.HealthCare.ProtocolTypes;

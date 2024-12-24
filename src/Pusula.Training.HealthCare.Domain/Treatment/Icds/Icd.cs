@@ -9,10 +9,10 @@ public class Icd : FullAuditedAggregateRoot<Guid>
 {
     
     [NotNull]
-    public virtual string CodeNumber { get; protected set; }
+    public virtual string CodeNumber { get; private set; } = null!;
     
     [NotNull]
-    public virtual string Detail { get; protected set; }
+    public virtual string Detail { get; private set; } = null!;
 
     protected Icd()
     {

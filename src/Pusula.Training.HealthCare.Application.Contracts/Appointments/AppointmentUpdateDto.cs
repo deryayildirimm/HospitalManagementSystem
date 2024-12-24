@@ -1,6 +1,10 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using Pusula.Training.HealthCare.AppointmentTypes;
 using Pusula.Training.HealthCare.Departments;
+using Pusula.Training.HealthCare.Doctors;
+using Pusula.Training.HealthCare.MedicalServices;
+using Pusula.Training.HealthCare.Patients;
 using Volo.Abp.Domain.Entities;
 
 namespace Pusula.Training.HealthCare.Appointments;
@@ -18,27 +22,13 @@ public class AppointmentUpdateDto
     
     [Required]
     public Guid AppointmentTypeId { get; set; }
-    
-    [Required]
     public DateTime AppointmentDate { get; set; }
-    
-    [Required]
     public DateTime StartTime { get; set; }
-    
-    [Required]
     public DateTime EndTime { get; set; }
-    
-    [Required]
     public EnumAppointmentStatus Status { get; set; }
-    
-    [StringLength(AppointmentConsts.MaxNotesLength)]
-    public string? Notes { get; set; } = string.Empty;
-    
-    [Required]
+    public string? Notes { get; set; }
     public bool ReminderSent { get; set; }
-    
-    [Required]
-    [Range(AppointmentConsts.MinAmount, AppointmentConsts.MaxAmount)]
+    public string? CancellationNotes { get; set; } = string.Empty;
     public double Amount { get; set; }
 
 }

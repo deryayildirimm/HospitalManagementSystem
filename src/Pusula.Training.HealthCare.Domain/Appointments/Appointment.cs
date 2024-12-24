@@ -14,60 +14,53 @@ namespace Pusula.Training.HealthCare.Appointments;
 
 public class Appointment : FullAuditedAggregateRoot<Guid>
 {
-    [NotNull]
-    public virtual Guid DoctorId { get; protected set; }
+    [NotNull] public virtual Guid DoctorId { get; private set; }
 
-    [NotNull] 
-    public virtual Guid PatientId { get; protected set; }
+    [NotNull] public virtual Guid PatientId { get; private set; }
 
-    [NotNull]
-    public virtual Guid MedicalServiceId { get; protected set; }
-    
-    [NotNull]
-    public virtual Guid AppointmentTypeId { get; protected set; }
-    
-    [NotNull]
-    public virtual Guid DepartmentId { get; protected set; }
-    
-    public virtual Doctor Doctor { get; protected set; }
-    
-    public virtual Patient Patient { get; protected set; }
-    
-    public virtual MedicalService MedicalService { get; protected set; }
-    
-    public virtual AppointmentType AppointmentType { get; protected set; }
-    
-    public virtual Department Department { get; protected set; }
+    [NotNull] public virtual Guid MedicalServiceId { get; private set; }
 
-    [NotNull]
-    public virtual DateTime AppointmentDate { get; protected set; }
-    
-    [NotNull]
-    public virtual DateTime StartTime { get; protected set; }
+    [NotNull] public virtual Guid AppointmentTypeId { get; private set; }
 
-    [NotNull]
-    public virtual DateTime EndTime { get; protected  set; } 
+    [NotNull] public virtual Guid DepartmentId { get; private set; }
 
-    [NotNull]
-    public virtual EnumAppointmentStatus Status { get; protected set; }
+    public virtual Doctor Doctor { get; private set; } = null!;
 
-    [CanBeNull]
-    public virtual string? Notes { get; protected set; } = string.Empty;
+    public virtual Patient Patient { get; private set; } = null!;
 
-    [NotNull]
-    public virtual bool ReminderSent { get; protected set; }
+    public virtual MedicalService MedicalService { get; private set; } = null!;
 
-    [NotNull] 
-    public virtual double Amount { get; protected set; }
+    public virtual AppointmentType AppointmentType { get; private set; } = null!;
+
+    public virtual Department Department { get; private set; } = null!;
+
+    [NotNull] public virtual DateTime AppointmentDate { get; private set; }
+
+    [NotNull] public virtual DateTime StartTime { get; private set; }
+
+    [NotNull] public virtual DateTime EndTime { get; private set; }
+
+    [NotNull] public virtual EnumAppointmentStatus Status { get; private set; }
+
+    [CanBeNull] public virtual string? Notes { get; private set; } = string.Empty;
+
+    [NotNull] public virtual bool ReminderSent { get; private set; }
+
+    [NotNull] public virtual double Amount { get; private set; }
+
+    [CanBeNull] public virtual string? CancellationNotes { get; private set; } = string.Empty;
 
     protected Appointment()
     {
         Amount = 0.0;
         ReminderSent = false;
+        Status = EnumAppointmentStatus.Scheduled;
     }
 
-    public Appointment(Guid id, Guid doctorId, Guid patientId, Guid medicalServiceId, Guid appointmentTypeId, Guid departmentId, DateTime appointmentDate,
-        DateTime startTime, DateTime endTime, EnumAppointmentStatus status, string? notes, bool reminderSent, double amount)
+    public Appointment(Guid id, Guid doctorId, Guid patientId, Guid medicalServiceId, Guid appointmentTypeId,
+        Guid departmentId, DateTime appointmentDate,
+        DateTime startTime, DateTime endTime, EnumAppointmentStatus status, string? notes, string? cancellationNotes,
+        bool reminderSent, double amount)
     {
         Id = id;
         SetDoctorId(doctorId);
@@ -82,6 +75,7 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
         SetNotes(notes);
         SetReminderSent(reminderSent);
         SetAmount(amount);
+        SetCancellationNote(cancellationNotes);
     }
 
     private void SetDoctorId(Guid doctorId)
@@ -101,13 +95,13 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
         Check.NotNull(appointmentTypeId, nameof(appointmentTypeId));
         AppointmentTypeId = appointmentTypeId;
     }
-    
+
     private void SetDepartmentId(Guid departmentId)
     {
         Check.NotNull(departmentId, nameof(departmentId));
         DepartmentId = departmentId;
     }
-    
+
     private void SetMedicalServiceId(Guid medicalServiceId)
     {
         Check.NotNull(medicalServiceId, nameof(medicalServiceId));
@@ -142,8 +136,8 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
     {
         HealthCareGlobalException.ThrowIf(
             HealthCareDomainErrorKeyValuePairs.TextLenghtExceeded,
-            !string.IsNullOrWhiteSpace(notes) && 
-            (notes.Length > AppointmentConsts.MaxNotesLength || notes.Length < ProtocolConsts.MinNotesLength)
+            !string.IsNullOrWhiteSpace(notes) &&
+            notes.Length is > AppointmentConsts.MaxNotesLength or < ProtocolConsts.MinNotesLength
         );
         Notes = notes;
     }
@@ -152,6 +146,17 @@ public class Appointment : FullAuditedAggregateRoot<Guid>
     {
         Check.NotNull(reminderSent, nameof(reminderSent));
         ReminderSent = reminderSent;
+    }
+
+    public void SetCancellationNote(string? cancellationNotes = null)
+    {
+        HealthCareGlobalException.ThrowIf(
+            HealthCareDomainErrorKeyValuePairs.TextLenghtExceeded,
+            !string.IsNullOrWhiteSpace(cancellationNotes) &&
+            cancellationNotes.Length is > AppointmentConsts.MaxNotesLength or < ProtocolConsts.MinNotesLength
+        );
+
+        CancellationNotes = cancellationNotes;
     }
 
     public void SetAmount(double amount)

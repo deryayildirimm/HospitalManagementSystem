@@ -14,18 +14,15 @@ namespace Pusula.Training.HealthCare.Controllers.DoctorLeaves;
 [RemoteService]
 [Area("app")]
 [ControllerName("DoctorLeave")]
-[Route("api/app/doctorleave")]
+[Route("api/app/doctor-leave")]
 public class DoctorLeaveController(IDoctorLeaveAppService leaveService) : HealthCareController, IDoctorLeaveAppService
 {
     [HttpGet]
     public virtual Task<PagedResultDto<DoctorLeaveDto>> GetListAsync(GetDoctorLeaveInput input) => leaveService.GetListAsync(input);
-
-
+    
     [HttpGet]
     [Route("{id}")]
     public virtual Task<DoctorLeaveDto> GetAsync(Guid id) => leaveService.GetAsync(id);
-    
-    
 
     [HttpPost]
     public virtual Task<DoctorLeaveDto> CreateAsync(DoctorLeaveCreateDto input) => leaveService.CreateAsync(input);

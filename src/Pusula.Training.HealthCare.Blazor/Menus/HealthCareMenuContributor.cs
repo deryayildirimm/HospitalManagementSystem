@@ -52,6 +52,27 @@ public class HealthCareMenuContributor : IMenuContributor
 
         context.Menu.AddItem(
             new ApplicationMenuItem(
+                    name: HealthCareMenus.Doctors,
+                    displayName: l["Menu:Doctors"],
+                    icon: "fa-solid fa-user-md",
+                    requiredPermissionName: HealthCarePermissions.Doctors.Default
+                )
+                .AddItem(new ApplicationMenuItem(
+                    name: HealthCareMenus.Doctors,
+                    displayName: l["Menu:DoctorList"],
+                    url: "doctors/list",
+                    icon: "fa-solid fa-list")
+                )
+                .AddItem(new ApplicationMenuItem(
+                    name: HealthCareMenus.DoctorLeaves,
+                    displayName: l["Menu:DoctorLeaves"],
+                    url: "doctors/leaves",
+                    icon: "fa-solid fa-calendar")
+                )
+        );
+
+        context.Menu.AddItem(
+            new ApplicationMenuItem(
                     name: HealthCareMenus.Appointments,
                     displayName: l["Menu:Appointment"],
                     icon: "fa-solid fa-calendar-check",
@@ -84,7 +105,7 @@ public class HealthCareMenuContributor : IMenuContributor
                         )
                         .AddItem(new ApplicationMenuItem(
                             name: HealthCareMenus.Appointments,
-                            displayName: l["Menu:Appointments"],
+                            displayName: l["Menu:ManageAppointment"],
                             url: "/appointments/operations/create",
                             icon: "fa-solid fa-calendar-check")
                         )
@@ -106,27 +127,17 @@ public class HealthCareMenuContributor : IMenuContributor
                             name: HealthCareMenus.AppointmentsOverview,
                             displayName: l["Menu:AppointmentsOverview"],
                             url: "/appointments/reports/overview",
-                            icon: "fa-solid fa-table")
+                            icon: "fa-solid fa-pie-chart")
                         )
                         .AddItem(new ApplicationMenuItem(
                             name: HealthCareMenus.AppointmentsOverview,
                             displayName: l["Menu:DoctorAppointmentsOverview"],
                             url: "/appointments/reports/doctor-appointments",
-                            icon: "fa-solid fa-table")
+                            icon: "fa-solid fa-calendar")
                         )
                 )
         );
-
-
-        context.Menu.AddItem(
-            new ApplicationMenuItem(
-                HealthCareMenus.Doctors,
-                l["Menu:Doctors"],
-                url: "/doctors",
-                icon: "fa fa-user-md",
-                requiredPermissionName: HealthCarePermissions.Doctors.Default)
-        );
-
+        
         context.Menu.AddItem(
             new ApplicationMenuItem(
                 HealthCareMenus.TestApprovalPanel,
@@ -166,8 +177,9 @@ public class HealthCareMenuContributor : IMenuContributor
         context.Menu.AddItem(
             new ApplicationMenuItem(
                     name: "Hasta Kabul",
-                    displayName: l["Hasta Kabul"],
-                    icon: "fa fa-users"
+                    displayName: l["Menu:HastaKabul"],
+                    icon: "fa fa-users",
+                    requiredPermissionName: HealthCarePermissions.Patients.Default
                 )
                 .AddItem(
                     new ApplicationMenuItem(
@@ -179,13 +191,15 @@ public class HealthCareMenuContributor : IMenuContributor
                             name: HealthCareMenus.ProtocolType,
                             displayName: l["Menu:ProtocolType"],
                             url: "/protocol-types",
-                            icon: "fa fa-file-alt")
+                            icon: "fa fa-file-alt",
+                            requiredPermissionName: HealthCarePermissions.ProtocolTypes.Default )
                         )
                         .AddItem(new ApplicationMenuItem(
                             name: HealthCareMenus.Insurances,
                             displayName: l["Menu:Insurance"],
                             url: "/insurances",
-                            icon: "fa fa-file-alt")
+                            icon: "fa fa-file-alt",
+                            requiredPermissionName: HealthCarePermissions.Insurances.Default)
                         )
                 )
                 .AddItem(
@@ -198,13 +212,15 @@ public class HealthCareMenuContributor : IMenuContributor
                             name: HealthCareMenus.Protocols,
                             displayName: l["Menu:Protocols"],
                             url: "/protocols",
-                            icon: "fa fa-file-alt")
+                            icon: "fa fa-file-alt",
+                            requiredPermissionName: HealthCarePermissions.Protocols.Default)
                         )
                         .AddItem(new ApplicationMenuItem(
                             name: HealthCareMenus.Patients,
                             displayName: l["Menu:Patients"],
                             url: "/patients",
-                            icon: "fa fa-file-alt")
+                            icon: "fa fa-file-alt",
+                            requiredPermissionName: HealthCarePermissions.Patients.Default)
                         )
                 )
                 .AddItem(
@@ -213,6 +229,20 @@ public class HealthCareMenuContributor : IMenuContributor
                         displayName: l["Menu:Reports"],
                         icon: "fa-solid fa-chart-bar"
                     )
+                    .AddItem(new ApplicationMenuItem(
+                        name: HealthCareMenus.ReportsDepartment,
+                        displayName: l["Menu:Department-Reports"],
+                        url: "/protocols-report-department",
+                        icon: "fa fa-file-alt",
+                        requiredPermissionName: HealthCarePermissions.Protocols.Default)
+                    )
+                    .AddItem(new ApplicationMenuItem(
+                        name: HealthCareMenus.ReportsDoctor,
+                        displayName: l["Menu:Doctor-Reports"],
+                        url: "/protocols-report-doctor",
+                        icon: "fa fa-file-alt",
+                        requiredPermissionName: HealthCarePermissions.Protocols.Default)
+                    )
                 ));
 
 
@@ -220,7 +250,8 @@ public class HealthCareMenuContributor : IMenuContributor
             new ApplicationMenuItem(
                     name: HealthCareMenus.Treatment,
                     displayName: l["Menu:Treatment"],
-                    icon: "fa-solid fa-medkit"
+                    icon: "fa-solid fa-medkit",
+                    requiredPermissionName: HealthCarePermissions.Treatment.Default
                 )
                 .AddItem(
                     new ApplicationMenuItem(

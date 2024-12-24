@@ -1,0 +1,400 @@
+@page "/appointments/definitions/medical-services"
+
+@attribute [Authorize(HealthCarePermissions.MedicalServices.Default)]
+@using Pusula.Training.HealthCare.MedicalServices
+@using Pusula.Training.HealthCare.Localization
+@using Volo.Abp.AspNetCore.Components.Messages
+@using Volo.Abp.AspNetCore.Components.Web.Theming.Layout
+
+@using Pusula.Training.HealthCare.Permissions
+@using Volo.Abp.AspNetCore.Components.Web
+@using Volo.Abp.Http.Client
+@inherits HealthCareComponentBase
+@inject IMedicalServicesAppService MedicalServicesAppService
+
+@inject IUiMessageService UiMessageService
+@inject AbpBlazorMessageLocalizerHelper<HealthCareResource> Lh
+@inject IRemoteServiceConfigurationProvider RemoteServiceConfigurationProvider
+@inject NavigationManager NavigationManager
+@inject ILookupAppService LookupAppService
+
+@* ************************* PAGE HEADER ************************* *@
+<PageHeader Title="@L["MedicalServices"]" BreadcrumbItems="BreadcrumbItems" Toolbar="Toolbar">
+
+</PageHeader>
+
+@* ************************* SEARCH ************************* *@
+<Card>
+    <CardBody>
+        <Form id="MedicalServiceSearchForm" class="mb-3">
+            <Addons>
+                <Addon AddonType="AddonType.Body">
+                    <TextEdit @bind-Text="@Filter.Name"
+                              Autofocus="true"
+                              Placeholder="@L["Search"]">
+                    </TextEdit>
+                </Addon>
+                <Addon AddonType="AddonType.End">
+                    <SubmitButton Form="MedicalServiceSearchForm" Clicked="GetMedicalServicesAsync">
+                        <Icon Name="IconName.Search" Class="me-1"></Icon>@L["Search"]
+                    </SubmitButton>
+                </Addon>
+            </Addons>
+        </Form>
+
+        <Row Class="mt-3 mb-3">
+            <div class="col-md-12">
+                <a href="javascript:" class="text-decoration-none" @onclick="() => ShowAdvancedFilters = !ShowAdvancedFilters">@L["SeeAdvancedFilters"]</a>
+            </div>
+        </Row>
+
+        <div style="display: @(!ShowAdvancedFilters ? "none" : "block")">
+            <Row>
+                <Column ColumnSize="ColumnSize.Is2">
+                    <FieldLabel>@L["MinCost"]</FieldLabel>
+                    <NumericPicker TValue="double?" @bind-Value="@Filter.CostMin" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue" Decimals="0">
+                        <Feedback>
+                            <ValidationError/>
+                        </Feedback>
+                    </NumericPicker>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is2">
+                    <FieldLabel>@L["MaxCost"]</FieldLabel>
+                    <NumericPicker TValue="double?" @bind-Value="@Filter.CostMax" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue" Decimals="0">
+                        <Feedback>
+                            <ValidationError/>
+                        </Feedback>
+                    </NumericPicker>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is2">
+                    <Field>
+                        <FieldLabel>@L["MinServiceDate"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+                                    InputMode="DateInputMode.Date"
+                                    Date="@Filter.ServiceDateMin"
+                                    DateChanged="@OnStartTimeMinChangedAsync"
+                                    Placeholder="@string.Empty"/>
+                    </Field>
+                </Column>
+                <Column ColumnSize="ColumnSize.Is2">
+                    <Field>
+                        <FieldLabel>@L["MaxServiceDate"]</FieldLabel>
+                        <DatePicker TValue="DateTime?"
+                                    InputMode="DateInputMode.Date"
+                                    Date="@Filter.ServiceDateMax"
+                                    DateChanged="@OnStartTimeMaxChangedAsync"
+                                    Placeholder="@string.Empty"/>
+                    </Field>
+                </Column>
+            </Row>
+        </div>
+    </CardBody>
+</Card>
+
+@* ************************* DATA GRID ************************* *@
+<Card>
+    <CardBody>
+        @if (SelectedMedicalServices.Any())
+        {
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                @if (AllMedicalServicesSelected)
+                {
+                    <p class="lead mb-0">
+                        @L["AllItemsAreSelected", TotalCount]
+                    </p>
+                }
+                else
+                {
+                    <p class="lead mb-0">
+                        @if (SelectedMedicalServices.Count > 1)
+                        {
+                            @L["NumberOfItemsOnThisPageAreSelected", SelectedMedicalServices.Count]
+                        }
+                        else
+                        {
+                            @L["OneItemOnThisPageIsSelected"]
+                        }
+                    </p>
+                }
+
+                <div>
+                    @if ((SelectedMedicalServices.Count == PageSize || SelectedMedicalServices.Count == MedicalServiceList.Count) && TotalCount > SelectedMedicalServices.Count)
+                    {
+                        if (!AllMedicalServicesSelected)
+                        {
+                            <Button Clicked="SelectAllItems" Class="mx-1 btn-outline-secondary">@L["SelectAllItems", TotalCount]</Button>
+                        }
+                        else
+                        {
+                            <Button Clicked="ClearSelection" Class="mx-1 btn-outline-secondary">@L["ClearSelection"]</Button>
+                        }
+                    }
+
+                    <Button Color="Color.Danger" Class="mx-1" Size="Size.Medium" Clicked="DeleteSelectedMedicalServicesAsync">
+                        <Icon Name="@IconName.Delete"/> @L["Delete"]
+                    </Button>
+                </div>
+            </div>
+
+            <hr class="my-1 mx-0"/>
+        }
+        <DataGrid TItem="MedicalServiceDto"
+                  Data="MedicalServiceList"
+                  SelectionMode="DataGridSelectionMode.Multiple"
+                  SelectedRows="SelectedMedicalServices"
+                  RowSelectable="@((args) => CanDeleteMedicalService)"
+                  SelectedRowsChanged="SelectedMedicalServiceRowsChanged"
+                  ReadData="OnDataGridReadAsync"
+                  TotalItems="TotalCount"
+                  ShowPager="true"
+                  Responsive="true"
+                  PageSize="PageSize"
+                  Class="datagrid-detail">
+
+            <LoadingTemplate>
+                <Progress Indeterminate Visibility="@ProgressVisibility"> </Progress>
+            </LoadingTemplate>
+            <EmptyTemplate>
+                <Row Class="w-100 align-items-center" Style="height: 150px;">
+                    <Column>
+                        <Heading Size="HeadingSize.Is4" TextAlignment="TextAlignment.Center">@L["NoDataAvailable"]</Heading>
+                    </Column>
+                </Row>
+            </EmptyTemplate>
+            <DataGridColumns>
+
+                @if (CanDeleteMedicalService && MedicalServiceList.Any())
+                {
+                    <DataGridMultiSelectColumn TItem="MedicalServiceDto" DisplayOrder="-1" Width="30px"></DataGridMultiSelectColumn>
+                }
+
+
+                <DataGridColumn TItem="MedicalServiceDto"
+                                Field="Name"
+                                Caption="@L["Name"]">
+                </DataGridColumn>
+
+                <DataGridColumn TItem="MedicalServiceDto"
+                                Field="Duration"
+                                Caption="@L["Duration"]">
+                </DataGridColumn>
+
+                <DataGridColumn TItem="MedicalServiceDto"
+                                Field="Cost"
+                                Caption="@L["Cost"]">
+                </DataGridColumn>
+
+                <DataGridColumn TItem="MedicalServiceDto"
+                                Field="ServiceCreatedAt"
+                                Caption="@L["ServiceDate"]">
+                    <DisplayTemplate>
+                        @context.ServiceCreatedAt.ToShortDateString()
+                    </DisplayTemplate>
+                </DataGridColumn>
+                
+                <DataGridColumn Caption="@L["ServiceDetail"]" TItem="MedicalServiceDto">
+                    <DisplayTemplate>
+                        <Button Color="Color.Primary" @onclick="() => NavigateToDetail(context)">
+                            <Icon Name="@IconName.ExternalLinkSquareAlt" />
+                        </Button>
+                    </DisplayTemplate>
+                </DataGridColumn>
+                
+                <DataGridEntityActionsColumn TItem="MedicalServiceDto" @ref="@EntityActionsColumn">
+                    <DisplayTemplate>
+                        <EntityActions TItem="MedicalServiceDto" EntityActionsColumn="@EntityActionsColumn">
+                            <EntityAction TItem="MedicalServiceDto"
+                                          Visible="@CanEditMedicalService"
+                                          Clicked="async () => await OpenEditMedicalServiceModalAsync(context)"
+                                          Text="@L["Edit"]">
+                            </EntityAction>
+                            <EntityAction TItem="MedicalServiceDto"
+                                          Visible="@CanDeleteMedicalService"
+                                          Clicked="() => DeleteMedicalServiceAsync(context)"
+                                          ConfirmationMessage="@(() => L["DeleteConfirmationMessage"])"
+                                          Text="@L["Delete"]">
+                            </EntityAction>
+                        </EntityActions>
+                    </DisplayTemplate>
+                </DataGridEntityActionsColumn>
+
+            </DataGridColumns>
+
+        </DataGrid>
+    </CardBody>
+</Card>
+
+@* ************************* CREATE MODAL ************************* *@
+<Modal @ref="CreateMedicalServiceModal" Closing="@CreateMedicalServiceModal.CancelClosingModalWhenFocusLost">
+    <ModalContent Centered="true">
+        @*//<suite-custom-code-block-5>*@
+        @*//</suite-custom-code-block-5>*@
+        <Form id="CreateMedicalServiceForm">
+            <ModalHeader>
+                <ModalTitle>@L["NewMedicalService"]</ModalTitle>
+                <CloseButton Clicked="CloseCreateMedicalServiceModalAsync"/>
+            </ModalHeader>
+            <ModalBody>
+                <Validations @ref="@NewMedicalServiceValidations"
+                             Mode="ValidationMode.Auto"
+                             Model="@NewMedicalService"
+                             ValidateOnLoad="false">
+
+
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["Name"] *</FieldLabel>
+                            <TextEdit @bind-Text="@NewMedicalService.Name" MaxLength="MedicalServiceConsts.NameMaxLength">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["Cost"] *</FieldLabel>
+                            <NumericPicker TValue="double" @bind-Value="@NewMedicalService.Cost" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue" Decimals="0">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </NumericPicker>
+                        </Field>
+                    </Validation>
+
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["Duration"] *</FieldLabel>
+                            <NumericPicker TValue="int" @bind-Value="@NewMedicalService.Duration" Min="MedicalServiceConsts.DurationMinValue" Max="MedicalServiceConsts.DurationMaxValue" Decimals="0">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </NumericPicker>
+                        </Field>
+                    </Validation>
+
+                    <Field>
+                        <FieldLabel>@L["Department"]</FieldLabel>
+                        <SfMultiSelect @ref="CreateDepartmentDropdown" TValue="string[]" TItem="ServiceSelectionItem" PopupHeight="350px" PopupWidth="350px" Placeholder="@L["SelectDepartment"]" DataSource="@DepartmentsCreateSelectionItems">
+                            <MultiSelectFieldSettings Value="DisplayName" Text="DisplayName"></MultiSelectFieldSettings>
+                            <MultiSelectEvents TValue="string[]" TItem="ServiceSelectionItem" ValueChange="OnDepartmentValueChange"></MultiSelectEvents>
+                        </SfMultiSelect>
+                    </Field>
+                    
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["ServiceDate"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@NewMedicalService.ServiceCreatedAt">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+
+                </Validations>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary"
+                        Clicked="CloseCreateMedicalServiceModalAsync">
+                    @L["Cancel"]
+                </Button>
+                <SubmitButton Form="CreateMedicalServiceForm" Clicked="CreateMedicalServiceAsync"/>
+            </ModalFooter>
+        </Form>
+    </ModalContent>
+</Modal>
+
+@* ************************* EDIT MODAL ************************* *@
+<Modal @ref="EditMedicalServiceModal" Closing="@EditMedicalServiceModal.CancelClosingModalWhenFocusLost">
+    <ModalContent Centered="true">
+        @*//<suite-custom-code-block-8>*@
+        @*//</suite-custom-code-block-8>*@
+        <Form id="EditMedicalServiceForm">
+            <ModalHeader>
+                <ModalTitle>@L["Update"]</ModalTitle>
+                <CloseButton Clicked="CloseEditMedicalServiceModalAsync"/>
+            </ModalHeader>
+            <ModalBody>
+                <Validations @ref="@EditingMedicalServiceValidations"
+                             Mode="ValidationMode.Auto"
+                             Model="@EditingMedicalService"
+                             ValidateOnLoad="false">
+
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["Name"] *</FieldLabel>
+                            <TextEdit @bind-Text="@EditingMedicalService.Name" MaxLength="MedicalServiceConsts.NameMaxLength">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </TextEdit>
+                        </Field>
+                    </Validation>
+
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["Cost"] *</FieldLabel>
+                            <NumericPicker TValue="double" @bind-Value="@EditingMedicalService.Cost" Min="MedicalServiceConsts.CostMinValue" Max="MedicalServiceConsts.CostMaxValue" Decimals="0">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </NumericPicker>
+                        </Field>
+                    </Validation>
+
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["Duration"] *</FieldLabel>
+                            <NumericPicker TValue="int" @bind-Value="@EditingMedicalService.Duration" Min="MedicalServiceConsts.DurationMinValue" Max="MedicalServiceConsts.DurationMaxValue" Decimals="0">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </NumericPicker>
+                        </Field>
+                    </Validation>
+                    
+                    <Field>
+                        <FieldLabel>@L["Department"]</FieldLabel>
+                        <SfMultiSelect @ref="UpdateDepartmentDropdown" TValue="string[]" TItem="ServiceSelectionItem" PopupHeight="350px" PopupWidth="350px" Placeholder="@L["SelectDepartment"]" DataSource="@DepartmentsUpdateSelectionItems">
+                            <MultiSelectFieldSettings Value="DisplayName" Text="DisplayName"></MultiSelectFieldSettings>
+                            <MultiSelectEvents TValue="string[]" TItem="ServiceSelectionItem" ValueChange="OnDepartmentValueChange"></MultiSelectEvents>
+                        </SfMultiSelect>
+                    </Field>
+
+                    <Validation MessageLocalizer="@Lh.Localize">
+                        <Field>
+                            <FieldLabel>@L["ServiceDate"]</FieldLabel>
+                            <DateEdit TValue="DateTime" InputMode="DateInputMode.Date" @bind-Date="@EditingMedicalService.ServiceCreatedAt">
+                                <Feedback>
+                                    <ValidationError/>
+                                </Feedback>
+                            </DateEdit>
+                        </Field>
+                    </Validation>
+                </Validations>
+            </ModalBody>
+            <ModalFooter>
+                <Button Color="Color.Secondary"
+                        Clicked="CloseEditMedicalServiceModalAsync">
+                    @L["Cancel"]
+                </Button>
+                <SubmitButton Form="EditMedicalServiceForm" Clicked="UpdateMedicalServiceAsync"/>
+            </ModalFooter>
+        </Form>
+    </ModalContent>
+</Modal>
+
+@* ************************* TOAST ************************* *@
+<Toaster>
+    <Toast Background="Background.Success" @bind-Visible="@ToastVisible">
+        <ToastHeader Background="Background.Success">
+            <Strong TextColor="TextColor.Light" TextSize="TextSize.Small" Margin="Margin.IsAuto.FromEnd">@EditStatus</Strong>
+            <CloseButton/>
+        </ToastHeader>
+        <ToastBody TextColor="TextColor.Light" TextSize="TextSize.Small">
+            @EditMessage
+        </ToastBody>
+    </Toast>
+</Toaster>

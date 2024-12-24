@@ -17,7 +17,7 @@
 
 @code {
 
-    [Parameter] public List<SelectionItem> Items { get; set; } = [];
+    [Parameter] public List<ServiceSelectionItem> Items { get; set; } = [];
 
     [Parameter] public string? Text { get; set; }
 
@@ -27,7 +27,7 @@
         await Task.CompletedTask;
     }
 
-    private async Task OnItemChange(SelectionItem item)
+    private async Task OnItemChange(ServiceSelectionItem item)
     {
         item.IsSelected = !item.IsSelected;
         StateHasChanged();

@@ -25,6 +25,14 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         double? maxAmount = null,
         CancellationToken cancellationToken = default);
     
+    Task<Appointment> GetByDateAsync(
+        Guid doctorId,
+        Guid medicalServiceId,
+        DateTime startTime,
+        DateTime endTime,
+        DateTime appointmentDate,
+        CancellationToken cancellationToken = default);
+    
     Task<List<Appointment>> GetListAsync(
         Guid? doctorId = null,
         Guid? patientId = null,
@@ -65,7 +73,8 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         double? maxAmount = null,
         CancellationToken cancellationToken = default);
     
-    Task<long> GetGroupCountByDepartmentsAsync(
+    Task<long> GetGroupCountByAsync(
+        EnumAppointmentGroupFilter groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,
@@ -86,7 +95,8 @@ public interface IAppointmentRepository : IRepository<Appointment, Guid>
         double? maxAmount = null,
         CancellationToken cancellationToken = default);
     
-    Task<List<DepartmentAppointmentCount>> GetGroupByDepartmentsAsync(
+    Task<List<AppointmentStatistic>> GetGroupByListAsync(
+        EnumAppointmentGroupFilter groupByField,
         Guid? doctorId = null,
         Guid? patientId = null,
         Guid? medicalServiceId = null,

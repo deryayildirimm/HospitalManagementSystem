@@ -39,7 +39,7 @@ public class MedicalServiceManager(
         );
 
         await SetDepartmentsAsync(service: medicalService, departmentNames: departmentNames);
-        return await medicalServiceRepository.InsertAsync(medicalService);
+        return await medicalServiceRepository.InsertAsync(medicalService, true);
     }
 
     public virtual async Task<MedicalService> UpdateAsync(
@@ -60,8 +60,7 @@ public class MedicalServiceManager(
         Check.Range(duration, nameof(duration), MedicalServiceConsts.DurationMinValue,
             MedicalServiceConsts.DurationMaxValue);
 
-        var service = await medicalServiceRepository.FirstOrDefaultAsync(x => x.Id == id);
-
+        var service = await medicalServiceRepository.GetWithDetailsAsync(id);
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.MedicalServiceNotFound, service is null);
 
         service!.SetName(name);
@@ -78,6 +77,7 @@ public class MedicalServiceManager(
     {
         if (departmentNames.Count == 0)
         {
+            service.RemoveAll();
             return;
         }
 
@@ -87,6 +87,8 @@ public class MedicalServiceManager(
 
         HealthCareGlobalException.ThrowIf(HealthCareDomainErrorKeyValuePairs.DepartmentNotFound,
             departmentIds.Count == 0);
+        
+        service.RemoveAllDepartmentsExceptGivenIds(departmentIds);
 
         foreach (var id in departmentIds)
         {

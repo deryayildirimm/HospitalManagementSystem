@@ -10,12 +10,11 @@ RUN apt-get update && \
 
 COPY . .
 WORKDIR /src/src/Pusula.Training.HealthCare.Blazor
-RUN dotnet restore "Pusula.Training.HealthCare.Blazor.csproj"
-RUN dotnet build "Pusula.Training.HealthCare.Blazor.csproj" -c Release -o /app/build
-RUN dotnet tool install -g Volo.Abp.Cli --version 8.0.0
+#RUN dotnet restore "Pusula.Training.HealthCare.Blazor.csproj"
+#RUN dotnet build "Pusula.Training.HealthCare.Blazor.csproj" -c Release -o /app/build
 ENV PATH="/root/.dotnet/tools:${PATH}"
-RUN abp install-libs
-RUN dotnet publish "Pusula.Training.HealthCare.Blazor.csproj" -c Release -o /app/publish
+
+RUN  dotnet tool install -g Volo.Abp.Cli --version 8.0.0 && abp install-libs && dotnet publish "Pusula.Training.HealthCare.Blazor.csproj" -c Release -o /app/publish
 
 
 FROM base AS final

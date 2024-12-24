@@ -1,4 +1,5 @@
 ﻿using Localization.Resources.AbpUi;
+using Microsoft.Extensions.DependencyInjection;
 using Pusula.Training.HealthCare.Localization;
 using Volo.Abp.Account;
 using Volo.Abp.FeatureManagement;
@@ -38,4 +39,5 @@ public class HealthCareHttpApiModule : AbpModule
                 );
         });
     }
+
 }

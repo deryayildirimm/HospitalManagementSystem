@@ -6,10 +6,6 @@
     z-index: 999;
 }
 
-.lpx-content {
-    
-}
-
 .lpx-content hr {
     display: none;
 }
@@ -22,7 +18,6 @@
 .turquoise {
    color: #1EA0D1 !important;
 }
-
 
 .turquoise-bg{
     background-color: #3DABFB !important;

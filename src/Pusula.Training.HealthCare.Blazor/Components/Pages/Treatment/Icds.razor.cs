@@ -1,29 +1,23 @@
-﻿using Blazorise;
-using Blazorise.DataGrid;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Pusula.Training.HealthCare.Treatment.Icds;
 using Pusula.Training.HealthCare.Permissions;
-using Pusula.Training.HealthCare.Validators;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
-using Microsoft.OpenApi.Extensions;
-using Pusula.Training.HealthCare.Patients;
-using Pusula.Training.HealthCare.Shared;
+using Syncfusion.Blazor.Buttons;
 using Syncfusion.Blazor.Data;
 using Syncfusion.Blazor.Popups;
+using Syncfusion.Blazor.Grids;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
-using Syncfusion.Blazor.DropDowns;
-using Syncfusion.Blazor.Grids;
-using SortDirection = Blazorise.SortDirection;
+using Volo.Abp;
 
 namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Treatment;
 
-public partial class Icds
+public partial class Icds : HealthCareComponentBase
 {
 
     protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = new();
@@ -41,8 +35,13 @@ public partial class Icds
     private IcdCreateDto NewIcd { get; set; }
     private IcdUpdateDto EditingIcd { get; set; }
     private Guid EditingIcdId { get; set; }
-    private SfDialog CreateIcdModal;
-    private SfDialog EditIcdModal;
+    private SfGrid<IcdDto> Grid { get; set; }
+    private Query FilterQuery { get; set; }
+    private SfDialog CreateIcdModal { get; set; }
+    private SfDialog EditIcdModal { get; set; }
+    private bool IsDeleteDialogVisible { get; set; }
+    private SfDialog DeleteConfirmDialog { get; set; }
+    private bool Flag { get; set; }
     private GetIcdsInput Filter { get; set; }
     private List<IcdDto> SelectedIcds { get; set; } = new();
     private bool IsVisibleCreate { get; set; }
@@ -51,8 +50,13 @@ public partial class Icds
         
     public Icds()
     {
+        Grid = new SfGrid<IcdDto>();
+        DeleteConfirmDialog = new SfDialog();
         IsVisibleCreate = false;
         IsVisibleEdit = false;
+        IsDeleteDialogVisible = false;
+        Flag = false;
+        FilterQuery = new Query();
         NewIcd = new IcdCreateDto();
         EditingIcd = new IcdUpdateDto();
         Filter = new GetIcdsInput
@@ -68,6 +72,7 @@ public partial class Icds
     {
         await SetPermissionsAsync();
         await SearchAsync();
+        SetFilters();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -76,20 +81,20 @@ public partial class Icds
         {
             await SetBreadcrumbItemsAsync();
             await SetToolbarItemsAsync();
+            await Grid.EnableToolbarItemsAsync(["Delete"], false);
+            await Refresh();
             await InvokeAsync(StateHasChanged);
         }
     }
-
     protected virtual ValueTask SetBreadcrumbItemsAsync()
     {
-        BreadcrumbItems.Add(new Volo.Abp.BlazoriseUI.BreadcrumbItem(L["Icds"]));
         return ValueTask.CompletedTask;
     }
 
     protected virtual ValueTask SetToolbarItemsAsync()
     {
         Toolbar.AddButton(L["ExportToExcel"], DownloadAsExcelAsync, IconName.Download);
-        Toolbar.AddButton(L["NewIcd"], OpenCreateIcdModal, IconName.Add, requiredPolicyName: HealthCarePermissions.Icds.Create);
+        Toolbar.AddButton(L["NewIcd"], OpenCreateIcdModal, IconName.Plus, requiredPolicyName: HealthCarePermissions.Icds.Create);
         return ValueTask.CompletedTask;
     }
 
@@ -99,28 +104,126 @@ public partial class Icds
         CanEditIcd = await AuthorizationService.IsGrantedAsync(HealthCarePermissions.Icds.Edit);
         CanDeleteIcd = await AuthorizationService.IsGrantedAsync(HealthCarePermissions.Icds.Delete);
     }
-    public async Task PageChangingHandler(GridPageChangingEventArgs args)
+
+    private void SetFilters()
     {
-        CurrentPage = args.CurrentPage;
-        await GetIcdsAsync();
+        FilterQuery.Queries.Params = new Dictionary<string, object>();
+        FilterQuery.Queries.Params.Add("Filter", Filter);
+    }
+    
+    public async void OnActionBegin(ActionEventArgs<IcdDto> args)
+    {
+        
+        if (args.RequestType.ToString() != "Delete" || !IsDeleteDialogVisible)
+        {
+            return;
+        }
+        
+        if (args.RequestType.ToString() == "Paging")
+        {
+            return;
+        }
+
+        args.Cancel = true;
+        await DeleteConfirmDialog.ShowAsync();
+        Flag = false;
+        await Refresh();
+    }
+    
+    public void Closed()
+    {
+        Flag = true;
+    }
+    
+    public void RowSelectHandler(RowSelectEventArgs<IcdDto> args)
+    {
+        var selectedRecordCount = Grid.GetSelectedRecordsAsync().Result.Count;
+        if (selectedRecordCount > 0)
+        {
+            Grid.EnableToolbarItemsAsync(["Delete"], true);
+        }
+    }
+    
+
+    public void RowDeselectHandler(RowDeselectEventArgs<IcdDto> args)
+    {
+        var selectedRecordCount = Grid.GetSelectedRecordsAsync().Result.Count;
+        if (selectedRecordCount == 0)
+        {
+            Grid.EnableToolbarItemsAsync(["Delete"], false);
+        }
+    }
+    
+    private async Task Refresh()
+    {
+        await Grid.Refresh();
+    }
+    
+    public async Task ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        try
+        {
+            switch (args.Item.Text)
+            {
+                case "Delete":
+                {
+                    var selectedRecord = Grid.GetSelectedRecordsAsync().Result;
+
+                    if (selectedRecord == null || selectedRecord.Count == 0)
+                    {
+                        return;
+                    }
+
+                    var ids = selectedRecord.Select(x => x.Id).ToList();
+
+                    var confirmed = await UiMessageService.Confirm(@L["DeleteSelectedRecords", ids.Count]);
+                    if (!confirmed)
+                    {
+                        return;
+                    }
+
+                    await IcdsAppService.DeleteByIdsAsync(ids);
+                    break;
+                }
+                case "Excel Export":
+                {
+                    var exportProperties = new ExcelExportProperties
+                    {
+                        IncludeTemplateColumn = true
+                    };
+                    await Grid.ExportToExcelAsync(exportProperties);
+                    break;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            throw new UserFriendlyException(e.Message);
+        }
+        finally
+        {
+            await Refresh();
+        }
     }
 
-    public async Task PageChangedHandler(GridPageChangedEventArgs args)
+    private void OkClick()
     {
-        CurrentPage = args.CurrentPage;
-        await GetIcdsAsync();    
-
+        DeleteConfirmDialog.ShowAsync();
     }
+
+    private void CancelClick()
+    {
+        DeleteConfirmDialog.HideAsync();
+    }
+    
     private async Task GetIcdsAsync()
     {
         Filter.MaxResultCount = PageSize;
         Filter.SkipCount = (CurrentPage - 1) * PageSize;
         Filter.Sorting = CurrentSorting;
 
-        var result = await IcdsAppService.GetListAsync(Filter);
-        IcdList = result.Items;
-        TotalCount = (int)result.TotalCount;
-
+        SetFilters();
+        await Refresh();
         await ClearSelection();
     }
 
@@ -198,18 +301,6 @@ public partial class Icds
     private void CloseEditIcdModal()
     {
         IsVisibleEdit = false;
-    }
-
-
-    private async Task OnDataGridReadAsync(DataGridReadDataEventArgs<IcdDto> e)
-    {
-        CurrentSorting = e.Columns
-            .Where(c => c.SortDirection != SortDirection.Default)
-            .Select(c => c.Field + (c.SortDirection == SortDirection.Descending ? " DESC" : ""))
-            .JoinAsString(",");
-        CurrentPage = e.Page;
-        await GetIcdsAsync();
-        await InvokeAsync(StateHasChanged);
     }
     
     private async Task DeleteIcdAsync(IcdDto input)

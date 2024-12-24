@@ -33,12 +33,6 @@ public class BackgroundsAppService(IBackgroundRepository backgroundRepository,
         return ObjectMapper.Map<Background, BackgroundDto>(background);
     }
 
-    [Authorize(HealthCarePermissions.Backgrounds.Delete)]
-    public virtual async void DeleteAsync(Guid id)
-    {
-        await backgroundRepository.DeleteAsync(id);
-    }
-
     [Authorize(HealthCarePermissions.Backgrounds.Create)]
     public virtual async Task<BackgroundDto> CreateAsync(BackgroundCreateDto input)
     {
@@ -55,18 +49,5 @@ public class BackgroundsAppService(IBackgroundRepository backgroundRepository,
             input.Habits);
         
         return ObjectMapper.Map<Background, BackgroundDto>(background);
-    }
-
-    [Authorize(HealthCarePermissions.Backgrounds.Delete)]
-    public virtual async Task DeleteByIdsAsync(List<Guid> backgroundIds)
-    {
-        await backgroundRepository.DeleteManyAsync(backgroundIds);
-    }
-
-    [Authorize(HealthCarePermissions.Backgrounds.Delete)]
-    public virtual async Task DeleteAllAsync(GetBackgroundsInput input)
-    {
-        await backgroundRepository.DeleteAllAsync(input.FilterText, input.Allergies, input.Medications, input.Habits, 
-            input.ExaminationId);
     }
 }

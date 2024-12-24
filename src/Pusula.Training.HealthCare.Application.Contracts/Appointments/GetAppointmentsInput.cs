@@ -8,6 +8,7 @@ namespace Pusula.Training.HealthCare.Appointments;
 
 public class GetAppointmentsInput : PagedAndSortedResultRequestDto
 {
+    public EnumAppointmentGroupFilter GroupByField { get; set; }
     public Guid? DoctorId { get; set; }
     public Guid? PatientId { get; set; }
     public Guid? MedicalServiceId { get; set; }

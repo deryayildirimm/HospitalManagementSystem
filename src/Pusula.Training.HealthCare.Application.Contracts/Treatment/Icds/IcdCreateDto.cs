@@ -4,10 +4,10 @@ namespace Pusula.Training.HealthCare.Treatment.Icds;
 
 public class IcdCreateDto
 {
-    [Required]
+    [Required(ErrorMessage="Code Number is Required")]
     [StringLength(IcdConsts.CodeNumberMaxLength, MinimumLength = IcdConsts.CodeNumberMinLength)]
     public string CodeNumber { get; set; } = null!;
-    [Required]
+    [Required(ErrorMessage="Code Number is Required")]
     [StringLength(IcdConsts.DetailMaxLength, MinimumLength = IcdConsts.DetailMinLength)]
     public string Detail { get; set; } = null!;
 }

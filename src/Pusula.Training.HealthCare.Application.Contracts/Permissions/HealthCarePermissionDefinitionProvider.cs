@@ -98,6 +98,8 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Edit, L("Permission:Edit"));
         bloodTestResultPermission.AddChild(HealthCarePermissions.BloodTestResults.Delete, L("Permission:Delete"));
 
+        var treatmentPermission = myGroup.AddPermission(HealthCarePermissions.Treatment.Default, L("Permission:Treatment"));
+
         var icdPermission = myGroup.AddPermission(HealthCarePermissions.Icds.Default, L("Permission:Icds"));
         icdPermission.AddChild(HealthCarePermissions.Icds.Create, L("Permission:Create"));
         icdPermission.AddChild(HealthCarePermissions.Icds.Edit, L("Permission:Edit"));
@@ -118,6 +120,11 @@ public class HealthCarePermissionDefinitionProvider : PermissionDefinitionProvid
         backgroundPermission.AddChild(HealthCarePermissions.Backgrounds.Edit, L("Permission:Edit"));
         backgroundPermission.AddChild(HealthCarePermissions.Backgrounds.Delete, L("Permission:Delete"));
         
+        var physicalFindingPermission = myGroup.AddPermission(HealthCarePermissions.PhysicalFindings.Default, L("Permission:PhysicalFindings"));
+        physicalFindingPermission.AddChild(HealthCarePermissions.PhysicalFindings.Create, L("Permission:Create"));
+        physicalFindingPermission.AddChild(HealthCarePermissions.PhysicalFindings.Edit, L("Permission:Edit"));
+        physicalFindingPermission.AddChild(HealthCarePermissions.PhysicalFindings.Delete, L("Permission:Delete"));
+
         var examinationPermission = myGroup.AddPermission(HealthCarePermissions.Examinations.Default, L("Permission:Examinations"));
         examinationPermission.AddChild(HealthCarePermissions.Examinations.Create, L("Permission:Create"));
         examinationPermission.AddChild(HealthCarePermissions.Examinations.Edit, L("Permission:Edit"));
