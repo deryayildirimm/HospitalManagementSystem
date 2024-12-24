@@ -28,30 +28,30 @@ stages:
               SmtpUsername: 'ferityksel@gmail.com'
               SmtpPassword: '$(SMTPPASSWORD)'
 
-  - stage: SonarQubeAnalysis
-    displayName: SonarQube Analysis
-    jobs:
-      - job: AnalyzeCode
-        displayName: Run SonarQube Analysis
-        steps:
+  # - stage: SonarQubeAnalysis
+  #   displayName: SonarQube Analysis
+  #   jobs:
+  #     - job: AnalyzeCode
+  #       displayName: Run SonarQube Analysis
+  #       steps:
 
-          - task: SonarQubePrepare@5
-            inputs:
-              SonarQube: 'sonarqube'
-              scannerMode: 'CLI'
-              configMode: 'manual'
-              cliProjectKey: 'Pusula.Training.HealthCare'
-              cliProjectName: 'Pusula.Training.HealthCare'
-              cliProjectVersion: '1.0'
-              cliSources: '.'
+  #         - task: SonarQubePrepare@5
+  #           inputs:
+  #             SonarQube: 'sonarqube'
+  #             scannerMode: 'CLI'
+  #             configMode: 'manual'
+  #             cliProjectKey: 'Pusula.Training.HealthCare'
+  #             cliProjectName: 'Pusula.Training.HealthCare'
+  #             cliProjectVersion: '1.0'
+  #             cliSources: '.'
 
-          - script: |
-              "$(SonarPath)/sonar-scanner"
-            displayName: Run SonarQube Scanner
+  #         - script: |
+  #             "$(SonarPath)/sonar-scanner"
+  #           displayName: Run SonarQube Scanner
 
-          - task: SonarQubePublish@5
-            inputs:
-              pollingTimeoutSec: '300'
+  #         - task: SonarQubePublish@5
+  #           inputs:
+  #             pollingTimeoutSec: '300'
 
   - stage: BuildDockerImage
     displayName: Build Docker Image
