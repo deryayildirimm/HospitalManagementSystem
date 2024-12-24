@@ -18,17 +18,19 @@ public partial class MyPatients
     private IReadOnlyList<TestCategoryDto>? Categories { get; set; }
     private List<Guid>? SelectedCategoryIds { get; set; }
     private PatientDto? Patient { get; set; }
-    private GetPatientsInput Filter { get; set; } = new();
+    private GetPatientsInput Filter { get; set; } 
     private bool CanCreateBloodTest { get; set; }
     private bool Disabled => SelectedCategoryIds?.Count == 0;
-    private bool IsVisibleChooseTestDialog = false;
+    private bool IsVisibleChooseTestDialog;
     private Guid DoctorId { get; set; }
     private bool isLoading;
 
     public MyPatients()
     {
+        Filter = new();
         isLoading = true;
         Patients = [];
+        IsVisibleChooseTestDialog = false;
     }
 
     protected override async Task OnInitializedAsync()

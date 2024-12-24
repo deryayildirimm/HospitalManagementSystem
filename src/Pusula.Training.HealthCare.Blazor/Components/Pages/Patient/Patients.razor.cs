@@ -33,17 +33,26 @@ public partial class Patients
     protected PageToolbar Toolbar { get; } 
     protected bool ShowAdvancedFilters { get; set; }
     private IReadOnlyList<PatientDto> PatientList { get; set; }
+    private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; } 
+
+    private IReadOnlyList<LookupDto<Guid>> InsuranceCollections { get; set; } 
+    private IReadOnlyList<LookupDto<Guid>> DoctorsCollection { get; set; } 
+    private IReadOnlyList<LookupDto<Guid>> ProtocolTypesCollection { get; set; } 
     private int PageSize { get; } 
-    private int CurrentPage { get; set; } = 1;
+    private int CurrentPage { get; set; } 
     private int TotalCount { get; set; }
     private string CurrentSorting { get; set; } 
     public string? MainCountryCode { get; set; }
     public string? RelativeCountryCode { get; set; }
+    private string FoundPatientName { get; set; } = string.Empty; // Bulunan hastanın adı (eğer varsa)
     private bool AllPatientsSelected { get; set; }
     private bool CanCreatePatient { get; set; }
     private bool CanEditPatient { get; set; }
     private bool CanDeletePatient { get; set; }
-    private int LookupPageSize { get; } 
+    private bool IsLookupsLoaded { get; set; }
+    private int LookupPageSize { get; }
+    private ProtocolCreateDto _newProtocol;
+    private GenericModal<ProtocolCreateDto> _createModal;
     private PatientCreateDto NewPatient { get; set; } 
     private PatientUpdateDto EditingPatient { get; set; }
     private Validations NewPatientValidations { get; set; } 
@@ -59,11 +68,8 @@ public partial class Patients
     private IEnumerable<KeyValuePair<int, string>> PationTypes;
     private IEnumerable<KeyValuePair<int, string>> DiscountGroups;
 
-
     public Patients()
     {
-        MobilePhoneNumber = string.Empty;
-        RelativePhoneNumber = string.Empty;
         NewPatient = new();
         CreatePatientModal = new();
         EditPatientModal = new();
@@ -71,12 +77,17 @@ public partial class Patients
         EditingPatient = new PatientUpdateDto();
         _createModal = new GenericModal<ProtocolCreateDto>();
         _newProtocol = new ProtocolCreateDto();
+        NewPatientValidations = new();
         Filter = new GetPatientsInput
         {
             MaxResultCount = PageSize,
             SkipCount = (CurrentPage - 1) * PageSize,
             Sorting = CurrentSorting
         };
+        DepartmentsCollection = [];
+        InsuranceCollections = [];
+        DoctorsCollection = [];
+        ProtocolTypesCollection = [];
         PatientList = [];
         Nationalities = [];
         Genders = [];
@@ -84,23 +95,16 @@ public partial class Patients
         PationTypes = [];
         DiscountGroups = [];
         SelectedPatients = [];
-        NewPatientValidations = new();
+        BreadcrumbItems = [];
         LookupPageSize = 100;
         CurrentSorting = string.Empty;
+        FoundPatientName = string.Empty;
+        MobilePhoneNumber = string.Empty;
+        RelativePhoneNumber = string.Empty;
         PageSize = LimitedResultRequestDto.DefaultMaxResultCount;
         Toolbar = new PageToolbar();
-        BreadcrumbItems = [];
+        CurrentPage = 1;
     }
-
-    private ProtocolCreateDto _newProtocol;
-    private GenericModal<ProtocolCreateDto> _createModal;
-    private bool IsLookupsLoaded { get; set; } 
-    private IReadOnlyList<LookupDto<Guid>> DepartmentsCollection { get; set; } = [];
-    
-    private IReadOnlyList<LookupDto<Guid>> InsuranceCollections { get; set; } = [];
-    private IReadOnlyList<LookupDto<Guid>> DoctorsCollection { get; set; } = [];
-    private IReadOnlyList<LookupDto<Guid>> ProtocolTypesCollection { get; set; } = [];
-    
 
     private async Task LoadLookupsAsync()
     {
@@ -123,16 +127,13 @@ public partial class Patients
                 (await LookupAppService.GetProtocolTypeLookupAsync(new LookupRequestDto
                     { MaxResultCount = LookupPageSize }))
                 .Items;
-
         }
         catch (Exception e)
         {
             await UiMessageService.Error(e.Message);
         }
     }
-    
-    private string FoundPatientName { get; set; } = string.Empty; // Bulunan hastanın adı (eğer varsa)
-    
+
     private async Task ShowCreateModal(PatientDto patientDto)
     {
 
@@ -148,6 +149,7 @@ public partial class Patients
         }
         _createModal.Show(); 
     }
+
     private async Task CreateProtocolTypeAsync(ProtocolCreateDto protocol)
     {
         try
@@ -164,7 +166,6 @@ public partial class Patients
             throw new UserFriendlyException(ex.Message);
         }
     }
-    
     
     protected override async Task OnInitializedAsync()
     {

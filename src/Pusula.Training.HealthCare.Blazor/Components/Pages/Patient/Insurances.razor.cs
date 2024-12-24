@@ -5,12 +5,10 @@ using Microsoft.OpenApi.Extensions;
 using Pusula.Training.HealthCare.Insurances;
 using Pusula.Training.HealthCare.Permissions;
 using Syncfusion.Blazor.Grids;
-using Syncfusion.Blazor.Popups;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Volo.Abp.Application.Dtos;
 using Volo.Abp.AspNetCore.Components.Web.Theming.PageToolbars;
 using SortDirection = Blazorise.SortDirection;
 
@@ -18,23 +16,23 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Patient
 {
     public partial class Insurances
     {
-        protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems = new();
+        protected List<Volo.Abp.BlazoriseUI.BreadcrumbItem> BreadcrumbItems;
         protected PageToolbar Toolbar { get; } = new PageToolbar();
         protected bool ShowAdvancedFilters { get; set; }
-        private IReadOnlyList<InsuranceDto> InsuranceList { get; set; } = new List<InsuranceDto>();
-        private int PageSize { get; } = LimitedResultRequestDto.DefaultMaxResultCount;
-        private int CurrentPage { get; set; } = 1;
+        private IReadOnlyList<InsuranceDto> InsuranceList { get; set; }
+        private int PageSize { get; }
+        private int CurrentPage { get; set; }
         private int TotalCount { get; set; }
-        private string CurrentSorting { get; set; } = string.Empty;
+        private string CurrentSorting { get; set; }
         private bool AllInsurancesSelected { get; set; }
         private bool CanCreateInsurance { get; set; }
         private bool CanEditInsurance { get; set; }
         private bool CanDeleteInsurance { get; set; }
         private Guid EditingInsuranceId { get; set; }
-        private InsuranceCreateDto? NewInsurance {  get; set; }
-        private InsuranceUpdateDto? EditInsurance {  get; set; }
+        private InsuranceCreateDto? NewInsurance { get; set; }
+        private InsuranceUpdateDto? EditInsurance { get; set; }
         private GetInsurancesInput Filter { get; set; }
-        private List<InsuranceDto> SelectedInsurances { get; set; } = [];
+        private List<InsuranceDto> SelectedInsurances { get; set; }
         private List<KeyValuePair<EnumInsuranceCompanyName, string>> InsuranceCompanyNameList { get; set; }
         private bool isLoading { get; set; }
         private bool IsVisibleCreate { get; set; }
@@ -51,7 +49,13 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Patient
                 SkipCount = (CurrentPage - 1) * PageSize,
                 Sorting = CurrentSorting
             };
-            InsuranceCompanyNameList = new();
+            InsuranceCompanyNameList = [];
+            BreadcrumbItems = [];
+            InsuranceList = [];
+            PageSize = 20;
+            CurrentPage = 1;
+            CurrentSorting = string.Empty;
+            SelectedInsurances = [];
         }
 
         protected override async Task OnInitializedAsync()
@@ -228,7 +232,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Patient
         {
             try
             {
-                await insuranceAppService.UpdateAsync(EditingInsuranceId,EditInsurance!);
+                await insuranceAppService.UpdateAsync(EditingInsuranceId, EditInsurance!);
                 await GetInsurances();
                 CloseEditInsuranceModal();
             }

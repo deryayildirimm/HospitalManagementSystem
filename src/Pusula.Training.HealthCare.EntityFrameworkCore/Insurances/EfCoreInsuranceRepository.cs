@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
@@ -33,7 +32,7 @@ namespace Pusula.Training.HealthCare.Insurances
         {
             var query = ApplyFilter(await GetQueryableAsync(), filterText, policyNumber, premiumAmount, coverageAmount, startDateMin, startDateMax,
                 endDateMin, endDateMax, insuranceCompanyName, description);
-            //query = query.OrderBy(string.IsNullOrWhiteSpace(sorting) ? InsuranceConst.GetDefaultSorting(true) : sorting);
+            query = query.OrderByDescending(x => x.CreationTime);
             return query.PageBy(skipCount, maxResultCount).ToList();
         }
 

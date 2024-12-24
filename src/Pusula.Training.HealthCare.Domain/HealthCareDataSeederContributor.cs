@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Pusula.Training.HealthCare.Appointments;
@@ -65,7 +64,7 @@ namespace Pusula.Training.HealthCare
         IInsuranceRepository insuranceRepository,
         IRestrictionManager restrictionManager,
         IDoctorLeaveRepository leaveRepository,
-        IRepository<Test, Guid> testRepository) : IDataSeedContributor, ITransientDependency
+        ITestRepository testRepository) : IDataSeedContributor, ITransientDependency
     {
         public async Task SeedAsync(DataSeedContext context)
         {
@@ -93,7 +92,6 @@ namespace Pusula.Training.HealthCare
             await SeedTestCategoryRecords();
             await SeedTestRecords();
             await SeedMedicalServiceRestrictions();
-            //await SeedInsurance();
            await SeedProtocolMedicalServices();
         }
 
@@ -912,7 +910,7 @@ namespace Pusula.Training.HealthCare
     var random = new Random();
     var protocols = new List<Protocol>();
     var insurances = new List<Insurance>();
-
+    int num = 0;
     foreach (var patient in patients)
     {
         for (int i = 0; i < 3; i++) // Her hasta için birden fazla protokol oluştur
@@ -952,6 +950,8 @@ namespace Pusula.Training.HealthCare
                 ));
             }
         }
+        if(num == 3) { break; }
+        num++;
     }
 
     await insuranceRepository.InsertManyAsync(insurances, autoSave: true); // Sigortalar veri tabanına ekleniyor

@@ -1,10 +1,10 @@
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Pusula.Training.HealthCare.Validators;
-
+//Created by Anıl Oğuzman
 public class CreatePhoneNumberValidator : ValidationAttribute
 {
     private const string PhoneNumberPattern = @"^\d{5,10}$";
