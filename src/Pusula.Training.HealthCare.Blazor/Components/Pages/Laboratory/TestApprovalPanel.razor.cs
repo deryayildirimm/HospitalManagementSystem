@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Pusula.Training.HealthCare.Blazor.Components.Pages
+namespace Pusula.Training.HealthCare.Blazor.Components.Pages.Laboratory
 {
     public partial class TestApprovalPanel
     {
@@ -15,7 +15,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages
         private BloodTestDto? CurrentBloodTest { get; set; }
 
         private Dictionary<BloodTestDto, bool> expandedCards;
-        private IReadOnlyList<BloodTestData> BloodTestList { get; set; } 
+        private IReadOnlyList<BloodTestData> BloodTestList { get; set; }
         private BloodTestData? BloodTestData { get; set; }
 
         private bool isLoading;
@@ -74,7 +74,7 @@ namespace Pusula.Training.HealthCare.Blazor.Components.Pages
         {
             if (!expandedCards.ContainsKey(bloodTest))
             {
-                expandedCards[bloodTest] = false; 
+                expandedCards[bloodTest] = false;
             }
             expandedCards[bloodTest] = !expandedCards[bloodTest];
         }

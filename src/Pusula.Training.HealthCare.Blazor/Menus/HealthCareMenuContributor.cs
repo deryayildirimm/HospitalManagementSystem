@@ -213,7 +213,7 @@ public class HealthCareMenuContributor : IMenuContributor
             new ApplicationMenuItem(
                     name: HealthCareMenus.Laboratory,
                     displayName: l["Menu:Laboratory"],
-                    icon: "fa-solid fa-medkit",
+                    icon: "fa-solid fa-flask-vial",
                     requiredPermissionName: HealthCarePermissions.BloodTests.Create
                 )
                 .AddItem(
