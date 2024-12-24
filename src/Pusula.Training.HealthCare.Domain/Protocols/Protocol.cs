@@ -39,7 +39,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
     
     public virtual Insurance Insurance { get; init; } 
     
-    public IList<ProtocolMedicalService> ProtocolMedicalServices { get;  set; } 
+    public IList<ProtocolMedicalService> ProtocolMedicalServices { get;  private set; } 
        
 
 
@@ -62,7 +62,7 @@ public class Protocol : FullAuditedAggregateRoot<Guid>
         SetProtocolTypeId(protocolTypeId);
         SetInsuranceId(insuranceId);
         SetNote(note);
-        
+        ProtocolMedicalServices = new List<ProtocolMedicalService>();
     }
     
     // add medical service 

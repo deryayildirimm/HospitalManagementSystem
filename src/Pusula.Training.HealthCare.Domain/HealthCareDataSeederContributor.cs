@@ -55,6 +55,7 @@ namespace Pusula.Training.HealthCare
         ITestCategoryRepository testCategoryRepository,
         IProtocolTypeRepository protocolTypeRepository,
         IProtocolRepository protocolRepository,
+        IProtocolManager protocolManager,
         IIcdRepository icdRepository,
         IExaminationRepository examinationRepository,
         IFamilyHistoryRepository familyHistoryRepository,
@@ -465,26 +466,15 @@ namespace Pusula.Training.HealthCare
             foreach (var protocol in protocols)
             {
                 // Eğer ProtocolMedicalServices koleksiyonu null ise, yeni bir liste oluştur
-                protocol.ProtocolMedicalServices ??= new List<ProtocolMedicalService>();
 
                 // Rastgele 5 tıbbi hizmet seç
-                var selectedServices = medicalServices.OrderBy(_ => random.Next()).Take(5).ToList();
+                var selectedServices =  (medicalServices.OrderBy(_ => random.Next()).Take(5).ToList()).Select( x => x.Name);
 
-                foreach (var service in selectedServices)
-                {
+                
+                    await protocolManager.UpdateAsync(protocol.Id, selectedServices.ToArray(), protocol.PatientId,
+                        protocol.DepartmentId, protocol.ProtocolTypeId, protocol.DoctorId, protocol.InsuranceId, protocol.StartTime, protocol.Note, protocol.EndTime , null);
                     // Eğer seçilen hizmet daha önce eklenmemişse ekle
-                    if (!protocol.ProtocolMedicalServices.Any(pms => pms.MedicalServiceId == service.Id))
-                    {
-                        protocol.ProtocolMedicalServices.Add(new ProtocolMedicalService
-                        {
-                            ProtocolId = protocol.Id,
-                            MedicalServiceId = service.Id
-                        });
-                    }
-                }
-
-                // Protokolü güncelle
-                await protocolRepository.UpdateAsync(protocol, true);
+                    
             }
         }
 
