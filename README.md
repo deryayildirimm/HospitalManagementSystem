@@ -15,11 +15,11 @@ TODO: Guide users through getting your code up and running on their own system. 
 
 Contributors to this project:
 
-- *Derya* - [GitHub Profili](https://github.com/deryayildirimm) - Rol: Full Stack Developer
-- *Anıl Oğuzman* - [GitHub Profili](https://github.com/AnilOguzman) -  Rol: Full Stack Developer
-- *Numan Kılınç* - [GitHub Profili](https://github.com/NumanKilincoglu) - Rol: Full Stack Developer
-- *Zeynep Bektaş* - [GitHub Profili](https://github.com/zeyBektas) - Rol: Full Stack Developer
-- 
+- *Derya* - [GitHub Profili](https://github.com/deryayildirimm) -  Full Stack Developer
+- *Anıl Oğuzman* - [GitHub Profili](https://github.com/AnilOguzman) -   Full Stack Developer
+- *Numan Kılınç* - [GitHub Profili](https://github.com/NumanKilincoglu) -  Full Stack Developer
+- *Zeynep Bektaş* - [GitHub Profili](https://github.com/zeyBektas) -  Full Stack Developer
+  
 # Build and Test
 TODO: Describe and show how to build your code and run the tests. 
 
